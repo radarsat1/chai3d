@@ -32,26 +32,30 @@ SOURCES = $(OBJECTS:.o=.cpp)
 INCLUDE = -I../src/graphics -I../src/collisions -I../src/devices -I../src/display -I../src/files -I../src/forces -I../src/math -I../src/scenegraph -I../src/timers -I../src/tools -I../src/widgets -I../include/dhd
 
 LOCALOBJS = $(notdir $(OBJECTS) )
+LOCALSRCS = $(notdir $(SOURCES) )
 
 # Optionally add -D_DISABLE_PHANTOM_SUPPORT to compile away SensAble's libraries
 # Optionally add -D_DISABLE_DELTA_SUPPORT to compile away Force Dimension's libraries
 DEFS = -D_POSIX -D_MAX_PATH=260 -D_LINUX -DLINUX -D_DISABLE_PHANTOM_SUPPORT -D_DISABLE_DELTA_SUPPORT
 
-CC   = g++ -c $(DEFS)
-CFLAGS = -O3 $(INCLUDE)
-LD   = g++ -o
+CC   = g++
+CFLAGS = -c $(DEFS) -O3 $(INCLUDE)
+LD   = g++
 AR   = ar rc
 RANLIB = ranlib
 
 LIBS = -L. -L../lib/linux -lglut -lgl -lglu -ldhd
 
-all: chai3d
+all: localsrc chai3d
+
+localsrc: $(SOURCES)
+	for i in $+; do if ! [ -h $$(basename $$i) ]; then ln -s $$i .; fi; done
 
 %.o: %.cpp 
-	$(CC) $(CFLAGS) $<
-  
+	$(CC) $(CFLAGS) $< -o $@
+
 # Actual target and dependencies
-chai3d: $(OBJECTS)
+chai3d: $(LOCALOBJS)
 	$(AR) libchai3d_linux.a $(LOCALOBJS) 
 	$(RANLIB) libchai3d_linux.a
 	mv libchai3d_linux.a ../lib/linux
