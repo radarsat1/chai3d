@@ -36,7 +36,8 @@ LOCALSRCS = $(notdir $(SOURCES) )
 
 # Optionally add -D_DISABLE_PHANTOM_SUPPORT to compile away SensAble's libraries
 # Optionally add -D_DISABLE_DELTA_SUPPORT to compile away Force Dimension's libraries
-DEFS = -D_POSIX -D_MAX_PATH=260 -D_LINUX -DLINUX -D_DISABLE_PHANTOM_SUPPORT -D_DISABLE_DELTA_SUPPORT
+# Optionally add -D_DISABLE_FALCON_DEVICE_SUPPORT to compile away Novint's libraries
+DEFS = -D_POSIX -D_MAX_PATH=260 -D_LINUX -DLINUX -D_DISABLE_PHANTOM_SUPPORT -D_DISABLE_DELTA_SUPPORT -D_DISABLE_FALCON_DEVICE_SUPPORT
 
 CC   = g++
 CFLAGS = -c $(DEFS) -O3 $(INCLUDE)
