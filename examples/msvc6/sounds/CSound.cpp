@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include "CSound.h"
+
 //---------------------------------------------------------------------------
 
 // Change these values if your computer is slow and the sound is jerky:
@@ -153,6 +154,7 @@ void cSound::reset()
     yreal[j] = a[j];
     yimag[j] = 0.0;
   }
+  m_counter = 0;
 }
 
 
@@ -171,20 +173,14 @@ void cSound::reset()
 //===========================================================================
 int cSound::play()
 {
-	
-  // calculate magnitude of the normal force
-	double normMag = m_contactForce.length(); 
 
-	// in the initial period after a new contact, set amplitude based on contact
-	// velocity rather than convolved force
-	if (m_counter < 500) 
-	{
-		normMag = m_velocity;
-	  m_counter++;
-  }
+  // attenuate the normal force so that the contact force decays gradually
+  // rather than as a square function (which would produce a spurious
+  // second hit)
+	double audioForce = pow(0.85, m_counter++)*m_normalForce.length() + m_tangentialForce.length();
 
 	// clamp the amplitude
-	if (normMag > 2.0) normMag = 2.0;
+	if (audioForce > 2.0) audioForce = 2.0;
 	
   // convolve the haptic normal force with the sound modes; see the Pai papers
   // for an explanation of this calculation
@@ -195,7 +191,7 @@ int cSound::play()
     tyimag[j] = treal[j]*yimag[j] + timag[j]*yreal[j];
     yreal[j] = tyreal[j];
     yimag[j] = tyimag[j];
-    yreal[j] += normMag*a[j];
+    yreal[j] += audioForce*a[j];
     lpTemp += yreal[j];
   }
 

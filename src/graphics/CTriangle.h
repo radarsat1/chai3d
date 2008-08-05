@@ -87,7 +87,13 @@ class cTriangle
         Destructor of cTriangle.
     */
     //-----------------------------------------------------------------------
-    ~cTriangle(){}
+    ~cTriangle() {
+      if (m_neighbors) {
+        m_neighbors->clear();
+        delete m_neighbors;
+        m_neighbors = 0;
+      }
+    }
 
 
     // METHODS:

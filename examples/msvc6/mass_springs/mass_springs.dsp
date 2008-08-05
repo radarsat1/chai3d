@@ -25,7 +25,7 @@ CFG=mass_springs - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=xicl6.exe
+CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
@@ -51,9 +51,9 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"msvcprt.lib libc.lib msvcp60.lib" /out:"../../../bin/mass_springs_msvc6.exe" /libpath:"../../../lib/msvc6" /libpath:"../../../external\PhantomDriver\lib\MSVC"
+# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"msvcprt.lib libc.lib msvcp60.lib" /out:"../../../bin/mass_springs_msvc6.exe" /libpath:"../../../lib/msvc6" /libpath:"../../../external\PhantomDriver\lib\MSVC"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "mass_springs - Win32 Debug"
@@ -78,9 +78,9 @@ LINK32=xilink6.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib /nologo /subsystem:windows /debug /machine:I386 /out:"../../../bin/mass_springs_msvc6.exe" /pdbtype:sept /libpath:"../../../lib/msvc6" /libpath:"../../../external\PhantomDriver\lib\MSVC"
+# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib /nologo /subsystem:windows /debug /machine:I386 /out:"../../../bin/mass_springs_msvc6.exe" /pdbtype:sept /libpath:"../../../lib/msvc6" /libpath:"../../../external\PhantomDriver\lib\MSVC"
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 

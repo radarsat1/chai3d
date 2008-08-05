@@ -32,12 +32,13 @@
 //---------------------------------------------------------------------------
 #include <mmsystem.h>
 #include <windowsx.h>
-#include <fstream.h>
-#include <string.h>
+#include <fstream>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include "CMatrix3d.h"
 #include "CVector3d.h"
+#include "bass.h"
 
 // Materials for which .sy files with sound parameter values are available
 enum sounds { BELL, TEAPOT };
@@ -63,46 +64,48 @@ class cSound
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cSound.
-     cSound();
+		cSound() { m_counter = 0; m_normalForce.set(0,0,0); m_tangentialForce.set(0,0,0);};
     //! Destructor of cSound.
-    ~cSound();
+    ~cSound() {};
 
     // METHODS:
     //! Set material sound parameters
     void setParams(sounds a_choice);
-    //! Render the sound
-    void play(cVector3d a_force);
+    //! Get the next sound sample
+    int play();
+    //! Reset the sound computations when a new contact is made
+		void reset();
+    //! Get function for current normal contact force on this sound object
+		cVector3d getNormalForce() { return m_normalForce; }
+    //! Get function for current tangential contact force on this sound object
+		cVector3d getTangentialForce() { return m_tangentialForce; }
+    //! Get function for current previous normal force on this sound object
+		cVector3d getPreviousForce() { return m_previousForce; }
+    //! Set function for current contact force on this object; also sets m_previousForce to former value
+		void setContactForce(cVector3d a_normalForce, cVector3d a_tangentialForce) {
+         m_previousForce = m_normalForce; m_normalForce = a_normalForce;
+         m_tangentialForce = a_tangentialForce; }
+    //! BASS stream associated with this sound
+		HSTREAM stream;
 
   private:
     // PROPERTIES:
-    //! Size of wave data section
-    DWORD dwDataSize;
-    //! Handle for sound device
-    HWAVEOUT hWaveOut;
-    //! Wave format struct
-    WAVEFORMATEX wfx;
-    //! Normal force magnitude from previous iteration
-    double prevMag;
     //! Number of modes
     int n;
-    //! Maximum number of samples to play for an impact sound
-    int soundSize;
     //! Frequency, amplitude, and decay coefficient material sound properties
-    vector<double> a, f, d;
+		std::vector<double> a, f, d;
     //! Arrays for calculating sound data
     double *yreal, *yimag, *treal, *timag, *tyreal, *tyimag;
-    //! Number of samples generated since last impulse force
-    long cnt;
     //! Value to scale sound samples by to be in 0-256 range
     double scale;
-    //! Index in the current buffer being written
-    unsigned int pos;
-    //! Should this object be writing sound now?
-    int state;
-    //! Sound data buffer
-    char* buffer;
-    //! Id of this sound object
-    int id;
+    //! Counter; used to attenuate normal force over time
+		int m_counter;
+    //! Previous contact force on this object; used to determine when a new contact has been made
+		cVector3d m_previousForce;
+    //! Current normal force on this object
+    cVector3d m_normalForce;
+    //! Current tangential force on this object
+    cVector3d m_tangentialForce;
 };
 
 #endif

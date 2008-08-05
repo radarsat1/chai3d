@@ -58,6 +58,8 @@
 #include "CSound.h"
 #include "CSoundMesh.h"
 
+#include "bass.h"
+
 //---------------------------------------------------------------------------
 
 bool flagSimulationOn = false;
@@ -125,14 +127,14 @@ private:
     bool flagCameraInMotion;
     int mouseX, mouseY;
 
-    void CreateObject(std::string fileName, cVector3d loc, cColorf color, int type);
+    void CreateObject(std::string fileName, cVector3d loc, cColorf color, sounds type, int tag);
 
 public:
     __fastcall TForm1(TComponent* Owner);
 
     // haptic tool
     cMeta3dofPointer* tool;
-    std::vector<cSoundMesh*> sound_meshes;
+    //std::vector<cSoundMesh*> sound_meshes;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

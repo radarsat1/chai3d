@@ -56,6 +56,7 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     // CONSTRUCTOR:
     //! Constructor of cProxyPointForceAlgo.
     cProxyPointForceAlgo();
+    virtual ~cProxyPointForceAlgo() {}
 
     // METHODS - BASIC PROXY:
     //! Initialize the algorithm.
@@ -90,11 +91,29 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     virtual inline void getContactObjectLastGlobalRot(cMatrix3d& a_rot)
         { a_rot = m_lastObjectGlobalRot; }
     //! Set dynamic proxy flag, (if on, all contacts are computed in object-local space).
-    void enableDynamicProxy(int a_enable) { m_dynamicProxy = a_enable; }
+    void enableDynamicProxy(bool a_enable) { m_dynamicProxy = a_enable; }
     //! Return whether the dynamic proxy flag is on.
-    int getDynamicProxyEnabled() { return m_dynamicProxy; }
-    
+    bool getDynamicProxyEnabled() { return m_dynamicProxy; }
+    //! Return most recently calculated normal force.
+    virtual inline cVector3d getNormalForce() { return m_normalForce; }
+    //! Return most recently calculated tangential force.
+    virtual inline cVector3d getTangentialForce() { return m_tangentialForce; }
+    //! Set whether friction is used.
+    void setUseFriction(const bool& a_useFriction) { m_useFriction = a_useFriction; }
+    //! Set whether Zilles friction is used.
+    void setUseZillesFriction(const bool& a_useZillesFriction) { m_useZillesFriction = a_useZillesFriction; }
+    //! Set whether Melder friction is used.
+    void setUseMelderFriction(const bool& a_useMelderFriction) { m_useMelderFriction = a_useMelderFriction; }
+
   protected:
+
+    // Virtual methods for performing operations that may differ among subclasses
+
+    //! Test whether the proxy has reached the goal point
+    virtual bool goalAchieved(const cVector3d& a_proxy, const cVector3d& a_goal) const;
+    //! Offset the goal to account for proxy volume
+    virtual void offsetGoalPosition(cVector3d& a_goal, const cVector3d& a_proxy) const;
+
     // METHODS - BASIC PROXY:
     //! Compute the next goal position of the proxy.
     virtual void computeNextBestProxyPosition();
@@ -119,7 +138,17 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     //! Next best position for the proxy (in global coordinate frame).
     cVector3d m_nextBestProxyGlobalPos;
     //! Are we currently in a "slip friction" state?
-    int m_slipping;
+    bool m_slipping;
+    //! Normal force.
+    cVector3d m_normalForce;
+    //! Tangential force.
+    cVector3d m_tangentialForce;
+    // Use any friction algorithm?
+    bool m_useFriction;
+    // Use the Zilles friction algorithm?
+    bool m_useZillesFriction;
+    //! Use the Melder friction algorithm?
+    bool m_useMelderFriction;
 
     // MEMBERS - POINTERS TO INTERSECTED OBJECTS:
     //! Number of contacts between proxy and triangles (0, 1, 2 or 3).
@@ -147,7 +176,7 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
 
     // MEMBERS - DYNAMIC PROXY (TO HANDLE MOVING OBJECTS):
     //! Dynamic proxy flag (if on, all contacts are computed in object-local space).
-    int m_dynamicProxy;
+    bool m_dynamicProxy;
     //! Mapping from meshes to position/rotation info for handling moving objects.
     meshPositionMap lastIterationPositions;
     //! Dynamic proxy tracks last position of object it's touching at each call.

@@ -39,7 +39,7 @@
 //! Smallest value near zero for a double.
 #define CHAI_TINY               1e-49
 //! Small value near zero.
-#define CHAI_SMALL              0.0000001
+#define CHAI_SMALL              0.000000001
 //! Biggest value for a double.
 #define CHAI_LARGE              1e+49
 

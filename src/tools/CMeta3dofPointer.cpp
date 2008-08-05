@@ -45,6 +45,8 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
 {
     bool systemAvailable;
 
+    m_physicalDevice = -1;
+
     // try to open a connection to a Delta or Omega haptic device
     m_device = new cDeltaDevice(a_deviceNumber);
     systemAvailable = m_device->isSystemAvailable();
@@ -52,6 +54,7 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
     if (systemAvailable)
     {
         m_device->open();
+        m_physicalDevice = DEVICE_DHD;
         return;
     }
     else
@@ -67,6 +70,7 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
     if (systemAvailable)
     {
         m_device->open();
+        m_physicalDevice = DEVICE_PHANTOM;
         return;
     }
     else
@@ -82,6 +86,7 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
     if (systemAvailable)
     {
       m_device->open();
+      m_physicalDevice = DEVICE_MPB;
       return;
     }
     else
@@ -94,11 +99,15 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
     m_device = new cVirtualDevice();
     systemAvailable = m_device->isSystemAvailable();
 
+    // Is the virtual device already running?
     if (systemAvailable)
     {
         m_device->open();
+        m_physicalDevice = DEVICE_VIRTUAL;
         return;
     }
+
+    // The virtual device is not running yet...
     else
     {
         // launch a virtual device
@@ -155,6 +164,10 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
             }
             m_device = NULL;
             return;
+        }
+        else
+        {
+            m_physicalDevice = DEVICE_VIRTUAL;
         }
     }
 }

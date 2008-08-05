@@ -88,8 +88,7 @@ class cCollisionAABBBox
     /*!
     Set the bounding box to bound the two given bounding boxes.
 
-    \fn       void cCollisionAABBBox::enclose(const cCollisionAABBBox& a_boxA,
-    const cCollisionAABBBox& a_boxB)
+    \fn       void cCollisionAABBBox::enclose(const cCollisionAABBBox& a_boxA, const cCollisionAABBBox& a_boxB)
     \param    a_boxA   The first bounding box to be enclosed.
     \param    a_boxB   The other bounding box to be enclosed.
     */
@@ -132,6 +131,7 @@ class cCollisionAABBBox
         setValue(lower, upper);
     }
     
+    //! Modify the bounding box to bound another box
     inline void enclose(const cCollisionAABBBox& a_box) { enclose(*this, a_box); }
 
     //! Initialize a bounding box to center at origin and infinite extent.

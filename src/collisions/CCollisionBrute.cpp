@@ -48,7 +48,7 @@ cCollisionBrute::cCollisionBrute(vector<cTriangle> *a_triangles)
     \fn       bool cCollisionBrute::computeCollision(cVector3d& a_segmentPointA,
               cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
               cTriangle*& a_colTriangle, cVector3d& a_colPoint,
-              double& a_colSquareDistance, int a_proxyCall
+              double& a_colSquareDistance, int a_proxyCall)
     \param    a_segmentPointA  Initial point of segment.
     \param    a_segmentPointB  End point of segment.
     \param    a_colObject  Returns pointer to nearest collided object.

@@ -31,6 +31,7 @@ extern "C" {
 
 #define FUNCTION __declspec(dllexport)
 
+const int PH_SUCCESS = 0;
 const int PH_ERR = -1;
 const int PH_INIT_ERR = -2;
 const int PH_RES_ENC_ERR = -3;
@@ -52,22 +53,22 @@ FUNCTION int __stdcall   OpenPhantom(char * name);
 FUNCTION void __stdcall   ClosePhantoms();
  
 //! ResetPhantomEncoders(int num),		resets encoders for phantom num
-//! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+//! the function returns PH_SUCCESS if everything went ok, a negative value otherwise (check list of errors)
 FUNCTION int __stdcall   ResetPhantomEncoders(int num);
 
 //! StartCommunication(int i), Start the effect of phantom i, basically enabling forces and position
 //! reading for such phantom. 
-//! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+//! the function returns PH_SUCCESS if everything went ok, a negative value otherwise (check list of errors)
 FUNCTION int __stdcall   StartCommunication(int i);
 
 //! StopCommunication(int i), Stops the effect of phantom i, basically disabling forces and position
 //! reading for such phantom. Note that the overall servoloop will still be running since the other phantom
 //! may be not disabled.
-//! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+//! the function returns PH_SUCCESS if everything went ok, a negative value otherwise (check list of errors)
 FUNCTION int __stdcall   StopCommunication(int i);
 
 //! ReadPosition(int num,double &iPosX,double &iPosY,double &iPosZ); reads tip position for phantom num
-//! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+//! the function returns PH_SUCCESS if everything went ok, a negative value otherwise (check list of errors)
 //! Note that positions are expressed in mm with respect to a Ghost reference frame (x towards the right, 
 //! y vertically pointing up, z vertical pointing towards the user).
 FUNCTION int __stdcall   ReadPosition(int num, 
@@ -77,18 +78,17 @@ FUNCTION int __stdcall   ReadPosition(int num,
 
 
 //! ReadNormalizedPosition(int num,double &iPosX,double &iPosY,double &iPosZ); reads tip position for phantom num
-//! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+//! the function returns PH_SUCCESS if everything went ok, a negative value otherwise (check list of errors)
 //! Note that positions are expressed with a value included in the interval [-1,1] for a cube centered in the device's workspace center with
 //! respect to a Ghost reference frame (x towards the right, y vertically pointing up, z vertical pointing towards the user).
 //! This is to ensure that a same demo may be used using different devices without having to change any of the code
-
 FUNCTION int __stdcall   ReadNormalizedPosition(int num, 
 									  double &iPosX,
 									  double &iPosY,
 									  double &iPosZ);
 
 //! SetForce(int num,const double &iForceX,const double &iForceY,const double &iForceZ); writes force to phantom num
-//! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+//! the function returns PH_SUCCESS if everything went ok, a negative value otherwise (check list of errors)
 //! Note that forces are expressed in Newtons with respect to a Ghost reference frame (x towards the right, 
 //! y vertically pointing up, z vertical pointing towards the user). Note: no safety features are implemented other than the 
 //! Ghost ones, i.e. if you start the servoloop and your phantom is inside an object you will probably
@@ -100,7 +100,7 @@ FUNCTION int __stdcall   SetForce(int num,
 
 //! SetForceTorque(int num, const double &iForceX, const double &iForceY, const double &iForceZ, const double &iTorqueX, const double &iTorqueY, const double &iTorqueZ);
 //! writes Forces and Torques to phantom num.
-//! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+//! the function returns PH_SUCCESS if everything went ok, a negative value otherwise (check list of errors)
 //! Note that torques are expressed in Newtons Meter with respect to a CHAI reference frame (x towards user, 
 //! y to the right, z vertical pointing up).
 FUNCTION int __stdcall   SetForceTorque(int num, 
@@ -116,14 +116,20 @@ FUNCTION int __stdcall   SetForceTorque(int num,
 FUNCTION int __stdcall   ReadOrientMat3DOF(int num, 
  									  double *m);
 
-//! ReadSwitch(int num);, reads the switch from phantom num
+//! ReadSwitch(int num), reads the switch from phantom num.  The integer that's
+//! returns has the state of button 0 in bit 0, etc.
 FUNCTION int __stdcall   ReadSwitch(int num);
 
 //! double GetMaxForce(int num),	reads what the max force is for Phantom num
 FUNCTION double __stdcall   GetMaxForce(int num);
 
+//! double GetWorkspaceScale(int num),	reads the scale factor from mm to normalized
+//! coordinates for Phantom num.  Multiply normalized coordinates by this value to
+//! get back to mm.
+FUNCTION int __stdcall   GetWorkspaceScale(const int& num, double& scale);
+
 //! int ReadVelocity(int num, double &iVelX, double &iVelY, double &iVelZ),	reads velocity for Phantom num
-//! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+//! the function returns PH_SUCCESS if everything went ok, a negative value otherwise (check list of errors)
 //! Note that velocity is expressed in mm/sec with respect to a Ghost reference frame (x towards the right, 
 //! y vertically pointing up, z vertical pointing towards the user).
 FUNCTION int __stdcall   ReadVelocity(int num, double &iVelX, double &iVelY, double &iVelZ);

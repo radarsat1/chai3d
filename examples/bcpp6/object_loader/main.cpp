@@ -23,6 +23,7 @@
 #include <vcl.h>
 #pragma hdrstop
 #include "main.h"
+#include "cVBOMesh.h"
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 
@@ -213,6 +214,11 @@ void __fastcall TForm1::LoadModelButtonClick(TObject *Sender)
     {
         // create a new mesh
         cMesh* newObject = new cMesh(world);
+
+        // If you don't plan to ever modify the mesh, you can use the
+        // vertex-buffer version instead for faster rendering...
+        // cMesh* newObject = new cVBOMesh(world);
+        
         newObject->setPos(0,0,0);
         objectToCameraDistance = 0.0;
 
@@ -395,7 +401,7 @@ void __fastcall TForm1::AABBTreeButtonClick(TObject *Sender)
     // inform the haptic thread not to compute any more collisions
     flagBusy = true;
     Sleep(10);
-    tool->setForcesOFF();
+    if (tool != NULL) tool->setForcesOFF();
 
     if (AABBTreeButton->Checked)
     {
@@ -407,7 +413,7 @@ void __fastcall TForm1::AABBTreeButtonClick(TObject *Sender)
     }
 
     // collision tree has been updated
-    tool->setForcesON();
+    if (tool != NULL) tool->setForcesON();
     flagBusy = false;
 
 }

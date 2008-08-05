@@ -33,13 +33,29 @@ void HapticLoop();
 
 const double MESH_SCALE_SIZE = 0.5;
 
+// vector of sound-enabled meshes in the world
+std::vector<cSoundMesh*> sound_meshes;
+
 __fastcall TForm1::TForm1(TComponent* Owner)
     : TForm(Owner)
 {
 
 }
 
-void TForm1::CreateObject(std::string fileName, cVector3d loc, cColorf color, int type)
+// Write the requested data from the .wav file to the sound card
+DWORD CALLBACK MyStreamWriter(HSTREAM handle, void *buf, DWORD len, DWORD user)
+{
+	char *cb=(char*)buf;
+
+	cSoundMesh* sound_mesh;
+	sound_mesh = sound_meshes[user];
+	for (unsigned int i=0; i<len; i++) 
+    cb[i] = sound_mesh->getSound()->play();
+	return len; 
+}
+
+
+void TForm1::CreateObject(std::string fileName, cVector3d loc, cColorf color, sounds type, int tag)
 {
     cSoundMesh* new_mesh = new cSoundMesh(world);
     new_mesh->loadFromFile(fileName);
@@ -74,18 +90,26 @@ void TForm1::CreateObject(std::string fileName, cVector3d loc, cColorf color, in
     // update global position
     new_mesh->computeGlobalPositions();
 
+		// set material properties
     cMaterial material;
-    material.m_ambient.set( 0.3 * color.getR(), 0.3 * color.getG(), 0.3 * color.getB(), color.getA() );
+    material.m_ambient.set( color.getR(), color.getG(), color.getB(), color.getA() );
     material.m_diffuse.set( color.getR(), color.getG(), color.getB(), color.getA() );
-    material.m_specular.set( 1.0, 1.0, 1.0, color.getA() );
+    material.m_specular.set( color.getR(), color.getG(), color.getB(), color.getA() );
     material.setShininess(100);
     new_mesh->setMaterial(material, true);
     new_mesh->useMaterial(true, true);
 
-    new_mesh->translate(loc.x, loc.y, loc.z);
+		// set sound parameters and create stream
     new_mesh->getSound()->setParams(type);
-    new_mesh->setStiffness(0.5);
-    sound_meshes.push_back(new_mesh);
+		new_mesh->getSound()->stream=BASS_StreamCreate(44100, 1 ,BASS_DEVICE_8BITS,&MyStreamWriter,tag);
+
+		// translate and set stiffness and friction
+    new_mesh->translate(loc.x, loc.y, loc.z);
+    new_mesh->setStiffness(15.0, true);
+		new_mesh->setFriction(0.6, 0.4, true);
+
+		// add this to the world and to the vector of sound meshes
+	  sound_meshes.push_back(new_mesh);
     world->addChild(new_mesh);
 }
 
@@ -94,6 +118,9 @@ void TForm1::CreateObject(std::string fileName, cVector3d loc, cColorf color, in
 
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
+    // initialize the sound device
+    if (!BASS_Init(1,44100,0,0,NULL))
+	    Application->MessageBox("Initialization Error", "Error");
 
     // create a new world
     world = new cWorld();
@@ -124,10 +151,10 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     viewport->setStereoOn(false);
 
     // create a sound-enabled bell
-    CreateObject("resources\\models\\handbell.3ds", cVector3d(0,-0.5,0), cColorf(0.82, 0.7, 0.0, 1.0), BELL);
+    CreateObject("resources\\models\\handbell.3ds", cVector3d(0,-0.5,0), cColorf(0.82, 0.7, 0.0, 1.0), BELL, 0);
 
     // create a sound-enabled teapot
-    CreateObject("resources\\models\\teapot.3ds", cVector3d(0,0.5,0), cColorf(0.5, 0.5, 0.5, 1.0), TEAPOT);
+    CreateObject("resources\\models\\teapot.3ds", cVector3d(0,0.5,0), cColorf(0.5, 0.5, 0.5, 1.0), TEAPOT, 1);
 
     // update camera position
     updateCameraPosition();
@@ -206,43 +233,56 @@ void HapticLoop()
     // simulation in now ON
     flagSimulationOn = true;
     flagHasExitedSimulation = false;
-    cVector3d previous_pos = cVector3d(0,0,0);
 
     // main haptics loop
     while(flagSimulationOn)
     {
-        // read position from haptic device
-        Form1->tool->updatePose();
+      // update tool position and rotation
+      Form1->tool->updatePose();
 
-        // compute forces
-        Form1->tool->computeForces();
+      // calculate forces
+      Form1->tool->computeForces();
 
-        // see if there is a collision with a sound-enabled object (including
-        // objects who have a sound-enabled parent mesh)
-        cSoundMesh* sound_mesh = NULL;
-        if (Form1->tool->getProxy()->getContactObject())
+	    // see if there is a collision with a sound-enabled object (including
+      // objects who have a sound-enabled parent mesh)
+      cSoundMesh* sound_mesh = NULL;
+      if (Form1->tool->getProxy()->getContactObject())
+      {
+        cGenericObject* parent = Form1->tool->getProxy()->getContactObject();
+        sound_mesh = dynamic_cast<cSoundMesh*>(parent);
+        while ((parent) && (!sound_mesh))
         {
-          cGenericObject* parent = Form1->tool->getProxy()->getContactObject();
+          parent = parent->getParent();
           sound_mesh = dynamic_cast<cSoundMesh*>(parent);
-          while ((parent) && (!sound_mesh))
-          {
-            parent = parent->getParent();
-            sound_mesh = dynamic_cast<cSoundMesh*>(parent);
-          }
         }
+      }
 
-        // call play methods for sound-enabled objects
-        for (int i=0; i<Form1->sound_meshes.size(); i++)
-        {
-          // send the current force to the currently contacted object, if any
-          if (Form1->sound_meshes[i] == sound_mesh)
-            sound_mesh->getSound()->play(Form1->tool->m_lastComputedGlobalForce);
-          else
-            Form1->sound_meshes[i]->getSound()->play(cVector3d(0,0,0));
-        }
+      // call play methods for sound-enabled objects
+      for (unsigned int i=0; i<sound_meshes.size(); i++)
+      {
 
-        // send forces to haptic device
-        Form1->tool->applyForces();
+        // send the current force to the currently contacted object, if any
+        if (sound_meshes[i] == sound_mesh)
+          sound_mesh->getSound()->setContactForce(Form1->tool->getProxy()->getNormalForce(),
+                                                  Form1->tool->getProxy()->getTangentialForce());
+        else
+          sound_meshes[i]->getSound()->setContactForce(cVector3d(0,0,0), cVector3d(0,0,0));
+
+		    // if there is a new contact, reset and restart playing the sound
+        if ((sound_meshes[i]->getSound()->getNormalForce().lengthsq() > 0.01) &&
+			      (sound_meshes[i]->getSound()->getPreviousForce().lengthsq() <= 0.01))
+		    {
+          // reset for the new contact
+          sound_meshes[i]->getSound()->reset();
+
+			    // restart playing this stream
+			    if (!(BASS_ChannelPlay(sound_meshes[i]->getSound()->stream,TRUE)))
+		        Application->MessageBox("Playback Error", "Error");
+		    }
+      }
+
+      // apply forces
+      Form1->tool->applyForces();
     }
 
     // stop haptics
@@ -300,6 +340,9 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
         // Enable the "dynamic proxy", which will handle moving objects
         cProxyPointForceAlgo* proxy = tool->getProxy();
         proxy->enableDynamicProxy(true);
+
+        // Enable the Zilles Friction algorithm (to get tangential forces)
+        tool->getProxy()->setUseZillesFriction(true);
 
         DWORD thread_id;
         ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(HapticLoop), this, 0, &thread_id);

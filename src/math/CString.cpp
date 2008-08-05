@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
@@ -21,108 +22,76 @@
 
 //---------------------------------------------------------------------------
 #include "CString.h"
+#include "CMacrosGL.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-	Convert a \e boolean into a \e string.
+    Convert a \e boolean into a \e string.
 
-	\fn			void cStr(string& a_string, const bool& a_value)
-	\param		a_string  Input string.
-	\param		a_value  Input value of type \e boolean.
+    \fn     void cStr(string& a_string, const bool& a_value)
+    \param    a_string  Input string.
+    \param    a_value  Input value of type \e boolean.
 */
 //===========================================================================
 void cStr(string& a_string, const bool& a_value)
 {
-    if (a_value)
-    {
-        a_string.append("true");
-    }
-    else
-    {
-        a_string.append("false");
-    }
+    if (a_value) a_string.append("true");
+    else a_string.append("false");    
 }
 
 
 //===========================================================================
 /*!
-	Convert an \e integer into a \e string.
+    Convert an \e integer into a \e string.
 
-	\fn			void cStr(string& a_string, const int& a_value)
-	\param		a_string  Input string.
-	\param		a_value  Input value of type \e integer.
+    \fn     void cStr(string& a_string, const int& a_value)
+    \param    a_string  Input string.
+    \param    a_value  Input value of type \e integer.
 */
 //===========================================================================
 void cStr(string& a_string, const int& a_value)
 {
-	char buffer[255];
-	sprintf(buffer, "%d", a_value);
-	a_string.append(buffer);
+  char buffer[255];
+  sprintf(buffer, "%d", a_value);
+  a_string.append(buffer);
 }
 
 
 //===========================================================================
 /*!
-	Convert a \e float into a \e string.
+    Convert a \e float into a \e string.
 
-	\fn         void cStr(string& a_string, const float& a_value, 
-				const unsigned int& a_precision)
-	\param		a_string  Input string.
-	\param		a_value  Input value of type \e integer.
-	\param		a_precision  Number of digits displayed.
+    \fn       void cStr(string& a_string, const float& a_value, const unsigned int a_precision=2)
+    \param    a_string  Input string.
+    \param    a_value  Input value of type \e integer.
+    \param    a_precision  Number of digits displayed after the decimal pt.
 */
 //===========================================================================
 void cStr(string& a_string, const float& a_value, const unsigned int a_precision)
 {
-    // make sure number of digits ranges between 0 and 20
-    unsigned int numDigits = a_precision;
-    if (numDigits > 20)
-    {
-        numDigits = 20;
-    }
-
-	// if number of digits is zero, remove '.'
-	if (numDigits == 0)
-	{
-		numDigits = -1;
-	}
-
-	char buffer[255];
-	sprintf(buffer, "%.20f", a_value);
-	buffer[ (strlen(buffer) - 20 + numDigits) ] = NULL;
-	a_string.append(buffer);
+    int digits = (a_precision > 20) ? 20 : a_precision;
+    char buffer[255];
+    sprintf(buffer, "%0.*f", digits, a_value);
+    a_string.append(buffer);
 }
 
 
 //===========================================================================
 /*!
-	Convert a \e double into a \e string.
+    Convert a \e double into a \e string.
 
-	\fn			void cStr(string& a_string, const double& a_value,
-                const unsigned int& a_precision);
-	\param		a_string  Input string.
-	\param		a_value  Input value of type \e integer.
-	\param		a_precision  Number of digits displayed.
+    \fn     void cStr(string& a_string, const double& a_value,
+                  const unsigned int a_precision=2);
+    \param    a_string  Input string.
+    \param    a_value  Input value of type \e integer.
+    \param    a_precision  Number of digits displayed after the decimal pt.
 */
 //===========================================================================
 void cStr(string& a_string, const double& a_value, const unsigned int a_precision)
 {
-	// make sure number of digits ranges between 0 and 20
-    unsigned int numDigits = a_precision;
-    if (numDigits > 20)
-    {
-        numDigits = 20;
-    }
-
-	// if number of digits is zero, remove '.'
-	if (numDigits == 0)
-	{
-		numDigits = -1;
-	}
-
-	char buffer[255];
-	sprintf(buffer, "%.20f", a_value);
-	buffer[ (strlen(buffer) - 20 + numDigits) ] = NULL;
-	a_string.append(buffer);
+    int digits = (a_precision > 20) ? 20 : a_precision;
+    char buffer[255];
+    sprintf(buffer, "%0.*f", digits, a_value);
+    a_string.append(buffer);
 }

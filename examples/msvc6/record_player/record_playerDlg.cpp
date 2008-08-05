@@ -132,11 +132,10 @@ BOOL Crecord_playerDlg::OnInitDialog() {
   m_camera_zoom_slider.SetRange(0,180,1);
   m_camera_zoom_slider.SetPos(45);
 
-	m_music_select.AddString("Italy");
-	m_music_select.AddString("Swiss");
-	m_music_select.AddString("USA");
+  for(i=0; i<getNumRecords(); i++) {
+    m_music_select.AddString(getRecordName(i));
+  }
 	m_music_select.SetDroppedWidth(3);
-
 	m_music_select.SetCurSel(0);
   
   initialized = 1;

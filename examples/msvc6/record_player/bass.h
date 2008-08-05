@@ -474,8 +474,8 @@ typedef void (CALLBACK SYNCPROC)(HSYNC handle, DWORD channel, DWORD data, DWORD 
 quick as other syncs can't be processed until it has finished. If the sync
 is a "mixtime" sync, then other streams and MOD musics can't be mixed until
 it's finished either.
-handle : The sync that has occured
-channel: Channel that the sync occured in
+handle : The sync that has occurred
+channel: Channel that the sync occurred in
 data   : Additional data associated with the sync's occurance
 user   : The 'user' parameter given when calling BASS_ChannelSetSync */
 

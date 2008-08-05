@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 210
-  Top = 165
+  Left = 266
+  Top = 290
   Width = 1248
   Height = 858
   Caption = 'CHAI 3D - The Sound Of Physical Shapes'
@@ -21,7 +21,7 @@ object Form1: TForm1
     Left = 1240
     Top = 0
     Width = 0
-    Height = 740
+    Height = 733
     Cursor = crHSplit
     Align = alRight
   end
@@ -29,7 +29,7 @@ object Form1: TForm1
     Left = 0
     Top = 0
     Width = 1240
-    Height = 740
+    Height = 733
     Align = alClient
     Color = clNone
     TabOrder = 0
@@ -39,7 +39,7 @@ object Form1: TForm1
   end
   object Panel2: TPanel
     Left = 0
-    Top = 740
+    Top = 733
     Width = 1240
     Height = 91
     Align = alBottom

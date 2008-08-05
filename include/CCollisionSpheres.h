@@ -122,9 +122,9 @@ class cCollisionSpheresSphere
 
     // METHODS:
     //! Return the center of the sphere.
-    inline const cVector3d &getCenter() {return m_center;}
+    inline const cVector3d &getCenter() { return m_center; }
     //! Return the radius of the sphere.
-    inline double getRadius() {return m_radius;}
+    inline double getRadius() { return m_radius; }
     //! Return whether the node is a leaf node.
     virtual bool isLeaf() = 0;
     //! Draw the collision sphere for this node, if at the given depth.
@@ -186,7 +186,6 @@ class cCollisionSpheresNode : public cCollisionSpheresSphere
     //! Exchange the two given pointers.
     static void swapptr(void **a_a, void **a_b);
 
-  protected:
     // PROPERTIES:
     //! Pointer to the left child in the sphere tree.
     cCollisionSpheresSphere *m_left;
@@ -214,9 +213,9 @@ class cCollisionSpheresLeaf : public cCollisionSpheresSphere
     cCollisionSpheresLeaf(cTriangle *a_tri,
             cCollisionSpheresSphere *a_parent = NULL);
     //! Default constructor of cCollisionSpheresLeaf
-    cCollisionSpheresLeaf() : cCollisionSpheresSphere() { m_prim = 0; };
+    cCollisionSpheresLeaf() : cCollisionSpheresSphere() { m_prim = 0; }
     //! Destructor of cCollisionSpheresLeaf()
-    ~cCollisionSpheresLeaf() { if (m_prim) delete m_prim; };
+    virtual ~cCollisionSpheresLeaf() { if (m_prim) delete m_prim; }
 
     // METHODS:
     //! Return whether the node is a leaf node. (In this class, it is.)

@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
@@ -23,4 +24,17 @@
 #include "CColor.h"
 //---------------------------------------------------------------------------
 
+cColorf CHAI_COLOR_RED(1.0f,0.0f,0.0f,1.0f);
+cColorf CHAI_COLOR_GREEN(0.0f,1.0f,0.0f,1.0f);
+cColorf CHAI_COLOR_BLUE(0.0f,0.0f,1.0f,1.0f);
+cColorf CHAI_COLOR_WHITE(1.0f,1.0f,1.0f,1.0f);
+cColorf CHAI_COLOR_BLACK(0.0f,0.0f,0.0f,1.0f);
+cColorf CHAI_COLOR_YELLOW(1.0f,1.0f,0.0f,1.0f);
+cColorf CHAI_COLOR_AQUA(0.0f,1.0f,1.0f,1.0f);
+cColorf CHAI_COLOR_PURPLE(1.0f,0.0f,1.0f,1.0f);
 
+cColorf CHAI_BASIC_COLORS[8] = {
+  CHAI_COLOR_RED, CHAI_COLOR_GREEN, CHAI_COLOR_BLUE,
+  CHAI_COLOR_WHITE, CHAI_COLOR_BLACK, CHAI_COLOR_YELLOW,
+  CHAI_COLOR_AQUA, CHAI_COLOR_PURPLE
+};

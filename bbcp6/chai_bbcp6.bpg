@@ -10,7 +10,8 @@ DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
 PROJECTS = chai_collisions.lib chai_devices.lib chai_files.lib chai_forces.lib \
-  chai_graphics.lib chai_tools.lib chai_math.lib chai_timers.lib chai_displays.lib
+  chai_graphics.lib chai_tools.lib chai_math.lib chai_timers.lib \
+  chai_displays.lib chai_widgets.lib chai_scenegraph.lib
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -48,6 +49,14 @@ chai_timers.lib: chai_timers.bpr
   $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
 
 chai_displays.lib: chai_displays.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_widgets.lib: chai_widgets.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_scenegraph.lib: chai_scenegraph.bpr
   $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
   $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
 

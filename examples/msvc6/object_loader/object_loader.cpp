@@ -25,6 +25,13 @@
 #include <conio.h>
 #include <process.h>
 #include "celapsed.h"
+#include "CVBOMesh.h"
+#include "CImageLoader.h"
+
+// If this is defined, we do our rendering with vertex buffers, instead
+// of plain-old GL immediate mode.  This is accomplished by simply creating
+// cVBOMesh's instead of cMesh's
+#define USE_VERTEX_BUFFER_MESHES
 
 #ifndef M_PI
 #define M_PI 3.1415926535898
@@ -106,7 +113,14 @@ Cobject_loaderApp theApp;
 
 Cobject_loaderApp::Cobject_loaderApp() {
 
+  disable_haptics_temporarily = false;
+  disable_haptics_temporarily_received = false;
+
   m_last_animation_time = -1.0;
+
+  object = 0;
+
+  shader = 0;
 
   moving_object = 0;
 
@@ -209,7 +223,15 @@ BOOL Cobject_loaderApp::InitInstance() {
 
   // Create a mesh - we will build a pyramid manually, and later let the
   // user load 3d models
+
+#ifdef USE_VERTEX_BUFFER_MESHES
+  // Create a mesh that uses vertex buffers
+  object = new cVBOMesh(world);
+#else
+  // Create a mesh that uses plain-vanilla GL rendering
   object = new cMesh(world);
+#endif
+
   world->addChild(object);
 
   double size = 1.0;
@@ -244,7 +266,7 @@ BOOL Cobject_loaderApp::InitInstance() {
 
   // Set the size of the coordinate frame that we're
   // going to gratuitously render
-  object->setFrameSize(1.0, false);
+  object->setFrameSize(1.0, 1.0, false);
 
   // Compute normals for each triangle; generally you would want
   // to do this only if you think your model doesn't already
@@ -252,6 +274,24 @@ BOOL Cobject_loaderApp::InitInstance() {
   //object->computeAllNormals();
   
   world->computeGlobalPositions(false);
+
+  // Create a text label
+  label = new cLabelPanel(world);
+  label->addLabel("This is the default object...");
+  label->getFont()->setPointSize(14.0f);
+  label->getFont()->setFontFace("arial");
+  label->setBorders(15,15,-1,-1,-1);
+  label->setDisplayRect(true);
+  label->m_rectColor = cColorf(0.7,0.2,0.2);
+  label->setDisplayEdges(true);
+  label->m_edgeColor = cColorf(0.5,0.5,0.5);
+  label->m_textColor = cColorf(1,1,1);    
+  label->setPos(cVector3d(50,50,0));
+  label->m_useLighting = false;
+  label->setAlignment(ALIGN_LEFT,VALIGN_BOTTOM);
+
+  camera->m_front_2Dscene.addChild(label);
+
 
   // This will set rendering and haptic options as they're defined in
   // the GUI...
@@ -380,6 +420,8 @@ void Cobject_loaderApp::update_options_from_gui(int preserve_loaded_properties) 
   object->setShowBox(g_main_dlg->m_showbox_check, true);
   object->useCulling(g_main_dlg->m_culling_check, true);
   object->useTexture(g_main_dlg->m_usetexture_check, true);
+  
+  if (shader) shader->setShadingEnabled(g_main_dlg->m_shaders_check);
 
   if (preserve_loaded_properties == 0) {
     if (g_main_dlg->m_usecolors_check!=BST_INDETERMINATE)
@@ -439,6 +481,39 @@ int FileBrowse(char* buffer, int length, int save, char* forceExtension,
 }
 
 
+// Called by the GUI when the user clicks the "load shader"
+// button.  Opens the specified file and applies the shader to
+// the current object.
+int Cobject_loaderApp::LoadShader(const char* filename) {
+
+  // Give the base filename .vert and .frag extensions
+  char vertex_filename[_MAX_PATH];
+  char fragment_filename[_MAX_PATH];
+
+  replace_extension(vertex_filename,filename,"vert");
+  replace_extension(fragment_filename,filename,"frag");
+
+  bool had_shader = (shader!=0);
+
+  if (had_shader == false) shader = new cGLSLShader;
+
+  shader->loadFragmentShaderFromFile(fragment_filename);
+  shader->loadVertexShaderFromFile(vertex_filename);
+  
+  // Stick the shader in the scenegraph between the world and the object
+  if (had_shader == false) {
+    object->removeFromGraph();
+    shader->addChild(object);
+    world->addChild(shader);
+  }
+
+  shader->setShadingEnabled(g_main_dlg->m_shaders_check);
+
+  return 0;
+}
+
+
+
 // Called by the GUI when the user clicks the "load model"
 // button.  Opens the specified file and displays the model (graphically
 // and haptically).
@@ -449,7 +524,14 @@ int FileBrowse(char* buffer, int length, int save, char* forceExtension,
 int Cobject_loaderApp::LoadModel(char* filename) {
 
   // create a new mesh
+
+#ifdef USE_VERTEX_BUFFER_MESHES
+  // Create a mesh that uses vertex buffers
+  cMesh* new_object = new cVBOMesh(world);
+#else
+  // Create a mesh that uses plain-vanilla GL rendering
   cMesh* new_object = new cMesh(world);
+#endif   
   
   _cprintf("Loading mesh file %s\n",filename);
 
@@ -569,23 +651,41 @@ int Cobject_loaderApp::LoadModel(char* filename) {
   // the proxy will work nicely when haptics are enabled.
   _cprintf("Building collision detector...\n");
 
-  // new_object->createSphereTreeCollisionDetector(true,true);
-  new_object->createAABBCollisionDetector(true,true);
+  new_object->createSphereTreeCollisionDetector(true,true);
+  // new_object->createAABBCollisionDetector(true,true);
   
   _cprintf("Finished building collision detector...\n");
 
   new_object->computeGlobalPositions();
   
-  // Replace the old object we're displaying with the
-  // new one
-  //
-  // Really I might synchronize this operation with the
-  // haptic thread - if there is one - but that's beyond the scope
-  // of this demo.
-  world->removeChild(object);
+  int haptics_was_enabled = haptics_enabled;
+  if (haptics_was_enabled) {
+    disable_haptics_temporarily_received = false;
+    disable_haptics_temporarily = true;
+    unsigned int i=0;
+    #define MAX_WAIT_LOOPS 15
+    while(disable_haptics_temporarily_received == false && i < MAX_WAIT_LOOPS) {
+      Sleep(5);
+      i++;
+    }
+    if (i >= MAX_WAIT_LOOPS ) {
+      _cprintf("Warning: could not turn forces off to load a new model\n");
+    }
+  }
+
+  // Replace the old object we're displaying with the new one  
+  object->removeFromGraph();
   delete object;
   object = new_object;
-  world->addChild(object);
+
+  // Put the object under the shader in our scenegraph if we have a shader
+  if (shader) shader->addChild(object);
+  else world->addChild(object);
+  
+
+  if (haptics_was_enabled) {
+    disable_haptics_temporarily = false;
+  }
 
   /*
   // Optional things that help make some models look good...
@@ -618,6 +718,12 @@ int Cobject_loaderApp::LoadModel(char* filename) {
   //
   // Don't over-write things we loaded from the file...
   update_options_from_gui(1);
+
+  // Change the text label displayed to the user so it reflects the new filename...
+  label->clearLabels();
+  char short_filename[_MAX_PATH];
+  find_filename(short_filename,filename,true);
+  label->addLabel(short_filename);
 
   return 0;
 
@@ -809,8 +915,16 @@ void object_loader_haptic_iteration(void* param) {
 
   app->animate();
 
+  if (app->disable_haptics_temporarily_received == false && app->disable_haptics_temporarily) {
+    _cprintf("Temporarily disabling haptic forces to load a new model...\n");
+    app->disable_haptics_temporarily_received = true;
+  }
+
   app->tool->updatePose();
-  app->tool->computeForces();
+  
+  if (app->disable_haptics_temporarily == false) app->tool->computeForces();
+  else app->tool->m_lastComputedGlobalForce.zero();
+
   app->tool->applyForces();
 
 }
@@ -915,9 +1029,7 @@ DWORD object_loader_haptic_loop(void* param) {
   Cobject_loaderApp* app = (Cobject_loaderApp*)(param);
 
   while(app->haptics_enabled) {
-
     object_loader_haptic_iteration(param);
-
   }
 
   app->haptics_thread_running = 0;
@@ -1013,7 +1125,8 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
     
     // Enable the "dynamic proxy", which will handle moving objects
     cProxyPointForceAlgo* proxy = tool->getProxy();
-    proxy->enableDynamicProxy(true);
+    // The dynamic proxy is in a pretty beta state, so we turn it off for now...
+    // proxy->enableDynamicProxy(true);
 
     // Make sure the haptic device knows where he is in the camera frame
     world->computeGlobalPositions(true);

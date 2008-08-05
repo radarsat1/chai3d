@@ -22,7 +22,7 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="chai_forces.bpf"/>
-    <INCLUDEPATH value="&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions"/>
+    <INCLUDEPATH value="&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions;..\src\scenegraph"/>
     <LIBPATH value="&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\src\forces;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par -w-8027 -w-hid -w-aus"/>
     <LISTFILE value=""/>
@@ -81,15 +81,16 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=8
-Item0=C:\Program Files\Borland\CBuilder6\Projects;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions
-Item1=..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions
-Item2=..\examples\bcpp6\graphics\example1\project;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions
-Item3=..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools
-Item4=..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files
-Item5=..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
-Item6=..\src\forces;$(BCB)\include;$(BCB)\include\vcl
-Item7=$(BCB)\include;$(BCB)\include\vcl
+Count=9
+Item0=C:\Program Files\Borland\CBuilder6\Projects;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions;..\src\scenegraph
+Item1=C:\Program Files\Borland\CBuilder6\Projects;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions
+Item2=..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions
+Item3=..\examples\bcpp6\graphics\example1\project;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools;..\src\collisions
+Item4=..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\tools
+Item5=..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files
+Item6=..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
+Item7=..\src\forces;$(BCB)\include;$(BCB)\include\vcl
+Item8=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
 Count=4

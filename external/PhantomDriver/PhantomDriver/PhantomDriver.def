@@ -1,8 +1,8 @@
 LIBRARY   PhantomDriver
-DESCRIPTION "Library that takes care of dynamically linking an application with the right version of ghost"
+DESCRIPTION "DLL interface to multiple SensAble device interfaces"
 EXPORTS
    OpenPhantom
-   PhantomAcces
+   PhantomAccess
    ClosePhantoms
    ResetPhantomEncoders
    StartCommunicationPhantom
@@ -15,4 +15,5 @@ EXPORTS
    ReadOrientMat3DOFPhantom
    ReadSwitchPhantom
    GetMaxForcePhantom
+   GetWorkspaceScalePhantom
    

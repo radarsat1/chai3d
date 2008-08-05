@@ -62,9 +62,10 @@ static int right_aligned_elements[] = {
     IDC_LOAD_TEXTURE_BUTTON, IDC_STATIC, IDC_STEREOSEP_SLIDER,
     IDC_STEREOFOCUS_TEXT, IDC_STEREOSEP_SLIDER, IDC_STEREOSEP_TEXT,
     IDC_TOGGLE_STEREO_BUTTON, IDC_CAMZOOM_SLIDER, IDC_CHECK_SHOWFRAME,
-    IDC_CHECK_USECOLORS, IDC_CHECK_USETEXTURE, IDC_STATIC3
+    IDC_CHECK_USECOLORS, IDC_CHECK_USETEXTURE, IDC_STATIC3,
+    IDC_CHECK_SHADERS, IDC_LOAD_SHADER_BUTTON
 };
-#define NUM_RIGHT_ALIGNED_ELEMENTS 21
+#define NUM_RIGHT_ALIGNED_ELEMENTS 23
 
 static int bottom_aligned_elements[] = {
   IDC_TOGGLEHAPTICS_BUTTON, IDC_ANIMATION_BUTTON, IDC_DYNAMIC_FRICTION_SLIDER,
@@ -96,6 +97,7 @@ Cobject_loaderDlg::Cobject_loaderDlg(CWnd* pParent /*=NULL*/)
 	m_usewireframe_check = FALSE;
   m_culling_check = TRUE;
   m_transparency_check = FALSE;
+  m_shaders_check = TRUE;
 	//}}AFX_DATA_INIT
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
   
@@ -124,6 +126,8 @@ void Cobject_loaderDlg::DoDataExchange(CDataExchange* pDX) {
 	DDX_Check(pDX, IDC_CHECK_USECOLORS, m_usecolors_check);
 	DDX_Check(pDX, IDC_CHECK_USETEXTURE, m_usetexture_check);
 	DDX_Check(pDX, IDC_CHECK_WIREFRAME, m_usewireframe_check);
+  DDX_Check(pDX, IDC_CHECK_SHADERS, m_shaders_check);
+
 	//}}AFX_DATA_MAP
 }
 
@@ -153,10 +157,12 @@ BEGIN_MESSAGE_MAP(Cobject_loaderDlg, CDialog)
   ON_BN_CLICKED(IDC_CHECK_USECOLORS, OnColorsCheck)
   ON_BN_CLICKED(IDC_CHECK_USETEXTURE, OnCheck)
   ON_BN_CLICKED(IDC_CHECK_WIREFRAME, OnCheck)
+  ON_BN_CLICKED(IDC_CHECK_SHADERS, OnCheck)
 	ON_BN_CLICKED(IDC_ANIMATION_BUTTON, OnAnimationButton)
+  ON_BN_CLICKED(IDC_LOAD_SHADER_BUTTON, OnLoadShaderButton)
 	//}}AFX_MSG_MAP
   ON_WM_SIZING()
-  ON_WM_SIZE()
+  ON_WM_SIZE()  
 END_MESSAGE_MAP()
 
 BOOL Cobject_loaderDlg::OnInitDialog() {
@@ -427,6 +433,9 @@ void Cobject_loaderDlg::OnMouseMove(UINT nFlags, CPoint point) {
 void Cobject_loaderDlg::OnMButtonDown(UINT nFlags, CPoint point) {
 
   CDialog::OnMButtonDown(nFlags,point);
+
+  ::SetCapture(m_hWnd);
+
   CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
   RECT r;
   pWnd->GetWindowRect(&r);
@@ -450,6 +459,8 @@ void Cobject_loaderDlg::OnMButtonDown(UINT nFlags, CPoint point) {
 
 void Cobject_loaderDlg::OnMButtonUp(UINT nFlags, CPoint point) {
 
+  ::ReleaseCapture();
+
   CDialog::OnMButtonUp(nFlags, point);  
   m_middle_scrolling_gl_area = 0;
 
@@ -459,6 +470,9 @@ void Cobject_loaderDlg::OnMButtonUp(UINT nFlags, CPoint point) {
 void Cobject_loaderDlg::OnLButtonDown(UINT nFlags, CPoint point) {
 
   CDialog::OnLButtonDown(nFlags, point);
+
+  ::SetCapture(m_hWnd);
+
   CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
   RECT r;
   pWnd->GetWindowRect(&r);
@@ -480,6 +494,8 @@ void Cobject_loaderDlg::OnLButtonDown(UINT nFlags, CPoint point) {
 
 void Cobject_loaderDlg::OnLButtonUp(UINT nFlags, CPoint point) {
 	
+  ::ReleaseCapture();
+
   CDialog::OnLButtonUp(nFlags, point);  
   m_left_scrolling_gl_area = 0;
 
@@ -489,6 +505,9 @@ void Cobject_loaderDlg::OnLButtonUp(UINT nFlags, CPoint point) {
 void Cobject_loaderDlg::OnRButtonDown(UINT nFlags, CPoint point) {
 
   CDialog::OnRButtonDown(nFlags, point);
+
+  ::SetCapture(m_hWnd);
+
   CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
   RECT r;
   pWnd->GetWindowRect(&r);
@@ -512,6 +531,8 @@ void Cobject_loaderDlg::OnRButtonDown(UINT nFlags, CPoint point) {
 
 void Cobject_loaderDlg::OnRButtonUp(UINT nFlags, CPoint point) {
 	
+  ::ReleaseCapture();
+
   CDialog::OnRButtonUp(nFlags, point);
   m_right_scrolling_gl_area = 0;
 
@@ -693,4 +714,20 @@ void Cobject_loaderDlg::OnSize(UINT nType, int cx, int cy)
   Invalidate();
   UpdateWindow();
   RedrawWindow(0,0,RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
+}
+
+void Cobject_loaderDlg::OnLoadShaderButton()
+{
+  char filename[_MAX_PATH];
+
+  int result = FileBrowse(filename, _MAX_PATH, 0, 0,
+    "shader files (*.vert, *.frag)|*.vert;*.frag|All Files (*.*)|*.*||",
+    "Choose a GLSL shader file...");
+
+  if (result < 0) {
+    _cprintf("File browse canceled...\n");
+    return;
+  }
+
+  g_main_app->LoadShader(filename);
 }

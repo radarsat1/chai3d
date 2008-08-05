@@ -1,0 +1,25 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{EAF909A5-FA59-4C3D-9431-0FCC20D5BCF9}") = "chai3d_complete_intel", "chai3d_complete_intel.icproj", "{75757994-2674-427B-8E0E-DC3D0CCD69B1}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{75757994-2674-427B-8E0E-DC3D0CCD69B1}.Debug.ActiveCfg = Debug|Win32
+		{75757994-2674-427B-8E0E-DC3D0CCD69B1}.Debug.Build.0 = Debug|Win32
+		{75757994-2674-427B-8E0E-DC3D0CCD69B1}.Release.ActiveCfg = Release|Win32
+		{75757994-2674-427B-8E0E-DC3D0CCD69B1}.Release.Build.0 = Release|Win32
+		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Release.Build.0 = Release|Win32
+		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Release.ActiveCfg = Release|Win32
+		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Debug.Build.0 = Debug|Win32
+		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Debug.ActiveCfg = Debug|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

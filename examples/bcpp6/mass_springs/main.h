@@ -52,7 +52,7 @@
 #include <Dialogs.hpp>
 #include <ExtDlgs.hpp>
 #include <Graphics.hpp>
-#include "CPhantom3dofPointer.h"
+#include "CMeta3dofPointer.h"
 
 
 // A couple of new object types required for our mass-spring
@@ -151,14 +151,17 @@ __published:
         TTimer *Timer1;
     TPanel *Panel1;
     TSplitter *Splitter2;
-    TSplitter *Splitter1;
-        TButton *ToggleHapticsButton;
+    TPanel *Panel2;
+    TButton *ToggleHapticsButton;
+    TMemo *Memo1;
+    TButton *Button1;
         void __fastcall MassSpringFormCreate(TObject *Sender);
         void __fastcall Timer1Timer(TObject *Sender);
     void __fastcall Panel1Resize(TObject *Sender);
         void __fastcall ToggleHapticsButtonClick(TObject *Sender);
         void __fastcall MassSpringFormClose(TObject *Sender,
           TCloseAction &Action);
+    void __fastcall Button1Click(TObject *Sender);
 
 private:
     // virtual world
@@ -219,8 +222,7 @@ public:
         __fastcall TForm1(TComponent* Owner);
         __fastcall ~TForm1() { }
         // haptic tool
-        //cDelta3dofPointer *tool;
-        cPhantom3dofPointer *tool;
+        cMeta3dofPointer *tool;
 
 };
 //---------------------------------------------------------------------------

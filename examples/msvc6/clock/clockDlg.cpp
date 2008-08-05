@@ -152,8 +152,8 @@ DWORD clock_loop(void* param) {
 		edit->SetWindowText(buff);    
 
 		edit = (CEdit*)(app->GetDlgItem(IDC_EDIT3));
-		if (app->time->timeoutOccured())
-			edit->SetWindowText("Timeout Occured!");
+		if (app->time->timeoutOccurred())
+			edit->SetWindowText("Timeout Occurred!");
 		else
 			edit->SetWindowText("");
 	}

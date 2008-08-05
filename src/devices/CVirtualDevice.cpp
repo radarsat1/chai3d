@@ -129,9 +129,9 @@ int cVirtualDevice::close()
 
 //===========================================================================
 /*!
-    Initialise virtual device
+    Initialize virtual device
 
-    \fn     void cVirtualDevice::init()
+    \fn     void cVirtualDevice::initialize()
     \return Return 0 is operation succeeds, -1 if an error occurs.
 */
 //===========================================================================

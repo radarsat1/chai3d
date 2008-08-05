@@ -26,6 +26,13 @@
 #include "CGenericDevice.h"
 //---------------------------------------------------------------------------
 
+// Constants defining the available ForceDimension device types
+#define DHD_DEVICE_UNINITIALIZED  -1
+#define DHD_DEVICE_3DOF           31
+#define DHD_DEVICE_6DOF           61
+#define DHD_DEVICE_6DOF_500       62
+#define DHD_DEVICE_OMEGA          32
+
 class cDeltaDevice : public cGenericDevice
 {
   public:
@@ -44,10 +51,19 @@ class cDeltaDevice : public cGenericDevice
     virtual int initialize();
     //! Set a command to the delta device
     virtual int command(int a_command, void* a_data);
+    //! Which ForceDimension device is actually connected to this object?
+    virtual int getDeviceType() { return m_deviceType; }
 
-  private:
+  protected:
+
+    //! Reference count used to control access to the dhd dll
+    static int m_activeDeltaDevices;
+
     //! Device ID number
     int m_deviceID;
+
+    //! Which FD device is actually instantiated here?
+    int m_deviceType;
 
     //! Half size of the workspace
     double m_halfSizeWorkspace;

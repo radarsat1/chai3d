@@ -18,6 +18,7 @@
 #define IDC_LOAD_TEXTURE_BUTTON         1012
 #define IDC_CHECK_CULLING2              1013
 #define IDC_CHECK_TRANSPARENCY          1013
+#define IDC_LOAD_SHADER_BUTTON          1014
 #define IDC_CAMZOOM_SLIDER              1015
 #define IDC_TOGGLEHAPTICS_BUTTON        1016
 #define IDC_STIFFNESS_SLIDER            1017
@@ -29,14 +30,16 @@
 #define IDC_TOGGLE_STEREO_BUTTON        1023
 #define IDC_ANIMATION_BUTTON            1024
 #define IDC_STATIC2                     1025
-#define IDC_STATIC3                     1026
-#define IDC_STATIC5                     1027
-#define IDC_STEREOFOCUS_SLIDER          1028
-#define IDC_STEREOFOCUS_TEXT            1029
-#define IDC_STEREOSEP_SLIDER            1030
-#define IDC_STEREOSEP_TEXT              1031
-#define IDC_STATIC6                     1032
-#define IDC_STATIC4                     1033
+#define IDC_CHECK_TRANSPARENCY2         1026
+#define IDC_CHECK_SHADERS               1027
+#define IDC_STATIC3                     1028
+#define IDC_STATIC5                     1029
+#define IDC_STEREOFOCUS_SLIDER          1030
+#define IDC_STEREOFOCUS_TEXT            1031
+#define IDC_STEREOSEP_SLIDER            1032
+#define IDC_STEREOSEP_TEXT              1033
+#define IDC_STATIC6                     1034
+#define IDC_STATIC4                     1035
 
 // Next default values for new objects
 // 

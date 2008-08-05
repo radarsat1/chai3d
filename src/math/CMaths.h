@@ -602,7 +602,7 @@ inline cVector3d cNormalize(const cVector3d& a_vector)
 
     \param    a_point1  First point.
     \param    a_point2  Second point.
-    \return   Return distance between both points
+    \return   Return distance between points
 */
 //===========================================================================
 inline double cDistance(const cVector3d& a_point1, const cVector3d& a_point2)
@@ -610,29 +610,48 @@ inline double cDistance(const cVector3d& a_point1, const cVector3d& a_point2)
     return ( a_point1.distance(a_point2) );
 }
 
+
+//===========================================================================
+/*!
+Compute the squared distance between two points.
+
+\param    a_point1  First point.
+\param    a_point2  Second point.
+\return   Return squared distance between points
+*/
+//===========================================================================
+inline double cDistanceSq(const cVector3d& a_point1, const cVector3d& a_point2)
+{
+  return ( a_point1.distancesq(a_point2) );
+}
+
                  
 //===========================================================================
 /*!
      Determine whether two vectors represent the same point.
 
-     \fn       bool inline cEqualPoints(cVector3d v1, cVector3d v2)
+     \fn       bool inline cEqualPoints(const cVector3d& v1, const cVector3d& v2,
+                           const double epsilon=CHAI_SMALL)
      \param    v1  First point.
      \param    v2  Second point.
+     \param    epsilon  Two points will be considered equal if each
+                        component is within epsilon units.  Defaults
+                        to CHAI_SMALL.
      \return   Return whether the two vectors represent the same point.
 */
 //===========================================================================
-bool inline cEqualPoints(const cVector3d& v1, const cVector3d& v2)
+bool inline cEqualPoints(const cVector3d& v1, const cVector3d& v2, const double epsilon=CHAI_SMALL)
 {
-    if ((fabs(v1.x-v2.x) < CHAI_SMALL) &&
-        (fabs(v1.y-v2.y) < CHAI_SMALL) &&
-        (fabs(v1.z-v2.z) < CHAI_SMALL))
-    {
-        return (true);
+    // Accelerated path for exact equality
+    if (epsilon == 0.0) {      
+        if ( (v1.x == v2.x) && (v1.y == v2.y) && (v1.z == v2.z) ) return true;
+        else return false;
     }
-    else
-    {
-        return (false);
-    }
+
+    if ((fabs(v1.x-v2.x) < epsilon) &&
+        (fabs(v1.y-v2.y) < epsilon) &&
+        (fabs(v1.z-v2.z) < epsilon)) return true;
+    else return false;    
 }
 
 

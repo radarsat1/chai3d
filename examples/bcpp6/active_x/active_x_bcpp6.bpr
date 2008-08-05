@@ -14,8 +14,8 @@
       ..\..\..\lib\bbcp6\chai_displays.lib ..\..\..\lib\bbcp6\chai_files.lib 
       ..\..\..\lib\bbcp6\chai_forces.lib ..\..\..\lib\bbcp6\chai_graphics.lib 
       ..\..\..\lib\bbcp6\chai_math.lib ..\..\..\lib\bbcp6\chai_timers.lib 
-      ..\..\..\lib\bbcp6\chai_tools.lib ..\..\..\lib\bbcp6\dhdbl.lib 
-      ..\..\..\lib\bbcp6\DLPortIO.lib"/>
+      ..\..\..\lib\bbcp6\chai_tools.lib ..\..\..\lib\bbcp6\chai_scenegraph.lib 
+      ..\..\..\lib\bbcp6\chai_widgets.lib"/>
     <LIBRARIES value="vclnp.lib rtl.lib vcl.lib"/>
     <SPARELIBS value="vcl.lib rtl.lib"/>
     <PACKAGES value="vcl.bpi rtl.bpi vclx.bpi bcbsmp.bpi dbrtl.bpi adortl.bpi vcldb.bpi 
@@ -70,8 +70,8 @@
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_math.lib" FORMNAME="" UNITNAME="chai_math.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_timers.lib" FORMNAME="" UNITNAME="chai_timers.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_tools.lib" FORMNAME="" UNITNAME="chai_tools.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\..\..\lib\bbcp6\dhdbl.lib" FORMNAME="" UNITNAME="dhdbl.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\..\..\lib\bbcp6\DLPortIO.lib" FORMNAME="" UNITNAME="DLPortIO.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_scenegraph.lib" FORMNAME="" UNITNAME="chai_scenegraph.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_widgets.lib" FORMNAME="" UNITNAME="chai_widgets.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -122,6 +122,9 @@ CryptoType=0
 Timestamping=0
 TimestampServer=
 
+[Excluded Packages]
+c:\program files\borland\cbuilder6\Bin\dclite60.bpl=Borland Integrated Translation Environment
+
 [HistoryLists\hlIncludePath]
 Count=2
 Item0=C:\Program Files\Borland\CBuilder6\Bin;C:\Chris\ActiveCHAI\chai3d\examples\bcpp6\active_x;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\include\atl;..\..\..\include
@@ -168,11 +171,6 @@ RemoteDebug=0
 ShowInfoMsgs=0
 LinkDebugVcl=0
 LinkCGLIB=0
-
-[Language]
-ActiveLang=
-ProjectLang=
-RootDir=
 
 [Linker]
 LibPrefix=

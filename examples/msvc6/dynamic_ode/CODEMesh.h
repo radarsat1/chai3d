@@ -24,10 +24,6 @@
 #ifndef CODEMeshH
 #define CODEMeshH
 
-#ifdef _MSVC
-#pragma warning (disable : 4786)
-#endif
-
 //---------------------------------------------------------------------------
 #include "CGenericObject.h"
 #include "CMaterial.h"
@@ -54,8 +50,8 @@ enum geomType{
 };
 
 enum objectType {
-	STATIC,
-	DYNAMIC
+	STATIC_OBJECT,
+	DYNAMIC_OBJECT
 };
 
 typedef int odeVector3[3];
@@ -87,7 +83,7 @@ class cODEMesh : public cMesh
 
     // METHODS:
 	  //! Initialize the dynamic object.
-	  void initDynamic(geomType a_type = TRIMESH,objectType a_objType = DYNAMIC,float a_x = 0.0, 
+	  void initDynamic(geomType a_type = TRIMESH,objectType a_objType = DYNAMIC_OBJECT,float a_x = 0.0, 
 		                 float a_y = 0.0, float a_z = 0.0, float a_density = 1.0);
 	  //! Update the position of the dynamic object.
 	  void updateDynamicPosition();

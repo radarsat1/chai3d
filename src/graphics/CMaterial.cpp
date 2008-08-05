@@ -38,7 +38,7 @@ cMaterial::cMaterial()
 {
     // set default colors
     m_ambient.set(0.3f, 0.3f, 0.3f, 1.0f);
-    m_diffuse.set(0.6f, 0.6f, 0.6f, 1.0f);
+    m_diffuse.set(0.7f, 0.7f, 0.7f, 1.0f);
     m_specular.set(1.0f, 1.0f, 1.0f, 1.0f);
     m_emission.set(0.0f, 0.0f, 0.0f, 1.0f);
     setShininess(64);

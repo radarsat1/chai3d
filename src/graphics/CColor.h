@@ -269,7 +269,7 @@ struct cColorf
           Returns a pointer to the raw color array
     */
     //-----------------------------------------------------------------------
-    const GLfloat* pColor() const
+    inline const GLfloat* pColor() const
     {
         return (&m_color[0]);
     }
@@ -519,7 +519,7 @@ struct cColorb
           \return   Return memory location of color array
     */
     //-----------------------------------------------------------------------
-    const GLubyte* pColor() const
+    inline const GLubyte* pColor() const
     {
         return (&m_color[0]);
     }
@@ -562,7 +562,19 @@ cColorf cColorb::getColorf(void) const
                       (GLfloat)m_color[2] / (GLfloat)0xff,
                       (GLfloat)m_color[3] / (GLfloat)0xff );
     return color;
-}    
+}
+
+extern cColorf CHAI_COLOR_RED;
+extern cColorf CHAI_COLOR_GREEN;
+extern cColorf CHAI_COLOR_BLUE;
+extern cColorf CHAI_COLOR_WHITE;
+extern cColorf CHAI_COLOR_BLACK;
+extern cColorf CHAI_COLOR_YELLOW;
+extern cColorf CHAI_COLOR_AQUA;
+extern cColorf CHAI_COLOR_PURPLE;
+
+extern cColorf CHAI_BASIC_COLORS[8];
+
 //---------------------------------------------------------------------------
 #endif
 //---------------------------------------------------------------------------

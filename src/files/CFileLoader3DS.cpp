@@ -34,7 +34,7 @@
 
 typedef std::map<unsigned int, unsigned int> uint_uint_map;
 
-bool g_3dsLoaderShouldGenerateExtraVertices = true;
+bool g_3dsLoaderShouldGenerateExtraVertices = false;
 
 //---------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ bool g_3dsLoaderShouldGenerateExtraVertices = true;
 /*!
     Load a 3d studio max 3ds file format image into a mesh.
 
-    \fn         bool cLoadFile3DS(const cMesh* a_mesh, const string& a_fileName)
+    \fn         bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
     \param      a_mesh         Mesh in which image file is loaded
     \param      a_fileName     Name of image file.
     \return     Return \b true if image was loaded successfully, otherwise
@@ -157,7 +157,7 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
           // We really failed to load a texture...
           else {
 #ifdef _WIN32
-            CHAI_DEBUG_PRINT("Could not load texture map %s\n",curmap.mapName);
+            // CHAI_DEBUG_PRINT("Could not load texture map %s\n",curmap.mapName);
 #endif
           }
 
@@ -196,7 +196,7 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
         newMesh->m_material.m_specular.setA(alpha);
 
         // get shininess
-        newMesh->m_material.setShininess((GLuint)(cur_material.GetShininess()));
+        newMesh->m_material.setShininess((GLuint)(128.0 * cur_material.GetShininess()));
 
       } // For every material in this mesh
 

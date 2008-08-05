@@ -226,7 +226,7 @@ cDriverServotogo::~cDriverServotogo()
 /*!
     Open board.
 
-    \fn     cDriverServotogo::Open()
+    \fn     cDriverServotogo::open()
     \return Return 0 is operation succeeds, -1 if an error occurs.
 */
 //===========================================================================
@@ -265,7 +265,7 @@ int cDriverServotogo::open()
       Set volt value dVolts for the i-th dac channel. If a_num is out of the range
       of DACs for the board no action is taken.
 
-      \fn       void cDriverServotogo::setMotor(int a_num, double a_volts)
+      \fn       void cDriverServotogo::setDac(int a_num, double a_volts)
       \param    a_num  dac number.
       \param    a_volts  value to be applied to dacs
 */
@@ -485,7 +485,7 @@ void cDriverServotogo::encoderInit()
 /*!
       Latches and reads all encoders at once
 
-      \fn       void cDriverServotogo::EncReadAll(LONGBYTE * a_lbEnc)
+      \fn       void cDriverServotogo::encReadAll(LONGBYTE * a_lbEnc)
       \param    LONGBYTE* a_lbEnc  array of the encoder values
 */
 //===========================================================================
@@ -657,7 +657,7 @@ int cDriverServotogo::getEncoder(int a_num, long *a_value)
 /*!
       Writes to DAC nAxis value lCounts
 
-      \fn       void cDriverServotogo::RawDAC(unsigned short nAxis, long lCounts)
+      \fn       void cDriverServotogo::rawDAC(unsigned short nAxis, long lCounts)
       \param    unsigned short nAxis, value of DAC to which to write
       \param    long lCounts, value to be written to the DAC
 
@@ -700,7 +700,7 @@ void cDriverServotogo::rawDAC(unsigned short nAxis, long lCounts)
 /*!
       Sets all DACs to zero
 
-    \fn       void cDriverServotogo::closeB()
+    \fn       void cDriverServotogo::close()
     \return Return 0 is operation succeeds, -1 if an error occurs.
 */
 //===========================================================================

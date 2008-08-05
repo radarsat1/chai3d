@@ -33,14 +33,18 @@ cViewport* cViewport::lastActiveViewport = 0;
     Constructor of cViewport.
 
     \fn         cViewport::cViewport(HWND a_winHandle, cCamera *a_camera,
-                const bool a_stereoEnabled)
+                const bool a_stereoEnabled, PIXELFORMATDESCRIPTOR* a_pixelFormat=0)
     \param      a_winHandle    Handle to the actual win32 window
     \param      a_camera       The camera through which this viewport should be rendered
     \param      a_useStereo    If \b true, a stereo rendering context is created
+    \param      a_pixelFormat  If non-zero, this custom pixel format is used to initialize the viewport
 */
 //===========================================================================
 cViewport::cViewport(HWND a_winHandle, cCamera *a_camera, const bool a_stereoEnabled, PIXELFORMATDESCRIPTOR* a_pixelFormat)
 {
+
+    memset(m_glViewport,0,sizeof(m_glViewport));
+
     // set the camera through which this viewport should be rendered
     setCamera(a_camera);
 
@@ -282,6 +286,8 @@ bool cViewport::update(bool resizeOnly)
     // enable viewport
     m_enabled = true;
 
+    if (resizeOnly == false) onDisplayReset();
+
     // return success
     return(true);
 }
@@ -308,7 +314,7 @@ bool cViewport::update(bool resizeOnly)
     (2) I have a stereo context, but I have a lot of computation to do and I
         want to get control back between the left and right frames.    
 
-    \fn         bool cViewport::render()
+    \fn         bool cViewport::render(int imageIndex)
     \param      int imageIndex Either CHAI_STEREO_DEFAULT, CHAI_MONO, CHAI_STEREO_LEFT, or CHAI_STEREO_RIGHT
     \return     Return \b true if operation succeeded.
 */
@@ -409,8 +415,11 @@ bool cViewport::renderView(const int a_imageIndex)
     // of overhead here.
     if (!wglMakeCurrent(m_glDC, m_glContext))
     {
-        // return operation failed
-        return(false);
+
+        // Try once to re-initialize the context...
+        if (!(update()))
+          // And return an error if this doesn't work out...
+          return(false);
     }
 
     // Set up rendering to the appropriate buffer
@@ -432,6 +441,8 @@ bool cViewport::renderView(const int a_imageIndex)
     int height = m_activeRenderingArea.top - m_activeRenderingArea.bottom;
     glViewport(m_activeRenderingArea.left, m_activeRenderingArea.bottom,
       width,height);
+
+    glGetIntegerv(GL_VIEWPORT,m_glViewport);
 
     // set background color
     cColorf color = m_camera->getParentWorld()->getBackgroundColor();
@@ -473,8 +484,8 @@ bool cViewport::renderView(const int a_imageIndex)
      getLastSelectedPoint() to extract information about the results of
      this operation.
 
-     \fn        bool cViewport::select(const unsigned int& a_windowPosX,
-                const unsigned int& a_windowPosY, const bool a_selectVisibleObjectsOnly)
+     \fn        bool cViewport::select(const unsigned int a_windowPosX,
+                const unsigned int a_windowPosY, const bool a_selectVisibleObjectsOnly)
      \param     a_windowPosX  X coordinate position of mouse click.
      \param     a_windowPosY  Y coordinate position of mouse click.
      \return    Return \b true if an object has been hit.
@@ -543,14 +554,40 @@ void cViewport::setRenderArea(RECT& r)
 
 //===========================================================================
 /*!
-Clients should call this when the scene associated with
-this viewport may need re-initialization, e.g. after a 
-switch to or from fullscreen.
+    Clients should call this when the scene associated with
+    this viewport may need re-initialization, e.g. after a 
+    switch to or from fullscreen.  Automatically called from update()
+    when the viewport creates a new GL context.
 
-\fn     void cViewport::onDisplayReset()
+    \fn     void cViewport::onDisplayReset()
 */
 //===========================================================================
 void cViewport::onDisplayReset()
 {
-  m_camera->onDisplayReset(true);
+    if (m_camera) m_camera->onDisplayReset(true);
+}
+
+
+//===========================================================================
+/*!
+    Project a world-space point from 3D to 2D, using my viewport xform, my
+    camera's projection matrix, and his world's modelview matrix
+
+    \fn     void cViewport::projectPoint(cVector3d& a_point)
+    \param  a_point     The point to transform
+    \return             The transformed point in window space
+*/
+//===========================================================================
+cVector3d cViewport::projectPoint(cVector3d& a_point)
+{
+    cVector3d toReturn;
+
+    int* viewport = m_glViewport;
+    double* projection = m_camera->m_projectionMatrix;
+    double* modelview = m_camera->getParentWorld()->m_worldModelView;
+
+    int success = ::gluProject(a_point.x,a_point.y,a_point.z,modelview,projection,
+      viewport,&toReturn.x,&toReturn.y,&toReturn.z);
+    
+    return toReturn;
 }

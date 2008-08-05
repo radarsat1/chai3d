@@ -30,7 +30,7 @@
       
       The scale parameter determines the size of the arrows.
 
-      \fn       void cDrawFrame(const double a_scale=1.0)
+      \fn       void cDrawFrame(const double a_scale=1.0,const bool a_modifyMaterialState=true)
       \param    a_scale  Length of each arrow
       \param    a_modifyMaterialState If true, this function sets GL to the preferred material state
 */

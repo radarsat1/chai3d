@@ -51,12 +51,11 @@ cTexture2D::cTexture2D()
 //===========================================================================
 cTexture2D::~cTexture2D()
 {
-
-  if (m_textureID != -1) {
-    glDeleteTextures(1,&m_textureID);
-    m_textureID = -1;
-  }
-
+    if (m_textureID != -1)
+    {
+        glDeleteTextures(1,&m_textureID);
+        m_textureID = -1;
+    }
 }
 
 
@@ -69,20 +68,37 @@ cTexture2D::~cTexture2D()
 //===========================================================================
 void cTexture2D::reset()
 {
-
-    m_texture_environment_mode = -1;
-    m_min_filter = -1;
-    m_mag_filter = -1;
-
     // id number provided by OpenGL once texture is stored in graphics
     // card memory
     m_textureID = -1;
 
     // texture has not yet been rendered
-    m_update_texture_flag = true;
-    
-}
+    m_updateTextureFlag = true;
 
+    // Tile the texture in X. (GL_REPEAT or GL_CLAMP)
+    m_wrapSmode = GL_REPEAT;
+
+    // Tile the texture in Y. (GL_REPEAT or GL_CLAMP)
+    m_wrapTmode = GL_REPEAT;
+
+    // set the magnification function. (GL_NEAREST or GL_LINEAR)
+    m_magnificationFunction = GL_NEAREST;
+
+    // set the minifying function. (GL_NEAREST or GL_LINEAR)
+    m_minifyingFunction = GL_NEAREST;
+
+    // set environmental mode (GL_MODULATE, GL_DECAL, GL_BLEND, GL_REPLACE)
+    m_environmentMode = GL_MODULATE;
+
+    // set environmental color
+    m_color.set(1.0, 1.0, 1.0, 0.0);
+
+    // set spherical mode
+    m_useSphericalMapping = false;
+
+    // use mipmaps
+    m_useMipmaps = true;
+}
 
 
 //===========================================================================
@@ -94,65 +110,91 @@ void cTexture2D::reset()
 //===========================================================================
 void cTexture2D::render()
 {
-    if (m_image_loader.initialized() == 0) return;
-    
-    // Only check residency in memory if we weren't going to 
-    // update the texture anyway...
-    if (m_update_texture_flag == 0) {
-    
-      GLboolean texture_is_resident;
-      glAreTexturesResident(1,&m_textureID,&texture_is_resident);
+    if (m_image.initialized() == 0) return;
 
-      if (texture_is_resident == 0) {
-        m_update_texture_flag = 1;
-      }
+    // Only check residency in memory if we weren't going to
+    // update the texture anyway...
+    if (m_updateTextureFlag == 0)
+    {
+        GLboolean texture_is_resident;
+        glAreTexturesResident(1, &m_textureID, &texture_is_resident);
+
+        if (texture_is_resident == false)
+        {
+            m_updateTextureFlag = true;
+        }
     }
 
     // is texture being rendered for the first time?
-    if (m_update_texture_flag) {
-      update();
-      m_update_texture_flag = false;
+    if (m_updateTextureFlag)
+    {
+        update();
+        m_updateTextureFlag = false;
     }
 
     // enable texturing
     glEnable(GL_TEXTURE_2D);
 
+    // enable or disable spherical mapping
+    if (m_useSphericalMapping)
+    {
+        glEnable(GL_TEXTURE_GEN_S);
+        glEnable(GL_TEXTURE_GEN_T);
+        glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+        glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    }
+    else
+    {
+        glDisable(GL_TEXTURE_GEN_S);
+        glDisable(GL_TEXTURE_GEN_T);
+    }
+    
+    // Sets the wrap parameter for texture coordinate s to either
+    // GL_CLAMP or GL_REPEAT.
+    glTexParameteri(GL_TEXTURE_2D ,GL_TEXTURE_WRAP_S, m_wrapSmode);
+    glTexParameteri(GL_TEXTURE_2D ,GL_TEXTURE_WRAP_T, m_wrapTmode);
+
+    // Set the texture magnification function to either GL_NEAREST or GL_LINEAR.
+    glTexParameteri(GL_TEXTURE_2D ,GL_TEXTURE_MAG_FILTER, m_magnificationFunction);
+
+    // Set the texture minifying function to either GL_NEAREST or GL_LINEAR.
+    glTexParameteri(GL_TEXTURE_2D ,GL_TEXTURE_MIN_FILTER, m_minifyingFunction);
+
+    // set the environment mode (GL_MODULATE, GL_DECAL, GL_BLEND, GL_REPLACE)
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, m_environmentMode);
+
     // make this the current texture
     glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-    // set the texture environment mode
-    if (m_texture_environment_mode != -1)
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, m_texture_environment_mode);
-
-    if (m_mag_filter != -1)
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,m_mag_filter);
+    // set the environmental color
+    glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, &m_color.pColor()[0]);
     
-    if (m_min_filter != -1)
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,m_min_filter);
 }
 
 
 //===========================================================================
 /*!
       Load an image file (CHAI currently supports 24-bit .bmp and
-      32-bit .tga files)
+      32-bit .tga files on all platforms and should support all formats
+      on Windows)
 
-      \fn         bool cTexture2D::loadFromFile(char*)
+      \fn         bool cTexture2D::loadFromFile(const char* a_fileName)
 */
 //===========================================================================
-bool cTexture2D::loadFromFile(char* a_fileName)
+bool cTexture2D::loadFromFile(const char* a_fileName)
 {
-  
-  if (m_image_loader.loadFromFile(a_fileName) < 0) {
-    // Failure
-    return 0;
-  }
-  else {
-    // Success
-    return 1;
-  }
-
+    if (m_image.loadFromFile(a_fileName) < 0)
+    {
+        // Failure
+        return 0;
+    }
+    else
+    {
+        // Success
+        return 1;
+    }
 }
+
 
 //===========================================================================
 /*!
@@ -161,34 +203,119 @@ bool cTexture2D::loadFromFile(char* a_fileName)
       \fn         void cTexture2D::update()
 */
 //===========================================================================
-void cTexture2D::update() {
+void cTexture2D::update()
+{
+    if (m_textureID != -1)
+    {
+        // Deletion makes for all kinds of new hassles, particularly
+        // when re-initializing a whole display context, since opengl
+        // automatically starts re-assigning texture ID's.  Not worth it.
+        // glDeleteTextures(1,&m_textureID);
 
-  if (m_textureID != -1) {
+        m_textureID = -1;
+    }
 
-    // Deletion makes for all kinds of new hassles, particularly
-    // when re-initializing a whole display context, since opengl
-    // automatically starts re-assigning texture ID's.  Not worth it.
+    // Generate a texture ID and bind to it
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glGenTextures(1,&m_textureID);
+    glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-    // glDeleteTextures(1,&m_textureID);
-    // m_textureID = -1;
-  }
-  
-  // Generate a texture ID and bind to it
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glGenTextures(1,&m_textureID); 
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
+    if (m_useMipmaps)
+    {
+        int components = (m_image.getFormat() == GL_RGB ? 3 : 4);
 
-  int components = (m_image_loader.getFormat() == GL_RGB ? 3 : 4);
-
-  gluBuild2DMipmaps(GL_TEXTURE_2D, 
-						  components, 
-						  m_image_loader.getWidth(),
-						  m_image_loader.getHeight(),
-						  m_image_loader.getFormat(),
+        gluBuild2DMipmaps(GL_TEXTURE_2D,
+						  components,
+						  m_image.getWidth(),
+						  m_image.getHeight(),
+						  m_image.getFormat(),
 						  GL_UNSIGNED_BYTE,
-						  m_image_loader.getData()
-              );	
-              
+						  m_image.getData()
+              );
+    }
 
+    else
+    {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA,
+                     m_image.getWidth(),
+                     m_image.getHeight(),
+                     0,
+                     m_image.getFormat(),
+                     GL_UNSIGNED_BYTE,
+                     m_image.getData()
+            );
+    }
 }
 
+
+//===========================================================================
+/*!
+      Sets the wrap parameter for texture coordinate s to either GL_CLAMP or
+      GL_REPEAT. GL_CLAMP causes s coordinates to be clamped to the
+      range [0,1] and is useful for preventing wrapping artifacts when mapping
+      a single image onto an object. GL_REPEAT causes the integer part of the
+      s coordinate to be ignored; OpenGL uses only the fractional part, thereby
+      creating a repeating pattern. Border texture elements are accessed only
+      if wrapping is set to GL_CLAMP. Initially, GL_TEXTURE_WRAP_S is set
+      to GL_REPEAT.
+
+      \fn       void cTexture2D::setWrapMode(const GLint& a_wrapSmode, const GLint& a_wrapTmode)
+      \param    a_wrapSmode  value shall be either GL_REPEAT or GL_CLAMP
+      \param    a_wrapTmode  value shall be either GL_REPEAT or GL_CLAMP
+*/
+//===========================================================================
+void cTexture2D::setWrapMode(const GLint& a_wrapSmode, const GLint& a_wrapTmode)
+{
+    m_wrapSmode = a_wrapSmode;
+    m_wrapTmode = a_wrapTmode;
+}
+
+
+//===========================================================================
+/*!
+    The texture magnification function is used when the pixel being textured
+    maps to an area less than or equal to one texture element.
+    It sets the texture magnification function to either GL_NEAREST or GL_LINEAR.
+
+    \fn       void cTexture2D::setWrapMode(a_wrapSmode, a_wrapTmode)
+    \param    a_magnificationFunction  value shall be either GL_NEAREST or GL_LINEAR.
+*/
+//==========================================================================
+void cTexture2D::setMagnificationFunction(GLint a_magnificationFunction)
+{
+    m_magnificationFunction = a_magnificationFunction;
+}
+
+
+//===========================================================================
+/*!
+    The texture minifying function is used whenever the pixel being textured
+    maps to an area greater than one texture element. There are six defined
+    minifying functions. Two of them use the nearest one or nearest four
+    texture elements to compute the texture value. The other four use mipmaps.
+    A mipmap is an ordered set of arrays representing the same image at
+    progressively lower resolutions. If the texture has dimensions 2nx2m
+    there are max(n, m) + 1 mipmaps. The first mipmap is the original texture,
+    with dimensions 2nx2m. Each subsequent mipmap has dimensions 2k1x2l1 where 2
+    kx2l are the dimensions of the previous mipmap, until either k = 0 or l = 0.
+    At that point, subsequent mipmaps have dimension 1x2l1 or 2k1x1 until the
+    final mipmap, which has dimension 1x1. Mipmaps are defined using
+    glTexImage1D or glTexImage2D with the level-of-detail argument indicating
+    the order of the mipmaps. Level 0 is the original texture; level bold
+    max(n, m) is the final 1x1 mipmap.
+
+    \fn       void cTexture2D::setMinifyingFunction(GLint a_minifyingFunction);
+    \param    a_minifyingFunction  value shall be either GL_NEAREST or GL_LINEAR.
+*/
+//==========================================================================
+void cTexture2D::setMinifyingFunction(GLint a_minifyingFunction)
+{
+    m_minifyingFunction = a_minifyingFunction;
+}

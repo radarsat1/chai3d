@@ -193,6 +193,8 @@ void Cbasic_shapesDlg::OnLButtonDown(UINT nFlags, CPoint point) {
 
   CDialog::OnLButtonDown(nFlags, point);
 
+  ::SetCapture(m_hWnd);
+
   CWnd* pWnd = GetDlgItem(IDC_GL_AREA);
   RECT r;
   pWnd->GetWindowRect(&r);
@@ -214,6 +216,8 @@ void Cbasic_shapesDlg::OnLButtonDown(UINT nFlags, CPoint point) {
 
 void Cbasic_shapesDlg::OnLButtonUp(UINT nFlags, CPoint point) {
 	
+  ::ReleaseCapture();
+
   CDialog::OnLButtonUp(nFlags, point);  
   m_left_scrolling_gl_area = 0;
 
@@ -223,6 +227,8 @@ void Cbasic_shapesDlg::OnLButtonUp(UINT nFlags, CPoint point) {
 void Cbasic_shapesDlg::OnRButtonDown(UINT nFlags, CPoint point) {
 
   CDialog::OnRButtonDown(nFlags, point);
+
+  ::SetCapture(m_hWnd);
 
   CWnd* pWnd = GetDlgItem(IDC_GL_AREA);
   RECT r;
@@ -245,6 +251,8 @@ void Cbasic_shapesDlg::OnRButtonDown(UINT nFlags, CPoint point) {
 
 void Cbasic_shapesDlg::OnRButtonUp(UINT nFlags, CPoint point) {
 	
+  ::ReleaseCapture();
+
   CDialog::OnRButtonUp(nFlags, point);
   m_right_scrolling_gl_area = 0;
 

@@ -4,9 +4,9 @@
   <MACROS>
     <VERSION value="BCB.06.00"/>
     <PROJECT value="..\lib\bbcp6\chai_tools.lib"/>
-    <OBJFILES value="obj\CGenericTool.obj obj\CGeneric3dofPointer.obj obj\CGenericTool3dof.obj 
-      obj\CDelta3dofPointer.obj obj\CPhantom3dofPointer.obj 
-      obj\CMeta3dofPointer.obj obj\CFreedom6S3dofPointer.obj"/>
+    <OBJFILES value="obj\CGenericTool.obj obj\CGeneric3dofPointer.obj obj\CDelta3dofPointer.obj 
+      obj\CPhantom3dofPointer.obj obj\CMeta3dofPointer.obj 
+      obj\CFreedom6S3dofPointer.obj"/>
     <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -23,7 +23,7 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="chai_tools.bpf"/>
-    <INCLUDEPATH value="..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files;..\src\forces;..\src\devices"/>
+    <INCLUDEPATH value="..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files;..\src\forces;..\src\devices;..\src\scenegraph"/>
     <LIBPATH value="..\src\tools;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par -w-8027 -w-hid"/>
     <LISTFILE value=""/>
@@ -45,7 +45,6 @@
       <FILE FILENAME="chai_tools.bpf" FORMNAME="" UNITNAME="chai_tools" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\tools\CGenericTool.cpp" FORMNAME="" UNITNAME="CGenericTool" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\tools\CGeneric3dofPointer.cpp" FORMNAME="" UNITNAME="CGeneric3dofPointer" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\src\tools\CGenericTool3dof.cpp" FORMNAME="" UNITNAME="CGenericTool3dof" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\tools\CDelta3dofPointer.cpp" FORMNAME="" UNITNAME="CDelta3dofPointer" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\tools\CPhantom3dofPointer.cpp" FORMNAME="" UNITNAME="CPhantom3dofPointer" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\tools\CMeta3dofPointer.cpp" FORMNAME="" UNITNAME="CMeta3dofPointer" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -83,12 +82,13 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=5
-Item0=..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files;..\src\forces;..\src\devices
-Item1=..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files;..\src\forces
-Item2=..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files
-Item3=..\src\tools;$(BCB)\include;$(BCB)\include\vcl
-Item4=$(BCB)\include;$(BCB)\include\vcl
+Count=6
+Item0=..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files;..\src\forces;..\src\devices;..\src\scenegraph
+Item1=..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files;..\src\forces;..\src\devices
+Item2=..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files;..\src\forces
+Item3=..\src\tools;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\collisions;..\src\files
+Item4=..\src\tools;$(BCB)\include;$(BCB)\include\vcl
+Item5=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
 Count=2

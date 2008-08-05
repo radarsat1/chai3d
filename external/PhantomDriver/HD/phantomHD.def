@@ -1,5 +1,5 @@
 LIBRARY   phantomHD
-DESCRIPTION "tests the PHANTOM DLL under MSVC or BCB"
+DESCRIPTION "OpenHaptics implementation of the CHAI/phantom interface"
 EXPORTS
    OpenPhantom
    ClosePhantoms
@@ -14,3 +14,4 @@ EXPORTS
    ReadSwitch
    GetMaxForce
    ReadVelocity
+   GetWorkspaceScale

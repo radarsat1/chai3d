@@ -32,6 +32,13 @@
 
 #define DHD_VIRTUAL_EXE_NAME "dhdVirtual.exe"
 
+// Constants representing each of the devices supported by the meta pointer
+#define DEVICE_PHANTOM 0
+#define DEVICE_DHD     1
+#define DEVICE_VIRTUAL 2
+#define DEVICE_MPB     3
+#define DEVICE_UNINITIALIZED -1
+
 //===========================================================================
 /*!
       \class      cMeta3dofPointer
@@ -51,6 +58,15 @@ class cMeta3dofPointer : public cGeneric3dofPointer
     cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber = 0, bool a_dio_access = false);
     //! Destructor of cPhantom3dofPointer.
     virtual ~cMeta3dofPointer();
+
+    //! Asks which physical device the meta pointer is communicating with; returns
+    //! -1 for uninitialized or a value from the constants above
+    int getPhysicalDevice() const { return m_physicalDevice; }
+
+  private:
+    // Which physical device is currently in use? (-1 when uninitialized)
+    int m_physicalDevice;
+
 };
 
 //---------------------------------------------------------------------------

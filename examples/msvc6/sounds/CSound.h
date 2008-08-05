@@ -64,9 +64,9 @@ class cSound
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cSound.
-		cSound() { m_counter = 0; /*m_previousForce.set(0,0,0);*/ m_contactForce.set(0,0,0); };
+		cSound() { m_counter = 0; m_normalForce.set(0,0,0); m_tangentialForce.set(0,0,0);};
     //! Destructor of cSound.
-    ~cSound();
+    ~cSound() {};
 
     // METHODS:
     //! Set material sound parameters
@@ -75,20 +75,16 @@ class cSound
     int play();
     //! Reset the sound computations when a new contact is made
 		void reset();
-    //! Get function for m_counter
-		int getCounter() { return m_counter; }
-    //! Set function for m_counter
-		void setCounter(int a_counter) { m_counter = a_counter; }
-    //! Get function for m_velocity
-		float getVelocity() { return m_velocity; }
-    //! Set function for m_velocity
-		void setVelocity(float a_velocity) { m_velocity = a_velocity; }
-    //! Get function for current contact force on this sound object
-		cVector3d getContactForce() { return m_contactForce; }
-    //! Get function for current previous force on this sound object
+    //! Get function for current normal contact force on this sound object
+		cVector3d getNormalForce() { return m_normalForce; }
+    //! Get function for current tangential contact force on this sound object
+		cVector3d getTangentialForce() { return m_tangentialForce; }
+    //! Get function for current previous normal force on this sound object
 		cVector3d getPreviousForce() { return m_previousForce; }
     //! Set function for current contact force on this object; also sets m_previousForce to former value
-		void setContactForce(cVector3d a_contactForce) { m_previousForce = m_contactForce; m_contactForce = a_contactForce; }
+		void setContactForce(cVector3d a_normalForce, cVector3d a_tangentialForce) {
+         m_previousForce = m_normalForce; m_normalForce = a_normalForce;
+         m_tangentialForce = a_tangentialForce; }
     //! BASS stream associated with this sound
 		HSTREAM stream;
 
@@ -102,14 +98,14 @@ class cSound
     double *yreal, *yimag, *treal, *timag, *tyreal, *tyimag;
     //! Value to scale sound samples by to be in 0-256 range
     double scale;
-    //! Counter; used to set amplitude based on velocity rather than force convolution at initial impact
+    //! Counter; used to attenuate normal force over time
 		int m_counter;
-    //! Velocity; used for amplitude at initial impact
-		float m_velocity;
-    //! Current contact force on this object
-		cVector3d m_contactForce;
     //! Previous contact force on this object; used to determine when a new contact has been made
 		cVector3d m_previousForce;
+    //! Current normal force on this object
+    cVector3d m_normalForce;
+    //! Current tangential force on this object
+    cVector3d m_tangentialForce;
 };
 
 #endif

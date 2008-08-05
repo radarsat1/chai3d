@@ -39,6 +39,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "chai3d_complete"=..\..\msvc6\chai3d_complete.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "clock"=.\clock\clock.dsp - Package Owner=<4>
 
 Package=<5>
@@ -52,6 +64,18 @@ Package=<4>
 ###############################################################################
 
 Project: "dynamic_ode"=.\dynamic_ode\dynamic_ode.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "earth"=.\earth\earth.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -100,6 +124,18 @@ Package=<4>
 ###############################################################################
 
 Project: "record_player"=.\record_player\record_player.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "reflections"=.\reflections\reflections.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -1,10 +1,10 @@
-# Doxyfile 1.4.3
+# Doxyfile 1.4.6
 
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
 PROJECT_NAME           = "CHAI 3D"
-PROJECT_NUMBER         = 1.1
+PROJECT_NUMBER         = 1.41
 OUTPUT_DIRECTORY       = C:\users\dmorris\chai3d\doc
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
@@ -25,19 +25,22 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = "C:/Documents and Settings/dmorris/"
+STRIP_FROM_PATH        = "C:/Documents and Settings/dmorris/" \
+                         c:\users\dmorris\ \
+                         c:/users/dmorris/
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = NO
 MULTILINE_CPP_IS_BRIEF = NO
 DETAILS_AT_TOP         = NO
 INHERIT_DOCS           = YES
-DISTRIBUTE_GROUP_DOC   = NO
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 8
 ALIASES                = 
 OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
+BUILTIN_STL_SUPPORT    = NO
+DISTRIBUTE_GROUP_DOC   = NO
 SUBGROUPING            = YES
 #---------------------------------------------------------------------------
 # Build related configuration options

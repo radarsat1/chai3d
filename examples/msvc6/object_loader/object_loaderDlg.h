@@ -61,6 +61,7 @@ public:
 	BOOL	m_usewireframe_check;
   BOOL  m_culling_check;
   BOOL  m_transparency_check;
+  BOOL  m_shaders_check;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides
@@ -118,6 +119,7 @@ protected:
 public:  
   afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
   afx_msg void OnSize(UINT nType, int cx, int cy);
+  afx_msg void OnLoadShaderButton();
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -30,7 +30,7 @@ extern cCollisionAABBInternal* g_nextFreeNode;
 /*!
     Determine whether the two given boxes intersect each other.
 
-    \fn       inline bool intersect(cCollisionAABBBox a_0, cCollisionAABBox a_1)
+    \fn       inline bool intersect(const cCollisionAABBBox& a_0, const cCollisionAABBox& a_1)
     \param    a_0   First box; may intersect with second box.
     \param    a_1   Second box; may intersect with first box.
     \return   Return whether there is any overlap of the two boxes.
@@ -97,10 +97,9 @@ void cCollisionAABBLeaf::fitBBox()
     Determine whether the given line intersects the triangle belonging to
     this leaf node by calling the triangle's collision detection method.
 
-    \fn       bool cCollisionAABBLeaf::computeCollision(cVector3d&
-              a_segmentPointA, cVector3d& a_segmentPointB,
-              cCollisionAABBBox &a_lineBox, cTriangle*& a_colTriangle,
-              cVector3d& a_colPoint, double& a_colSquareDistance)
+    \fn       bool cCollisionAABBLeaf::computeCollision(cVector3d& a_segmentPointA,
+              cVector3d& a_segmentPointB, cCollisionAABBBox &a_lineBox,
+              cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance)
     \param    a_segmentPointA  Initial point of segment.
     \param    a_segmentDirection  Direction of ray from first to second
                                   segment points (i.e., proxy to goal).
@@ -153,7 +152,7 @@ cCollisionAABBInternal::~cCollisionAABBInternal()
     Draw the edges of the bounding box for an internal tree node if it is
     at depth a_depth in the tree, and call the draw function for its children.
 
-    \fn       void cCollisionAABBInternal::draw(int a_depth)
+    \fn       void cCollisionAABBInternal::render(int a_depth)
     \param    a_depth   Only draw nodes at this level in the tree.
                         a_depth = -1 renders the complete tree.
 */

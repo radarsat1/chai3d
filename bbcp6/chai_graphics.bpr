@@ -4,10 +4,8 @@
   <MACROS>
     <VERSION value="BCB.06.00"/>
     <PROJECT value="..\lib\bbcp6\chai_graphics.lib"/>
-    <OBJFILES value="obj\CWorld.obj obj\CCamera.obj obj\CColor.obj obj\CDraw3D.obj 
-      obj\CGenericObject.obj obj\CLight.obj obj\CMacrosGL.obj obj\CMaterial.obj 
-      obj\CMesh.obj obj\CTexture2D.obj obj\CTriangle.obj obj\CVertex.obj 
-      obj\CGenericPotentialField.obj obj\CShapeSphere.obj"/>
+    <OBJFILES value="obj\CColor.obj obj\CDraw3D.obj obj\CMacrosGL.obj obj\CMaterial.obj 
+      obj\CTexture2D.obj obj\CTriangle.obj obj\CVertex.obj obj\CShaders.obj"/>
     <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -24,7 +22,7 @@
     <USERDEFINES value="I_WIN32;GLUT_NO_LIB_PRAGMA"/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="chai_graphics.bpf"/>
-    <INCLUDEPATH value="&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions"/>
+    <INCLUDEPATH value="&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display;..\src\scenegraph"/>
     <LIBPATH value="&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par -w-8027 -w-8026 -w-hch -w-csu"/>
     <LISTFILE value=""/>
@@ -47,20 +45,14 @@
       <FILE FILENAME="..\lib\bbcp6\glu32.lib" FORMNAME="" UNITNAME="glu32.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\lib\bbcp6\glut32.lib" FORMNAME="" UNITNAME="glut32.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\lib\bbcp6\opengl32.lib" FORMNAME="" UNITNAME="opengl32.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\src\graphics\CWorld.cpp" FORMNAME="" UNITNAME="CWorld.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\src\graphics\CCamera.cpp" FORMNAME="" UNITNAME="CCamera.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\graphics\CColor.cpp" FORMNAME="" UNITNAME="CColor.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\graphics\CDraw3D.cpp" FORMNAME="" UNITNAME="CDraw3D.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\src\graphics\CGenericObject.cpp" FORMNAME="" UNITNAME="CGenericObject.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\src\graphics\CLight.cpp" FORMNAME="" UNITNAME="CLight.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\graphics\CMacrosGL.cpp" FORMNAME="" UNITNAME="CMacrosGL.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\graphics\CMaterial.cpp" FORMNAME="" UNITNAME="CMaterial.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\src\graphics\CMesh.cpp" FORMNAME="" UNITNAME="CMesh.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\graphics\CTexture2D.cpp" FORMNAME="" UNITNAME="CTexture2D" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\graphics\CTriangle.cpp" FORMNAME="" UNITNAME="CTriangle.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\graphics\CVertex.cpp" FORMNAME="" UNITNAME="CVertex.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\src\graphics\CGenericPotentialField.cpp" FORMNAME="" UNITNAME="CGenericPotentialField" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\src\graphics\CShapeSphere.cpp" FORMNAME="" UNITNAME="CShapeSphere" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\src\graphics\CShaders.cpp" FORMNAME="" UNITNAME="CShaders.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -94,18 +86,21 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=11
-Item0=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
-Item1=..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
-Item2=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
-Item3=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
-Item4=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
-Item5=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
-Item6=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
-Item7=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files
-Item8=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math
-Item9=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl
-Item10=$(BCB)\include;$(BCB)\include\vcl
+Count=14
+Item0=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display;..\src\scenegraph
+Item1=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display
+Item2=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external
+Item3=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item4=..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item5=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item6=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item7=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item8=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item9=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item10=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files
+Item11=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math
+Item12=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl
+Item13=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
 Count=5

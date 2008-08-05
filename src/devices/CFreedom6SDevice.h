@@ -53,6 +53,10 @@ class cFreedom6SDevice : public cGenericDevice
     virtual int command(int a_command, void* a_data);
 
   protected:
+
+    //! Reference count used to control access to the dll
+    static int m_activeFreedom6SDevices;
+
     void* m_hf6s;
 };
 

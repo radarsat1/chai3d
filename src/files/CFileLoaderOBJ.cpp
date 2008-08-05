@@ -28,13 +28,13 @@
 #include <conio.h>
 #endif
 
-bool g_objLoaderShouldGenerateExtraVertices = true;
+bool g_objLoaderShouldGenerateExtraVertices = false;
 
 //===========================================================================
 /*!
     Load a Wavefront OBJ file format image into a mesh.
 
-    \fn         bool cLoadFileOBJ(const cMesh* a_mesh, const string& a_fileName)
+    \fn         bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
     \param      a_mesh         Mesh in which image file is loaded
     \param      a_fileName     Name of image file.
     \return     Return \b true if image was loaded successfully, otherwise
@@ -119,7 +119,7 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
                 // We really failed to load a texture...
                 else {
 #ifdef _WIN32
-                  CHAI_DEBUG_PRINT("Could not load texture map %s\n",material.m_texture);
+                  // CHAI_DEBUG_PRINT("Could not load texture map %s\n",material.m_texture);
 #endif
                 }
             }

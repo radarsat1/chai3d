@@ -55,7 +55,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=xilink6.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib /nologo /subsystem:windows /dll /machine:I386 /out:"../../../bin/active_x_msvc6.ocx" /libpath:"..\..\..\lib\msvc6\\"
+# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib /nologo /subsystem:windows /dll /machine:I386 /out:"../../../bin/active_x_msvc6.ocx" /libpath:"..\..\..\lib\msvc6\\"
+# SUBTRACT LINK32 /pdb:none
 # Begin Custom Build - Registering ActiveX Control...
 OutDir=.\Release
 TargetPath=\users\dmorris\chai3d\bin\active_x_msvc6.ocx
@@ -94,7 +95,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=xilink6.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib ..\..\..\lib\msvc6\dhdms.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../../../bin/active_x_msvc6.ocx" /pdbtype:sept /libpath:"..\..\..\lib\msvc6\\"
+# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../../../bin/active_x_msvc6.ocx" /pdbtype:sept /libpath:"..\..\..\lib\msvc6\\"
 # Begin Custom Build - Registering ActiveX Control...
 OutDir=.\Debug
 TargetPath=\users\dmorris\chai3d\bin\active_x_msvc6.ocx

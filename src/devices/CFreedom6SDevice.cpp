@@ -66,6 +66,9 @@ F6SRC (*f6s_GetPositionMatrixGL)( HF6S hf6s, double kineMat[16] );
 F6SRC (*f6s_UpdateKinematics)( HF6S hf6s );
 F6SRC (*f6s_GetVelocityGL)( HF6S hf6s, double linearVel[3],  double angularVel[3] );
 
+// Initialize dhd dll reference count
+int cFreedom6SDevice::m_activeFreedom6SDevices = 0;
+
 //===========================================================================
 /*!
     Constructor of cFreedom6SDevice. \r
@@ -74,40 +77,43 @@ F6SRC (*f6s_GetVelocityGL)( HF6S hf6s, double linearVel[3],  double angularVel[3
     \fn     cFreedom6SDevice::cFreedom6SDevice()
 */
 //===========================================================================
-cFreedom6SDevice::cFreedom6SDevice()
-  : cGenericDevice()
+cFreedom6SDevice::cFreedom6SDevice() : cGenericDevice()
 {
     m_systemReady = false;
     m_systemAvailable = false;
-  m_hf6s = 0;
+    m_hf6s = 0;
 
-  if (hDLL==NULL)
-    hDLL = LoadLibrary("freedom6s.dll");
+    m_activeFreedom6SDevices++;
 
-  if (hDLL==NULL)
-    return;
+    if (hDLL==NULL)
+    {
+        hDLL = LoadLibrary("freedom6s.dll");
 
-  f6s_Initialize = (F6SRC (*)( HF6S* )) GetProcAddress(hDLL, "f6s_Initialize");
-  f6s_ComputeJointVel = (F6SRC (*)( HF6S , float , int  )) GetProcAddress(hDLL, "f6s_ComputeJointVel");
-  f6s_Cleanup = (F6SRC (*)( HF6S  )) GetProcAddress(hDLL, "f6s_Cleanup");
-  f6s_SetHoldDist = (F6SRC (*)( HF6S , float  )) GetProcAddress(hDLL, "f6s_SetHoldDist");
-  f6s_SetForceTorque = (F6SRC (*)( HF6S , const double [3], const double [3] )) GetProcAddress(hDLL, "f6s_SetForceTorque");
-  f6s_GetPositionMatrixGL = (F6SRC (*)( HF6S , double [16] )) GetProcAddress(hDLL, "f6s_GetPositionMatrixGL");
-  f6s_UpdateKinematics = (F6SRC (*)( HF6S  )) GetProcAddress(hDLL, "f6s_UpdateKinematics");
-  f6s_GetVelocityGL = (F6SRC (*)( HF6S hf6s, double [3],  double [3] )) GetProcAddress(hDLL, "f6s_GetVelocityGL");
+        if (hDLL==NULL)
+            return;
 
-  if (  !f6s_Initialize
-    ||  !f6s_ComputeJointVel
-    ||  !f6s_Cleanup
-    ||  !f6s_SetHoldDist
-    ||  !f6s_SetForceTorque
-    ||  !f6s_GetPositionMatrixGL
-    ||  !f6s_UpdateKinematics
-    ||  !f6s_GetVelocityGL)
-  {
-    FreeLibrary(hDLL);
-    hDLL = NULL;
-  }
+        f6s_Initialize = (F6SRC (*)( HF6S* )) GetProcAddress(hDLL, "f6s_Initialize");
+        f6s_ComputeJointVel = (F6SRC (*)( HF6S , float , int  )) GetProcAddress(hDLL, "f6s_ComputeJointVel");
+        f6s_Cleanup = (F6SRC (*)( HF6S  )) GetProcAddress(hDLL, "f6s_Cleanup");
+        f6s_SetHoldDist = (F6SRC (*)( HF6S , float  )) GetProcAddress(hDLL, "f6s_SetHoldDist");
+        f6s_SetForceTorque = (F6SRC (*)( HF6S , const double [3], const double [3] )) GetProcAddress(hDLL, "f6s_SetForceTorque");
+        f6s_GetPositionMatrixGL = (F6SRC (*)( HF6S , double [16] )) GetProcAddress(hDLL, "f6s_GetPositionMatrixGL");
+        f6s_UpdateKinematics = (F6SRC (*)( HF6S  )) GetProcAddress(hDLL, "f6s_UpdateKinematics");
+        f6s_GetVelocityGL = (F6SRC (*)( HF6S hf6s, double [3],  double [3] )) GetProcAddress(hDLL, "f6s_GetVelocityGL");
+
+        if (  !f6s_Initialize
+          ||  !f6s_ComputeJointVel
+          ||  !f6s_Cleanup
+          ||  !f6s_SetHoldDist
+          ||  !f6s_SetForceTorque
+          ||  !f6s_GetPositionMatrixGL
+          ||  !f6s_UpdateKinematics
+          ||  !f6s_GetVelocityGL)
+        {
+            FreeLibrary(hDLL);
+            hDLL = NULL;
+        }
+    }
 
     m_systemAvailable = true;
 }
@@ -116,17 +122,22 @@ cFreedom6SDevice::cFreedom6SDevice()
 /*!
     Destructor of cFreedom6SDevice.
 
-    \fn     cFreedom6SDevice:~cFreedom6SDevice()
+    \fn     cFreedom6SDevice::~cFreedom6SDevice()
 */
 //===========================================================================
 cFreedom6SDevice::~cFreedom6SDevice()
 {
-  if (m_hf6s != 0)
-    f6s_Cleanup(m_hf6s);
-  m_hf6s = 0;
+    if (m_hf6s != 0)
+       f6s_Cleanup(m_hf6s);
+    m_hf6s = 0;
 
-  FreeLibrary(hDLL);
-  hDLL = NULL;
+    m_activeFreedom6SDevices--;
+
+    if (m_activeFreedom6SDevices == 0 && hDLL)
+    {
+        FreeLibrary(hDLL);
+        hDLL = NULL;
+    }
 }
 
 //===========================================================================
@@ -139,7 +150,7 @@ cFreedom6SDevice::~cFreedom6SDevice()
 //===========================================================================
 int cFreedom6SDevice::open()
 {
-  return 0;
+   return 0;
 }
 
 //===========================================================================
@@ -152,7 +163,7 @@ int cFreedom6SDevice::open()
 //===========================================================================
 int cFreedom6SDevice::close()
 {
-  return 0;
+   return 0;
 }
 
 //===========================================================================
@@ -166,21 +177,21 @@ int cFreedom6SDevice::close()
 //===========================================================================
 int cFreedom6SDevice::initialize()
 {
-  if (m_hf6s != 0)
+    if (m_hf6s != 0)
+        return -1;
+
+    F6SRC rc = f6s_Initialize(&m_hf6s);
+    if (m_hf6s && rc == F6SRC_NOERROR)
+    {  
+        // Joint velocity computation:
+        //   timestep = 1ms
+        //   sample buffer size = 15
+        f6s_ComputeJointVel(m_hf6s, 0.001f, 15);
+        return 0;
+    }
+
+    m_hf6s = 0;
     return -1;
-
-  F6SRC rc = f6s_Initialize(&m_hf6s);
-  if (m_hf6s && rc == F6SRC_NOERROR)
-  {  
-    // Joint velocity computation:
-    //   timestep = 1ms
-    //   sample buffer size = 15
-    f6s_ComputeJointVel(m_hf6s, 0.001f, 15);
-    return 0;
-  }
-
-  m_hf6s = 0;
-  return -1;
 }
 
 //===========================================================================
@@ -215,9 +226,20 @@ int cFreedom6SDevice::command(int a_command, void* a_data)
     // kinemat is a row-major 4x4 rotation/translation matrix
 
     v = (cVector3d*)a_data;
-    v->x = kinemat[14] / 0.1; // workspace is approximately from -0.1 to 0.1 meters.
-    v->y = kinemat[12] / 0.1;
-    v->z = kinemat[13] / 0.1;
+
+    v->x = kinemat[14];
+    v->y = kinemat[12];
+    v->z = kinemat[13];
+
+    // workspace is approximately from -0.1 to 0.1 meters.
+    if (a_command == CHAI_CMD_GET_POS_NORM_3D) {
+      v->div(0.1);
+    }
+
+    // convert to mm
+    else {
+      v->mul(1000.0);
+    }
 
     break;
 
@@ -242,6 +264,22 @@ int cFreedom6SDevice::command(int a_command, void* a_data)
     v->y = velLinear[0];
     v->z = velLinear[1];
 
+    // Now convert from m/s to mm/s
+    v->mul(1000.0);
+
+    break;
+
+  // read scale factor from normalized coords to mm
+  case CHAI_CMD_GET_NORMALIZED_SCALE_FACTOR:   
+    {
+    double* scale = (double*)a_data;
+
+    // Multiply .1 to get meters back
+    *scale = 0.1;
+
+    // Then multiply by 1000 to get millimeters
+    *scale *= 1000.0;
+    }
     break;
 
   default:

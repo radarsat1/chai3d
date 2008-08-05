@@ -291,41 +291,15 @@ struct cMatrixGL
     inline void mulr(const cMatrix3d& a_matrix, cMatrix3d& a_result) const
     {
         // compute multiplication between both matrices
-        a_result.m[0][0] = m[0][0] * a_matrix.m[0][0] + m[0][1] * a_matrix.m[1][0] +
-                           m[0][2] * a_matrix.m[2][0] + m[0][3] * a_matrix.m[3][0];
-        a_result.m[0][1] = m[0][0] * a_matrix.m[0][1] + m[0][1] * a_matrix.m[1][1] +
-                           m[0][2] * a_matrix.m[2][1] + m[0][3] * a_matrix.m[3][1];
-        a_result.m[0][2] = m[0][0] * a_matrix.m[0][2] + m[0][1] * a_matrix.m[1][2] +
-                           m[0][2] * a_matrix.m[2][2] + m[0][3] * a_matrix.m[3][2];
-        a_result.m[0][3] = m[0][0] * a_matrix.m[0][3] + m[0][1] * a_matrix.m[1][3] +
-                           m[0][2] * a_matrix.m[2][3] + m[0][3] * a_matrix.m[3][3];
-
-        a_result.m[1][0] = m[1][0] * a_matrix.m[0][0] + m[1][1] * a_matrix.m[1][0] +
-                           m[1][2] * a_matrix.m[2][0] + m[1][3] * a_matrix.m[3][0];
-        a_result.m[1][1] = m[1][0] * a_matrix.m[0][1] + m[1][1] * a_matrix.m[1][1] +
-                           m[1][2] * a_matrix.m[2][1] + m[1][3] * a_matrix.m[3][1];
-        a_result.m[1][2] = m[1][0] * a_matrix.m[0][2] + m[1][1] * a_matrix.m[1][2] +
-                           m[1][2] * a_matrix.m[2][2] + m[1][3] * a_matrix.m[3][2];
-        a_result.m[1][3] = m[1][0] * a_matrix.m[0][3] + m[1][1] * a_matrix.m[1][3] +
-                           m[1][2] * a_matrix.m[2][3] + m[1][3] * a_matrix.m[3][3];
-
-        a_result.m[2][0] = m[2][0] * a_matrix.m[0][0] + m[2][1] * a_matrix.m[1][0] +
-                           m[2][2] * a_matrix.m[2][0] + m[2][3] * a_matrix.m[3][0];
-        a_result.m[2][1] = m[2][0] * a_matrix.m[0][1] + m[2][1] * a_matrix.m[1][1] +
-                           m[2][2] * a_matrix.m[2][1] + m[2][3] * a_matrix.m[3][1];
-        a_result.m[2][2] = m[2][0] * a_matrix.m[0][2] + m[2][1] * a_matrix.m[1][2] +
-                           m[2][2] * a_matrix.m[2][2] + m[2][3] * a_matrix.m[3][2];
-        a_result.m[2][3] = m[2][0] * a_matrix.m[0][3] + m[2][1] * a_matrix.m[1][3] +
-                           m[2][2] * a_matrix.m[2][3] + m[2][3] * a_matrix.m[3][3];
-
-        a_result.m[3][0] = m[3][0] * a_matrix.m[0][0] + m[3][1] * a_matrix.m[1][0] +
-                           m[3][2] * a_matrix.m[2][0] + m[3][3] * a_matrix.m[3][0];
-        a_result.m[3][1] = m[3][0] * a_matrix.m[0][1] + m[3][1] * a_matrix.m[1][1] +
-                           m[3][2] * a_matrix.m[2][1] + m[3][3] * a_matrix.m[3][1];
-        a_result.m[3][2] = m[3][0] * a_matrix.m[0][2] + m[3][1] * a_matrix.m[1][2] +
-                           m[3][2] * a_matrix.m[2][2] + m[3][3] * a_matrix.m[3][2];
-        a_result.m[3][3] = m[3][0] * a_matrix.m[0][3] + m[3][1] * a_matrix.m[1][3] +
-                           m[3][2] * a_matrix.m[2][3] + m[3][3] * a_matrix.m[3][3];
+        a_result.m[0][0] = m[0][0] * a_matrix.m[0][0] + m[0][1] * a_matrix.m[1][0] + m[0][2] * a_matrix.m[2][0];
+        a_result.m[0][1] = m[0][0] * a_matrix.m[0][1] + m[0][1] * a_matrix.m[1][1] + m[0][2] * a_matrix.m[2][1];
+        a_result.m[0][2] = m[0][0] * a_matrix.m[0][2] + m[0][1] * a_matrix.m[1][2] + m[0][2] * a_matrix.m[2][2];
+        a_result.m[1][0] = m[1][0] * a_matrix.m[0][0] + m[1][1] * a_matrix.m[1][0] + m[1][2] * a_matrix.m[2][0];
+        a_result.m[1][1] = m[1][0] * a_matrix.m[0][1] + m[1][1] * a_matrix.m[1][1] + m[1][2] * a_matrix.m[2][1];
+        a_result.m[1][2] = m[1][0] * a_matrix.m[0][2] + m[1][1] * a_matrix.m[1][2] + m[1][2] * a_matrix.m[2][2];
+        a_result.m[2][0] = m[2][0] * a_matrix.m[0][0] + m[2][1] * a_matrix.m[1][0] + m[2][2] * a_matrix.m[2][0];
+        a_result.m[2][1] = m[2][0] * a_matrix.m[0][1] + m[2][1] * a_matrix.m[1][1] + m[2][2] * a_matrix.m[2][1];
+        a_result.m[2][2] = m[2][0] * a_matrix.m[0][2] + m[2][1] * a_matrix.m[1][2] + m[2][2] * a_matrix.m[2][2];
     }
 
 
@@ -380,7 +354,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Create a frustrum matrix, as defined by the glFrustum function.
+        Create a frustum matrix, as defined by the glFrustum function.
     */
     //-----------------------------------------------------------------------
     inline void buildFrustumMatrix(double l, double r, double b, double t,

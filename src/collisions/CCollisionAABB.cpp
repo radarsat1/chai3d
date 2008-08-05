@@ -30,8 +30,7 @@ cCollisionAABBInternal* g_nextFreeNode;
 /*!
     Constructor of cCollisionAABB.
 
-    \fn       cCollisionAABB::cCollisionAABB(vector<cTriangle> *a_triangles,
-              bool a_useNeighbors)
+    \fn       cCollisionAABB::cCollisionAABB(vector<cTriangle> *a_triangles, bool a_useNeighbors)
     \param    a_triangle      Pointer to array of triangles.
     \param    a_useNeighbors  Use neighbor lists to speed up collision detection?
 */
@@ -208,13 +207,19 @@ bool cCollisionAABB::computeCollision(cVector3d& a_segmentPointA,
 
         // check each neighbor, and find the closest for which there is a
         // collision, if any
-        for (unsigned int i=0; i<m_lastCollision->m_neighbors->size(); i++)
+        unsigned int ntris = m_lastCollision->m_neighbors->size();
+        std::vector<cTriangle*>* neighbors = m_lastCollision->m_neighbors;
+        for (unsigned int i=0; i<ntris; i++)
         {
-            if (((*(m_lastCollision->m_neighbors))[i])->computeCollision(
+            cTriangle* tri = (*neighbors)[i];
+            if (tri == 0) {
+              CHAI_DEBUG_PRINT("Oops... invalid neighbor\n");
+              continue;
+            }
+            if (tri->computeCollision(
                     a_segmentPointA, dir, colObject, colTriangle,
                     colPoint, colSquareDistance))
             {
-
                 // if this intersected triangle is closer to the segment origin
                 // than any other found so far, set the output parameters
                 if (firstHit || (colSquareDistance < a_colSquareDistance))
@@ -233,7 +238,7 @@ bool cCollisionAABB::computeCollision(cVector3d& a_segmentPointA,
         if (!firstHit)  return true;
 
         // otherwise there was no collision; return false
-        m_lastCollision = NULL;
+        if (a_proxyCall != -1) m_lastCollision = NULL;
         return false;
     }
 
@@ -243,7 +248,7 @@ bool cCollisionAABB::computeCollision(cVector3d& a_segmentPointA,
     // if the root is null, the tree is empty, so there can be no collision
     if (m_root == NULL)
     {
-        m_lastCollision = NULL;
+        if (a_proxyCall != -1) m_lastCollision = NULL;
         return (false);
     }
 
@@ -264,12 +269,12 @@ bool cCollisionAABB::computeCollision(cVector3d& a_segmentPointA,
     // parameter for the intersected mesh to the parent of this triangle
     if (result)
     {
-        m_lastCollision = a_colTriangle;
+        if (a_proxyCall != -1) m_lastCollision = a_colTriangle;
         a_colObject = a_colTriangle->getParent();
     }
     else
     {
-        m_lastCollision = NULL;
+        if (a_proxyCall != -1) m_lastCollision = NULL;
     }
 
     // return whether there was an intersection

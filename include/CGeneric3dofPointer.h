@@ -24,7 +24,7 @@
 #ifndef CGeneric3dofPointerH
 #define CGeneric3dofPointerH
 //---------------------------------------------------------------------------
-#include "CGenericTool3dof.h"
+#include "CGenericTool.h"
 #include "CGenericDevice.h"
 #include "CColor.h"
 #include "CProxyPointForceAlgo.h"
@@ -38,13 +38,15 @@ typedef enum {
 //===========================================================================
 /*!
       \class      cGeneric3dofPointer
-      \brief      cGeneric3dofPointer provides a cursor like tool which is
-                  graphically rendered by a small sphere illustrating the tip
-                  of the device. The tools interacts with the environment
-                  by using the finger-proxy algorithm
+      \brief      cGeneric3dofPointer represents a haptic tool that 
+                  can apply forces in three degrees of freedom and
+                  maintains three or six degrees of device pose.
+
+                  This class provides i/o with haptic devices and
+                  a basic graphical representation of a tool.
 */
 //===========================================================================
-class cGeneric3dofPointer : public cGenericTool3dof
+class cGeneric3dofPointer : public cGenericTool
 {
   public:
     // CONSTRUCTOR & DESTRUCTOR:
@@ -60,11 +62,11 @@ class cGeneric3dofPointer : public cGenericTool3dof
     //! Render the object in OpenGL 
     virtual void render(const int a_renderMode=0);
     //! toggle on/off the tool frame
-    virtual void visualizeFrames(bool a_showToolFrame) { m_showToolFrame = a_showToolFrame; }
+    virtual inline void visualizeFrames(const bool& a_showToolFrame) { m_showToolFrame = a_showToolFrame; }
     //! set the visual settings of the tool frame
-    virtual void setToolFrame(bool a_showToolFrame, double a_toolFrameSize);
+    virtual void setToolFrame(const bool& a_showToolFrame, const double& a_toolFrameSize);
     //! Control proxy rendering options
-    virtual void setRenderingMode(proxy_render_modes render_mode) { m_render_mode = render_mode; }
+    virtual inline void setRenderingMode(const proxy_render_modes& render_mode) { m_render_mode = render_mode; }
 
     // Initialization / shutdown
 
@@ -90,12 +92,25 @@ class cGeneric3dofPointer : public cGenericTool3dof
 
     // Miscellaneous 
 
-    //! Set radius of pointer
-    virtual void setRadius(double a_radius);
+    // Returns a scale factor from normalized coordinates to millimeters.  
+    virtual cVector3d getWorkspaceScaleFactors();
+
+    //! Set radius of pointer.
+    virtual void setRadius(const double& a_radius);
     //! Set haptic device driver.
     virtual void setDevice(cGenericDevice *a_device);
-    //! Get information about the proxy directly
-    virtual cProxyPointForceAlgo* getProxy() { return &m_proxyPointForceAlgo; }
+    //! This is a convenience function; it searches the list of force functions for a proxy
+    virtual cProxyPointForceAlgo* getProxy();
+
+    //! Set virtual workspace dimensions in which tool will be working.
+    virtual void setWorkspace(const double& a_workspaceAxisX, const double& a_workspaceAxisY,
+                      const double& a_workspaceAxisZ);
+
+    //! Enable or disable normalized position values (vs. absolute mm) (defaults to true, i.e. normalized)
+    virtual void useNormalizedPositions(const bool& a_useNormalizedPositions)
+      { m_useNormalizedPositions = a_useNormalizedPositions; }
+    //! Are we currently using normalized position values (vs. absolute mm)?
+    virtual bool getNormalizedPositionsEnabled() { return m_useNormalizedPositions; }
 
     // MEMBERS:
     //! Color of sphere representing position of device.
@@ -117,8 +132,37 @@ class cGeneric3dofPointer : public cGenericTool3dof
     //! with this variable
     bool m_waitForSmallForce;
 
-    //! Mesh force algorithm.
-    cProxyPointForceAlgo m_proxyPointForceAlgo;
+    //! Vector of force algorithms.  By default, a proxy algorithm object is added to this list
+    //!
+    //! When a tool is asked to compute forces, it walks this list and asks each algorithm
+    //! to compute its forces.
+    std::vector<cGenericPointForceAlgo*> m_pointForceAlgos;
+
+    //! Width of workspace.   Ignored when m_useNormalizedPositions is false.
+    double m_halfWorkspaceAxisX;
+    //! Height of workspace.  Ignored when m_useNormalizedPositions is false.
+    double m_halfWorkspaceAxisY;
+    //! Depth of workspace.   Ignored when m_useNormalizedPositions is false.
+    double m_halfWorkspaceAxisZ;
+    //! Position of device in device local coordinate system
+    cVector3d m_deviceLocalPos;
+    //! Position of device in world global coordinate system
+    cVector3d m_deviceGlobalPos;
+    //! Velocity of device in device local coordinate system
+    cVector3d m_deviceLocalVel;
+    //! Velocity of device in world global coordinate system
+    cVector3d m_deviceGlobalVel;
+
+    //! The last force computed for application to this tool, in the world coordinate
+    //! system.  (N)
+    //!
+    //! If you want to manually send forces to a device, you can modify this
+    //! value before calling 'applyForces'.
+    cVector3d m_lastComputedGlobalForce;
+
+    //! The last force computed for application to this tool, in the device coordinate
+    //! system.  (N)
+    cVector3d m_lastComputedLocalForce;    
 
   protected:
     // MEMBERS:
@@ -128,16 +172,14 @@ class cGeneric3dofPointer : public cGenericTool3dof
     cGenericDevice *m_device;
     //! World in which tool is interacting
     cWorld* m_world;
-    //! Implicit function based object
-    cPotentialFieldForceAlgo m_potentialFieldForceAlgo;
     //! flag for frame visualization of the proxy
     bool m_showToolFrame;
     //! size of the frame visualization of the proxy
     double m_toolFrameSize;
     //! Should we render the device position, the proxy position, or both?
     proxy_render_modes m_render_mode;
-
-
+    //! Should we be returning normalized (vs. absolute _mm_) positions?
+    bool m_useNormalizedPositions;
     //! this flag records whether the user has enabled forces
     bool m_forceON;
     //! flag to avoid initial bumps in force (has the user sent a _small_ force yet?)
@@ -147,5 +189,4 @@ class cGeneric3dofPointer : public cGenericTool3dof
 //---------------------------------------------------------------------------
 #endif
 //---------------------------------------------------------------------------
-
 

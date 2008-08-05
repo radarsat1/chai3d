@@ -57,7 +57,7 @@ cPhantomDevice::cPhantomDevice(int a_num, bool a_dio_access)
     {
         if (a_dio_access)
         {
-            PhantomAcces(1);
+            PhantomAccess(1);
         }
 
         m_phantomHandle = OpenPhantom(a_num);
@@ -81,7 +81,7 @@ cPhantomDevice::cPhantomDevice(int a_num, bool a_dio_access)
 /*!
     Destructor of cPhantomDevice.
 
-    \fn     cPhantomDevice:~cPhantomDevice()
+    \fn     cPhantomDevice::~cPhantomDevice()
 */
 //===========================================================================
 cPhantomDevice::~cPhantomDevice()
@@ -185,7 +185,7 @@ int cPhantomDevice::command(int a_command, void* a_data)
                 cVector3d* position = (cVector3d *) a_data;
                 // Note: we're doing a change in reference here to pass from the phantom
                 // convention to the CHAI one.
-                ReadPositionPhantom(m_phantomHandle, position->y, position->z, position->x);
+                result = ReadPositionPhantom(m_phantomHandle, position->y, position->z, position->x);
            }
            break;
 
@@ -195,7 +195,7 @@ int cPhantomDevice::command(int a_command, void* a_data)
                 cVector3d* position = (cVector3d *) a_data;
                 // Note: we're doing a change in reference here to pass from the phantom
                 // convention to the CHAI one.
-                ReadNormalizedPositionPhantom(m_phantomHandle, position->y, position->z, position->x);
+                result = ReadNormalizedPositionPhantom(m_phantomHandle, position->y, position->z, position->x);
            }
            break;
 
@@ -205,7 +205,7 @@ int cPhantomDevice::command(int a_command, void* a_data)
                 cVector3d* velocity = (cVector3d *) a_data;
                 // Note: we're doing a change in reference here to pass from the phantom
                 // convention to the CHAI one.
-                ReadVelocityPhantom(m_phantomHandle, velocity->y, velocity->z, velocity->x);
+                result = ReadVelocityPhantom(m_phantomHandle, velocity->y, velocity->z, velocity->x);
            }
            break;
 
@@ -216,7 +216,7 @@ int cPhantomDevice::command(int a_command, void* a_data)
                 double m[9];
                 // Note: we're doing a change in reference here to pass from the phantom
                 // convention to the CHAI one.
-                ReadOrientMat3DOFPhantom(m_phantomHandle,m);
+                result = ReadOrientMat3DOFPhantom(m_phantomHandle,m);
                 mat3->set(m[8], m[2], m[5], m[6], m[0], m[3], m[7], m[1], m[4]);
            }
            break;
@@ -226,7 +226,7 @@ int cPhantomDevice::command(int a_command, void* a_data)
            {
                 cVector3d *force;
                 force = (cVector3d *) a_data;
-                SetForcePhantom(m_phantomHandle, force->y, force->z, force->x);
+                result = SetForcePhantom(m_phantomHandle, force->y, force->z, force->x);
            }
            break;
 
@@ -235,7 +235,7 @@ int cPhantomDevice::command(int a_command, void* a_data)
            {
                 cVector3d *genforce;
                 genforce = (cVector3d *) a_data;
-                SetForceTorquePhantom(m_phantomHandle,
+                result = SetForceTorquePhantom(m_phantomHandle,
                              genforce[0].y, genforce[0].z, genforce[0].x,
                              genforce[1].y, genforce[1].z, genforce[1].x);
            }
@@ -244,8 +244,43 @@ int cPhantomDevice::command(int a_command, void* a_data)
            // read user switch from phantom stylus
            case CHAI_CMD_GET_SWITCH_0:
            {
-                int* result = (int *) a_data;
-                *result = ReadSwitchPhantom(m_phantomHandle);
+                int* switchstate = (int *) a_data;
+                *switchstate = ReadSwitchPhantom(m_phantomHandle);
+
+                // Only care about button 0
+                *switchstate = (*switchstate & 1)?1:0;
+
+                result = *switchstate;
+           }
+           break;
+
+           // read user switch from phantom stylus
+           case CHAI_CMD_GET_SWITCH_1:
+           {
+               int* switchstate = (int *) a_data;
+               *switchstate = ReadSwitchPhantom(m_phantomHandle);
+
+               // Only care about button 1
+               *switchstate = (*switchstate & 2)?1:0;
+
+               result = *switchstate;
+           }
+           break;
+
+           // read all user switches from phantom stylus
+           case CHAI_CMD_GET_SWITCH_MASK:
+           {
+             int* switchstate = (int *) a_data;
+             *switchstate = ReadSwitchPhantom(m_phantomHandle);
+             result = *switchstate;
+           }
+           break;
+
+           // read scale factor from normalized coords to mm
+           case CHAI_CMD_GET_NORMALIZED_SCALE_FACTOR:
+           {
+               double* scale = (double*)a_data;
+               result = GetWorkspaceScalePhantom(m_phantomHandle,*scale);               
            }
            break;
 

@@ -25,7 +25,7 @@ CFG=chai3d_complete - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=xicl6.exe
+CPP=cl.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
@@ -41,13 +41,13 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /G6 /MD /W3 /GR /GX /O2 /Ob2 /I "../src/graphics" /I "../src/collisions" /I "../src/files" /I "../src/tools" /I "../src/devices" /I "../src/display" /I "../src/forces" /I "../src/math" /I "../src/timers" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_MSVC" /YX /FD /c
+# ADD CPP /nologo /G6 /MD /W3 /GR /GX /O2 /Ob2 /I "../src/graphics" /I "../src/collisions" /I "../src/files" /I "../src/tools" /I "../src/devices" /I "../src/display" /I "../src/forces" /I "../src/math" /I "../src/timers" /I "../src/scenegraph" /I "../src/widgets" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_MSVC" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=xilink6.exe -lib
+LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"../lib/msvc6/chai3d_complete.lib"
 # Begin Special Build Tool
@@ -68,13 +68,13 @@ PostBuild_Cmds=../scripts/copyHeaderFiles.bat
 # PROP Intermediate_Dir "chai3d_complete___Win32_Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "../src/graphics" /I "../src/collisions" /I "../src/files" /I "../src/tools" /I "../src/devices" /I "../src/display" /I "../src/forces" /I "../src/math" /I "../src/timers" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_MSVC" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "../src/graphics" /I "../src/collisions" /I "../src/files" /I "../src/tools" /I "../src/devices" /I "../src/display" /I "../src/forces" /I "../src/math" /I "../src/timers" /I "../src/scenegraph" /I "../src/widgets" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_MSVC" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=xilink6.exe -lib
+LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"../lib/msvc6/chai3d_complete.lib"
 # Begin Special Build Tool
@@ -93,553 +93,270 @@ PostBuild_Cmds=../scripts/copyHeaderFiles.bat
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\src\graphics\CCamera.cpp
+SOURCE=..\src\widgets\CBitmap.cpp
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\scenegraph\CCamera.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\collisions\CCollisionAABB.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\collisions\CCollisionAABBBox.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\collisions\CCollisionAABBTree.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\collisions\CCollisionBrute.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\collisions\CCollisionSpheres.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\collisions\CCollisionSpheresGeometry.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\graphics\CColor.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\tools\CDelta3dofPointer.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\devices\CDeltaDevices.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\graphics\CDraw3D.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\devices\CDriverSensoray626.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\devices\CDriverServotogo.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\files\CFileLoader3DS.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\files\CFileLoaderBMP.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\files\CFileLoaderOBJ.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\files\CFileLoaderTGA.cpp
+# ADD CPP /I "../include/external"
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\widgets\CFont.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\tools\CFreedom6S3dofPointer.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\devices\CFreedom6SDevice.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\tools\CGeneric3dofPointer.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\collisions\CGenericCollision.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\devices\CGenericDevice.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CGenericObject.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\scenegraph\CGenericObject.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\forces\CGenericPointForceAlgo.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CGenericPotentialField.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\scenegraph\CGenericPotentialField.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\tools\CGenericTool.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\tools\CGenericTool3dof.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\files\CImageLoader.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CLight.cpp
+SOURCE=..\src\widgets\CLabelPanel.cpp
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\scenegraph\CLight.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\graphics\CMacrosGL.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\graphics\CMaterial.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\math\CMaths.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CMesh.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\scenegraph\CMesh.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\files\CMeshLoader.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\tools\CMeta3dofPointer.cpp
+# ADD CPP /I "../include/external"
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\widgets\CPanel.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\tools\CPhantom3dofPointer.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\devices\CPhantomDevices.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\forces\CPotentialFieldForceAlgo.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\timers\CPrecisionClock.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\timers\CPrecisionTimer.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\forces\CProxyPointForceAlgo.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CShapeSphere.cpp
+SOURCE=..\src\graphics\CShaders.cpp
+# ADD CPP /I "../include/external"
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
+SOURCE=..\src\scenegraph\CShapeSphere.cpp
+# End Source File
+# Begin Source File
 
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\scenegraph\CShapeTorus.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\math\CString.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\graphics\CTexture2D.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\graphics\CTriangle.cpp
+# ADD CPP /I "../include/external"
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\scenegraph\CVBOMesh.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\graphics\CVertex.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\display\CViewport.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\devices\CVirtualDevice.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CWorld.cpp
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=..\src\scenegraph\CWorld.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\devices\WIN626.C
-
-!IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
-
-!ENDIF 
-
+# ADD CPP /I "../include/external"
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -651,7 +368,11 @@ SOURCE=..\src\devices\App626.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CCamera.h
+SOURCE=..\src\widgets\CBitmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\scenegraph\CCamera.h
 # End Source File
 # Begin Source File
 
@@ -727,6 +448,10 @@ SOURCE=..\src\files\CFileLoaderTGA.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\widgets\CFont.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\tools\CFreedom6S3dofPointer.h
 # End Source File
 # Begin Source File
@@ -747,7 +472,7 @@ SOURCE=..\src\devices\CGenericDevice.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CGenericObject.h
+SOURCE=..\src\scenegraph\CGenericObject.h
 # End Source File
 # Begin Source File
 
@@ -755,7 +480,7 @@ SOURCE=..\src\forces\CGenericPointForceAlgo.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CGenericPotentialField.h
+SOURCE=..\src\scenegraph\CGenericPotentialField.h
 # End Source File
 # Begin Source File
 
@@ -763,15 +488,15 @@ SOURCE=..\src\tools\CGenericTool.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\tools\CGenericTool3dof.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\src\files\CImageLoader.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CLight.h
+SOURCE=..\src\widgets\CLabelPanel.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\scenegraph\CLight.h
 # End Source File
 # Begin Source File
 
@@ -791,7 +516,7 @@ SOURCE=..\src\math\CMatrix3d.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CMesh.h
+SOURCE=..\src\scenegraph\CMesh.h
 # End Source File
 # Begin Source File
 
@@ -800,6 +525,10 @@ SOURCE=..\src\files\CMeshLoader.h
 # Begin Source File
 
 SOURCE=..\src\tools\CMeta3dofPointer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\widgets\CPanel.h
 # End Source File
 # Begin Source File
 
@@ -827,7 +556,15 @@ SOURCE=..\src\forces\CProxyPointForceAlgo.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CShapeSphere.h
+SOURCE=..\src\graphics\CShaders.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\scenegraph\CShapeSphere.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\scenegraph\CShapeTorus.h
 # End Source File
 # Begin Source File
 
@@ -840,6 +577,10 @@ SOURCE=..\src\graphics\CTexture2D.h
 # Begin Source File
 
 SOURCE=..\src\graphics\CTriangle.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\scenegraph\CVBOMesh.h
 # End Source File
 # Begin Source File
 
@@ -859,7 +600,7 @@ SOURCE=..\src\devices\CVirtualDevice.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\graphics\CWorld.h
+SOURCE=..\src\scenegraph\CWorld.h
 # End Source File
 # Begin Source File
 

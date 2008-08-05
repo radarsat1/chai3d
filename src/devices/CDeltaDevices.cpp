@@ -21,21 +21,36 @@
 
 //---------------------------------------------------------------------------
 #include "CDeltaDevices.h"
-#include "CVector3d.h"
-#include "CMatrix3d.h"
-#include "dhdc.h"
+#include "CMaths.h"
+#include <windows.h>
 //---------------------------------------------------------------------------
 const double DELTA_DEVICE_WORKSPACE_HALF_SIZE  = 0.15;  // [meters]
 const double DELTA_DEVICE_MAXIMUM_FORCE        = 20.0;  // [newtons]
 const double OMEGA_DEVICE_WORKSPACE_HALF_SIZE  = 0.075; // [meters]
 const double OMEGA_DEVICE_MAXIMUM_FORCE        = 12.0;  // [newtons]
 //---------------------------------------------------------------------------
+HINSTANCE dhdDLL = NULL;
+
+int (__stdcall *dhdGetDeviceCount)             (void);
+int (__stdcall *dhdGetDeviceID)                (void);
+int (__stdcall *dhdGetSystemType)              (char ID);
+int (__stdcall *dhdOpenID)                     (char ID);
+int (__stdcall *dhdClose)                      (char ID);
+int (__stdcall *dhdGetButton)                  (int index, char ID);
+int (__stdcall *dhdReset)                      (char ID);
+int (__stdcall *dhdGetPosition)                (double *px, double *py, double *pz, char ID);
+int (__stdcall *dhdSetForce)                   (double  fx, double  fy, double  fz, char ID);
+int (__stdcall *dhdGetOrientationRad)          (double *oa, double *ob, double *og, char ID);
+int (__stdcall *dhdSetTorque)                  (double  ta, double  tb, double  tg, char ID);
+
+// Initialize dhd dll reference count
+int cDeltaDevice::m_activeDeltaDevices = 0;
 
 //===========================================================================
 /*!
     Constructor of cDeltaDevice.
 
-    \fn     cDeltaDevice::cDeltaDevice()
+    \fn     cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
 */
 //===========================================================================
 cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
@@ -43,6 +58,44 @@ cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
     // device is not yet available or ready
     m_systemAvailable = false;
     m_systemReady = false;
+
+    m_deviceType = DHD_DEVICE_UNINITIALIZED;
+
+    m_activeDeltaDevices++;
+
+    // load dhd.dll library
+    if (dhdDLL==NULL)
+    {
+        dhdDLL = LoadLibrary("dhd.dll");
+        dhdGetDeviceCount   = (int (__stdcall*)(void))GetProcAddress(dhdDLL, "dhdGetDeviceCount");
+        dhdGetDeviceID      = (int (__stdcall*)(void))GetProcAddress(dhdDLL, "dhdGetDeviceID");
+        dhdGetSystemType    = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdGetSystemType");
+        dhdOpenID           = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdOpenID");
+        dhdClose            = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdClose");
+        dhdGetButton        = (int (__stdcall*)(int, char))GetProcAddress(dhdDLL, "dhdGetButton");
+        dhdReset            = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdReset");
+        dhdGetPosition      = (int (__stdcall*)(double*, double*, double*, char))GetProcAddress(dhdDLL, "dhdGetPosition");
+        dhdSetForce         = (int (__stdcall*)(double, double, double, char))GetProcAddress(dhdDLL, "dhdSetForce");
+        dhdGetOrientationRad = (int( __stdcall*)(double*, double*, double*, char))GetProcAddress(dhdDLL, "dhdGetOrientationRad");
+        dhdSetTorque        = (int (__stdcall *)(double, double, double, char))GetProcAddress(dhdDLL, "dhdSetTorque");
+    }
+    
+    // If we failed to load the library or any of the functions, quit...
+    if (dhdDLL==NULL) return;
+
+    if (dhdGetDeviceCount    == 0 || 
+        dhdGetDeviceCount    == 0 ||
+        dhdGetDeviceID       == 0 ||
+        dhdGetSystemType     == 0 ||
+        dhdOpenID            == 0 ||
+        dhdClose             == 0 ||
+        dhdGetButton         == 0 ||
+        dhdReset             == 0 ||
+        dhdGetPosition       == 0 ||
+        dhdSetForce          == 0 ||
+        dhdGetOrientationRad == 0 ||
+        dhdSetTorque         == 0)
+        return;
 
     // get the number ID of the device we wish to communicate with
     m_deviceID = a_deviceNumber;
@@ -77,6 +130,14 @@ cDeltaDevice::~cDeltaDevice()
     if (m_systemReady)
     {
         close();
+    }
+
+    m_activeDeltaDevices--;
+
+    if (m_activeDeltaDevices == 0 && dhdDLL)
+    {
+      FreeLibrary(dhdDLL);
+      dhdDLL = 0;
     }
 }
 
@@ -198,6 +259,8 @@ int cDeltaDevice::command(int a_command, void* a_data)
                 dhdGetPosition(&x, &y, &z, m_deviceID);
 
                 cVector3d* position = (cVector3d *) a_data;
+                // Convert from m to mm
+                position->mul(1000.0);
                 position->set(x, y, z);
             }
             break;
@@ -264,6 +327,31 @@ int cDeltaDevice::command(int a_command, void* a_data)
                 int* result = (int *) a_data;
 
                 *result = dhdGetButton(0, m_deviceID);
+            }
+            break;
+
+            // read user switch from wrist
+            case CHAI_CMD_GET_SWITCH_MASK:
+            {
+                int* result = (int *) a_data;
+
+                // Force the result to be 0 or 1, since bit 0 should carry button 0's value
+                *result = dhdGetButton(0, m_deviceID) ? 1 : 0;                
+            }
+            break;
+
+            // read scale factor from normalized coords to mm
+            case CHAI_CMD_GET_NORMALIZED_SCALE_FACTOR:
+            {
+                double* scale = (double*)a_data;
+
+                // Multiply by m_halfSizeWorkspace to get meters back
+                *scale = m_halfSizeWorkspace;
+
+                // Then multiply by 1000 to get millimeters
+                *scale *= 1000.0;
+
+                result = CHAI_MSG_OK;
             }
             break;
 

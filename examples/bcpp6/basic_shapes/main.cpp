@@ -100,11 +100,13 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     materialGray.m_diffuse.set(0.6, 0.8, 0.65, transparency_level);
     materialGray.m_specular.set(0.9, 1.0, 0.9, transparency_level);
     materialGray.setShininess(100);
+    materialGray.setStiffness(50);
 
     materialRed.m_ambient.set(0.6, 0.3, 0.3, transparency_level);
     materialRed.m_diffuse.set(0.9, 0.6, 0.6, transparency_level);
     materialRed.m_specular.set(1.0, 0.9, 0.9, transparency_level);
     materialRed.setShininess(100);
+    materialRed.setStiffness(50);
 
     // we now build 9 little cubes
     int i,j,k;
@@ -222,7 +224,8 @@ void HapticLoop()
         Form1->tool->computeForces();
 
         // detect which cubes that is being touched by the tool and modify its material property
-        cMesh* object = (cMesh*)Form1->tool->m_proxyPointForceAlgo.getContactObject();
+        cProxyPointForceAlgo* proxy = Form1->tool->getProxy();
+        cMesh* object = (cMesh*)proxy->getContactObject();
         if (object != Form1->lastObject)
         {
             if (Form1->lastObject != NULL)

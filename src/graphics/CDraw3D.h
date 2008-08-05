@@ -40,7 +40,7 @@
 //===========================================================================
 
 //! Draw an x-y-z frame.
-void cDrawFrame(const double a_scale=1.0, const bool a_modifyMaterialState=1);
+void cDrawFrame(const double a_scale=1.0, const bool a_modifyMaterialState=true);
 
 //! Draw an x-y-z frame.
 void cDrawFrame(const double a_axisLengthScale, const double a_axisThicknessScale,

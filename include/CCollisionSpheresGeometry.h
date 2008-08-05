@@ -63,13 +63,10 @@ class cCollisionSpheresPoint
     cCollisionSpheresPoint(double a_x = 0, double a_y = 0, double a_z = 0)
         { m_pos.x = a_x;  m_pos.y = a_y;  m_pos.z = a_z; }
 
-    // METHODS:
-    //! Return the edge, if any, from this point to the given point.
-    cCollisionSpheresEdge *getEdgeTo(cCollisionSpheresPoint *a_other);
-
     // PROPERTIES:
     //! Position of the point.
     cVector3d m_pos;
+
     //! Map of edges which have this point as an endpoint.
     PtEmap m_edgeMap;
 };
@@ -87,11 +84,16 @@ class cCollisionSpheresEdge
   public:
     // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresEdge.
-    cCollisionSpheresEdge(cCollisionSpheresPoint *a_a, cCollisionSpheresPoint *a_b);
+    cCollisionSpheresEdge() { }
+    cCollisionSpheresEdge(cCollisionSpheresPoint *a_a, cCollisionSpheresPoint *a_b) {
+      initialize(a_a,a_b);
+    }
+
+    void initialize(cCollisionSpheresPoint *a_a, cCollisionSpheresPoint *a_b);
 
     // METHODS:
     //! Return the center of the edge.
-    inline const cVector3d *getCenter() const  {return &m_center;}
+    inline const cVector3d &getCenter() const  {return m_center;}
     //! Return the radius of the edge.
     inline double getRadius() const
         { if (m_D <= 0.0) return 0.0; return sqrt(m_D)/2; }
@@ -124,6 +126,7 @@ class cCollisionSpheresGenericShape
     // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresGenericShape.
     cCollisionSpheresGenericShape() { m_sphere = NULL; }
+    virtual ~cCollisionSpheresGenericShape() {}
 
     // METHODS:
     //! Return center.
@@ -169,8 +172,8 @@ class cCollisionSpheresTri : public cCollisionSpheresGenericShape
   public:
     // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresTri.
-    cCollisionSpheresTri(cCollisionSpheresPoint *a_a, cCollisionSpheresPoint *a_b,
-            cCollisionSpheresPoint *a_c);
+    cCollisionSpheresTri(cVector3d a, cVector3d b, cVector3d c);
+    virtual ~cCollisionSpheresTri();
 
     // METHODS:
     //! Return whether triangle collides with given line.
@@ -189,9 +192,9 @@ class cCollisionSpheresTri : public cCollisionSpheresGenericShape
   protected:
     // PROPERTIES:
     //! The vertices of the triangle.
-    cCollisionSpheresPoint *m_corner[3];
+    cCollisionSpheresPoint m_corner[3];
     //! The edges of the triangle.
-    cCollisionSpheresEdge *m_side[3];
+    cCollisionSpheresEdge m_side[3];
     //! The center of the triangle.
     cVector3d m_center;
     //! The radius of the triangle.
@@ -216,6 +219,7 @@ class cCollisionSpheresLine : public cCollisionSpheresGenericShape
     // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresLine.
     cCollisionSpheresLine(cVector3d& a_segmentPointA, cVector3d& a_segmentPointB);
+    virtual ~cCollisionSpheresLine() {}
 
     //! METHODS:
     //! Return the center of the line.

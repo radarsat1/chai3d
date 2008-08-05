@@ -32,6 +32,7 @@ extern "C" {
 
 #define FUNCTION __declspec(dllexport)
 
+const int PH_SUCCESS = 0;
 const int PH_ERR = -1;
 const int PH_INIT_ERR = -2;
 const int PH_RES_ENC_ERR = -3;
@@ -54,7 +55,7 @@ FUNCTION int __stdcall   OpenPhantom(int num);
 //! int PhantomAccess(int access_type), if i = 1 the system tries to load the deviceIO based phantom access. This will
 //! only take place, however, if ghost4 is installed. This function does not need to be called. If not called
 //! the system loads the gstEffect phantom access by default.
-FUNCTION void __stdcall   PhantomAcces(int access_type);
+FUNCTION void __stdcall   PhantomAccess(int access_type);
 
 //! ClosePhantoms(), closes all Phantoms in the system.
 //! the function should be called as a last operation and no other phantom operation should follow.
@@ -129,20 +130,31 @@ FUNCTION int __stdcall   SetForceTorquePhantom(int num,
 				                  const double &iTorqueY,
 								  const double &iTorqueZ);
 
+
 //! ReadOrientMat3DOFPhantom(int num, double *m);, reads the orientation matrix of the stylus for a 3dof wristed
 //! phantom device and returns it in a Ghost reference frame (x towards the right, y vertically pointing up, z vertical pointing towards the user), 
 //! as		m[0][0]  m[0][1] m[0][2]
 //!			m[1][0]  m[1][1] m[1][2]
 //!			m[2][0]  m[2][1] m[2][2]
-
 FUNCTION int __stdcall   ReadOrientMat3DOFPhantom(int num, 
  									  double *m);
 
-//! ReadSwitchPhantom(int num);, reads the switch from phantom num
+//! ReadSwitchPhantom(int num), reads the switch from phantom num
+//!
+//! Returns a bitmask with button 0 in bit 0, etc.
 FUNCTION int __stdcall   ReadSwitchPhantom(int num);
 
 //! double GetMaxForcePhantom(int num),	reads what the max force is for Phantom num
 FUNCTION double __stdcall   GetMaxForcePhantom(int num);
+
+
+// OPTIONAL FUNCTIONS
+
+//! double GetWorkspaceScale(int num),	reads the scale factor from mm to normalized
+//! coordinates for Phantom num.  Multiply normalized coordinates by this value to
+//! get back to mm.
+FUNCTION int __stdcall   GetWorkspaceScalePhantom(const int& num, double& scale);
+
 
 #ifdef _cplusplus
 }

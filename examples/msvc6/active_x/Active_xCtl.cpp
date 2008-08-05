@@ -301,7 +301,9 @@ void CActive_xCtrl::toggle_haptics(int enable)
 
 		// Tell the proxy algorithm associated with this tool to enable its
 		// "dynamic mode", which allows interaction with moving objects
-		tool->getProxy()->enableDynamicProxy(1);
+    
+    // The dynamic proxy is in a pretty beta state, so we turn it off for now...
+		// tool->getProxy()->enableDynamicProxy(1);
 
 		// start haptic thread
 		haptics_thread_running = 1;

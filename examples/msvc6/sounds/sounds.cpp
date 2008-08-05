@@ -165,7 +165,7 @@ void CsoundsApp::createObject(std::string fileName, cVector3d loc, cColorf color
     new_mesh->createAABBCollisionDetector(true,true);
 
     // set size of frame
-    new_mesh->setFrameSize(0.2, true);
+    new_mesh->setFrameSize(0.2, 1.0, true);
 
     // set size of normals
     new_mesh->setNormalsProperties(0.01, cColorf(1.0, 0.0, 0.0, 1.0), true);
@@ -391,9 +391,6 @@ void CsoundsApp::select(CPoint p) {
 // Our haptic loop... just computes forces on the 
 // phantom every iteration, until haptics are disabled
 // in the supplied CsoundsApp
-cVector3d former_position;
-cVector3d recent_position;
-int counter;
 
 // A single iteration through the loop...
 void sounds_haptic_iteration(void* param) {
@@ -401,14 +398,6 @@ void sounds_haptic_iteration(void* param) {
   CsoundsApp* app = (CsoundsApp*)(param);
 
   app->tool->updatePose();
-
-	// keep track of recent positions for upcoming velocity calculations
-  if (counter == 1000) {
-		former_position = recent_position;
-		recent_position = app->tool->m_deviceGlobalPos;
-		counter = 0;
-	}
-	counter++;
 
   app->tool->computeForces();
 
@@ -432,26 +421,17 @@ void sounds_haptic_iteration(void* param) {
     
     // send the current force to the currently contacted object, if any
     if (sound_meshes[i] == sound_mesh)
-		{
-			sound_mesh->getSound()->setContactForce(app->tool->m_lastComputedGlobalForce);
-		}
+			sound_mesh->getSound()->setContactForce(app->tool->getProxy()->getNormalForce(), 
+				  app->tool->getProxy()->getTangentialForce());
     else
-		{
-			sound_meshes[i]->getSound()->setContactForce(cVector3d(0,0,0));
-		}
+			sound_meshes[i]->getSound()->setContactForce(cVector3d(0,0,0), cVector3d(0,0,0));
 
 		// if there is a new contact, reset and restart playing the sound
-    if ((sound_meshes[i]->getSound()->getContactForce().lengthsq() > 0.01) && 
+    if ((sound_meshes[i]->getSound()->getNormalForce().lengthsq() > 0.01) && 
 			  (sound_meshes[i]->getSound()->getPreviousForce().lengthsq() <= 0.01))
 		{
-			
+			// reset for new contact
       sound_meshes[i]->getSound()->reset();
-			sound_meshes[i]->getSound()->setCounter(0);
-
-			// calculate velocity at contact to be used for initial sound amplitude
-      cVector3d change_vector = cSub(former_position, recent_position);
-			float change = (float)change_vector.length();
-			sound_meshes[i]->getSound()->setVelocity(10.0f*change); 
 
 			// restart playing this stream
 			if (!(BASS_ChannelPlay(sound_meshes[i]->getSound()->stream,TRUE)))
@@ -460,7 +440,6 @@ void sounds_haptic_iteration(void* param) {
   }
 
   app->tool->applyForces();
-
 }
 
 
@@ -470,9 +449,6 @@ void sounds_haptic_iteration(void* param) {
 DWORD sounds_haptic_loop(void* param) {
 
   CsoundsApp* app = (CsoundsApp*)(param);
-	counter = 0;
-	recent_position.set(0,0,0);
-	former_position.set(0,0,0);
 
   while(app->haptics_enabled) {
 
@@ -554,7 +530,13 @@ void CsoundsApp::toggle_haptics(int enable) {
 
     // Tell the proxy algorithm associated with this tool to enable its
     // "dynamic mode", which allows interaction with moving objects
-    tool->getProxy()->enableDynamicProxy(1);
+    
+    // The dynamic proxy is in a pretty beta state, so we turn it off for now...
+    // tool->getProxy()->enableDynamicProxy(1);
+
+		// Use Zilles Friction algorithm (to get tangential forces)
+		tool->getProxy()->setUseZillesFriction(true);
+		tool->getProxy()->setUseMelderFriction(false);
     
     // start haptic thread
     haptics_thread_running = 1;

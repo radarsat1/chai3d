@@ -21,7 +21,7 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="chai_displays.bpf"/>
-    <INCLUDEPATH value="..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions"/>
+    <INCLUDEPATH value="..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions;..\src\scenegraph"/>
     <LIBPATH value="..\src\display;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par -w-8027"/>
     <LISTFILE value=""/>
@@ -75,13 +75,14 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=6
-Item0=..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
-Item1=..\src\display;..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
-Item2=..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
-Item3=..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools
-Item4=..\src\displays;$(BCB)\include;$(BCB)\include\vcl
-Item5=$(BCB)\include;$(BCB)\include\vcl
+Count=7
+Item0=..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions;..\src\scenegraph
+Item1=..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
+Item2=..\src\display;..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
+Item3=..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
+Item4=..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools
+Item5=..\src\displays;$(BCB)\include;$(BCB)\include\vcl
+Item6=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
 Count=4

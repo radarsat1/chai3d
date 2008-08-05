@@ -22,7 +22,7 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="chai_files.bpf"/>
-    <INCLUDEPATH value="..\examples\bcpp6;..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics"/>
+    <INCLUDEPATH value="..\examples\bcpp6;..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\scenegraph"/>
     <LIBPATH value="..\examples\bcpp6;..\src\files;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-rch -w-par -w-lin -w-8027 -w-8026 -w-csu -w-ccc -w-aus"/>
     <LISTFILE value=""/>
@@ -83,13 +83,14 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=6
-Item0=..\examples\bcpp6;..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
-Item1=..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
-Item2=..\src\files\obj;..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
-Item3=..\src\files\obj;..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl
-Item4=..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl
-Item5=$(BCB)\include;$(BCB)\include\vcl
+Count=7
+Item0=..\examples\bcpp6;..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\scenegraph
+Item1=..\examples\bcpp6;..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
+Item2=..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
+Item3=..\src\files\obj;..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
+Item4=..\src\files\obj;..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl
+Item5=..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl
+Item6=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
 Count=5

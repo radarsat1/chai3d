@@ -47,12 +47,12 @@ cVector3d cPotentialFieldForceAlgo::computeForces(const cVector3d& a_nextDeviceP
         int numObjects = m_world->getNumChildren();
         for (int i=0; i<numObjects; i++)
         {
-					  cGenericPotentialField *nextField = dynamic_cast<cGenericPotentialField*>(m_world->getChild(i));
+            cGenericPotentialField *nextField = dynamic_cast<cGenericPotentialField*>(m_world->getChild(i));
 
             // if this object is a cGenericPotentialField, calculate the force
             // by calling the object's computeForces method, and add this to
             // the cumulative total
-						if (nextField)
+            if (nextField)
             {
                 cVector3d nextForce = nextField->computeForces(a_nextDevicePos);
                 force.add(nextForce);

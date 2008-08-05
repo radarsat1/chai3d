@@ -214,6 +214,12 @@ struct cMatrix3d
     result.x = m[index][0];   result.y = m[index][1];     result.z = m[index][2];
     return (result);
   }
+
+  // This is a slightly confusing operator, because the operation:
+  //
+  // my_matrix[1][2] = 4.0;
+  //
+  // ...compiles, but does not modify the matrix.  Be careful.
   inline cVector3d operator[](const unsigned int& index) const
   {
     return getRow(index);
@@ -414,7 +420,7 @@ struct cMatrix3d
               Result is stored is same vector.
   */
   //-----------------------------------------------------------------------
-  inline void mul(cVector3d& a_vector)
+  inline void mul(cVector3d& a_vector) const
   {
     // compute multiplication
     double x = m[0][0] * a_vector.x + m[0][1] * a_vector.y + m[0][2] * a_vector.z;
@@ -840,7 +846,7 @@ struct cMatrix3d
     \return   Return \b true if matrices are equal, otherwise \b false.
   */
   //-----------------------------------------------------------------------
-    inline bool equals(cMatrix3d& a_matrix)
+    inline bool equals(cMatrix3d& a_matrix) const
     {
          for(int i=0; i<3; i++)
         {

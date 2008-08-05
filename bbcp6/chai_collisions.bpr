@@ -23,7 +23,7 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="chai_collisions.bpf"/>
-    <INCLUDEPATH value="..\src\collisions;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files"/>
+    <INCLUDEPATH value="..\src\collisions;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\scenegraph"/>
     <LIBPATH value="..\src\collisions;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par -w-8027 -w-8026"/>
     <LISTFILE value=""/>
@@ -85,11 +85,12 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=4
-Item0=..\src\collisions;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files
-Item1=..\src\collisions;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
-Item2=..\src\collisions;$(BCB)\include;$(BCB)\include\vcl
-Item3=$(BCB)\include;$(BCB)\include\vcl
+Count=5
+Item0=..\src\collisions;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files;..\src\scenegraph
+Item1=..\src\collisions;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\files
+Item2=..\src\collisions;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
+Item3=..\src\collisions;$(BCB)\include;$(BCB)\include\vcl
+Item4=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
 Count=2

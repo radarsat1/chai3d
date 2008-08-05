@@ -29,6 +29,34 @@
 #define M_PI 3.1415926535898
 #endif
 
+// A hard-coded list of sound and image files
+const char* g_audio_files[] = {
+  "resources\\sounds\\italy.mp3",
+  "resources\\sounds\\switzerland.mp3",
+  "resources\\sounds\\usa.mp3"
+};
+
+const char* g_flag_files[] = {
+  "resources\\images\\italy.bmp",
+  "resources\\images\\switzerland.bmp",
+  "resources\\images\\usa.bmp"
+};
+
+const char* g_record_names[] = {
+  "Italy", "Switzerland", "USA"  
+};
+
+#define NUM_RECORDS (sizeof(g_audio_files)/sizeof(char*))
+
+int getNumRecords() { return NUM_RECORDS; }
+
+const char* getRecordName(int a_index) {
+  if (a_index < 0 || a_index >= NUM_RECORDS) return 0;
+  return g_record_names[a_index];
+}
+
+#define TURNTABLE_MODEL "resources\\models\\turntable.obj"
+
 /***
 
   This example demonstrates two ways to drive a haptic loop
@@ -98,7 +126,7 @@ unsigned int pos = 0;
 
 
 // Load an audio file in .wav format
-bool LoadWaveFile(LPSTR szFileName)
+bool LoadAudioFile(LPCSTR szFileName)
 {
 	// Load the data from the specified file
   HSTREAM file_stream = BASS_StreamCreateFile(FALSE,szFileName,0,0,BASS_STREAM_DECODE);
@@ -268,7 +296,7 @@ BOOL Crecord_playerApp::InitInstance() {
 	object = new cMesh(world);
      
 	// load 3d object file     
-	object->loadFromFile("resources\\models\\turntable.obj");
+	object->loadFromFile(TURNTABLE_MODEL);
 
   // compute size of object
   object->computeBoundaryBox(true);
@@ -293,7 +321,7 @@ BOOL Crecord_playerApp::InitInstance() {
   object->createAABBCollisionDetector(true,true);
 
   // set size of frame
-  object->setFrameSize(0.2, true);
+  object->setFrameSize(0.2, 1.0, true);
 
   // set size of normals
   object->setNormalsProperties(0.01, cColorf(1.0, 0.0, 0.0, 1.0), true);
@@ -405,15 +433,15 @@ void Crecord_playerApp::scroll(CPoint p, int left_button) {
   // selected object
   if (left_button) {
 
-		m_movingObject->translate(cMul(-0.04, m_movingObject->getRot().getCol2()));
+		m_recordMesh->translate(cMul(-0.04, m_recordMesh->getRot().getCol2()));
     cVector3d axis1(-1,0,0);
     object->rotate(axis1,-1.0*(float)p.y / 50.0);
-		m_movingObject->rotate(axis1,-1.0*(float)p.y / 50.0);
+		m_recordMesh->rotate(axis1,-1.0*(float)p.y / 50.0);
   
     cVector3d axis2(0,1,0);
     object->rotate(axis2,(float)p.x / 50.0);
-		m_movingObject->rotate(axis2,(float)p.x / 50.0);
-		m_movingObject->translate(cMul(0.04, m_movingObject->getRot().getCol2()));
+		m_recordMesh->rotate(axis2,(float)p.x / 50.0);
+		m_recordMesh->translate(cMul(0.04, m_recordMesh->getRot().getCol2()));
   }
 
   // If the left button is being held down, move the
@@ -421,15 +449,15 @@ void Crecord_playerApp::scroll(CPoint p, int left_button) {
   else {
 
     object->translate(0, 0, -1.0*(float)p.y / 100.0);
-		m_movingObject->translate(0, 0, -1.0*(float)p.y / 100.0);
+		m_recordMesh->translate(0, 0, -1.0*(float)p.y / 100.0);
     object->translate(0, 1.0*(float)p.x / 100.0, 0);
-		m_movingObject->translate(0, 1.0*(float)p.x / 100.0, 0);
+		m_recordMesh->translate(0, 1.0*(float)p.x / 100.0, 0);
 
   }
 
   // Let the object re-compute his global position data
   object->computeGlobalPositions();
-	m_movingObject->computeGlobalPositions();
+	m_recordMesh->computeGlobalPositions();
   object->computeBoundaryBox(true);  
   
 }
@@ -472,7 +500,7 @@ void HapticLoop(void* param)
 
   // figure out if we're touching the record
   cProxyPointForceAlgo * algo = app->tool->getProxy();
-  if (algo->getContactObject() == app->m_movingObject)
+  if (algo->getContactObject() == app->m_recordMesh)
   {
     if (!app->m_inContact)
     {
@@ -522,6 +550,7 @@ void Crecord_playerApp::toggle_haptics(int enable) {
 
       // turn on dynamic proxy
       cProxyPointForceAlgo* forceAlgo = tool->getProxy();
+      
       forceAlgo->enableDynamicProxy(true);
 
       // set up a nice-looking workspace for the phantom so
@@ -548,7 +577,7 @@ void Crecord_playerApp::toggle_haptics(int enable) {
 
     timer.set(0,HapticLoop,this);
 
-    // intialize clock
+    // initialize clock
     m_time = new cPrecisionClock();
     m_time->initialize();
 
@@ -578,7 +607,10 @@ void Crecord_playerApp::toggle_haptics(int enable) {
 void Crecord_playerApp::load_record(int a_index)
 {
 
-	if (stream) { BASS_ChannelStop(stream); Sleep(100); }
+  // Verify valid input
+  if (a_index < 0 || a_index >= NUM_RECORDS) return;
+
+  if (stream) { BASS_ChannelStop(stream); Sleep(100); }
 	int restart_haptics = 0;
 	if (haptics_enabled) {
 		restart_haptics = 1;
@@ -586,60 +618,50 @@ void Crecord_playerApp::load_record(int a_index)
 	}
 	pos = 0;
 
-	switch (a_index) {
-		case 0 : LoadWaveFile("resources\\sounds\\italy.mp3"); break;
-		case 1 : LoadWaveFile("resources\\sounds\\swiss.mp3"); break;
-		case 2 : LoadWaveFile("resources\\sounds\\usa.mp3"); break;
-		default : return;
-	}
-
+  LoadAudioFile(g_audio_files[a_index]);
+	
 	stream=BASS_StreamCreate(info.freq,info.chans,0,&MyStreamWriter,0);
         
 	// delete existing record
-	if (m_movingObject) { world->removeChild(m_movingObject); delete m_movingObject; }
+	if (m_recordMesh) { world->removeChild(m_recordMesh); delete m_recordMesh; }
 
 	// create new record
-  m_movingObject = new cMesh(world);
-  createTexCoords(m_movingObject, 0.33);
+  m_recordMesh = new cMesh(world);
+  createTexCoords(m_recordMesh, 0.33);
   cTexture2D *record = new cTexture2D();
 
-  switch (a_index) {
-		case 0 : record->loadFromFile("resources\\images\\italy.bmp"); break;
-		case 1 : record->loadFromFile("resources\\images\\swiss.bmp"); break;
-		case 2 : record->loadFromFile("resources\\images\\usa.bmp"); break;
-		default : return;
-	}
+  bool result = record->loadFromFile(g_flag_files[a_index]);
+  
+  m_recordMesh->setTexture(record);
+  m_recordMesh->useTexture(true, true);
 
-  m_movingObject->setTexture(record);
-  m_movingObject->useTexture(true, true);
-
-  // compute size of object again
-  m_movingObject->computeBoundaryBox(true);
+  // Compute object size
+  m_recordMesh->computeBoundaryBox(true);
 
   // Build a collision-detector for this object, so
   // the proxy will work nicely when haptics are enabled.
-  m_movingObject->createAABBCollisionDetector(true, true);
+  m_recordMesh->createAABBCollisionDetector(true, true);
 
   // set size of frame
-  m_movingObject->setFrameSize(0.3, true);
+  m_recordMesh->setFrameSize(0.3, 1.0, true);
 
   // update global position
-  m_movingObject->computeGlobalPositions();
+  m_recordMesh->computeGlobalPositions();
 
   // add object to world and translate
-  world->addChild(m_movingObject);
-  m_movingObject->translate(0, 0, 0.04);
+  world->addChild(m_recordMesh);
+  m_recordMesh->translate(0, 0, 0.04);
 
 	// set stiffness
   double stiffness = (double)35;
-  if (m_movingObject)
-    m_movingObject->setStiffness(stiffness, true);
+  if (m_recordMesh)
+    m_recordMesh->setStiffness(stiffness, true);
 
 	// set static and dynamic friction
   double staticFriction = (double)100 / 100.0;
   double dynamicFriction = (double)100 / 100.0;
-  if (m_movingObject)
-    m_movingObject->setFriction(staticFriction, dynamicFriction, true);
+  if (m_recordMesh)
+    m_recordMesh->setFriction(staticFriction, dynamicFriction, true);
 
 	m_rotVel = 0.0;
 	if (restart_haptics) toggle_haptics();
@@ -658,7 +680,7 @@ void Crecord_playerApp::animateObject(cVector3d force)
   // get position of proxy on plane, get vector from center to application point
   cProxyPointForceAlgo* forceAlgo = tool->getProxy();
   m_proxyPos = forceAlgo->getProxyGlobalPosition();
-	m_proxyPos.sub(m_movingObject->getGlobalPos());
+	m_proxyPos.sub(m_recordMesh->getGlobalPos());
   cVector3d radius;
   radius.set(m_proxyPos.x, m_proxyPos.y, 0);
 
@@ -689,8 +711,8 @@ void Crecord_playerApp::animateObject(cVector3d force)
 	}
 
   // rotate object
-  m_movingObject->rotate(m_movingObject->getRot().getCol2(), m_rotVel * time_step);
-  m_movingObject->computeGlobalPositions();
+  m_recordMesh->rotate(m_recordMesh->getRot().getCol2(), m_rotVel * time_step);
+  m_recordMesh->computeGlobalPositions();
 }
 //---------------------------------------------------------------------------
 
@@ -729,6 +751,6 @@ void createTexCoords(cMesh *a_mesh, double radius) {
   // compute normals
   a_mesh->computeAllNormals(true);
 
-  // compute boudary box
+  // compute boundary box
   a_mesh->computeBoundaryBox(true);
 }

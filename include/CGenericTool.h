@@ -42,7 +42,7 @@ class cGenericTool : public cGenericObject
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cGenericTool.
-    cGenericTool() {};
+    cGenericTool() { m_button = 0; };
     //! Destructor of cGenericTool.
     virtual ~cGenericTool() {};
 
@@ -67,6 +67,11 @@ class cGenericTool : public cGenericObject
     virtual int setForcesON()  { return -1; }
     //! Toggle forces off
     virtual int setForcesOFF() { return -1; }
+
+    //! Are the device's buttons currently on?
+    //!
+    //! This is a _bitmask_, with bit 0 representing button 0, etc.
+    int m_button;
 };
 
 //---------------------------------------------------------------------------

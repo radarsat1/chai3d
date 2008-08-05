@@ -25,22 +25,31 @@
 #define CImageLoaderH
 //---------------------------------------------------------------------------
 #include <windows.h>
+#include "CColor.h"
 //---------------------------------------------------------------------------
 
 // Global utility functions:
 
-//! Finds the extension in a filename and returns a pointer to the character after the '.'
-char* find_extension(const char* a_input);
+//! Finds the extension in a filename and returns a pointer to the character
+//! after the '.' (or to the '.' itself, if include_dot is 'true')
+char* find_extension(const char* a_input, const bool include_dot=0);
 
 //! Discards the path component of a filename and returns the result in a_dest
-void find_filename(char* a_dest, const char* a_input, bool a_includeExtension=false);
+void find_filename(char* a_dest, const char* a_input, const bool a_includeExtension=false);
 
-//! Finds only the _path_ portion of source, and copies it to a_dest
-void find_directory(char* a_dest, const char* a_source);
+//! Copies the string a_input to a_dest, replacing a_input's extension
+void replace_extension(char* a_dest, const char* a_input, const char* a_extension);
 
-//! Converts a string to lower-case
-void string_tolower(char* a_dest,const char* a_source);
+//! Finds only the _path_ portion of a_source, and copies it to a_dest
+//!
+//! Returns false if no path (i.e. no '/' or '\' is present)
+bool find_directory(char* a_dest, const char* a_source);
 
+//! Converts a_source to lower-case and writes the result to a_dest
+void string_tolower(char* a_dest, const char* a_source);
+
+//! Global function to read the contents of a file
+unsigned char* readFile(const char* a_filename, bool a_readAsText);
 
 //===========================================================================
 /*!
@@ -77,6 +86,21 @@ class cImageLoader
 
     //! Get the number of bits per pixel used to store this image
     inline unsigned int getBitsPerPixel() { return m_bits_per_pixel; }
+
+    //! Get the color of a pixel by passing its x and y coordinate
+    cColorb getPixelColor(const unsigned int a_x, const unsigned int a_y);
+
+    //! Set the color of a pixel
+    void setPixelColor(const unsigned int a_x, const unsigned int a_y, const cColorb& a_color);
+
+    //! Clear an image with defined color
+    void clear(const cColorb& a_color);
+
+    //! Replace a specific color in the image by a new one
+    void replace(const cColorb& a_oldColor, const cColorb& a_newColor);
+
+    //! Allocate a new image by defining its size
+    void allocate(const unsigned int a_width, const unsigned int a_height); 
 
     //! Returns 1 if a file has been successfully loaded, 0 otherwise
     inline unsigned int initialized() { return m_initialized; }

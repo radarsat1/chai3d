@@ -85,24 +85,29 @@ ProductName=
 ProductVersion=1.0.0.0
 Comments=
 
+[Excluded Packages]
+c:\program files\borland\cbuilder6\Bin\dclite60.bpl=Borland Integrated Translation Environment
+
 [HistoryLists\hlIncludePath]
-Count=9
-Item0=src;project;..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include;..\..\..\include
-Item1=src;project;..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include
-Item2=..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include
-Item3=..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include\
-Item4=..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\include
-Item5=..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..\include
-Item6=..\src;..\..\..\..\..\bbcp;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\include
-Item7=..\src;..\..\..\..\..\bbcp;$(BCB)\include;$(BCB)\include\vcl
-Item8=$(BCB)\include;$(BCB)\include\vcl
+Count=10
+Item0=..\mass_springs;src;project;..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include;..\..\..\include
+Item1=src;project;..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include;..\..\..\include
+Item2=src;project;..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include
+Item3=..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include
+Item4=..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\include\
+Item5=..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\include
+Item6=..\src;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..\include
+Item7=..\src;..\..\..\..\..\bbcp;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\include
+Item8=..\src;..\..\..\..\..\bbcp;$(BCB)\include;$(BCB)\include\vcl
+Item9=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=4
-Item0=src;project;..\src;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\lib\bbcp6
-Item1=..\src;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\lib\bbcp6
-Item2=..\src;..\..\..\..\..\bbcp;$(BCB)\lib\obj;$(BCB)\lib
-Item3=$(BCB)\lib\obj;$(BCB)\lib
+Count=5
+Item0=..\mass_springs;src;project;..\src;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\lib\bbcp6
+Item1=src;project;..\src;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\lib\bbcp6
+Item2=..\src;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\lib\bbcp6
+Item3=..\src;..\..\..\..\..\bbcp;$(BCB)\lib\obj;$(BCB)\lib
+Item4=$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1
@@ -146,10 +151,5 @@ RemoteDebug=0
 ShowInfoMsgs=0
 LinkDebugVcl=0
 LinkCGLIB=0
-
-[Language]
-ActiveLang=
-ProjectLang=
-RootDir=
   </IDEOPTIONS>
 </PROJECT>

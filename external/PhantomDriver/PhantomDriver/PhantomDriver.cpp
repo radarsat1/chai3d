@@ -16,9 +16,17 @@
     \author:    Federico Barbagli
     \version    1.4
     \date       06/2003
-	\date		04/2004
+    \date   04/2004
 */
 //===========================================================================
+
+/***
+
+  Various cprintf's are sprinkled throughout, but commented-out... this 
+  really helps when debugging low-level phantom problems, so please don't
+  remove them.
+
+***/
 
 #include "stdafx.h"
 #include <stdio.h>
@@ -31,6 +39,7 @@
 #include <vector>
 #include <algorithm>
 #define PHANTOM_REGISTRY_KEY "SYSTEM\\CurrentControlSet\\Services\\PHANToM_IO\\Parameters"
+#include <conio.h>
 
 
 //===============================================================================
@@ -91,6 +100,7 @@ typedef int (CALLBACK* LPFNDLLReadOrientMat2DOF)(int, double *);
 typedef int (CALLBACK* LPFNDLLReadSwitch)(int);
 typedef double (CALLBACK* LPFNDLLGetMaxForce)(int);
 typedef int (CALLBACK* LPFNDLLReadVelocity)(int,double&,double&,double&);
+typedef int (CALLBACK* LPFNDLLGetWorkspaceScale)(const int&,double&);
 
 
 LPFNDLLOpenPhantom Open; 
@@ -107,7 +117,7 @@ LPFNDLLReadOrientMat2DOF ReadOr2;
 LPFNDLLReadSwitch ReadS;
 LPFNDLLGetMaxForce GetMF;
 LPFNDLLReadVelocity GetV;
-
+LPFNDLLGetWorkspaceScale GetWSS=0;
 
 
 
@@ -120,107 +130,111 @@ LPFNDLLReadVelocity GetV;
 //! phantom control panel all taken as lower case words (this is the way they are shown in the phantom control panel itself)
 bool my_str_comp(std::string s1, std::string s2)
 {
-	std::string ss1 = s1;
-	std::string ss2 = s2;
-	std::transform (ss2.begin(),ss2.end(), ss2.begin(), tolower);
-	std::transform (ss1.begin(),ss1.end(), ss1.begin(), tolower);
-	if (ss1<ss2)
-		return true;
-	else
-		return false;
+  std::string ss1 = s1;
+  std::string ss2 = s2;
+  std::transform (ss2.begin(),ss2.end(), ss2.begin(), tolower);
+  std::transform (ss1.begin(),ss1.end(), ss1.begin(), tolower);
+  if (ss1<ss2)
+    return true;
+  else
+    return false;
 }
 
 
 
 //!  LoadLib loads the right version of the Phantom library, depending on what version of ghost is installed on the user's PC
-//!		In case ghost3.1 is installed, LoadLib loads the gstEffect based DLL compiled against Ghost3.1
-//!		In case ghost4.0 is installed, LoadLib loads, by default, the gstEffect based DLL compiled against Ghost4
-//!		However, by using the PhantomAccess function one can demand the driver to attempt to load the DeviceIO
-//!		based DLL compiled against Ghost4.0, if that is a real option.
+//!   In case ghost3.1 is installed, LoadLib loads the gstEffect based DLL compiled against Ghost3.1
+//!   In case ghost4.0 is installed, LoadLib loads, by default, the gstEffect based DLL compiled against Ghost4
+//!   However, by using the PhantomAccess function one can demand the driver to attempt to load the DeviceIO
+//!   based DLL compiled against Ghost4.0, if that is a real option.
 //!
-//!	 LoadLib returns TRUE if lib loads successfully, FALSE otherwise
+//!  LoadLib returns TRUE if lib loads successfully, FALSE otherwise
 
 BOOL LoadLib()
 {
 
-	HINSTANCE checkVal = NULL;
-	// load the right library
-	if (lib_ver == 50)
-	{
-		// 50 is the Touch3d Library
-		checkVal = LoadLibrary("hd.dll");
-		if (checkVal)
-			// load the phantomHD.dll
-			hDLL = LoadLibrary("phantomHD.dll");
+  HINSTANCE checkVal = NULL;
+  // load the right library
+  if (lib_ver == 50)
+  {
+    // 50 is the Touch3d Library
+    checkVal = LoadLibrary("hd.dll");
+    if (checkVal) {
+      // load the phantomHD.dll
+      hDLL = LoadLibrary("phantomHD.dll");
+    }
 
-	}
-	else 
-		if (lib_ver  == 31)
-		{
-			// double check that ghost40 is really installed in the system
-			checkVal = LoadLibrary("ghost31.dll");
-			if (checkVal)
-				// load the phantomGstEffect31.dll
-				hDLL = LoadLibrary("phantomGstEffect31.dll");
-		}
-		else 
-			if (type_access == DEVICE_IO_ACCESS)
-			{
-				// double check that ghost40 is really installed in the system
-				checkVal = LoadLibrary("GHOST40.dll");
-				if (checkVal)
-					// load the phantomDeviceIO40.dll
-					hDLL = LoadLibrary("phantomDeviceIO40.dll");
-	
-			}
-			else
-			{
-				// double check that ghost40 is really installed in the system
-				checkVal = LoadLibrary("GHOST40.dll");
-				if (checkVal)
-					// load the phantomGstEffect40.dll
-					hDLL = LoadLibrary("phantomGstEffect40.dll");
+  }
+  else 
+    if (lib_ver  == 31)
+    {
+      // double check that ghost40 is really installed in the system
+      checkVal = LoadLibrary("ghost31.dll");
+      if (checkVal)
+        // load the phantomGstEffect31.dll
+        hDLL = LoadLibrary("phantomGstEffect31.dll");
+    }
+    else 
+      if (type_access == DEVICE_IO_ACCESS)
+      {
+        // double check that ghost40 is really installed in the system
+        checkVal = LoadLibrary("GHOST40.dll");
+        if (checkVal)
+          // load the phantomDeviceIO40.dll
+          hDLL = LoadLibrary("phantomDeviceIO40.dll");
+  
+      }
+      else
+      {
+        // double check that ghost40 is really installed in the system
+        checkVal = LoadLibrary("GHOST40.dll");
+        if (checkVal)
+          // load the phantomGstEffect40.dll
+          hDLL = LoadLibrary("phantomGstEffect40.dll");
 
-			}
+      }
 
-	// if DLL was not loaded correctly exit returning FALSE
-	if (!hDLL)
-	{
-		return FALSE;
-	}
+  // if DLL was not loaded correctly exit returning FALSE
+  if (!hDLL)
+  {
+    return FALSE;
+  }
 
-	// otherwise load all the function we need dynamically
-	Open = (LPFNDLLOpenPhantom)GetProcAddress(hDLL,"OpenPhantom"); 
-	Close = (LPFNDLLClosePhantoms)GetProcAddress(hDLL,"ClosePhantoms"); 
-	Reset = (LPFNDLLResetPhantomEncoders)GetProcAddress(hDLL,"ResetPhantomEncoders");
-	Start = (LPFNDLLStartCommunication)GetProcAddress(hDLL, "StartCommunication");
-	Stop = (LPFNDLLStopCommunication)GetProcAddress(hDLL, "StopCommunication");
-	ReadP  = (LPFNDLLReadPosition)GetProcAddress(hDLL, "ReadPosition");
-	ReadNormalized = (LPFNDLLReadNormalizedPosition)GetProcAddress(hDLL, "ReadNormalizedPosition");
-	Set = (LPFNDLLSetForce)GetProcAddress(hDLL, "SetForce");
-	SetFT = (LPFNDLLSetForceTorque)GetProcAddress(hDLL, "SetForceTorque");
-	ReadOr3 = (LPFNDLLReadOrientMat3DOF)GetProcAddress(hDLL, "ReadOrientMat3DOF");
-	ReadOr2 = (LPFNDLLReadOrientMat2DOF)GetProcAddress(hDLL, "ReadOrientMat2DOF");
-	ReadS = (LPFNDLLReadSwitch)GetProcAddress(hDLL, "ReadSwitch");
-	GetMF = (LPFNDLLGetMaxForce)GetProcAddress(hDLL, "GetMaxForce");
-	GetV = (LPFNDLLReadVelocity)GetProcAddress(hDLL, "ReadVelocity");
+  // otherwise load all the function we need dynamically
+  Open = (LPFNDLLOpenPhantom)GetProcAddress(hDLL,"OpenPhantom"); 
+  Close = (LPFNDLLClosePhantoms)GetProcAddress(hDLL,"ClosePhantoms"); 
+  Reset = (LPFNDLLResetPhantomEncoders)GetProcAddress(hDLL,"ResetPhantomEncoders");
+  Start = (LPFNDLLStartCommunication)GetProcAddress(hDLL, "StartCommunication");
+  Stop = (LPFNDLLStopCommunication)GetProcAddress(hDLL, "StopCommunication");
+  ReadP  = (LPFNDLLReadPosition)GetProcAddress(hDLL, "ReadPosition");
+  ReadNormalized = (LPFNDLLReadNormalizedPosition)GetProcAddress(hDLL, "ReadNormalizedPosition");
+  Set = (LPFNDLLSetForce)GetProcAddress(hDLL, "SetForce");
+  SetFT = (LPFNDLLSetForceTorque)GetProcAddress(hDLL, "SetForceTorque");
+  ReadOr3 = (LPFNDLLReadOrientMat3DOF)GetProcAddress(hDLL, "ReadOrientMat3DOF");
+  ReadOr2 = (LPFNDLLReadOrientMat2DOF)GetProcAddress(hDLL, "ReadOrientMat2DOF");
+  ReadS = (LPFNDLLReadSwitch)GetProcAddress(hDLL, "ReadSwitch");
+  GetMF = (LPFNDLLGetMaxForce)GetProcAddress(hDLL, "GetMaxForce");
+  GetV = (LPFNDLLReadVelocity)GetProcAddress(hDLL, "ReadVelocity");
 
-	// in case of error free the DLL and return false
-	if (!Open || !Close|| !Reset || !Start || !Stop || !ReadP || !ReadNormalized || !Set || !SetFT || !ReadOr3 || !ReadS || !GetMF || !GetV) 
+  // OPTIONAL functions
+  GetWSS = (LPFNDLLGetWorkspaceScale)GetProcAddress(hDLL, "GetWorkspaceScale");  
+
+
+  // in case of error free the DLL and return false
+  if (!Open || !Close|| !Reset || !Start || !Stop || !ReadP || !ReadNormalized || !Set || !SetFT || !ReadOr3 || !ReadS || !GetMF || !GetV) 
     { 
-		FreeLibrary(hDLL); 
-		return FALSE;
-	} 
+    FreeLibrary(hDLL); 
+    return FALSE;
+  } 
 
-	return true;
+  return true;
 
 }
 
 
 
 //!  int get_phantom_count() 
-//!		reads from the registry how many Phantoms have been initialized under the Phantom Control Panel, saves it in m_totalPhantomNumber
-
+//!   reads from the registry how many Phantoms have been initialized under the Phantom Control Panel, saves it in m_totalPhantomNumber
 int get_phantom_count() 
 {
 
@@ -251,10 +265,10 @@ int get_phantom_count()
 
 
 //!  int get_phantom_name() 
-//!		Populates the list of phantom names available in the system and saves it in m_totalPhantomList.
-//!		Returns -1 for an error, 0 if all goes well.
-//!		Note: this function checks if the dual configuration is enabled and, in that case, decreases m_totalPhantomNumber by
-//!		two and does not save the DualPHANToM1 and DualPHANToM2 entries in the m_totalPhantomList list.
+//!   Populates the list of phantom names available in the system and saves it in m_totalPhantomList.
+//!   Returns -1 for an error, 0 if all goes well.
+//!   Note: this function checks if the dual configuration is enabled and, in that case, decreases m_totalPhantomNumber by
+//!   two and does not save the DualPHANToM1 and DualPHANToM2 entries in the m_totalPhantomList list.
 
 int get_phantom_name() 
 {
@@ -278,47 +292,47 @@ int get_phantom_name()
     return -1;
   }
 
-	m_totalPhantomList.clear();
+  m_totalPhantomList.clear();
   
   bool DUAL_CONFIG = false;  
   for (int i=0; i<m_totalPhantomNumber; i++) 
   {
      unsigned char data[1000];
      unsigned long data_len = 1000;
-	 char value_name[1000];
-	 unsigned long value_len = 1000;
-	 DWORD type;
-	 
-	 result = RegEnumValue(hKey,i,value_name,&value_len,0,&type,data,&data_len);
+   char value_name[1000];
+   unsigned long value_len = 1000;
+   DWORD type;
+   
+   result = RegEnumValue(hKey,i,value_name,&value_len,0,&type,data,&data_len);
      if (result != ERROR_SUCCESS) 
-	 {
+   {
        return -1;
-	 }
+   }
 
-	 if (type != REG_SZ) 
-	 {
-		return -1;
-	 }
-	 
-	 // if dual config is ON then there will be two more phantom names in the register
-	 // ignore them
-	 if (value_name[0] == 'D')
-		 DUAL_CONFIG = true;
-	 else
-	 {
-		 char* cdata = (char*)(data);
-	     std::string name_s = std::string(cdata);
-		 m_totalPhantomList.push_back(name_s);
-	 }
+   if (type != REG_SZ) 
+   {
+    return -1;
+   }
+   
+   // if dual config is ON then there will be two more phantom names in the register
+   // ignore them
+   if (value_name[0] == 'D')
+     DUAL_CONFIG = true;
+   else
+   {
+     char* cdata = (char*)(data);
+       std::string name_s = std::string(cdata);
+     m_totalPhantomList.push_back(name_s);
+   }
   }
-	
+  
   // order the list of phantom names
   std::vector<std::string>::iterator i1 = m_totalPhantomList.begin();
   std::vector<std::string>::iterator i2 = m_totalPhantomList.end();
   std::sort(i1, i2, my_str_comp);
   // check if dual config is on or off
   if (DUAL_CONFIG)
-	m_totalPhantomNumber = m_totalPhantomNumber - 2;
+  m_totalPhantomNumber = m_totalPhantomNumber - 2;
 
   RegCloseKey(hKey);
 
@@ -336,46 +350,45 @@ int get_phantom_name()
 //===========================================================================================
 
 //!  This function: 
-//!		finds the version of ghost
-//!		reads the number of phantoms in the system
-//!		extracts all the names of the phantom and orders them as in the control panel
+//!   finds the version of ghost
+//!   reads the number of phantoms in the system
+//!   extracts all the names of the phantom and orders them as in the control panel
 
 BOOL APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
                        LPVOID lpReserved
-					 )
+           )
 {
 
-	// get ghost version installed on the machine
-	char *libvarGhost;
+  // get ghost version installed on the machine
+  char *libvarGhost;
     libvarGhost = getenv( "GHOST_LIB_VERSION" );
-	char *libvar3Dtouch;
+  char *libvar3Dtouch;
     libvar3Dtouch = getenv( "3DTOUCH_BASE" );
     if ((libvarGhost == NULL) && (libvar3Dtouch == NULL))
-		deviceReady = false;
-	else if (libvar3Dtouch!= NULL)
-		lib_ver = 50;
-	else
-	{
-		if (strcmp(libvarGhost, "40") == 0)
-			lib_ver = 40;
-		else if (strcmp(libvarGhost, "31") == 0)
-			lib_ver = 31;
-		else
-			deviceReady = false;
-	}
+    deviceReady = false;
+  else if (libvar3Dtouch!= NULL)
+    lib_ver = 50;
+  else
+  {
+    if (strcmp(libvarGhost, "40") == 0)
+      lib_ver = 40;
+    else if (strcmp(libvarGhost, "31") == 0)
+      lib_ver = 31;
+    else
+      deviceReady = false;
+  }
+
+  // get number of phantoms
+  m_totalPhantomNumber = get_phantom_count();
+  if (m_totalPhantomNumber <= 0)
+    deviceReady = false;
 
 
-	// get number of phantoms
-	m_totalPhantomNumber = get_phantom_count();
-	if (m_totalPhantomNumber <= 0)
-		deviceReady = false;
-
-
-	// get all names for phantoms
-	int result = get_phantom_name();
-	if (result < 0) 
-		deviceReady = false;
+  // get all names for phantoms
+  int result = get_phantom_name();
+  if (result < 0) 
+    deviceReady = false;
 
     return TRUE;
 }
@@ -389,310 +402,330 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 //==========================================================================
 /*!
-	If access_type = 1 the system tries to load the deviceIO based phantom access. This will
-	only take place, however, if ghost4 is installed. This function does not need to be called. If not called
-	the system loads the gstEffect phantom access by default.
-	Note: access modes for all phantoms are the same.
+  If access_type = 1 the system tries to load the deviceIO based phantom access. This will
+  only take place, however, if ghost4 is installed. This function does not need to be called. If not called
+  the system loads the gstEffect phantom access by default.
+  Note: access modes for all phantoms are the same.
 
       \fn       void PhantomAcces(int access_type)
-	  \param	int num
+    \param  int num
 */
 //===========================================================================
-FUNCTION void __stdcall   PhantomAcces(int access_type)
+FUNCTION void __stdcall   PhantomAccess(int access_type)
 {
-	// this is the variable used when trying to decide what version of the ghost 4 libs to load.
-	type_access = access_type;
+  // this is the variable used when trying to decide what version of the ghost 4 libs to load.
+  type_access = access_type;
 }
 
 
 //==========================================================================
 /*!
-	 This function opens a Phantom device port. The phantom is specified by 
-	 an integer (n>0) that represents the nth phantom in the the Phantom Control 
-	 Panel list. If the phantom is opened successfully the function returns a handle 
-	 (non-negative integer) for the phantom. If something goes wrong a negative value
-	 is returned.
+   This function opens a Phantom device port. The phantom is specified by 
+   an integer (n>0) that represents the nth phantom in the the Phantom Control 
+   Panel list. If the phantom is opened successfully the function returns a handle 
+   (non-negative integer) for the phantom. If something goes wrong a negative value
+   is returned.
 
       \fn       int OpenPhantom(int num)
-	  \param	int num
+    \param  int num
 */
 //===========================================================================
 FUNCTION int __stdcall   OpenPhantom(int num)
 {
-	if (!lib_loaded)
-		if (!LoadLib())
-		{
-			deviceReady = false;
-			return PH_DLL_PROBLEM;
-		}
-		else
-			lib_loaded = true;
+  // _cprintf("Opening up a phantom...\n");
+  if (!lib_loaded) {
+    if (!LoadLib())
+    {
+      // _cprintf("Failed to load phantom library...\n");
+      deviceReady = false;
+      return PH_DLL_PROBLEM;
+    }
+    else {
+      // _cprintf("Loaded phantom library...\n");
+      lib_loaded = true;
+    }
+  }
 
-	if ((num < 0) || (num>=m_totalPhantomNumber) || (deviceReady == false))
-		return PH_DLL_PROBLEM;
-	else
-	{	
-		char name[100];
-		strcpy(name, m_totalPhantomList[num].c_str());
-		return Open(name);
-	}
-
-	
+  if ((num < 0) || (num>=m_totalPhantomNumber) || (deviceReady == false))
+    return PH_DLL_PROBLEM;
+  else
+  {
+    // _cprintf("Opening phantom %d of %d\n",num,m_totalPhantomNumber);
+    char name[100];
+    strcpy(name, m_totalPhantomList[num].c_str());
+    int result = Open(name);
+    // _cprintf("Result is %d\n",result);
+    return result;
+  }  
 }
 
 //==========================================================================
 /*!
-	 Last function to be called: closes all the phantoms. In case no phantom currently
-	exists the value returned is negative, 1 in case of success.
-	
+   Last function to be called: closes all the phantoms. In case no phantom currently
+  exists the value returned is negative, 1 in case of success.
+  
 
       \fn       int ClosePhantoms()
-	  \param	int num
+    \param  int num
 */
 //===========================================================================
 
 FUNCTION void __stdcall   ClosePhantoms()
 {
-	if ((lib_loaded) && (deviceReady))
-	{
-		Close();
-		lib_loaded = false;
-		FreeLibrary(hDLL);
-	}
+  if ((lib_loaded) && (deviceReady))
+  {
+    Close();
+    lib_loaded = false;
+    FreeLibrary(hDLL);
+  }
 }
 
  
 //==========================================================================
 /*!
-	 Reset Phantom number num. Returns a negative value is operation failed, 
-	 1 in case of success.
+   Reset Phantom number num. Returns a negative value is operation failed, 
+   1 in case of success.
 
       \fn       int ResetPhantomEncoders(int num)
-	  \param	int num
+    \param  int num
 */
 //===========================================================================
 FUNCTION int __stdcall   ResetPhantomEncoders(int num)
 {
-	if ((lib_loaded) && (deviceReady))
-		return Reset(num);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady))
+    return Reset(num);
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 //==========================================================================
 /*!
-	This function starts the Communication with the phantom i. Returns 1 if everything
-	went OK, a negative value otherwise.
+  This function starts the Communication with the phantom i. Returns 1 if everything
+  went OK, a negative value otherwise.
 
       \fn       int StartCommunicationPhantom(int i)
-	  \param	int num
+    \param  int num
 */
 //===========================================================================
 FUNCTION int __stdcall   StartCommunicationPhantom(int i)
 {
-	if ((lib_loaded) && (deviceReady))
-		return Start(i);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady)) {
+    int result = Start(i);
+    // _cprintf("Starting phantom communication: result is %d\n",result);
+    return result;
+  }
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 //==========================================================================
 /*!
-	StopCommunicationPhantom(int i), Stops the effect of phantom i, basically disabling forces and position
-	reading for such phantom. Note that the overall servoloop will still be running since the other phantom
-	may be not disabled.
-	The function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+  StopCommunicationPhantom(int i), Stops the effect of phantom i, basically disabling forces and position
+  reading for such phantom. Note that the overall servoloop will still be running since the other phantom
+  may be not disabled.
+  The function returns 1 if everything went ok, a negative value otherwise (check list of errors)
     
-	  \fn       int StopCommunicationPhantom(int i)
-	  \param	int i
+    \fn       int StopCommunicationPhantom(int i)
+    \param  int i
 */
 //===========================================================================
 FUNCTION int __stdcall   StopCommunicationPhantom(int i)
 {
-	if ((lib_loaded) && (deviceReady))
-		return Stop(i);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady))
+    return Stop(i);
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 //==========================================================================
 /*!
-	ReadPositionPhantom(int num,double &iPosX,double &iPosY,double &iPosZ); reads tip position for phantom num
-	the function returns 1 if everything went ok, a negative value otherwise (check list of errors). 
-	Position values are returned in the three iPos variables.
-	Note that positions are expressed in mm with respect to a Ghost reference frame (X: right, Y: up, Z: toward user)
-	
+  ReadPositionPhantom(int num,double &iPosX,double &iPosY,double &iPosZ); reads tip position for phantom num
+  the function returns 1 if everything went ok, a negative value otherwise (check list of errors). 
+  Position values are returned in the three iPos variables.
+  Note that positions are expressed in mm with respect to a Ghost reference frame (X: right, Y: up, Z: toward user)
+  
 
-  	  \fn       int ReadPositionPhantom
-	  \param	int num
-	  \param	int iPosX
-	  \param	int iPosY
-	  \param	int iPosZ
+      \fn       int ReadPositionPhantom
+    \param  int num
+    \param  int iPosX
+    \param  int iPosY
+    \param  int iPosZ
 */
 //===========================================================================
 FUNCTION int __stdcall   ReadPositionPhantom(int num, 
-									  double &iPosX,
-									  double &iPosY,
-									  double &iPosZ)
+                    double &iPosX,
+                    double &iPosY,
+                    double &iPosZ)
 {
-	if ((lib_loaded) && (deviceReady))
-		return ReadP(num, iPosX, iPosY, iPosZ);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady)) {
+    int result = ReadP(num, iPosX, iPosY, iPosZ);
+    return result;    
+  }
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 
 //==========================================================================
 /*!
-	ReadNormalizedPositionPhantom(int num,double &iPosX,double &iPosY,double &iPosZ); reads tip position for phantom num
-	the function returns 1 if everything went ok, a negative value otherwise (check list of errors).
-	Position values are returned in the three iPos variables.
-	Note that positions are expressed with a value included in the interval [-1,1] for a cube centered in the device's workspace center.
-	This is to ensure that a same demo may be used using different devices without having to change any of the code
-	Note that positions are expressed in mm with respect to a Ghost reference frame (X: right, Y: up, Z: toward user)
-	
+  ReadNormalizedPositionPhantom(int num,double &iPosX,double &iPosY,double &iPosZ); reads tip position for phantom num
+  the function returns 1 if everything went ok, a negative value otherwise (check list of errors).
+  Position values are returned in the three iPos variables.
+  Note that positions are expressed with a value included in the interval [-1,1] for a cube centered in the device's workspace center.
+  This is to ensure that a same demo may be used using different devices without having to change any of the code
+  Note that positions are expressed in mm with respect to a Ghost reference frame (X: right, Y: up, Z: toward user)
+  
 
-  	  \fn       int ReadNormalizedPositionPhantom
-	  \param	int num
-	  \param	int iPosX
-	  \param	int iPosY
-	  \param	int iPosZ
+      \fn       int ReadNormalizedPositionPhantom
+    \param  int num
+    \param  int iPosX
+    \param  int iPosY
+    \param  int iPosZ
 */
 //===========================================================================
 FUNCTION int __stdcall   ReadNormalizedPositionPhantom(int num, 
-									  double &iPosX,
-									  double &iPosY,
-									  double &iPosZ)
+                    double &iPosX,
+                    double &iPosY,
+                    double &iPosZ)
 {
-	if ((lib_loaded) && (deviceReady))
-		return ReadNormalized(num, iPosX, iPosY, iPosZ);
-	else 
-		return PH_DLL_PROBLEM;
+  // Useful for debugging phantom-position problems...
+  // static int tmp=0;
+  if ((lib_loaded) && (deviceReady)) {
+    int result = ReadNormalized(num, iPosX, iPosY, iPosZ);
+    /*
+    if (tmp++ < 10) {
+      _cprintf("Reading normalized phantom position, result is %d (%.3lf,%.3lf,%.3lf)\n",result,iPosX,iPosY,iPosZ);            
+    }
+    */
+    return result;
+  }
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 
 //==========================================================================
 /*!
-	SetForcePhantom(int num,const double &iForceX,const double &iForceY,const double &iForceZ); writes force to phantom num
-	the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
-	Note that forces are expressed in Newtons with respect to a Ghost reference frame (X: right, Y: up, Z: toward user)
-	Note: no safety features are implemented other than the standard Ghost ones.
-	
-	
+  SetForcePhantom(int num,const double &iForceX,const double &iForceY,const double &iForceZ); writes force to phantom num
+  the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+  Note that forces are expressed in Newtons with respect to a Ghost reference frame (X: right, Y: up, Z: toward user)
+  Note: no safety features are implemented other than the standard Ghost ones.
+  
+  
 
-  	  \fn       int SetForcePhantom
-	  \param	int num
-	  \param	int iForceX
-	  \param	int iForceY
-	  \param	int iForceZ
+      \fn       int SetForcePhantom
+    \param  int num
+    \param  int iForceX
+    \param  int iForceY
+    \param  int iForceZ
 */
 //===========================================================================
 FUNCTION int __stdcall   SetForcePhantom(int num, 
-								  const double &iForceX,
-				                  const double &iForceY,
-								  const double &iForceZ)
+                  const double &iForceX,
+                          const double &iForceY,
+                  const double &iForceZ)
 {
-	if ((lib_loaded) && (deviceReady))
-		return Set(num, iForceX, iForceY, iForceZ);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady))
+    return Set(num, iForceX, iForceY, iForceZ);
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 
 //==========================================================================
 /*!
-	SetForceTorquePhantom(int num, const double &iForceX, const double &iForceY, const double &iForceZ, const double &iTorqueX, const double &iTorqueY, const double &iTorqueZ);
-	writes Forces and Torques to phantom num.
-	the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
-	Note that forces are expressed in Newtons and torques are expressed in Newtons Meter with respect to a Phantom reference frame (X: right, Y: up, Z: toward user)
-	Note: no safety features are implemented other than the standard Ghost ones.
-	
-	
+  SetForceTorquePhantom(int num, const double &iForceX, const double &iForceY, const double &iForceZ, const double &iTorqueX, const double &iTorqueY, const double &iTorqueZ);
+  writes Forces and Torques to phantom num.
+  the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+  Note that forces are expressed in Newtons and torques are expressed in Newtons Meter with respect to a Phantom reference frame (X: right, Y: up, Z: toward user)
+  Note: no safety features are implemented other than the standard Ghost ones.
+  
+  
 
-  	  \fn       int SetForceTorquePhantom
-	  \param	int num
-	  \param	int iForceX
-	  \param	int iForceY
-	  \param	int iForceZ
-	  \param	int iTorqueX
-	  \param	int iTorqueY
-	  \param	int iTorqueZ
+      \fn       int SetForceTorquePhantom
+    \param  int num
+    \param  int iForceX
+    \param  int iForceY
+    \param  int iForceZ
+    \param  int iTorqueX
+    \param  int iTorqueY
+    \param  int iTorqueZ
 */
 //===========================================================================
 FUNCTION int __stdcall   SetForceTorquePhantom(int num, 
-								  const double &iForceX,
-				                  const double &iForceY,
-								  const double &iForceZ,
-								  const double &iTorqueX,
-				                  const double &iTorqueY,
-								  const double &iTorqueZ)
+                  const double &iForceX,
+                          const double &iForceY,
+                  const double &iForceZ,
+                  const double &iTorqueX,
+                          const double &iTorqueY,
+                  const double &iTorqueZ)
 {
-	if ((lib_loaded) && (deviceReady))
-		return SetFT(num, iForceX, iForceY, iForceZ, iTorqueX, iTorqueY, iTorqueZ);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady))
+    return SetFT(num, iForceX, iForceY, iForceZ, iTorqueX, iTorqueY, iTorqueZ);
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 
 
 //==========================================================================
 /*!
-	ReadOrientMat3DOFPhantom(int num, double *m);, reads the orientation matrix of the stylus for a 3dof wristed
-	phantom device and returns it in a Phantom coordinate frame.
-	The function returns 1 if everything went ok, a negative value otherwise (check list of errors). 
-	
+  ReadOrientMat3DOFPhantom(int num, double *m);, reads the orientation matrix of the stylus for a 3dof wristed
+  phantom device and returns it in a Phantom coordinate frame.
+  The function returns 1 if everything went ok, a negative value otherwise (check list of errors). 
+  
 
-  	  \fn       int ReadOrientMat3DOFPhantom
-	  \param	int num
-	  \param	double *m
+      \fn       int ReadOrientMat3DOFPhantom
+    \param  int num
+    \param  double *m
 */
 //===========================================================================
 FUNCTION int __stdcall   ReadOrientMat3DOFPhantom(int num, 
- 									  double *m)
+                    double *m)
 {
-	if ((lib_loaded) && (deviceReady))
-		return ReadOr3(num, m);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady))
+    return ReadOr3(num, m);
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 
 
 //==========================================================================
 /*!
-	ReadSwitchPhantom(int num);, reads the switch from phantom num
-	
+  ReadSwitchPhantom(int num), reads the switch from phantom num 
 
-  	  \fn       int ReadSwitchPhantom
-	  \param	int num
-	  
+  \fn       int ReadSwitchPhantom(int num)
+  \param    int num   Which phantom
+  \return   A bitmask with button 0 in bit 0, etc., or < 0 for an error  
+    
 */
 //===========================================================================
 FUNCTION int __stdcall   ReadSwitchPhantom(int num)
 {
-	if ((lib_loaded) && (deviceReady))
-		return ReadS(num);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady))
+    return ReadS(num);
+  else 
+    return PH_DLL_PROBLEM;
 }
 
 
 //==========================================================================
 /*!
-	double GetMaxForcePhantom(int num),	reads what the max force is for Phantom num
+  double GetMaxForcePhantom(int num), reads what the max force is for Phantom num
 
 
-  	  \fn       double GetMaxForcePhantom
-	  \param	int num
-	  
+      \fn       double GetMaxForcePhantom
+    \param  int num
+    
 */
 //===========================================================================
 FUNCTION double __stdcall   GetMaxForcePhantom(int num)
 {
-	if ((lib_loaded) && (deviceReady))
-		return GetMF(num);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady))
+    return GetMF(num);
+  else 
+    return 0.0;
 
 }
 
@@ -700,26 +733,49 @@ FUNCTION double __stdcall   GetMaxForcePhantom(int num)
 
 //==========================================================================
 /*!
-	ReadVelocityPhantom(int num,double &iVelX,double &iVelY,double &iVelZ); reads tip velocity for phantom num
-	the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
-	Note that velocity is expressed in mm/sec with respect to a Ghost reference frame (X: right, Y: up, Z: toward user)
-	
+  ReadVelocityPhantom(int num,double &iVelX,double &iVelY,double &iVelZ); reads tip velocity for phantom num
+  the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
+  Note that velocity is expressed in mm/sec with respect to a Ghost reference frame (X: right, Y: up, Z: toward user)
+  
 
-  	  \fn       int ReadVelocityPhantom
-	  \param	int num
-	  \param	int iVelX
-	  \param	int iVelY
-	  \param	int iVelZ
+      \fn       int ReadVelocityPhantom
+    \param  int num
+    \param  int iVelX
+    \param  int iVelY
+    \param  int iVelZ
 */
 //===========================================================================
 FUNCTION int __stdcall   ReadVelocityPhantom(int num, 
-									  double &iVelX,
-									  double &iVelY,
-									  double &iVelZ)
+                    double &iVelX,
+                    double &iVelY,
+                    double &iVelZ)
 {
-	if ((lib_loaded) && (deviceReady))
-		return GetV(num, iVelX, iVelY, iVelZ);
-	else 
-		return PH_DLL_PROBLEM;
+  if ((lib_loaded) && (deviceReady))
+    return GetV(num, iVelX, iVelY, iVelZ);
+  else 
+    return PH_DLL_PROBLEM;
+}
 
+
+//==========================================================================
+/*!
+  Reads the scale factor from mm to normalized
+  coordinates for Phantom num.  Multiply normalized coordinates by this value to
+  get back to mm.
+
+  \fn     double GetWorkspaceScalePhantom(int num);
+  \param  int num   handle to the phantom
+  \return error code
+*/
+//===========================================================================
+FUNCTION int __stdcall   GetWorkspaceScalePhantom(const int& num, double& scale)
+{
+
+  if (GetWSS && (lib_loaded) && (deviceReady)) {
+    int result = GetWSS(num, scale);
+    return result;
+  }
+  else {
+    return PH_DLL_PROBLEM;
+  }
 }

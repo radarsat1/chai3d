@@ -30,7 +30,7 @@ cCollisionSpheresNode* g_nextInternalNode;
 cCollisionSpheresLeaf* g_nextLeafNode;
 //! A "sufficiently small" number; zero within tolerated precision.
 const double LITTLE = 1e-10;
-//! A "sufficently large" number; effectively infinity.
+//! A "sufficiently large" number; effectively infinity.
 const double LARGE = 1e10;
 //---------------------------------------------------------------------------
 
@@ -51,6 +51,7 @@ cCollisionSpheres::cCollisionSpheres(vector<cTriangle> *a_triangles,
     m_trigs = a_triangles;
     m_useNeighbors = a_useNeighbors;
     m_root = NULL;
+    m_firstLeaf = 0;
 
     // set material properties
     m_material.m_ambient.set(0.1, 0.3, 0.1, 0.3);
@@ -72,11 +73,14 @@ cCollisionSpheres::~cCollisionSpheres()
 {
     // delete array of internal nodes
     if (m_root != NULL)
-        delete[] m_root;
+        delete [] m_root;
 
     // delete array of leaf nodes
-    if ((m_trigs) && (m_trigs->size() > 1) && (m_firstLeaf))
-        delete[] m_firstLeaf;
+    // if ((m_trigs) && (m_trigs->size() > 1) && (m_firstLeaf))
+    if (m_firstLeaf) {
+        delete [] m_firstLeaf;
+        m_firstLeaf = 0;
+    }
 }
 
 
@@ -135,7 +139,7 @@ void cCollisionSpheres::initialize()
 /*!
     Draw the collision spheres at the given level.
 
-    \fn       void cCollisionSpheres::draw(int depth)
+    \fn       void cCollisionSpheres::render(int depth)
     \param    depth   Only draw nodes at this depth in the tree.
 */
 //===========================================================================
@@ -189,7 +193,7 @@ void cCollisionSpheres::render()
     \param    a_segmentPointA  Initial point of segment.
     \param    a_segmentPointB  End point of segment.
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle Returns pointer to nearest colided triangle.
+    \param    a_colTriangle Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.
@@ -272,15 +276,14 @@ bool cCollisionSpheres::computeCollision(cVector3d& a_segmentPointA,
     }
 
     // create a cCollisionSpheresLine object and enclose it in a sphere leaf
-    cCollisionSpheresLine* curLine = new cCollisionSpheresLine(a_segmentPointA,
-            a_segmentPointB);
-    cCollisionSpheresLeaf* lineSphere = new cCollisionSpheresLeaf(curLine);
+    cCollisionSpheresLine curLine(a_segmentPointA,a_segmentPointB);
+    cCollisionSpheresLeaf lineSphere(&curLine);
 
     // test for intersection between the line segment and the root of the
     // collision tree; the root will recursively call children down the tree
     a_colSquareDistance = dir.lengthsq();
     bool result = cCollisionSpheresSphere::computeCollision(m_root, a_colObject,
-            a_colTriangle, a_colPoint, a_colSquareDistance, lineSphere);
+            a_colTriangle, a_colPoint, a_colSquareDistance, &lineSphere);
 
     // if there was a collision, set m_lastCollision to the intersected triangle
     // returned by the call to the root of the tree, and set the output
@@ -295,9 +298,9 @@ bool cCollisionSpheres::computeCollision(cVector3d& a_segmentPointA,
         m_lastCollision = NULL;
     }
 
-    // delete stack-allocated local variables
-    delete curLine;
-    delete lineSphere;
+    // This prevents the destructor from deleting a stack-allocated SpheresLine
+    // object
+    lineSphere.m_prim = 0;
 
     // return whether there was an intersection
     return result;
@@ -415,26 +418,16 @@ cCollisionSpheresNode::cCollisionSpheresNode(std::vector<cTriangle>* a_tris,
     for (unsigned int i=0; i<a_tris->size(); i++)
     {
         // create cCollisionSpheresPoint primitive object for first point
-        cVector3d vpos =  (*a_tris)[i].getVertex0()->getPos();
-        cCollisionSpheresPoint* p1 = new cCollisionSpheresPoint(
-                vpos.x, vpos.y, vpos.z);
+        cVector3d vpos1 =  (*a_tris)[i].getVertex0()->getPos();
+        cVector3d vpos2 =  (*a_tris)[i].getVertex0()->getPos();
+        cVector3d vpos3 =  (*a_tris)[i].getVertex0()->getPos();
 
-        // create cCollisionSpheresPoint primitive object for second point
-        vpos =  (*a_tris)[i].getVertex1()->getPos();
-        cCollisionSpheresPoint* p2 = new cCollisionSpheresPoint(
-                vpos.x, vpos.y, vpos.z);
+        cCollisionSpheresTri* t = new cCollisionSpheresTri(vpos1,vpos2,vpos3);
 
-        // create cCollisionSpheresPoint primitive object for third point
-        vpos =  (*a_tris)[i].getVertex2()->getPos();
-        cCollisionSpheresPoint* p3 = new cCollisionSpheresPoint(
-                vpos.x, vpos.y, vpos.z);
-
-        // create cCollisionSpheresTri primitive object
-        cCollisionSpheresTri* temp = new cCollisionSpheresTri(p1, p2, p3);
-        temp->setOriginal(&(*a_tris)[i]);
+        t->setOriginal(&(*a_tris)[i]);
 
         // insert new object in primitives list
-        primList.insert(primList.end(), temp);
+        primList.insert(primList.end(), t);
     }
 
     // set parent pointer
@@ -728,23 +721,15 @@ cCollisionSpheresLeaf::cCollisionSpheresLeaf(cTriangle* a_tri,
                                              cCollisionSpheresSphere(a_parent)
 {
     // create cCollisionSpheresPoint primitive object for first point
-    cVector3d vpos = a_tri->getVertex0()->getPos();
-    cCollisionSpheresPoint* p1 = new cCollisionSpheresPoint(vpos.x, vpos.y, vpos.z);
+    cVector3d vpos0 = a_tri->getVertex0()->getPos();
+    cVector3d vpos1 = a_tri->getVertex1()->getPos();
+    cVector3d vpos2 = a_tri->getVertex2()->getPos();
 
-    // create cCollisionSpheresPoint primitive object for second point
-    vpos = a_tri->getVertex1()->getPos();
-    cCollisionSpheresPoint* p2 = new cCollisionSpheresPoint(vpos.x, vpos.y, vpos.z);
-
-    // create cCollisionSpheresPoint primitive object for third point
-    vpos = a_tri->getVertex2()->getPos();
-    cCollisionSpheresPoint* p3 = new cCollisionSpheresPoint(vpos.x, vpos.y, vpos.z);
-
-    // create cCollisionSpheresTri primitive object
-    cCollisionSpheresTri* temp = new cCollisionSpheresTri(p1, p2, p3);
+    cCollisionSpheresTri* t = new cCollisionSpheresTri(vpos0,vpos1,vpos2);
 
     // set pointers
-    temp->setOriginal(a_tri);
-    m_prim = temp;
+    t->setOriginal(a_tri);
+    m_prim = t;
     m_prim->setSphere(this);
     m_parent = a_parent;
 
@@ -788,7 +773,7 @@ void cCollisionSpheresLeaf::draw(int a_depth)
               double& a_colSquareDistance, cCollisionSpheresLeaf *a_sb)
     \param    a_sa  One sphere tree leaf to check for collision.
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle  Returns pointer to nearest colided triangle.
+    \param    a_colTriangle  Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.

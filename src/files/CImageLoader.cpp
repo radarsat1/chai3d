@@ -24,7 +24,9 @@
 #include "CImageLoader.h"
 #include "CFileLoaderBMP.h"
 #include "CFileLoaderTGA.h"
-#include "cMacrosGL.h"
+#include "CMacrosGL.h"
+#include <gl/gl.h>
+//---------------------------------------------------------------------------
 
 #ifdef _WIN32
 
@@ -51,7 +53,7 @@
 
 //===========================================================================
 /*!
-    Default onstructor of cImageLoader
+    Default constructor of cImageLoader
 
     \fn     cImageLoader::cImageLoader()
 */
@@ -71,7 +73,7 @@ cImageLoader::cImageLoader()
     Use the initialized() function to determine whether loading
     was successful.
 
-    \fn     cImageLoader::cImageLoader(char* a_filename)
+    \fn     cImageLoader::cImageLoader(const char* a_filename)
     \param  a_filename  Image filename
 */
 //===========================================================================
@@ -110,8 +112,8 @@ void cImageLoader::defaults()
 {
     m_filename[0] = '\0';
     m_width = m_height = -1;
-    m_data = 0;
-    m_initialized = 0;
+    m_data = NULL;
+    m_initialized = false;
 }
 
 
@@ -127,6 +129,171 @@ void cImageLoader::cleanup()
 {
     if (m_data) delete [] m_data;
     defaults();
+}
+
+
+//===========================================================================
+/*!
+    Get the color of a pixel by passing its x and y coordinate
+
+    \fn     cColorb cImageLoader::getPixelColor(const unsigned int a_x, const
+            unsigned int a_y)
+
+    \param  a_x X coordinate of the pixel
+    \param  a_y Y coordinate of the pixel
+    \return return the color of the pixel
+*/
+//===========================================================================
+cColorb cImageLoader::getPixelColor(const unsigned int a_x, const unsigned int a_y)
+{
+    if ((a_x < ((unsigned int)(m_width))) && (a_y < ((unsigned int)(m_height))))
+    {
+        if (m_format == GL_RGBA)
+        {
+            unsigned int index = 4 * (a_x + a_y * m_width);
+            cColorb result;
+            int* pColor = (int*)result.pColor();
+            int* pData = (int*)&(m_data[index]);
+            *pColor = *pData;
+            return (result);
+        }
+        else
+        {
+            return (cColorb(0,0,0,0));
+        }
+    }
+    else
+    {
+        return (cColorb(0,0,0,0));
+    }
+}
+
+
+//===========================================================================
+/*!
+    Set the color of a pixel
+
+    \fn     void cImageLoader::setPixelColor(const unsigned int a_x,
+            const unsigned int a_y, const cColorb& a_color)
+
+    \param  a_x X coordinate of the pixel
+    \param  a_y Y coordinate of the pixel
+    \param  new color of the pixel
+*/
+//===========================================================================
+void cImageLoader::setPixelColor(const unsigned int a_x, const unsigned int a_y, const cColorb& a_color)
+{
+    if ((a_x < ((unsigned int)(m_width))) && (a_y < ((unsigned int)(m_height))))
+    {
+        if (m_format == GL_RGBA)
+        {
+            unsigned int index = (a_x + a_y * m_width);
+            int* pData = (int*)m_data;
+            int* pColor = (int*)a_color.pColor();
+            pData[index] = *pColor;
+        }
+    }
+}
+
+
+//===========================================================================
+/*!
+    Clear an image with a defined color
+
+    \fn     void cImageLoader::clear(const cColorb& a_color)
+    \param  new color of the image
+*/
+//===========================================================================
+void cImageLoader::clear(const cColorb& a_color)
+{
+    // check if image exists
+    if (!m_initialized) { return; }
+
+    // clear the image when the format is of type GL_RGBA
+    if (m_format == GL_RGBA)
+    {
+        int color = *(int*)(a_color.pColor());
+        int* pData = (int*)m_data;
+        int size = m_width * m_height;
+        int i;
+        for (i=0; i<size; i++)
+        {
+            *pData = color;
+            pData++;
+        }
+    }
+}
+
+
+//===========================================================================
+/*!
+    Replace a specific color in the image by a new one
+
+    \fn     void cImageLoader::replace(const cColorb& a_oldColor,
+            const cColorb& a_newColor)
+
+    \param  a_oldColor  Old color to be replaced
+    \param  a_newColor  New color that shall replace the old one
+*/
+//===========================================================================
+void cImageLoader::replace(const cColorb& a_oldColor, const cColorb& a_newColor)
+{
+    // check if image exists
+    if (!m_initialized) { return; }
+
+    // clear the image when the format is of type GL_RGBA
+    if (m_format == GL_RGBA)
+    {
+        int oldColor = *(int*)(a_oldColor.pColor());
+        int newColor = *(int*)(a_newColor.pColor());
+
+        int* pData = (int*)m_data;
+        int size = m_width * m_height;
+        int i;
+        for (i=0; i<size; i++)
+        {
+            if (*pData == oldColor)
+            {
+                *pData = newColor;
+            }
+            pData++;
+        }
+    }
+}
+
+
+//===========================================================================
+/*!
+    Allocate a new image by defining its size.
+
+    \fn     void cImageLoader::allocate(const unsigned int a_width,
+            const unsigned int a_height)
+
+    \param  a_width     Width of new image
+    \param  a_height    Height of new image
+*/
+//===========================================================================
+void cImageLoader::allocate(const unsigned int a_width, const unsigned int a_height)
+{
+    // cleanup previous image
+    cleanup();
+
+    // allocate memory
+    m_width = a_width;
+    m_height = a_height;
+    m_bits_per_pixel = 32;
+    m_format = GL_RGBA;
+    m_initialized = true;
+    m_data = new unsigned char[m_width * m_height * (m_bits_per_pixel / 8) ];
+
+    // check if memory has been allocated, otherwise cleanup.
+    if (m_data == NULL)
+    {
+        cleanup();
+    }
+
+    cColorb color(0, 0, 0, 0);
+    clear(color);
 }
 
 
@@ -159,9 +326,10 @@ int cImageLoader::loadFromFile(const char* filename)
     char* extension = find_extension(filename);
 
     // We need a file extension to figure out file type
-    if (extension == 0) {
-      cleanup();
-      return -1;
+    if (extension == 0)
+    {
+        cleanup();
+        return -1;
     }
 
     char lower_extension[1024];
@@ -251,8 +419,8 @@ int cImageLoader::loadFromFile(const char* filename)
     //--------------------------------------------------------------------
     // Unrecognized file format - use win32 loader
     //--------------------------------------------------------------------
-    else {
-
+    else
+    {
       return loadFromFileOLE(filename);
 
     }
@@ -271,7 +439,8 @@ int cImageLoader::loadFromFile(const char* filename)
         // that might be stored within model files.
 
         // Make sure we can actually build a replacement extension...
-        if (extension == 0) {
+        if (extension == 0)
+        {
             m_initialized = 0;
             return -1;
         }
@@ -294,9 +463,10 @@ int cImageLoader::loadFromFile(const char* filename)
     //--------------------------------------------------------------------
     // Unrecognized file format
     //--------------------------------------------------------------------
-    else {
-      m_initialized = 0;
-      return -1;
+    else
+    {
+        m_initialized = false;
+        return -1;
     }
 
 #endif
@@ -312,18 +482,44 @@ int cImageLoader::loadFromFile(const char* filename)
 }
 
 
+
+//===========================================================================
+/*!
+  Copies the string a_input to a_dest, replacing a_input's extension
+  \fn     replace_extension(char* a_dest, const char* a_input, const char* a_extension);
+  \param  char* a_input The input filename
+  \param  char* a_dest  The output filename
+  \param  char* a_extension  The extension to replace a_input's extension with
+
+*/
+//===========================================================================
+void replace_extension(char* a_dest, const char* a_input, const char* a_extension)
+{
+    int chars_to_copy = strlen(a_input);
+
+    // Copy only the non-extension portion of a_input if he has an extension
+    char* input_extension = 0;
+    if (input_extension = find_extension(a_input,1))
+      chars_to_copy = input_extension - a_input;
+
+    strncpy(a_dest,a_input,chars_to_copy);
+    a_dest[chars_to_copy] = '\0';
+    strcat(a_dest,".");
+    strcat(a_dest,a_extension[0]=='.'?a_extension+1:a_extension);
+}
+
 //===========================================================================
 /*!
     Finds the extension in a filename and returns a pointer
     to the character after the '.' in the original string,
     or 0 if no '.' is found.
 
-    \fn     char* find_extension(const char* input);
+    \fn     char* find_extension(const char* input, const bool include_dot=0);
     \param  char* a_input The input filename string
     \return Returns a pointer to the character after the '.', or 0 for an error
 */
 //===========================================================================
-char* find_extension(const char* a_input)
+char* find_extension(const char* a_input, const bool include_dot)
 {
     int length = strlen(a_input);
 
@@ -334,15 +530,16 @@ char* find_extension(const char* a_input)
     curpos--;
 
     // Look for the last '.'
-    while( (curpos > a_input) && (*curpos != '.')) {
-      if (*curpos == '\\') return 0;
-      curpos--;
+    while( (curpos > a_input) && (*curpos != '.'))
+    {
+        if (*curpos == '\\') return 0;
+        curpos--;
     }
 
     // No '.' found
     if (curpos == a_input) return 0;
 
-    return curpos + 1;
+    return include_dot?curpos:(curpos + 1);
 }
 
 
@@ -365,8 +562,8 @@ void cImageLoader::convertToRGBA()
     int size = m_width*m_height;
     unsigned char* original_image_pos = m_data;
     unsigned char* new_image_pos = data;
-    for(int i=0; i<size; i++) {
-
+    for(int i=0; i<size; i++)
+    {
       new_image_pos[0] = original_image_pos[0];
       new_image_pos[1] = original_image_pos[1];
       new_image_pos[2] = original_image_pos[2];
@@ -374,7 +571,6 @@ void cImageLoader::convertToRGBA()
 
       new_image_pos += 4;
       original_image_pos += 3;
-
     }
 
     delete [] m_data;
@@ -390,55 +586,61 @@ void cImageLoader::convertToRGBA()
     _no_ trailing '\\'.  If there's no /'s or \\'s, writes an
     empty string
 
-    \fn     void find_directory(char* a_dest, const char* a_source)
+    \fn     bool find_directory(char* a_dest, const char* a_source)
     \param  a_dest    String which will contain the directory name
     \return a_source  Input string containing path and filename
 */
 //===========================================================================
-void find_directory(char* a_dest, const char* a_source)
+bool find_directory(char* a_dest, const char* a_source)
 {
     strcpy(a_dest,a_source);
 
     int len = strlen(a_dest);
     int last_separator_index = 0;
 
-    for(int i=0; i<len; i++) {
-      if (a_dest[i] == '/' || a_dest[i] == '\\') last_separator_index = i;
+    for(int i=0; i<len; i++)
+    {
+        if (a_dest[i] == '/' || a_dest[i] == '\\') last_separator_index = i;
     }
 
     a_dest[last_separator_index] = '\0';
+
+    if (last_separator_index == 0) return false;
+    return true;
 }
 
 
 //===========================================================================
 /*!
-Discards the path component of a filename and returns the filename itself,
-optionally including the extension, in a_dest
+    Discards the path component of a filename and returns the filename itself,
+    optionally including the extension, in a_dest
 
-\fn     void find_filename(char* a_dest, const char* a_input, bool a_includeExtension);
-\param  a_dest    String which will contain the resulting filename
-\param  a_input   Input string containing path and filename
-\param  a_includeExtension Should the output include the extension?
+    \fn     void find_filename(char* a_dest, const char* a_input, bool a_includeExtension);
+    \param  a_dest    String which will contain the resulting filename
+    \param  a_input   Input string containing path and filename
+    \param  a_includeExtension Should the output include the extension?
 */
 //===========================================================================
-void find_filename(char* a_dest, const char* a_input, bool a_includeExtension)
+void find_filename(char* a_dest, const char* a_input, const bool a_includeExtension)
 {
-  // Find the last '/' or '\' in the filename
-  int len = strlen(a_input);
-  int last_separator_index = 0;
+    // Find the last '/' or '\' in the filename
+    int len = strlen(a_input);
+    int last_separator_index = 0;
 
-  for(int i=0; i<len; i++) {
-    if (a_input[i] == '/' || a_input[i] == '\\') last_separator_index = i;
-  }
+    for(int i=0; i<len; i++)
+    {
+        if (a_input[i] == '/' || a_input[i] == '\\') last_separator_index = i;
+    }
 
-  // Copy the whole filename (including extension)
-  strcpy(a_dest,a_input+last_separator_index+1);
+    // Copy the whole filename (including extension)
+    strcpy(a_dest,a_input+last_separator_index+1);
 
-  // If we don't want the extension, trim it off
-  if (a_includeExtension == false) {
-    char* ext = find_extension(a_dest);
-    if (ext) *ext = 0;    
-  }
+    // If we don't want the extension, trim it off
+    if (a_includeExtension == false)
+    {
+        char* ext = find_extension(a_dest);
+        if (ext) *ext = 0;
+    }
 }
 
 
@@ -464,8 +666,16 @@ void string_tolower(char* a_dest, const char* a_source)
 }
 
 
+//===========================================================================
+/*!
+    Load an Image file using windows loader.
 
-int cImageLoader::loadFromFileOLE(const char* szPathName) {
+    \fn    int cImageLoader::loadFromFileOLE(const char* szPathName)
+    \param  szPathName    filename
+*/
+//===========================================================================
+int cImageLoader::loadFromFileOLE(const char* szPathName)
+{
 
 #ifndef _WIN32
   
@@ -513,6 +723,7 @@ int cImageLoader::loadFromFileOLE(const char* szPathName) {
       }
 
       if(FAILED(hr)) {
+        //CHAI_DEBUG_PRINT("Warning: could not load image file %s...\n",szPathName);
         return -1;
       }
     }
@@ -588,4 +799,53 @@ int cImageLoader::loadFromFileOLE(const char* szPathName) {
     return 0;
 #endif
 
+}
+
+
+//===========================================================================
+/*!
+    Global function to read the contents of a file.  Caller is responsible
+    for deleting the allocated memory.
+
+    \fn     unsigned char* readFile(const char* a_filename, bool a_readAsText);
+    \param  a_filename    The file to read
+    \param  a_readAsText  if true, the file is opened in text mode (if supported)
+                          and a null character is appended to the returned value
+    \return A buffer containing the file contents, or 0 for an error                          
+*/
+//===========================================================================
+unsigned char* readFile(const char* a_filename, bool a_readAsText)
+{
+    
+    if (a_filename == 0) return 0;
+
+    // Open the file
+    FILE *f = 0;
+    f = fopen(a_filename,a_readAsText?"rt":"rb");
+
+    // Check for file-open errors
+    if (f == 0) return 0;
+
+    // See how big the file is
+    unsigned int filesize=0;
+    fseek(f, 0, SEEK_END);
+    filesize = ftell(f);
+    rewind(f);
+
+    if (filesize == 0) { fclose(f); return 0; }
+
+    unsigned char *contents = 0;
+
+    // Allocate one extra byte if we're reading in text mode
+    contents = new unsigned char[a_readAsText?filesize+1:filesize];
+
+    // Read the file
+    unsigned int bytesread = fread(contents,sizeof(char),filesize,f);
+          
+    // Append a null character if necessary
+    if (a_readAsText) contents[bytesread] = '\0';
+    
+    fclose(f);
+      
+    return contents;
 }

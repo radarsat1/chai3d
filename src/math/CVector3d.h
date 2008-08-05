@@ -25,6 +25,7 @@
 #define CVector3dH
 //---------------------------------------------------------------------------
 #include "CString.h"
+#include "CConstants.h"
 #include <math.h>
 //---------------------------------------------------------------------------
 
@@ -57,36 +58,48 @@ struct cVector3d
     // CONSTRUCTOR & DESTRUCTOR:
     //-----------------------------------------------------------------------
     /*!
-      Constructor of cVector3d.
+      Constructors of cVector3d.
+
+      You can initialize a cVector3d from any of the following:
+
+      char*
+      string
+      double,double,double
+      cVector3d
+      double*
+      float*
+
+      See the set(char*) function for a description of the acceptable
+      string formats.
     */
     //-----------------------------------------------------------------------
     cVector3d() {}
-
-      
+    cVector3d(const char*& a_initstr) { set(a_initstr); }
+    cVector3d(const string& a_initstr) { set(a_initstr); }
+    cVector3d(const double& a_x, const double &a_y,
+      const double& a_z){ x = a_x, y = a_y, z = a_z; }
+    cVector3d(const cVector3d& a_source) { copyfrom(a_source); }
+    cVector3d(const double*& a_in) { x = a_in[0]; y = a_in[1]; z = a_in[2]; }
+    cVector3d(const float*& a_in)  { x = a_in[0]; y = a_in[1]; z = a_in[2]; }
+     
+    // OVERLOADED CAST OPERATORS:
     //-----------------------------------------------------------------------
     /*!
-      Constructor of cVector3d. Components X, Y and Z are passed
-      as parameter.
+      Cast to a double*
 
-      \param  a_x  X component.
-      \param  a_y  Y component.
-      \param  a_z  Z component.
+      This replaces the previous [] operators (without breaking existing 
+      code).
     */
     //-----------------------------------------------------------------------
-    cVector3d(const double& a_x, const double& a_y, const double& a_z)
-    {
-      x = a_x;
-      y = a_y;
-      z = a_z;
-      };
-
-
-      // METHODS:
-      //-----------------------------------------------------------------------
-      /*!
-          Clear vector with zeros.
-      */
-      //-----------------------------------------------------------------------
+    operator double* () { return &x; }
+    operator const double* () const { return (const double*)&x; } 
+    
+    // METHODS:
+    //-----------------------------------------------------------------------
+    /*!
+        Clear vector with zeros.
+    */
+    //-----------------------------------------------------------------------
     inline void zero()
     {
       x = 0.0;
@@ -107,11 +120,7 @@ struct cVector3d
     {
         return ((double*)(this))[a_component];
     }
-    inline double operator[] (const unsigned int& a_component) const
-    {
-        return ((double*)(this))[a_component];
-    }
-
+    
     /*!
         An overloaded /= operator for vector/scalar division
     */
@@ -151,23 +160,7 @@ struct cVector3d
       y -= a_input.y;
       z -= a_input.z;      
     }
-
-    //-----------------------------------------------------------------------
-    /*!
-        Return the i th component of the vector. a_component = 0 return x,
-        a_component = 1 returns y, a_component = 2 returns z.
-
-        This is the non-const version of this function, so its return value
-        can be used as an l-value.
-
-        \param  a_component  component number
-    */
-    //-----------------------------------------------------------------------
-    inline double& operator[] (const unsigned int& a_component)
-    {
-        return ((double*)(this))[a_component];
-    }
-
+    
     //-----------------------------------------------------------------------
     /*!
       Initialize 3 dimensional vector with parameters \c a_X, \c a_Y
@@ -185,6 +178,61 @@ struct cVector3d
       z = a_z;
     }
 
+    //-----------------------------------------------------------------------
+    /*!
+      Initialize a vector from a string of the form (x,y,z), the
+      same form produced by str().  Will actually accept any of the
+      following forms:
+
+      (4.3,23,54)
+      4.3 54 2.1
+      4.5,7.8,9.1      
+
+      ...i.e., it expects three numbers, optionally preceded
+      by '(' and whitespace, and separated by commas or whitespace.
+
+      \param   a_initStr The string to convert
+      \return  TRUE if conversion was successful.
+    */
+    //-----------------------------------------------------------------------
+    inline bool set(const char* a_initStr)
+    {
+      if (a_initStr == 0) return false;
+
+      double ax,ay,az;
+
+      // Look for a valid-format string
+      // Ignore leading whitespace and ('s
+      const char* curpos = a_initStr;
+      while(
+        (*curpos != '\0') && 
+        (*curpos == ' ' || *curpos == '\t' || *curpos == '(')
+        )
+          curpos++;      
+        
+      int result = sscanf(curpos,"%lf%*[ ,\t\n\r]%lf%*[ ,\t\n\r]%lf",&ax,&ay,&az);
+
+      // Make sure the conversion worked
+      if (result !=3) return false;
+
+      // Copy the values we found
+      x = ax; y = ay; z = az;
+      return true;
+    }
+
+    //-----------------------------------------------------------------------
+    /*!
+    Initialize a vector from a string of the form (x,y,z) (the
+    same form produced by str() )
+
+    \param   a_initStr The string to convert
+    \return  TRUE if conversion was successful.
+    */
+    //-----------------------------------------------------------------------
+    inline bool set(const string& a_initStr)
+    {
+      return set(a_initStr.c_str());
+    }
 
     //-----------------------------------------------------------------------
     /*!
@@ -536,7 +584,7 @@ struct cVector3d
     \param  a_vector  Vector with which product is computed.
     */
     //-----------------------------------------------------------------------
-    inline void elementMul(const cVector3d& a_vector, cVector3d& a_result) const
+    inline void elementMulr(const cVector3d& a_vector, cVector3d& a_result) const
     {
       a_result.x = x*a_vector.x;
       a_result.y = y*a_vector.y;
@@ -573,7 +621,7 @@ struct cVector3d
     //-----------------------------------------------------------------------
     /*!
       Normalize current vector to become a vector of length one.\n
-      \b Warning: Vector should not be of equal to (0,0,0) or a division
+      \b Warning: Vector should not be equal to (0,0,0) or a division
       by zero error will occur. \n
       Result is stored in current vector.
     */
@@ -593,7 +641,7 @@ struct cVector3d
     //-----------------------------------------------------------------------
     /*!
       Normalize current vector to become a vector of length one. \n
-      \b WARNING: Vector should not be of equal to (0,0,0) or a division
+      \b WARNING: Vector should not be equal to (0,0,0) or a division
       by zero error will occur. \n
       Result is stored in \e a_result vector.
 
@@ -617,8 +665,8 @@ struct cVector3d
       Compute the distance between current point and an external point
       passed as parameter.
 
-      \param  a_vector  Point with which distance is measured.
-      \return  Returns distance between both points.
+      \param  a_vector  Point to which the distance is measured
+      \return  Returns distance between the points
     */
     //-----------------------------------------------------------------------
     inline double distance(const cVector3d& a_vector) const
@@ -635,11 +683,11 @@ struct cVector3d
 
     //-----------------------------------------------------------------------
     /*!
-      Compute the square distance between current point and an external
-      point passed as parameter.
+      Compute the square distance between the current point and an external
+      point.
 
-      \param  a_vector  Point with which square distance is measured.
-      \return  Returns square distance between both points.
+      \param  a_vector  Point to which squared distance is measured
+      \return  Returns the squared distance between the points
     */
     //-----------------------------------------------------------------------
     inline double distancesq(const cVector3d& a_vector) const
@@ -656,24 +704,29 @@ struct cVector3d
 
     //-----------------------------------------------------------------------
     /*!
-      Compare if current vector and external vector passed as parameter
-      are equal.
+      Test whether the current vector and an external vector are equal.
 
       \param    a_vector  Vector with which equality is checked.
+      \param    epsilon  Two vectors will be considered equal if each
+                component is within epsilon units.  Defaults
+                to zero.
       \return   Returns \c true if both vectors are equal, otherwise
-            returns \c false.
+                returns \c false.
     */
     //-----------------------------------------------------------------------
-    inline bool equals(const cVector3d& a_vector) const
+    inline bool equals(const cVector3d& a_vector, const double epsilon=0.0) const
     {
-      if ( (x == a_vector.x) && (y == a_vector.y) && (z == a_vector.z) )
-      {
-        return (true);
+
+      // Accelerated path for exact equality
+      if (epsilon == 0.0) {      
+          if ( (x == a_vector.x) && (y == a_vector.y) && (z == a_vector.z) ) return true;
+          else return false;
       }
-      else
-      {
-        return (false);
-      }
+
+      if ((fabs(a_vector.x-x) < epsilon) &&
+          (fabs(a_vector.y-y) < epsilon) &&
+          (fabs(a_vector.z-z) < epsilon)) return true;
+      else return false;      
     }
 
 

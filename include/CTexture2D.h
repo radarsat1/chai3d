@@ -49,40 +49,88 @@ class cTexture2D
     ~cTexture2D();
 
     //! Load an image file (CHAI currently supports 24-bit .bmp and 32-bit .tga files)
-    bool loadFromFile(char* a_fileName);
+    bool loadFromFile(const char* a_fileName);
 
     //! Enable texturing and set this texture as the current texture
     void render();
-        
+
     //! Call this to force texture re-initialization
-    void markForUpdate() { m_update_texture_flag = 1; }
+    void markForUpdate() { m_updateTextureFlag = true; }
 
-    //! OpenGL texture mode (GL_MODULATE, GL_DECAL, GL_BLEND, GL_REPLACE, or -1 for "don't set")
-    GLint m_texture_environment_mode;
+    //! Set the environment mode (GL_MODULATE, GL_DECAL, GL_BLEND, GL_REPLACE, or -1 for "don't set")
+    void setEnvironmentMode(const GLint& a_environmentMode) { m_environmentMode = a_environmentMode; }
 
-    //! OpenGL texture quality, or -1 (default) to use the current quality level
-    GLint m_min_filter;
-    GLint m_mag_filter;
+    //! Get the environment mode status
+    GLint getEnvironmentMode() { return (m_environmentMode); }
+
+    //! Set the texture wrap mode
+    void setWrapMode(const GLint& a_wrapSmode, const GLint& a_wrapTmode);
+
+    //! Get the texture wrap mode of S
+    GLint getWrapSmode() { return (m_wrapSmode); }
+
+    //! Get the texture wrap mode of T
+    GLint getWrapTmode() { return (m_wrapSmode); }
+
+    //! set the magnification function
+    void setMagnificationFunction(GLint a_magnificationFunction);
+
+    //! get current magnification function
+    GLint getMagnificationFunction() { return (m_magnificationFunction); }
+
+    //! set the minification function
+    void setMinifyingFunction(GLint a_minifyingFunction);
+
+    //! get current magnification function
+    GLint getMinifyingFunction() { return (m_minifyingFunction); }
+
+    //! set spherical mapping mode ON or OFF
+    void setSphericalMappingEnabled(bool a_enabled) { m_useSphericalMapping = a_enabled; }
+
+    // get the status of the spherical mapping mode
+    bool getSphericalMappingEnabled() { return (m_useSphericalMapping); }
 
     //! Image loader (use this to get data about the texture itself)
-    cImageLoader m_image_loader;
-        
+    cImageLoader m_image;
+
+    //! Environmental color
+    cColorf m_color;
+
   private:
     // METHODS:
 
-    //! Reset internal variables. This function should be called only by constructors/
+    //! Reset internal variables. This function should be called only by constructors.
     void reset();
 
-    //! copy texture to memory video graphics card.
+    //! Initialize GL texture
     void update();
 
     // MEMBERS:
 
     //! If \b true, texture bitmap has not yet been sent to video card.
-    bool m_update_texture_flag;
+    bool m_updateTextureFlag;
 
     //! OpenGL texture ID number.
     GLuint m_textureID;
+
+    //! texture wrap parameter along S and T (GL_REPEAT or GL_CLAMP)
+    GLint m_wrapSmode;
+    GLint m_wrapTmode;
+
+    //! texture magnification function. (GL_NEAREST or GL_LINEAR)
+    GLint m_magnificationFunction;
+
+    //! texture minifying function. (GL_NEAREST or GL_LINEAR)
+    GLint m_minifyingFunction;
+
+    //! If \b true, we use GLU to build mipmaps.
+    bool m_useMipmaps;
+
+    //! If \b true, we use spherical mapping.
+    bool m_useSphericalMapping;
+
+    //! OpenGL texture mode (GL_MODULATE, GL_DECAL, GL_BLEND, GL_REPLACE)
+    GLint m_environmentMode;
 };
 
 //---------------------------------------------------------------------------

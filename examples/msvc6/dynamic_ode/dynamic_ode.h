@@ -39,8 +39,40 @@
 #include "CPrecisionTimer.h"
 #include "CLight.h"
 #include "CPrecisionClock.h"
-
 #include "CODEMesh.h"
+#include "CProxyPointForceAlgo.h"
+
+// A slightly modified proxy algorithm is required to support ODE;
+// we override the relevant functions in a subclass...
+class cODEProxy : public cProxyPointForceAlgo
+{    
+  
+protected:
+    //! Remove the approximate test for whether the proxy has reached the goal point; use exact distances
+    virtual bool goalAchieved(const cVector3d& a_proxy, const cVector3d& a_goal) const
+    {
+        // Always fail this test to force the proxy to continue...
+        return false;
+    }
+
+    //! Remove the offsetting of the goal to account for proxy volume; use exact collision vectors
+    virtual void offsetGoalPosition(cVector3d& a_goal, const cVector3d& a_proxy) const
+    {
+        // Leave the goal where it is...
+        return;
+    }
+  
+public:
+    //! A constructor that copies relevant initialization state from another proxy
+    cODEProxy(cProxyPointForceAlgo* a_oldProxy)
+    {
+        m_deviceGlobalPos = a_oldProxy->getDeviceGlobalPosition();
+        m_proxyGlobalPos = a_oldProxy->getProxyGlobalPosition();
+        m_lastGlobalForce.zero();
+        m_world = a_oldProxy->getWorld();
+        m_radius = a_oldProxy->getProxyRadius();
+    }
+};
 
 
 // A global function for sticking a cube in the given mesh

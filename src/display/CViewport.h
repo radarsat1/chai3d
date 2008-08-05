@@ -73,7 +73,7 @@ class cViewport
     cCamera* getCamera() const { return (m_camera); }
 
     //! Enable or disable rendering of this viewport
-    void setEnabled( const bool a_enabled ) { m_enabled = a_enabled; }
+    void setEnabled( const bool& a_enabled ) { m_enabled = a_enabled; }
     //! Get the rendering status of this viewport
     bool getEnabled() const { return (m_enabled); }
 
@@ -127,6 +127,13 @@ class cViewport
     //! Reconfigures the display context.
     bool update(bool resizeOnly=false);
 
+    // Project a world-space point from 3D to 2D, using my viewport xform, my
+    // camera's projection matrix, and his world's modelview matrix
+    cVector3d projectPoint(cVector3d& a_point);
+
+    //! It's useful to store the last viewport transformation, for gluProject'ing things
+    int m_glViewport[4];
+
   protected:
 
     // PROPERTIES:
@@ -175,13 +182,12 @@ class cViewport
     //! for finding global opengl state information
     static cViewport* lastActiveViewport;
 
-
     // METHODS:
 
     //! Clean up the current rendering context
     bool cleanup();
     //! Render the scene in OpenGL.  Nukes the contents of the GL buffers.
-    virtual bool renderView(const int a_imageIndex);
+    virtual bool renderView(const int a_imageIndex);   
     
 };
 

@@ -9,17 +9,17 @@
 // manual modifications will be lost.                                         
 // ************************************************************************ //
 
-// C++ TLBWRTR : $Revision: 1.4 $
-// File generated on 9/18/2005 10:21:38 PM from Type Library described below.
+// C++ TLBWRTR : $Revision: 1.14 $
+// File generated on 1/25/2006 8:50:17 PM from Type Library described below.
 
 // ************************************************************************  //
-// Type Lib: D:\chai3d\dev\chai3d\examples\bcpp6\active_x\ActiveFormProj.tlb (1)
+// Type Lib: C:\Chris\chai3d_current\examples\bcpp6\active_x\ActiveFormProj.tlb (1)
 // LIBID: {F1238B58-47BB-4D14-BFD2-315846C966A7}
 // LCID: 0
 // Helpfile: 
 // HelpString: ActiveFormProj Library
 // DepndLst: 
-//   (1) v2.0 stdole, (C:\WINDOWS\system32\stdole2.tlb)
+//   (1) v2.0 stdole, (C:\WINDOWS\System32\stdole2.tlb)
 // ************************************************************************ //
 
 #include <vcl.h>

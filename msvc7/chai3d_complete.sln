@@ -6,15 +6,12 @@ EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
-		Intel Release = Intel Release
 		Release = Release
 		Release with symbols = Release with symbols
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Debug.ActiveCfg = Debug|Win32
 		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Debug.Build.0 = Debug|Win32
-		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Intel Release.ActiveCfg = Intel Release|Win32
-		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Intel Release.Build.0 = Intel Release|Win32
 		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Release.ActiveCfg = Release|Win32
 		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Release.Build.0 = Release|Win32
 		{A9F01342-5463-4634-B1F9-BF98CD5591B0}.Release with symbols.ActiveCfg = Release with symbols|Win32

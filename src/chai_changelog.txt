@@ -1,3 +1,425 @@
+1/25/2006 - dmorris
+
+* Released version 1.41, with CVS files removed and some changes to the doxygen
+
+1/24/2006 - dmorris
+
+* To let the ODE example work without the awkward "m_movingProxy"
+  situation, I parsed a couple of tests in the proxy code out into
+  virtual methods, and let a custom proxy override those in the ODE
+  example.  All is now well and clean.
+
+
+1/23/2006 - Chris
+
+* Added "m_movingProxy" variable to cProxyPointForceAlgo and made recent changes
+  to this class, which had broken the ODE examples, conditional on this variable
+  being zero (the default).
+
+
+1/22/2006 - dmorris
+
+* Added an m_useNormalizedPositions variable to cGeneric3dofPointer; when this is set
+  to _false_ (the default is _true_), the position values returned by this class
+  should be in millimeters; normalization at the device and workspace stages
+  is bypassed.
+
+
+1/22/2006
+
+* Released version 1.4
+
+
+1/20/2006 - dmorris
+
+* Some more fixes:
+
+  * Reduced the stiffnesses for the earth and reflections examples; they
+    were _way_ above the acceptable stiffnesses for the Phantom.  Actually they
+    were way above the stiffnesses for the Omega also, but the Omega saturates
+    more cleanly than the Phantoms do.  Same for the Borland record_player.
+
+    * Note to team: don't increase the default stiffnesses; assume the person
+      who set them knocked them down from some unreasonable amoutn.
+
+  * We turned the dynamic proxy back _on_ in the record_player examples; it 
+    was necessary to correct for the disc's rotation.
+
+  * Lots of project-file fixes: removing dhdlib from all the msvc6 projects,
+    removing unnecessary toolkits from the Borland projects (which made the
+    annoying dclusr.bpi error go away)
+  
+  * Ironically, turning off software force limits in the PhantomHD lib caused
+    software force limits to kick in all the time.  Don't ask me.  Fixed.
+
+  * A bug in cDeltaDevices was freeing the dhd library every time a cDeltaDevice
+    was deleted, so the next one that came along had bad function pointers. 
+    Fixed, with additional error checks added for good measure.
+
+  * The glut projects each now refer to a _single_ main.cpp file; the point
+    of the glut projects is to be cross-platform, now they are.  This does
+    require an ifdef in the file itself because MSVC and Borland like slightly
+    different glut headers.
+
+  * Fixed lots of spelling errors in comments and some tab errors
+
+    * Note to team: use a spellcheck-enabled IDE and click on the wavy 
+      red lines
+
+    * Note to team: if you use MSVC6, be sure to change the default options
+      to replace tabs with spaces
+
+* Among many other fixes we've made in the last couple days, I renamed
+  timeoutOccured to timeoutOccurred and replaced it everywhere I found it.
+  Correcting spelling errors seems to be the protocol for this release.
+
+
+1/16/2006 - dmorris
+
+* Modified the comment above the CHAI_CMD_GET_POS_3D command (which no one uses)
+  to require this command to return positions in mm (it was previously 
+  unspecified)
+
+* Modified cDeltaDevices.cpp to comply with the above change and to implement
+  the CHAI_CMD_GET_NORMALIZED_SCALE_FACTOR command
+
+
+1/15/2006 - Francois
+
+* Added functionality in CImageLoader to read/write pixels, clear image and
+  allocate new images without having to load one
+
+* corrected a minor bug in the 3DS loader when the material shininess was being loaded.
+
+* Renamed m_imageLoader to m_image in CTexture2D (more generic definition) (BREAKING)
+
+* fixed a concept bug related to the scale function in cGenericObject. Create a virtual call named scaleObject.
+
+* extended cGeneric3dofPointer to support a default proxy and potential field model.
+  Several fixes to make sure all force rendering algorithms get initialized and called correctly
+
+* extended cTexture2D to support environment mapping
+
+* extended cshapeSphere to support texture properties. Corrected bug related to force computation.
+
+* created an new class cShapeTorus which renders graphically and haptically a torus
+
+* created an new example "reflections" which implements a simple dynamic torus. The applicatiuon uses a GLUT display.
+ 
+* created an new example "earth" which implements a dynamic textures sphere. The applicatiuon uses a GLUT display.
+
+
+1/9/2006 - dmorris
+
+* Added some default colors so you could quickly access an array of eight 
+  different colors; see cColor.h:
+
+  cColorf CHAI_BASIC_COLORS[8] = {
+    CHAI_COLOR_RED, CHAI_COLOR_GREEN, CHAI_COLOR_BLUE,
+    CHAI_COLOR_WHITE, CHAI_COLOR_BLACK, CHAI_COLOR_YELLOW,
+    CHAI_COLOR_AQUA, CHAI_COLOR_PURPLE
+  };
+
+* Added a getPhysicalDevice() method to the meta pointer, which lets you query
+  which physical device was opened (dhd, phantom, mpb, virtual, or uninitialized)
+
+* Fixed a minor bug in the cLabelPanel class that sometimes caused incorrect box
+  sizes when you first rendered a cLabelPanel.
+
+
+12/28/2005 - dmorris
+
+* Added rendering with vertex and fragment shaders, based on Emanuele's
+  example.  The cGenericShader class provides generic "load" functions,
+  and calls functions to install itself before rendering all of its 
+  children.  So to use a CHAI shader, you'll load it into a cGenericShader
+  object and put any objects that should be shaded below him in the hierarchy.
+
+  The cGLSLShader class is currently the only subclass; this implements the
+  cGenericShader functionality for GLSL programs.  Example shaders have been
+  put in the bin/resources/shaders directory.
+
+* Added rendering from vertex buffers, via the cVBOMesh class.  This class
+  is a drop-in replacement for cMesh, but on systems that support VBO's, 
+  it will use them and should be faster.  On systems that don't support VBO's,
+  this class behaves just like a cMesh.
+
+  The MSVC object_loader example now uses vertex buffers by default.
+
+
+12/27/2005 - dmorris
+
+* Added some more 2D functionality to CHAI.  In particular, I added three
+  classes:
+
+  * c2DPanel - a rectangle that can be just a rectangle or can be used to show
+               images in 2D or 3D
+  * cFont - a generic font interface, with a win32-specific subclass that uses
+            GL textures for text-rendering.  A static function is provided to
+            access actual subclass objects, depending on the current platform.
+  * cLabelPanel - a subclass of c2DPanel that draws lines of text to the screen,
+                  optionally with little colored squares next to each line (like
+                  a graph key).
+
+  The MSVC object_loader now shows a label to indicate the currently-loaded
+  file, which is a simple example of how to use the new 2D classes.
+
+
+12/21/2005 - dmorris
+
+* Fixed some memory leaks:
+
+  * Triangle neighbor lists were never being cleared, so both
+    collision detectors were leaking.  Fixed.
+
+  * The sphere tree classes had a couple of non-virtual destructors,
+    which was causing memory leaks by virtue of subclass destructors
+    not getting called.  Fixed.
+
+  * The sphere tree was using a lot of new'ing that it didn't need to
+    use, so I made a lot of pointer variables non-pointer.  This
+    cleaned up memory leaks on the order of 10MB for each loaded model,
+    and should speed up the sphere trees, since it was actually calling
+    new a few times at every collision test.
+
+* This line in cMesh was causing problems:
+
+  m_freeTriangles.erase(0);
+
+  ...we really meant m_freeTriangles.erase(m_freeTriangles.begin()) or
+  just m_freeTriangles.pop_front().  Fixed.
+
+* Fixed some of the demos that no longer compiled because of the missing
+  dhd libraries (there are more to fix, though) (I'll catch all these
+  when I do a mass-compilation before the next release)
+
+* The .obj and .3ds loaders have typically made no effort to share vertices
+  among triangles, creating lots of unnecessary vertices.  Some time ago,
+  I added secret global variables called g_objLoaderShouldGenerateExtraVertices
+  and g_3dsLoaderShouldGenerateExtraVertices, which were true by default.
+  I always set them to false in my apps, and I wanted to confirm that nothing
+  would break down when we used shared vertices correctly.  Everything has been
+  fine for a while, so I made _false_ the default now.  All your CHAI apps should
+  render faster.
+
+  If for some reason you _need_ un-shared vertices in all your models, set 
+  these variables to _true_ in your applications.
+
+* In the OpenHaptics library, I turned _off_ the "software force limit" and
+  turned on the "force clamping".  This means that instead of crapping out
+  at high forces, Phantom apps will saturate nicely.  I also added some useful
+  debugging code - commented out by default - to check the OpenHaptics
+  version and to access various OpenHaptics options related to force limits,
+  errors, etc.
+
+
+
+11/25/2005 - Francois
+
+* Removed the dhdms.lib, dhdbl.lib and dhdc.h files. 
+* Modified CDeltaDevices to dynamicaly load dhd.dll calls.  
+
+
+11/20/2005 - Francois
+
+* Implemented a force model initialization in cGeneric3dofPointer::initialize()
+  so that the proxy's position starts where the device is located.
+
+
+11/19/2005 - Francois
+
+* added an example 'nano_world' (bbcp6)
+* fixed a minor bug in shapes demo (bbcp6)
+* updated spring demo (bbcp6)
+* extended createNeighborLists to parse children
+* corrected minor bug in CProxyPointForceAlgo which caused the proxy to pop through.
+
+
+11/14/2005 - Chris
+
+* There appeared to be a new version of PhantomDriver.lib that was updated
+  for MSVC but not Borland, causing the Borland examples to be unable to 
+  link.  I created a Borland version of the new library using COFF2OFM and
+  checked it in in lib\bbcp6.
+
+
+11/11/2005 - dmorris
+
+* If wglMakeCurrent() fails, the viewport now attempts one call to update()
+  before giving up.  This means that if you call viewport->renderView() from
+  different threads at different times, your program will still work.  This
+  doesn't mean you should call it _simultaneously_ from multiple threads, 
+  but if rendering moves from one thread to another, that's okay.
+
+  Previously all rendering had to be done on the thread that created the
+  context.
+
+* I upgraded to the 9.0 Intel Compiler, which required upgrading the 
+  .icproj file.  I left the old one there as
+  chai3d_complete.icproj.intel_8_1_compiler, since many folks still have 
+  the 8.1 compiler.
+
+  None of this affects anyone who's not using the Intel Compiler.
+
+
+11/11/2005 - Chris
+
+* Added comments to findNeighbors and createNeighborLists functions in cMesh.
+
+
+11/4/2005 - dmorris
+
+* Compiled against openhaptics 2.0 and confirmed backwards-compatibility
+
+
+11/4/2005 - Chris
+
+* Removed cGenericTool3dof since it was redundant with cGeneric3dofPointer.
+
+* Replaced m_proxyPointForceAlgo and m_potentialForceField member
+  variables from cGeneric3dofPointer, replacing it with a vector of
+  cGenericPointForceAlgo pointers, so that the user can add whatever
+  point force algorithms they want.  By default, a cProxyPointForceAlgo
+  instance is created and inserted into this vector in initialize(), so
+  it shouldn't break old programs.  The function getProxy() searches
+  for an instance of cProxyPointForceAlgo, and returns it if there
+  is one.
+
+* Added a public function createNeighborLists to cMesh that allows the
+  user to create triangle neighbor lists (previously computed only as
+  a part of creating AABB or sphere trees) for any purpose. 
+
+
+11/2/2005 - dmorris
+
+* Added the can.obj model to the 'bin/resources/models' directory;
+  I thought it would be good to have a couple .3ds models and a
+  couple .obj models ship w/CHAI.
+
+* Fixed a minor bug in the basic_shapes and object_loader msvc
+  examples that prevented the mouse from being correctly tracked
+  when it leaves the window, causing odd behavior if you left the
+  window while holding a button down.
+
+
+10/25/2005 - dmorris
+
+* I've added the virtual device to CVS, and re-compiled it to include
+  the magic _control87 function call that gets rid of those _really_
+  annoying "floating-point" error windows that pile up on top of
+  each other sometimes.
+
+* cViewport now has a projectPoint function, which will give you the
+  window position of any point in world-space.
+
+* moved m_button from generictool3dof to generictool, since having 
+  a button isn't really specific to being 3dof.
+
+* m_button is now an int, and each bit represents the state of one
+  button.
+
+* cGeneric3dofPointer now has a getWorkspaceScaleFactors() function,
+  which lets you convert from normalized device units to millimeters.
+  This incorporates the workspace xformation that happens in 3dofpointer
+  and any scaling that happens in the device library.  Only implemented
+  for the HD Phantom device right now; returns zeros for all other devices.
+
+
+10/13/2005 - dmorris
+
+* A bug in world::computecollisiondetection was causing numerous
+  crashes (this is a new bug, not affecting the online version).
+  Fixed.
+
+
+10/12/2005 - dmorris
+
+* Recompiled PhantomHD.dll and PhantomDriver.dll to release versions.
+  Also modified PhantomHD.dll to remove the requirement that you send
+  a zero force before sending any non-zero forces, which is confusing
+  sometimes (you send forces in CHAI and nothing happens, but no error
+  is returned).  This is imposed in cGeneric3DofPointer anyway.
+
+
+10/04/2005 - dmorris
+
+* The cStr() function (and the functions in cVector3d and cMatrix3d that
+  used it) was producing incorrect output (e.g. 3.4 == 3.39) at times.
+  Fixed and simplified.
+
+* Added constructors to initialize vectors from all sorts of data:
+
+  cVector3d, double*, float*, string, char*
+
+  There's also a cVector3d::set(string) and cVector3d::set(char*) now.
+
+  The string methods accept strings of the forms:
+
+  (4.3,23,54)
+  4.3 54 2.1
+  4.5,7.8,9.1      
+
+  ...i.e., it expects three numbers, optionally preceded
+  by '(' and whitespace, and separated by commas or whitespace.
+
+  This is helpful if you're parsing files.
+
+  Also I overloaded the cast-to-double-pointer operator, which replaces
+  the previous [] operators (without breaking existing code).
+
+
+* The examples had a bug that prevented the 'show coordinate frame'
+  checkbox from working; this relates to a change I made a few
+  weeks ago that allows a caller to specify both the size and thickness
+  of the coordinate frame.  My bad.
+
+
+9/28/2005 - Chris
+
+* Made the friction algorithm choice (Zilles or Melder) and normal/tangential
+  forces member variables (with getter and setter functions) in cProxyPointForceAlgo.
+
+* Added normal force attenuation and tangential force component to sound examples.
+
+
+9/28/2005 - dmorris
+
+* An addendum to Chris's previous entry; a parameter was dropped from
+  cGenericObject::computeCollisionDetection.  This is a breaking change.
+  A well-advised one, since the parameter was a bit odd, but a breaking
+  change.
+
+
+9/22/2005 - Chris
+
+* Made simplifying changes to the computeCollisionDetection functions in cWorld and
+  cGenericObject (and AdjustCollisionSegment in cGenericObject) to make them
+  much more understandable (including many new comments), eliminate unnecessary
+  code, and possibly improve performance.
+
+* Added back some Borland example .res files and obj folders since Borland was
+  having trouble compiling without them.
+
+
+9/21/2005 - Chris
+
+* Added Borland version of the dynamic_ode example.  Now there are essentially
+  equivalent Borland, MSVC6, and MSVC7 versions of all examples.
+
+
+9/20/2005 - Chris
+
+* Added Borland version of the record_player example, as well as a re-done
+  BASS-enabled version of the Borland sounds example.
+
+
+9/20/2005 - dmorris
+
+* Release version 1.31 (stable)
+
+* Fixed problems with the individual MSVC project files.
+
+
 9/19/2005 - dmorris
 
 * Released version 1.3 (stable).

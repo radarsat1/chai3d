@@ -74,6 +74,8 @@ class cCollisionAABB : public cGenericCollision
     //! The number of triangles in the mesh.
     unsigned int m_numTriangles;
     //! Triangle returned by last successful collision test.
+    //!
+    //! This is only modified by _proxy_ collision tests.
     cTriangle* m_lastCollision;
     //! Use list of triangles' neighbors to speed up collision detection?
     bool m_useNeighbors;

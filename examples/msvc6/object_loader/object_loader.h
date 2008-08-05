@@ -38,6 +38,8 @@
 #include "CMeta3dofPointer.h"
 #include "CPrecisionTimer.h"
 #include "CLight.h"
+#include "CLabelPanel.h"
+#include "CShaders.h"
 
 typedef enum {
   MOUSE_BUTTON_RIGHT=0,MOUSE_BUTTON_LEFT,MOUSE_BUTTON_MIDDLE
@@ -64,11 +66,18 @@ public:
 
   virtual int render_loop();
 
+  // A GLSL shader object, not used by default but inserted into
+  // the scenegraph when the user loads a shader
+  cGLSLShader* shader;
+
   // An object of some kind, to be rendered in the scene
   cMesh* object;
 
   // Light source
   cLight* light;
+
+  // A text label that tells me what file I most recently loaded
+  cLabelPanel* label;
 
   // Grab relevant options from checkboxes and sliders in the GUI
   //
@@ -83,6 +92,9 @@ public:
   // This function is run on the haptics thread if it's running,
   // on the graphics thread otherwise
   void animate();
+
+  // Loads the specified shader from a supported shader format file
+  int LoadShader(const char* filename);
 
   // Loads the specified model from a supported 3d model format file
   int LoadModel(char* filename);
@@ -112,6 +124,12 @@ public:
 
   // A flag that indicates whether haptics are currently enabled
   int haptics_enabled;
+
+  // A flag that indicates that we should turn haptics off for just a bit
+  bool disable_haptics_temporarily;
+
+  // Used to indicate that the haptics thread "got the message"
+  bool disable_haptics_temporarily_received;
 
   // A flag that indicates whether the haptics thread is currently running
   //

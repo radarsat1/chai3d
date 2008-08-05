@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="..\lib\bbcp6\chai_widgets.lib"/>
+    <OBJFILES value="obj\CFont.obj obj\CPanel.obj obj\CLabelPanel.obj obj\CBitmap.obj"/>
+    <RESFILES value=""/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\src\widgets"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="I_WIN32;GLUT_NO_LIB_PRAGMA"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
+    <MAINSOURCE value="chai_widgets.bpf"/>
+    <INCLUDEPATH value="..\src\widgets;&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display;..\src\scenegraph"/>
+    <LIBPATH value="..\src\widgets;&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par -w-8027 -w-8026 -w-hch -w-csu"/>
+    <LISTFILE value=""/>
+    <OTHERFILES value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <PFLAGS value="-N2obj -N0obj -$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="/P64"/>
+    <OTHERFILES value=""/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+    <OTHERFILES value=""/>
+  </LINKER>
+  <FILELIST>
+      <FILE FILENAME="chai_widgets.bpf" FORMNAME="" UNITNAME="chai_widgets" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\src\widgets\CFont.cpp" FORMNAME="" UNITNAME="CFont.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\src\widgets\CPanel.cpp" FORMNAME="" UNITNAME="CPanel.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\src\widgets\CLabelPanel.cpp" FORMNAME="" UNITNAME="CLabelPanel" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\src\widgets\CBitmap.cpp" FORMNAME="" UNITNAME="CBitmap" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=15
+Item0=..\src\widgets;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display;..\src\scenegraph
+Item1=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display;..\src\scenegraph
+Item2=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display
+Item3=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external
+Item4=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item5=..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item6=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item7=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item8=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item9=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item10=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item11=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files
+Item12=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math
+Item13=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl
+Item14=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=6
+Item0=..\src\widgets;C:\Program Files\Borland\CBuilder6\Projects;..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item1=C:\Program Files\Borland\CBuilder6\Projects;..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item3=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item5=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=8
+Item0=I_WIN32;GLUT_NO_LIB_PRAGMA
+Item1=I_WIN32;GLUT_NO_LIB_PRAGMA;_DEBUG
+Item2=_DEBUG;I_WIN32;GLUT_NO_LIB_PRAGMA
+Item3=_DEBUG;I_WIN32
+Item4=_DEBUG; _CHAI_WIN32
+Item5=_DEBUG;
+Item6=_DEBUG; _WIN32
+Item7=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=obj
+
+[HistoryLists\hlFinalOutputDir]
+Count=3
+Item0=..\lib\bbcp6\
+Item1=..\lib\bbcp\
+Item2=..\lib\bbcp
+
+[HistoryLists\hIBPIOutputDir]
+Count=1
+Item0=..\lib\bbcp
+
+[HistoryLists\hlTlibPageSize]
+Count=3
+Item0=0x0040
+Item1=0x0020
+Item2=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteLauncher=
+RemoteCWD=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+  </IDEOPTIONS>
+</PROJECT>

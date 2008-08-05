@@ -14,16 +14,16 @@
       ..\..\..\lib\bbcp6\chai_displays.lib ..\..\..\lib\bbcp6\chai_files.lib 
       ..\..\..\lib\bbcp6\chai_forces.lib ..\..\..\lib\bbcp6\chai_graphics.lib 
       ..\..\..\lib\bbcp6\chai_math.lib ..\..\..\lib\bbcp6\chai_timers.lib 
-      ..\..\..\lib\bbcp6\chai_tools.lib ..\..\..\lib\bbcp6\dhdbl.lib 
-      ..\..\..\lib\bbcp6\PhantomDriver.lib"/>
+      ..\..\..\lib\bbcp6\chai_tools.lib ..\..\..\lib\bbcp6\PhantomDriver.lib 
+      ..\..\..\lib\bbcp6\chai_widgets.lib ..\..\..\lib\bbcp6\chai_scenegraph.lib"/>
     <LIBRARIES value="rtl.lib vcl.lib"/>
     <SPARELIBS value="vcl.lib rtl.lib"/>
     <PACKAGES value="vcl.bpi rtl.bpi vclx.bpi bcbsmp.bpi dbrtl.bpi adortl.bpi vcldb.bpi 
       qrpt.bpi bdertl.bpi vcldbx.bpi dsnap.bpi cds.bpi bdecds.bpi teeui.bpi 
       teedb.bpi tee.bpi teeqr.bpi ibxpress.bpi visualclx.bpi visualdbclx.bpi 
       vclie.bpi xmlrtl.bpi inet.bpi inetdbbde.bpi inetdbxpress.bpi inetdb.bpi 
-      nmfast.bpi bcbie.bpi soaprtl.bpi dclocx.bpi dbexpress.bpi dbxcds.bpi 
-      indy.bpi bcb2kaxserver.bpi"/>
+      nmfast.bpi bcbie.bpi soaprtl.bpi dbexpress.bpi dbxcds.bpi indy.bpi 
+      bcb2kaxserver.bpi"/>
     <PATHCPP value=".;"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
@@ -66,9 +66,10 @@
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_math.lib" FORMNAME="" UNITNAME="chai_math.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_timers.lib" FORMNAME="" UNITNAME="chai_timers.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_tools.lib" FORMNAME="" UNITNAME="chai_tools.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\..\..\lib\bbcp6\dhdbl.lib" FORMNAME="" UNITNAME="dhdbl.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\PhantomDriver.lib" FORMNAME="" UNITNAME="PhantomDriver.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="main.cpp" FORMNAME="Form1" UNITNAME="main" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_widgets.lib" FORMNAME="" UNITNAME="chai_widgets.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_scenegraph.lib" FORMNAME="" UNITNAME="chai_scenegraph.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -100,6 +101,9 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
+
+[Excluded Packages]
+c:\program files\borland\cbuilder6\Bin\dclite60.bpl=Borland Integrated Translation Environment
 
 [HistoryLists\hlIncludePath]
 Count=14
@@ -173,10 +177,5 @@ RemoteDebug=0
 ShowInfoMsgs=0
 LinkDebugVcl=0
 LinkCGLIB=0
-
-[Language]
-ActiveLang=
-ProjectLang=
-RootDir=
   </IDEOPTIONS>
 </PROJECT>

@@ -69,6 +69,7 @@
   but may slow down other threads.
 
   This #define controls which approach is used by this application.
+
 ***/
 
 // #define USE_MM_TIMER_FOR_HAPTICS
@@ -84,6 +85,7 @@
 ***/
 
 #define USE_PHANTOM_DIRECT_IO 1
+
 
 #define ALLOCATE_SCOPED_GLOBALS
 #include "dynamic_ode_globals.h"
@@ -253,7 +255,7 @@ BOOL Cdynamic_odeApp::InitInstance() {
   // initialize ODE parameters
 	// Move the object over some so the Phantom will not initially be
   // inside the object.
-  object->initDynamic(BOX,DYNAMIC, g_initial_object_pos.x , g_initial_object_pos.y, g_initial_object_pos.z);
+  object->initDynamic(BOX,DYNAMIC_OBJECT, g_initial_object_pos.x , g_initial_object_pos.y, g_initial_object_pos.z);
   object->setMass(0.2);
 
   // Give a color to each vertex
@@ -311,7 +313,7 @@ cODEMesh* Cdynamic_odeApp::create_wall(double a_x, double a_y, double a_z, bool 
   new_mesh->m_material.setShininess(100);
   new_mesh->m_material.setStiffness(K);
 	new_mesh->setFriction(MU_S, MU_D, 1);
-  new_mesh->initDynamic(BOX,STATIC,a_x, a_y, a_z);
+  new_mesh->initDynamic(BOX,STATIC_OBJECT,a_x, a_y, a_z);
   world->addChild(new_mesh);
   new_mesh->computeAllNormals();
 	
@@ -567,7 +569,7 @@ void dynamic_ode_haptic_iteration(void* param) {
 
   if (app->ode_clock->on()) 
   {  
-    if ( (app->ode_clock->timeoutOccured()) && app->ready) 
+    if ( (app->ode_clock->timeoutOccurred()) && app->ready) 
 	  {
       app->ready = false;
 
@@ -595,7 +597,7 @@ void dynamic_ode_haptic_iteration(void* param) {
 						cur_object = cur_object->getParent();
 					}
           
-					if ((found) && (mesh) && (mesh->m_objType == DYNAMIC)) 
+					if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT)) 
 				    dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z);
 				}
 			}
@@ -624,7 +626,7 @@ void dynamic_ode_haptic_iteration(void* param) {
 						cur_object = cur_object->getParent();
 					}
 
-			    if ((found) && (mesh) && (mesh->m_objType == DYNAMIC)) 
+			    if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT)) 
 		  	    dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z); 
 				}
 		  }		  
@@ -708,15 +710,18 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
       tool1 = new cMeta3dofPointer(world, 0, USE_PHANTOM_DIRECT_IO);
 	    tool1->setWorkspace(3.0,3.0,3.0);
 	
-      // turn on ode proxy algorithm
-	    //tool->m_proxyODEOn = true;
-
       world->addChild(tool1);        
 	    tool1->setRadius(0.05);
 	    tool1->computeGlobalCurrentObjectOnly(true);
+
+      // Replace the proxy with our custom ODE proxy
+      cProxyPointForceAlgo* old_proxy = (cProxyPointForceAlgo*)(tool1->m_pointForceAlgos[0]);
+      tool1->m_pointForceAlgos[0] = new cODEProxy(old_proxy);
+      delete old_proxy;
+
 		}
 	
-		// set up the device
+    // set up the device
     tool1->initialize();
 
     // open communication to the device
@@ -731,12 +736,9 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
 
     // I need to call this so the tool can update its internal
     // transformations before performing collision detection, etc.
-    tool1->computeGlobalPositions(1);
+    tool1->computeGlobalPositions(true);
     
-		// Enable the "dynamic proxy", which will handle moving objects
-    //cProxyPointForceAlgo* proxy = tool->getProxy();
-    //proxy->enableDynamicProxy(0);
-		tool1->setForcesON();
+    tool1->setForcesON();
       
 	  ode_clock = new cPrecisionClock();
 	  ode_clock->setTimeoutPeriod(TIME_STEP * 1e+6);
@@ -819,7 +821,7 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
 
     // create a phantom tool with its graphical representation
     //
-    // Use device zero, and use either the gstEffect or direct 
+    // Use device 1 this time, and use either the gstEffect or direct 
     // i/o communication mode, depending on the USE_PHANTOM_DIRECT_IO
     // constant
     if (tool2 == 0) 
@@ -830,13 +832,17 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
 	    tool2->setWorkspace(3.0,3.0,3.0);
 
       // turn on ode proxy algorithm
-	    //tool2->m_proxyODEOn = true;
-      world->addChild(tool2);       
+	    world->addChild(tool2);       
 	    tool2->setRadius(0.05);
 	    tool2->computeGlobalCurrentObjectOnly(true);
+
+      // Replace the proxy with our custom ODE proxy
+      cProxyPointForceAlgo* old_proxy = (cProxyPointForceAlgo*)(tool2->m_pointForceAlgos[0]);
+      tool2->m_pointForceAlgos[0] = new cODEProxy(old_proxy);
+      delete old_proxy;
 		}
 
-	  // set up the device
+    // set up the device
     tool2->initialize();
 
     // open communication to the device
@@ -852,7 +858,8 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
     // I need to call this so the tool can update its internal
     // transformations before performing collision detection, etc.
     tool2->computeGlobalPositions();
-    tool2->setForcesON(); 
+
+		tool2->setForcesON(); 
 
 		Sleep(100);
 

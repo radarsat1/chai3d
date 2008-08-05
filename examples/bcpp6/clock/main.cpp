@@ -58,10 +58,10 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
         // display current time
         labelTime->Caption = time->getCurrentTime();
 
-        // check if timeout occured
-        if (time->timeoutOccured())
+        // check if timeout occurred
+        if (time->timeoutOccurred())
         {
-            labelMessage->Caption = "Timeout Occured!";
+            labelMessage->Caption = "Timeout Occurred!";
         }
         else
         {

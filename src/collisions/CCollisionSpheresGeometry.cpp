@@ -30,45 +30,18 @@
 // Initialize m_split, axis on which to sort triangle primitives.
 int cCollisionSpheresGenericShape::m_split = 0;
 
-//===========================================================================
-/*!
-    Return the edge that connects this point to the given point.  If no such
-    edge exists, create a new edge between the two points, and return this
-    new edge.
-
-    \fn       cCollisionSpheresEdge *cCollisionSpheresPoint::getEdgeTo(
-              cCollisionSpheresPoint *a_other)
-    \param    a_other  The other endpoint of an edge connecting to this point.
-    \return   Return a pointer to edge connecting this point and given point.
-*/
-//===========================================================================
-cCollisionSpheresEdge *cCollisionSpheresPoint::getEdgeTo(cCollisionSpheresPoint *a_other)
-{
-    // check if this edge to the given point already exists in this point's edge map
-    PtEmap::iterator edgeIter;
-    edgeIter = m_edgeMap.find(a_other);
-
-    // if the edge does not yet exist, create it
-    if (edgeIter == m_edgeMap.end())
-      return new cCollisionSpheresEdge(this, a_other);
-
-    // return the (new or previously existing) edge
-    return edgeIter->second;
-}
-
 
 //===========================================================================
 /*!
     Constructor of cCollisionSpheresEdge.
 
-    \fn       cCollisionSpheresEdge::cCollisionSpheresEdge(
+    \fn       cCollisionSpheresEdge::initialize(
               cCollisionSpheresPoint *a_a, cCollisionSpheresPoint *a_b)
     \param    a_a  First vertex of the edge.
     \param    a_b  Second vertex of the edge.
 */
 //===========================================================================
-cCollisionSpheresEdge::cCollisionSpheresEdge(cCollisionSpheresPoint *a_a,
-                                             cCollisionSpheresPoint *a_b)
+void cCollisionSpheresEdge::initialize(cCollisionSpheresPoint *a_a, cCollisionSpheresPoint *a_b)
 {
     // set the endpoints of the new edge
     m_end[0] = a_a;
@@ -94,47 +67,54 @@ cCollisionSpheresEdge::cCollisionSpheresEdge(cCollisionSpheresPoint *a_a,
 
 //===========================================================================
 /*!
+
+Destructor of cCollisionSpheresTri.
+
+*/
+//===========================================================================
+cCollisionSpheresTri::~cCollisionSpheresTri() { }
+
+//===========================================================================
+/*!
     Constructor of cCollisionSpheresTri.
 
-    \fn       cCollisionSpheresTri::cCollisionSpheresTri(
-              cCollisionSpheresPoint *a, cCollisionSpheresPoint *b,
-              cCollisionSpheresPoint *c)
+    \fn       cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a,
+              cVector3d b, cVector3d c);
     \param    a_a     First vertex of the triangle.
     \param    a_b     Second vertex of the triangle.
     \param    a_c     Third vertex of the triangle.
     \return   Return a pointer to new cCollisionSpheresTri instance.
 */
 //===========================================================================
-cCollisionSpheresTri::cCollisionSpheresTri(cCollisionSpheresPoint *a_a,
-                                           cCollisionSpheresPoint *a_b,
-                                           cCollisionSpheresPoint *a_c)
+cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a, cVector3d b, cVector3d c)
 {
     // set the vertices (corners) of the triangle
-    m_corner[0] = a_a;
-    m_corner[1] = a_b;
-    m_corner[2] = a_c;
-
+    m_corner[0].m_pos = a;
+    m_corner[1].m_pos = b;
+    m_corner[2].m_pos = c;
+    
     // set the edges (sides) of the triangle
-    int i;
-    for (i = 0; i < 3; i++)
-      m_side[i] = m_corner[i]->getEdgeTo(m_corner[(i + 1) % 3]);
+    m_side[0].initialize(&m_corner[0],&m_corner[1]);
+    m_side[1].initialize(&m_corner[0],&m_corner[2]);
+    m_side[2].initialize(&m_corner[1],&m_corner[2]);
 
     // calculate a center point for the bounding sphere halfway between the
     // center of the first edge and the first vertex
     double lambda = 0.5;
-    m_center.x = (*m_side[0]->getCenter()).x +
-            lambda*((*m_corner[0]).m_pos.x - (*m_side[0]->getCenter()).x);
-    m_center.y = (*m_side[0]->getCenter()).y +
-            lambda*((*m_corner[0]).m_pos.y - (*m_side[0]->getCenter()).y);
-    m_center.z = (*m_side[0]->getCenter()).z +
-            lambda*((*m_corner[0]).m_pos.z - (*m_side[0]->getCenter()).z);
+    m_center.x = (m_side[0].getCenter()).x +
+            lambda*m_corner[0].m_pos.x - (m_side[0].getCenter().x);
+    m_center.y = (m_side[0].getCenter()).y +
+            lambda*m_corner[0].m_pos.y - (m_side[0].getCenter().y);
+    m_center.z = (m_side[0].getCenter()).z +
+            lambda*m_corner[0].m_pos.z - (m_side[0].getCenter().z);
 
     // calculate a radius of the bounding sphere as the largest distance between
     // the sphere center calculated above and any vertex of the triangle
     m_radius = 0;
+    unsigned int i ;
     for (i = 0; i < 3; i++)
     {
-        double curRadius = m_corner[i]->m_pos.distance(m_center);
+        double curRadius = m_corner[i].m_pos.distance(m_center);
         if (curRadius > m_radius)
             m_radius = curRadius;
     }
@@ -147,13 +127,12 @@ cCollisionSpheresTri::cCollisionSpheresTri(cCollisionSpheresPoint *a_a,
     (this triangle and the given line) by calling the collision detection
     method of the cTriangle object associated with this triangle primitive.
 
-    \fn       bool cCollisionSpheresTri::computeCollision(
-              cCollisionSpheresGenericShape *a_other,
+    \fn       bool cCollisionSpheresTri::computeCollision(cCollisionSpheresGenericShape *a_other,
               cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-              cVector3d& a_colPoint, double& a_colSquareDistance))
+              cVector3d& a_colPoint, double& a_colSquareDistance)
     \param    a_other  The line primitive to check for intersection.
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle  Returns pointer to nearest colided triangle.
+    \param    a_colTriangle  Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.
@@ -224,10 +203,10 @@ cCollisionSpheresLine::cCollisionSpheresLine(cVector3d& a_segmentPointA,
     \fn       bool cCollisionSpheresLine::computeCollision(
               cCollisionSpheresGenericShape *a_other,
               cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-              cVector3d& a_colPoint, double& a_colSquareDistance))
+              cVector3d& a_colPoint, double& a_colSquareDistance)
     \param    a_other  The triangle primitive to check for intersection.
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle  Returns pointer to nearest colided triangle.
+    \param    a_colTriangle  Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.

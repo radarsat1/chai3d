@@ -72,8 +72,8 @@ object Form1: TForm1
           'This example illustrates the use of triangle based meshes with s' +
           'ingle point force algorithm.'
         
-          'By clicking on th button [Toggle Haptics]  the haptic thread is ' +
-          'launched. '
+          'By clicking on the button [Toggle Haptics]  the haptic thread is' +
+          ' launched. '
         
           'The application will connect to the first available haptic devic' +
           'e; if no device is found the program '
