@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by object_loader.rc
 //
 #define IDD_object_loader_DIALOG        102
@@ -16,6 +16,8 @@
 #define IDC_CHECK_CULLING               1010
 #define IDC_LOAD_MODEL_BUTTON           1011
 #define IDC_LOAD_TEXTURE_BUTTON         1012
+#define IDC_CHECK_CULLING2              1013
+#define IDC_CHECK_TRANSPARENCY          1013
 #define IDC_CAMZOOM_SLIDER              1015
 #define IDC_TOGGLEHAPTICS_BUTTON        1016
 #define IDC_STIFFNESS_SLIDER            1017

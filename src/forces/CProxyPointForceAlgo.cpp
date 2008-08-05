@@ -14,8 +14,10 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author:    Chris Sewell
+    \author:    Dan Morris
+    \version    1.2
+    \date       03/2005
 */
 //===========================================================================
 
@@ -25,9 +27,32 @@
 #include "CMesh.h"
 #include "CWorld.h"
 #include <float.h>
+#include <conio.h>
+
 //---------------------------------------------------------------------------
-const double CHAI_SCALE_PROXY = 100.0;
-const double CHAI_SCALE_COLLISION_RAY = 5.0;
+
+// Controls whether the proxy searches invisible objects
+//
+// If this constant is zero, the proxy will use visible _and_
+// invisible objects.
+#define CHAI_PROXY_ONLY_USES_VISIBLE_OBJECTS 0
+
+// Using the Melder et al friction model, it becomes useful to decouple the
+// _angle_ used for dynamic friction from the actual friction coefficient.
+//
+// In CHAI's proxy, the angle computed from the coefficient is multiplied
+// by this constant to avoid rapidly oscillating between slipping and sticking
+// without having to turn the dynamic friction level way down.
+#define DYNAMIC_FRICTION_HYSTERESIS_MULTIPLIER 0.6
+
+
+// A global constant to turn off friction for debugging
+const static int g_useFriction = 1;
+
+// Global constants to turn on and off the two friction models
+const static int g_useZillesFriction = 0;
+const static int g_useMelderFriction = 1;
+
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -53,7 +78,9 @@ cProxyPointForceAlgo::cProxyPointForceAlgo()
     // set default colors
     m_colorProxy.set(1.0f, 0.7f, 0.0, 1.0f);
     m_colorLine.set(0.5f, 0.5f, 0.5f);
-    m_radius = 0.10f;
+
+    // this will generally be over-written by the calling pointer
+    m_radius = 0.1f;
 
     // by default, we do not use dynamic proxy (which handles moving objects)
     m_dynamicProxy = 0;
@@ -62,6 +89,9 @@ cProxyPointForceAlgo::cProxyPointForceAlgo()
     m_lastObjectGlobalPos.set(0,0,0);
     m_lastObjectGlobalRot.identity();
     m_touchingObject = 0;
+    m_numContacts = 0;
+
+    m_slipping = 1;
 }
 
 
@@ -81,6 +111,8 @@ void cProxyPointForceAlgo::initialize(cWorld* a_world, const cVector3d& a_initia
 {
     // no contacts yet between proxy and environment
     m_numContacts = 0;
+
+    m_slipping = 1;
 
     // initialize device and proxy positions
     m_deviceGlobalPos = a_initialPos;
@@ -158,147 +190,204 @@ cVector3d cProxyPointForceAlgo::computeForces(const cVector3d& a_nextDevicePos)
 void cProxyPointForceAlgo::computeNextBestProxyPosition()
 {
     // local variable declarations
-    bool hit;
-    cGenericObject* colObject;
-    cTriangle* colTriangle;
-    cVector3d colPoint, oldColPoint, vDeviceGoal;
-    double colDistance=DBL_MAX, cosAngle, distanceTriangleProxy, distProxyGoal;
-    cVector3d proxy, goal, colGoal,vProxyGoal, vColProxy, offset;
-    cVector3d force, normalForce, tangentialForce;
-    cVector3d vertex0, vertex1, vertex2;
-    cVector3d normal0, normal1, normal2;
-    cGenericObject* parent;
 
-    // read current position of proxy and device; the device position is
-    // considered the initial goal position for the proxy
+    // Each of these variables is re-used in each of three collision passes...
+
+    // Did we hit a triangle this pass?
+    bool hit = false;
+
+    // What object, triangle, and point did we collide with?
+    cGenericObject* colObject = 0;
+    cTriangle* colTriangle = 0;
+    cVector3d colPoint;
+    
+    // This is the parent object of the triangle we hit, which should really
+    // be the same as colObject...
+    cGenericObject* parent = 0;
+
+    // How far away was the collision from the current proxy position?
+    double colDistance=DBL_MAX;
+
+    // The three vertices of the triangle we most recently collided with...
+    cVector3d vertex0, vertex1, vertex2;
+
+    // The current positions of the proxy and the goal
+    cVector3d proxy, goal;
+
+    // A vector from the proxy to the goal
+    cVector3d vProxyGoal;
+
+    // A vector from the most recent collision point to the proxy
+    cVector3d vColProxy;
+
+    // The offset we'll apply to each goal position to "push it away" from
+    // the collision plane, to account for the proxy's radius.
+    cVector3d goalOffset;
+
+    // The goal we try to move the proxy to _after_ finding a constraint plane
+    // (i.e. after the proxy->goal segment is found to hit an object)
+    cVector3d colGoal;
+
+    // The force exerted on the proxy by the user
+    cVector3d force;
+
+    // The normal and tangential components of that force
+    cVector3d normalForce, tangentialForce;
+
+    // The surface normal of each of the three triangles we come in contact with.
+    // These variables are not re-used across collisions.
+    cVector3d normal0, normal1, normal2;
+
+    // Used for maintaining a minimum distance between the proxy and all
+    // constraint planes...
+    double cosAngle, distanceTriangleProxy;
+      
+    // A vector from the device to the proxy; used to orient surface normals
+    cVector3d vDeviceProxy;
+
+    // Read the current position of proxy and device; the device position
+    // is considered the initial goal position for the proxy.
     proxy = m_proxyGlobalPos;
     goal = m_deviceGlobalPos;
 
-    // no contacts with triangles have occured yet
+    // Store the previous number of contacts for debugging...
+    int previousNumberOfContacts = m_numContacts;
+
+    // No contacts with triangles have occurred yet.
     m_numContacts = 0;
 
-    // if the distance between the proxy and the goal position (device) is
-    // smaller than a factor CHAI_SCALE_PROXY of the proxy's radius, we
-    // consider that both points are equal, thus the proxy is at the same
-    // position as the device, and we can exit
-    if ( proxy.distance(goal) < (m_radius / CHAI_SCALE_PROXY))
+    /*
+    // If the distance between the proxy and the goal position (device) is
+    // smaller than the proxy's radius, we consider the proxy to be at
+    // the same position as the device, and we're done.
+    if ( proxy.distance(goal) < m_radius)
     {
         m_nextBestProxyGlobalPos = goal;
-        if (m_touchingObject)
-            m_touchingObject = 0;
+        m_numContacts = 0;
+        m_touchingObject = 0;
         return;
     }
+    */
 
-    // the proxy and device are not located at the same position, so we draw a
-    // virtual line between both points
-    goal.subr(proxy, colGoal);
-    colGoal.add(goal);
+    // Test whether the path from the proxy to the goal is obstructed...
+    hit = m_world->computeCollisionDetection( proxy, goal, colObject,
+            colTriangle, colPoint, colDistance, CHAI_PROXY_ONLY_USES_VISIBLE_OBJECTS, 1);
 
-    // test whether the path along this virtual line from the proxy to its
-    // goal is obstructed by a triangle of a mesh by calling the world's
-    // collision detection method
-    hit = m_world->computeCollisionDetection( proxy, colGoal, colObject,
-            colTriangle, colPoint, colDistance, true, 1);
-
-    // if no collision occurs, then we move the proxy to its goal
+    // If no collision occurs, then we move the proxy to its goal, and we're done
     if (hit == false)
     {
         m_nextBestProxyGlobalPos = goal;
-        if (m_touchingObject)
-            m_touchingObject = 0;
+        m_numContacts = 0;
+        m_touchingObject = 0;
+        m_slipping = 0;
         return;
     }    
+
+		m_touchingPoint = colPoint;
 
     //-----------------------------------------------------------------------
     // FIRST COLLISION:
     //-----------------------------------------------------------------------
 
-    // a first collision has occured; we first compute the global positions
-    // of each vertex of the triangle from the mesh to which the triangle
-    // belongs (its parent)
-    parent = colTriangle->getParent();
-    parent->getGlobalRot().mulr( colTriangle->getVertex0()->getPos(), vertex0);
-    vertex0.add(parent->getGlobalPos());
-    parent->getGlobalRot().mulr( colTriangle->getVertex1()->getPos(), vertex1);
-    vertex1.add(parent->getGlobalPos());
-    parent->getGlobalRot().mulr( colTriangle->getVertex2()->getPos(), vertex2);
-    vertex2.add(parent->getGlobalPos());
-
-    // next we compute the triangle surface normal in world coordinates
-    normal0 = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
-
-    // we compute a vector going from the proxy to the goal
-    goal.subr(proxy, vProxyGoal);
-
-    // we measure the distance between the proxy and the goal
-    distProxyGoal = vProxyGoal.length();
-
-    // we compute the cosine of the angle between the normal and proxy-goal vector
-    vProxyGoal.normalize();
-    cosAngle = vProxyGoal.dot(normal0);
-
-    // by knowing the angle between the normal and the collision segment
-    // (vector from proxy to goal), we determine the next position of
-    // the proxy along the collision segment; we make sure that the
-    // proxy's surface (small ball) does not penetrate the triangle
-    distanceTriangleProxy = m_radius / cAbs(cosAngle);
-
-    // since a collision has occured with a triangle, we store a pointer to
-    // the intersected triangle and increment the number of contacts counter
+    // Since a collision has occurred with a triangle, we store a pointer to
+    // the intersected triangle and increment the number of contacts.
     m_triangle0 = colTriangle;
     m_numContacts = 1;
 
-    // we now move the proxy toward the triangle; we compute a small vector
-    // called offset, which is the projection of the vector between the
-    // proxy and the collision point onto the normal of the triangle
+    // A first collision has occurred; we first compute the global positions
+    // of each vertex of the triangle we hit...
+    parent = colTriangle->getParent();
+
+    cMatrix3d rot = parent->getGlobalRot();
+    cVector3d pos = parent->getGlobalPos();
+
+    rot.mulr(colTriangle->getVertex0()->getPos(), vertex0);
+    vertex0.add(pos);
+    rot.mulr(colTriangle->getVertex1()->getPos(), vertex1);
+    vertex1.add(pos);
+    rot.mulr(colTriangle->getVertex2()->getPos(), vertex2);
+    vertex2.add(pos);
+
+    // Compute the triangle surface normal in world coordinates
+    normal0 = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
+
+    // Align the surface normal to point away from the device
+    vDeviceProxy = cSub(proxy,m_deviceGlobalPos);
+    vDeviceProxy.normalize();
+    if (cDot(normal0,vDeviceProxy) < 0) normal0.negate();
+   
+    // Compute a vector from the proxy to the goal (device)
+    goal.subr(proxy, vProxyGoal);
+
+    // We want the center of the proxy to move as far toward the triangle as it can,
+    // but we want it to stop when the _sphere_ representing the proxy hits the
+    // triangle.  We want to compute how far the proxy center will have to 
+    // be pushed _away_ from the collision point - along the vector from the proxy
+    // to the goal - to keep a distance m_radius between the proxy center and the
+    // triangle.
+    //
+    // So we compute the cosine of the angle between the normal and proxy-goal vector...
+    vProxyGoal.normalize();
+    cosAngle = vProxyGoal.dot(normal0);
+
+    // Now we compute how far away from the collision point - _backwards_
+    // along vProxyGoal - we have to put the proxy to keep it from penetrating
+    // the triangle.
+    //
+    // If only ASCII art were a little more expressive...
+    distanceTriangleProxy = m_radius / cAbs(cosAngle);
+
+    // We compute the projection of the vector between the proxy and the collision
+    // point onto the normal of the triangle.  This is the direction in which
+    // we'll move the _goal_ to "push it away" from the triangle (to account for
+    // the radius of the proxy).
+
+    // A vector from the collision point to the proxy...
     proxy.subr(colPoint, vColProxy);
-    offset = cProject(vColProxy, normal0);
 
-    // as long as the length of offset is not within CHAI_SMALL of zero,
-    // normalize it and then set its length to the radius of the proxy;
-    // also set the variable "proxy" to be a distance equal to the proxy radius
-    // from the collision point along the vector between the collision point
-    // and the initial proxy position
-    if (offset.lengthsq() > CHAI_SMALL)
+    // Move the proxy to the collision point, minus the distance along the
+    // movement vector that we computed above.
+    //
+    // Note that we're adjusting the 'proxy' variable, which is just a local
+    // copy of the proxy position.  We still might decide not to move the
+    // 'real' proxy due to friction.
+    vColProxy.normalize();
+    vColProxy.mul(distanceTriangleProxy);
+    colPoint.addr(vColProxy, proxy);
+
+    // If the distance between the new proxy position and the goal (device) is
+    // smaller than a the proxy's radius, we consider the proxy to be at the
+    // same position as the device, and we're done.
+    if (proxy.distance(goal) < m_radius)
     {
-        offset.normalize();
-        offset.mul(m_radius);
-        vColProxy.normalize();
-        vColProxy.mul(distanceTriangleProxy);
-        colPoint.addr(vColProxy, proxy);
+      m_nextBestProxyGlobalPos = proxy;
+      m_touchingObject = parent;
+      return;
     }
 
-    // if the distance between the proxy and the goal position (device) is
-    // smaller than a factor CHAI_SCALE_PROXY of the proxy's radius, we
-    // consider that both points are equal, thus the proxy is at the same
-    // position as the device, and we can exit
-    if ( proxy.distance(goal) < (m_radius / CHAI_SCALE_PROXY))
-    {
-        m_nextBestProxyGlobalPos = goal;
-        if (m_touchingObject)
-            m_touchingObject = 0;
-        return;
-    }
-
-    // the proxy is now contrained on a plane; we now calculate the nearest
+    // The proxy is now constrained on a plane; we now calculate the nearest
     // point to the original goal (device position) on this plane; this point
     // is computed by projecting the ideal goal onto the plane defined by the
     // intersected triangle
-    goal = cProjectPointOnPlane( m_deviceGlobalPos, vertex0, vertex1, vertex2 );
+    goal = cProjectPointOnPlane(m_deviceGlobalPos, vertex0, vertex1, vertex2 );
 
-    // since the proxy has a radius, the new goal position is set above
-    // the triangle so that the proxy will not penetrate the triangle
-    goal.add(offset);
+    // Since the proxy has a radius, the new goal position is offset to be
+    // on the same side of the plane as the proxy, so the proxy will not
+    // penetrate the triangle.
+    goalOffset = normal0;
+    goalOffset.mul(m_radius);        
+    goal.add(goalOffset);
 
-    // before moving the proxy to this new goal position we need to check
-    // if a second triangle could stop the proxy from reaching its new goal; as
-    // described earlier we compute a new collision segment going from the
-    // proxy towards the goal position
+    // Before moving the proxy to this new goal position, we need to check
+    // if a second triangle could stop the proxy from reaching its new goal.
+    //
+    // We compute a new collision segment going from the proxy towards
+    // the goal position...
     goal.subr(proxy, colGoal);
 
-    // if the distance between the proxy and the new goal position is
-    // smaller than CHAI_SMALL, we consider that both points are equal,
-    // and thus the proxy is at the same position as the goal, and we can exit
+    // If the distance between the proxy and the new goal position is
+    // smaller than CHAI_SMALL, we consider the proxy to be at the same position
+    // as the goal, and we're done.
     if (colGoal.length() < CHAI_SMALL)
     {
         m_nextBestProxyGlobalPos = proxy;
@@ -306,183 +395,136 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
         return;
     }
 
-    // add goal to get global vector of the new goal
-    colGoal.add(goal);
 
-    // calculate static friction
-    //
-    // calculate force exerted on proxy by user as the stiffness coefficient
-    // of the intersected triangle's mesh times the vector between the proxy
-    // and the device
-    force = cMul(colTriangle->getParent()->m_material.getStiffness(),
-            cSub(m_proxyGlobalPos, m_deviceGlobalPos));
+    if (g_useZillesFriction) {
 
-    // calculate the normal component of the force
-    normalForce = cProject(force, normal0);
+      // Calculate static friction, and see if we should move the _real_ proxy
+      // position...
+          
+      // Calculate the force exerted on the proxy by the user as the stiffness
+      // coefficient of the intersected triangle's mesh times the vector between the
+      // proxy and the device...
+      force = cMul(colTriangle->getParent()->m_material.getStiffness(),
+              cSub(proxy, m_deviceGlobalPos));
 
-    // calculate the tangential component of the force as the total force
-    // minus the normal component
-    tangentialForce = cSub(force, normalForce);
+      // Calculate the normal component of that force...
+      normalForce = cProject(force, normal0);
 
-    // if the magnitude of the tangential force is less than or equal to the
-    // static friction coefficient times the magnitude of the normal force, then
-    // the user's position is in the friction cone of the surface, and the
-    // proxy should not be moved (set next best position to current position)
-    if (tangentialForce.length() <=
-        colTriangle->getParent()->m_material.getStaticFriction()*normalForce.length())
-    {
-        m_nextBestProxyGlobalPos = m_proxyGlobalPos;
-        m_touchingObject = parent;
-        return;
+      // Calculate the tangential component of that force...
+      tangentialForce = cSub(force, normalForce);
+
+      // If the magnitude of the tangential force is less than the
+      // static friction coefficient times the magnitude of the normal force, 
+      // the user's position is in the friction cone of the surface, and the
+      // proxy should not be moved.
+      if (tangentialForce.length() <
+          colTriangle->getParent()->m_material.getStaticFriction()*normalForce.length())
+      {
+          m_nextBestProxyGlobalPos = m_proxyGlobalPos;
+          m_touchingObject = parent;
+          return;
+      }
     }
 
-    // save the first collision point (offset by the proxy radius above the
-    // triangle) since we're about to overwrite it in the second call to the
-    // collision detection method
-    oldColPoint = cAdd(colPoint, offset);
+    // Test whether the path along the virtual line between the updated proxy
+    // and its new goal is obstructed
+    hit = m_world->computeCollisionDetection(proxy, goal, colObject,
+            colTriangle, colPoint, colDistance, CHAI_PROXY_ONLY_USES_VISIBLE_OBJECTS, 2);
 
-    // test whether the path along the virtual line between the updated proxy
-    // to its new goal is obstructed by a triangle of a mesh by calling the
-    // world's collision detection method again
-    hit = m_world->computeCollisionDetection( proxy, colGoal, colObject,
-            colTriangle, colPoint, colDistance, true, 2);
+    // If no collision occurs, we move the proxy to its goal, unless
+    // friction prevents us from doing so.
 
-    // if no collision occurs, we move the proxy to its goal, unless
-    // dynamic friction prevents us from doing so
     if (hit == false)
     {
-        // calculate dynamic friction
-        //
-        // calculate the depth of penetration as the vector between the device
-        // and the proxy collision point, dotted with the first triangle normal
-        double penetrationDepth = cDot(cSub(m_deviceGlobalPos, oldColPoint),
-                normal0);
-
-        // calculate the friction radius as the absolute value of the penetration
-        // depth times the coefficient of dynamic friction of the intersected
-        // triangle's mesh
-        double frictionRadius = fabs(penetrationDepth *
-                colTriangle->getParent()->m_material.getDynamicFriction());
-
-        // calculate the distance between the proxy position and the current
-        // goal position (the device position projected onto the constraint
-        // plane of the first intersected triangle, offset above by proxy radius)
-        double r = cSub(m_proxyGlobalPos, goal).length();
-
-        // if this distance is smaller than CHAI_SMALL, we consider that both
-        // points are equal, and thus the proxy is at the same position as the
-        // goal, and we can exit
-        if (r < CHAI_SMALL)
-        {
-            m_nextBestProxyGlobalPos = goal;
-        }
-
-        // if the proxy is outside the friction cone, update is position to
-        // be on the perimeter of the friction cone
-        else if (r > frictionRadius)
-        {
-            m_nextBestProxyGlobalPos = cAdd(goal,
-                              cMul(frictionRadius/r,cSub(oldColPoint, goal)));                    
-        }
-
-        // otherwise, if the proxy is inside the friction cone, the proxy
-        // should not be moved (set next best position to current position)
-        else
-        {
-            m_nextBestProxyGlobalPos = m_proxyGlobalPos;
-        }
-
-        // set current touching pointer (for dynamic proxy) and return
-        m_touchingObject = parent;
-        return;
+      testFrictionAndMoveProxy(goal, proxy, normal0, parent);
+      return;
     }
 
     //-----------------------------------------------------------------------
     // SECOND COLLISION:
     //-----------------------------------------------------------------------
 
-    // a second collision has occured; we first compute the global positions
-    // of each vertex of the triangle from the mesh to which the triangle
-    // belongs (its parent)
-    parent = colTriangle->getParent();
-    parent->getGlobalRot().mulr( colTriangle->getVertex0()->getPos(), vertex0);
-    vertex0.add(parent->getGlobalPos());
-    parent->getGlobalRot().mulr( colTriangle->getVertex1()->getPos(), vertex1);
-    vertex1.add(parent->getGlobalPos());
-    parent->getGlobalRot().mulr( colTriangle->getVertex2()->getPos(), vertex2);
-    vertex2.add(parent->getGlobalPos());
-
-    // next we compute the triangle surface normal in world coordinates
-    normal1 = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
-
-    // we compute a vector from the proxy to the goal
-    goal.subr(proxy, vProxyGoal);
-
-    // we measure the distance between the proxy and the goal
-    distProxyGoal = vProxyGoal.length();
-
-    // we compute the cosine of the angle between normal and proxy-goal vector
-    vProxyGoal.normalize();
-    cosAngle = vProxyGoal.dot(normal1);
-
-    // by knowing the angle between the normal and the collision segment
-    // (vector from proxy to goal), we determine the next position of
-    // the proxy along the collision segment; we make sure that the
-    // proxy's surface (small ball) does not penetrate the triangle
-    distanceTriangleProxy = m_radius / cAbs(cosAngle);
-
-    // we test if the collision point is located between the proxy and the goal;
-    // if not, we simply move the proxy to its goal position
-    if ( (colDistance - distanceTriangleProxy) > distProxyGoal)
-    {
-        m_nextBestProxyGlobalPos = goal;
-        if (m_touchingObject)
-            m_touchingObject = 0;
-        return;
-    }
-
-    // since a collision has occured with a triangle, we store a pointer to
-    // the intersected triangle and increment the number of contacts counter
+    // Since a collision has occurred with a triangle, we store a pointer to
+    // the intersected triangle and increment the number of contacts.
     m_triangle1 = colTriangle;
     m_numContacts = 2;
 
-    // we move the proxy to its new position
+    // A second collision has occurred; we first compute the global positions
+    // of each vertex of the triangle from the mesh to which the triangle
+    // belongs (its parent)
+    parent = colTriangle->getParent();
+
+    rot = parent->getGlobalRot();
+    pos = parent->getGlobalPos();
+
+    rot.mulr( colTriangle->getVertex0()->getPos(), vertex0);
+    vertex0.add(pos);
+    rot.mulr( colTriangle->getVertex1()->getPos(), vertex1);
+    vertex1.add(pos);
+    rot.mulr(colTriangle->getVertex2()->getPos(), vertex2);
+    vertex2.add(pos);
+
+    // Next we compute the triangle surface normal in world coordinates...
+    normal1 = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
+
+    // Align the surface normal to point away from the device
+    vDeviceProxy = cSub(proxy,m_deviceGlobalPos);
+    vDeviceProxy.normalize();
+    if (cDot(normal1,vDeviceProxy) < 0) normal1.negate();
+
+    // Compute a vector from the proxy to the goal...
+    goal.subr(proxy, vProxyGoal);
+
+    // Compute the distance we'll have to push the proxy "backwards" along
+    // the proxy-goal vector to account for the proxy's radius.
+    //
+    // See above for a more detailed explanation of what's happening here.
+    vProxyGoal.normalize();
+    cosAngle = vProxyGoal.dot(normal1);
+    distanceTriangleProxy = m_radius / cAbs(cosAngle);
+
+    // Move the proxy to its new position, preventing it from quite reaching
+    // the goal to account for the proxy radius.
     vProxyGoal.mul(distanceTriangleProxy);
     colPoint.subr(vProxyGoal, proxy);
 
     // if the distance between the proxy and the new goal position is
-    // smaller than a factor CHAI_SCALE_PROXY of the proxy's radius, we
-    // consider that both point are equal, and thus the proxy is at the same
-    // position than the device
-    if ( proxy.distance(goal) < (m_radius / CHAI_SCALE_PROXY))
-    {
-        m_nextBestProxyGlobalPos = goal;
+    // smaller than the proxy's radius, we consider the proxy to be at
+    // the same position as the goal, and we're done.
+    if (proxy.distance(goal) < m_radius)
+    {        
+        m_nextBestProxyGlobalPos = proxy;
         m_touchingObject = parent;
         return;
     }
 
-    // the proxy is now contrained by two triangles and can only move along
+    // The proxy is now constrained by two triangles and can only move along
     // a virtual line; we now calculate the nearest point to the original
     // goal (device position) along this line by projecting the ideal
-    // goal onto the line
+    // goal onto the line.
     //
-    // the line is expressed by the cross product of both surface normals
+    // The line is expressed by the cross product of both surface normals,
+    // which have both been oriented to point away from the device
     cVector3d line;
     normal0.crossr(normal1, line);
 
-    // compute the projection of device position (goal) onto line; this gives
-    // us the new goal position
-    goal = cProjectPointOnLine( m_deviceGlobalPos, proxy, line);
+    // Compute the projection of the device position (goal) onto the line; this
+    // gives us the new goal position.
+    goal = cProjectPointOnLine(m_deviceGlobalPos, proxy, line);
 
-    // before moving the proxy to this new goal position we need to check
-    // if a third triangle could stop the proxy from reaching its new goal; as
-    // described earlier we compute a new collision segment going from the
-    // proxy towards the goal position
+    // Offset the goal to account for the proxy's radius, bringing it
+    // "in from the corner" defined by the two occluding triangles
+    goalOffset = cMul(0.5,cAdd(normal0,normal1));
+    goalOffset.mul(m_radius);        
+    goal = cAdd(goal,goalOffset);
+
+    // Before moving the proxy to this new goal position, we need to check
+    // if a third triangle could stop the proxy from reaching its new goal.
     goal.subr(proxy, colGoal);
 
-    // if the distance between the proxy and the new goal position is
-    // smaller than CHAI_SMALL, we consider that both points are equal,
-    // and thus the proxy is at the same position as the goal, and we can exit
+    // If the distance between the proxy and the new goal position is
+    // smaller than CHAI_SMALL, we consider the proxy to be at the same position
+    // as the goal, and we're done.
     if (colGoal.length() < CHAI_SMALL)
     {
         m_nextBestProxyGlobalPos = proxy;
@@ -490,94 +532,48 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
         return;
     }
 
-    // add goal to get global vector of the new goal
-    colGoal.add(goal);
+    if (g_useZillesFriction) {
 
-    // calculate static friction
-    //
-    // calculate force exerted on proxy by user as the stiffness coefficient
-    // of the intersected triangle's mesh times the vector between the proxy
-    // and the device
-    force = cMul(colTriangle->getParent()->m_material.getStiffness(),
-             cSub(m_proxyGlobalPos, m_deviceGlobalPos));
+      // Calculate static friction, and see if we should move the _real_ proxy
+      // position...
+      
+      // Calculate the force exerted on the proxy by the user as the stiffness
+      // coefficient of the intersected triangle's mesh times the vector between the
+      // proxy and the device.
+      force = cMul(colTriangle->getParent()->m_material.getStiffness(),
+              cSub(proxy, m_deviceGlobalPos));
 
-    // calculate the normal component of the force
-    normalForce = cProject(force, normal1);
+      // Calculate the normal component of this force
+      normalForce = cProject(force, normal1);
 
-    // calculate the tangential component of the force as the total force
-    // minus the normal component
-    tangentialForce = cSub(force, normalForce);
+      // Calculate the tangential component of the force
+      tangentialForce = cSub(force, normalForce);
 
-    // if the magnitude of the tangential force is less than or equal to the
-    // static friction coefficient times the magnitude of the normal force, then
-    // the user's position is in the friction cone of the surface, and the
-    // proxy should not be moved (set next best position to current position)
-    if (tangentialForce.length() <=
-        colTriangle->getParent()->m_material.getStaticFriction()*normalForce.length())
-    {
-        m_nextBestProxyGlobalPos = m_proxyGlobalPos;
-        m_touchingObject = parent;
-        return;
+      // If the magnitude of the tangential force is less than the
+      // static friction coefficient times the magnitude of the normal force,
+      // the user's position is in the friction cone of the surface, and the
+      // proxy should not be moved.
+      if (tangentialForce.length() <
+          colTriangle->getParent()->m_material.getStaticFriction()*normalForce.length())
+      {        
+          m_nextBestProxyGlobalPos = m_proxyGlobalPos;
+          m_touchingObject = parent;
+          return;
+      }
+
     }
 
-    // save the second collision point (offset by the proxy radius above the
-    // triangle) since we're about to overwrite it in the third call to the
-    // collision detection method
-    oldColPoint = cAdd(colPoint, offset);
+    // Test whether the path along the virtual line between the updated proxy
+    // to its new goal is obstructed
+    hit = m_world->computeCollisionDetection(proxy, goal, colObject,
+            colTriangle, colPoint, colDistance, CHAI_PROXY_ONLY_USES_VISIBLE_OBJECTS, 3);
 
-    // test whether the path along the virtual line between the updated proxy
-    // to its new goal is obstructed by a triangle of a mesh by calling the
-    // world's collision detection method again
-    hit = m_world->computeCollisionDetection( proxy, colGoal, colObject,
-            colTriangle, colPoint, colDistance, true, 3);
+    // If no collision occurs, we move the proxy to its goal, unless
+    // friction prevents us from doing so
 
-    // if no collision occurs, we move the proxy to its goal, unless
-    // dynamic friction prevents us from doing so
     if (hit == false)
     {
-        // calculate dynamic friction
-        //
-        // calculate the depth of penetration as the vector between the device
-        // and the proxy collision point, dotted with the first triangle normal
-        double penetrationDepth = cDot(cSub(m_deviceGlobalPos, oldColPoint),
-                normal1);
-
-        // calculate the friction radius as the absolute value of the penetration
-        // depth times the coefficient of dynamic friction of the intersected
-        // triangle's mesh
-        double frictionRadius = fabs(penetrationDepth *
-                colTriangle->getParent()->m_material.getDynamicFriction());
-
-        // calculate the distance between the proxy position and the current
-        // goal position (the device position projected onto the constraint
-        // planes of the first two intersected triangles)
-        double r = cSub(m_proxyGlobalPos, goal).length();
-
-        // if this distance is smaller than CHAI_SMALL, we consider that both
-        // points are equal, and thus the proxy is at the same position as the
-        // goal, and we can exit
-        if (r < CHAI_SMALL)
-        {
-            m_nextBestProxyGlobalPos = goal;
-        }
-
-        // if the proxy is outside the friction cone, update is position to
-        // be on the perimeter of the friction cone
-        else if (r > frictionRadius)
-        {
-            m_nextBestProxyGlobalPos = cAdd(goal,
-                    cMul(frictionRadius/r,cSub(oldColPoint, goal)));
-        }
-
-        // otherwise, if the proxy is inside the friction cone, the proxy
-        // should not be moved (set next best position to current position)
-        else
-        {
-            m_nextBestProxyGlobalPos = m_proxyGlobalPos;
-        }
-
-        // set current touching pointer (for dynamic proxy) and return
-        m_touchingObject = parent;
+        testFrictionAndMoveProxy(goal, proxy, cMul(0.5,cAdd(normal0,normal1)), parent);
         return;
     }
 
@@ -585,87 +581,202 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
     // THIRD COLLISION:
     //-----------------------------------------------------------------------
 
-    // a third collision has occured; we first compute the global positions
-    // of each vertex of the triangle.
-    parent = colTriangle->getParent();
-    parent->getGlobalRot().mulr( colTriangle->getVertex0()->getPos(), vertex0);
-    vertex0.add(parent->getGlobalPos());
-    parent->getGlobalRot().mulr( colTriangle->getVertex1()->getPos(), vertex1);
-    vertex1.add(parent->getGlobalPos());
-    parent->getGlobalRot().mulr( colTriangle->getVertex2()->getPos(), vertex2);
-    vertex2.add(parent->getGlobalPos());
-
-    // next we compute the triangle surface normal in world coordinates
-    normal2 = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
-
-    // we compute a vector from the proxy to the goal point
-    goal.subr(proxy, vProxyGoal);
-
-    // we measure the distance between the proxy and the goal
-    distProxyGoal = vProxyGoal.length();
-
-    // we compute the cosine of the angle between normal and proxy-goal vector
-    vProxyGoal.normalize();
-    cosAngle = vProxyGoal.dot(normal2);
-
-    // by knowing the angle between the normal and the collision segment
-    // (vector from proxy to goal), we determine the next position of
-    // the proxy along the collision segment; we make sure that the
-    // proxy's surface (small ball) does not penetrate the triangle
-    distanceTriangleProxy = m_radius / cAbs(cosAngle);
-
-    // we test if the collision point is located between the proxy and the goal;
-    // if not we simply move the proxy to the goal position
-    if ( (colDistance - distanceTriangleProxy) > distProxyGoal)
-    {
-        m_nextBestProxyGlobalPos = goal;
-        if (m_touchingObject)
-          m_touchingObject = 0;
-        return;
-    }
-
-    // the proxy is now constrained to a single point just above the third triangle
+    // The proxy is now constrained to a single point just above the third triangle
     m_triangle2 = colTriangle;
     m_numContacts = 3;
 
-    // calculate static friction
+    // A third collision has occurred; we first compute the global positions
+    // of each vertex of the triangle...
+    parent = colTriangle->getParent();
+
+    rot = parent->getGlobalRot();
+    pos = parent->getGlobalPos();
+
+    rot.mulr(colTriangle->getVertex0()->getPos(), vertex0);
+    vertex0.add(pos);
+    rot.mulr(colTriangle->getVertex1()->getPos(), vertex1);
+    vertex1.add(pos);
+    rot.mulr(colTriangle->getVertex2()->getPos(), vertex2);
+    vertex2.add(pos);
+
+    // Next we compute the triangle surface normal in world coordinates...
+    normal2 = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
+
+    // Compute a vector from the proxy to the goal point...
+    goal.subr(proxy, vProxyGoal);
+
+    // Compute the distance we'll have to push the proxy "backwards" along
+    // the proxy-goal vector to account for the proxy's radius.
     //
-    // calculate force exerted on proxy by user as the stiffness coefficient
-    // of the intersected triangle's mesh times the vector between the proxy
-    // and the device
-    force = cMul(colTriangle->getParent()->m_material.getStiffness(),
-             cSub(m_proxyGlobalPos, m_deviceGlobalPos));
+    // See above for a more detailed explanation of what's happening here.
+    vProxyGoal.normalize();
+    cosAngle = vProxyGoal.dot(normal2);
+    distanceTriangleProxy = m_radius / cAbs(cosAngle);
 
-    // calculate the normal component of the force
-    normalForce = cProject(force, normal2);
+    // Note that we don't really have to do another "goal offset" here, because
+    // we're moving the proxy along a line, and we will make sure not to move
+    // the proxy too close to the colliding triangle...
 
-    // calculate the tangential component of the force as the total force
-    // minus the normal component
-    tangentialForce = cSub(force, normalForce);
+    // Move the proxy to the collision point, minus the distance along the
+    // movement vector that we computed above.
+    //
+    // Note that we're adjusting the 'proxy' variable, which is just a local
+    // copy of the proxy position.  We still might decide not to move the
+    // 'real' proxy due to friction.
+    vProxyGoal.normalize();
+    vProxyGoal.mul(distanceTriangleProxy);
+    colPoint.subr(vProxyGoal, proxy);
 
-    // if the magnitude of the tangential force is less than or equal to the
-    // static friction coefficient times the magnitude of the normal force, then
-    // the user's position is in the friction cone of the surface, and the
-    // proxy should not be moved (set next best position to current position)
-    if (tangentialForce.length() <=
-            colTriangle->getParent()->m_material.getStaticFriction()*normalForce.length())
+    // TODO: There actually should be a third friction test to see if we 
+    // can make it to our new goal position, but this is generally such a
+    // small movement in one iteration that it's irrelevant...
+
+    /*
+    // If the distance between the new proxy position and the goal (device) is
+    // smaller than the proxy's radius, we consider the proxy to be at the same
+    // position as the device, and we're done.
+    if (proxy.distance(goal) < m_radius)
     {
-        m_nextBestProxyGlobalPos = m_proxyGlobalPos;
-        m_touchingObject = parent;
-        return;
+      m_nextBestProxyGlobalPos = proxy;
+      m_touchingObject = parent;
+      return;
     }
-
-    // by knowing the angle between the normal and the collision segment
-    // (vector from proxy to goal), we determine the next position of
-    // the proxy along the collision segment; we make sure that the
-    // proxy's surface (small ball) does not penetrate the triangle
-    vProxyGoal.mul(m_radius/(cAbs(cosAngle)));
-    colPoint.subr(vProxyGoal, m_nextBestProxyGlobalPos);
-
-    // set the last touched object pointer for the dynamic proxy
+    */
+    
+    m_nextBestProxyGlobalPos = proxy;
     m_touchingObject = parent;
+    return;    
+    
 }
 
+
+//===========================================================================
+/*!
+  Attempt to move the proxy, subject to friction constraints.  This is called
+  from computeNextBestProxyPosition when the proxy is ready to move along a
+  known surface.
+
+  \fn   void cProxyPointForceAlgo::testFrictionAndMoveProxy()
+  \param    goal        The location to which we'd like to move the proxy
+  \param    proxy       The current position of the proxy
+  \param    normal      The surface normal at the obstructing surface
+  \param    parent      The surface along which we're moving  
+*/
+//===========================================================================
+void cProxyPointForceAlgo::testFrictionAndMoveProxy(const cVector3d& goal, const cVector3d& proxy,
+  cVector3d& normal, cGenericObject* parent)
+{
+    if (g_useFriction == 0 || g_useMelderFriction == 0)
+    {
+      m_nextBestProxyGlobalPos = goal;
+      m_touchingObject = parent;
+      return;
+    }
+
+    // Compute penetration depth; how far is the device "behind" the
+    // plane of the obstructing surface
+    cVector3d projectedGoal = cProjectPointOnPlane(m_deviceGlobalPos,proxy,normal);   
+    double penetrationDepth = cSub(m_deviceGlobalPos,projectedGoal).length();
+
+    // Find the appropriate friction coefficient
+
+    // Our dynamic and static coefficients...
+    cMesh* parent_mesh = dynamic_cast<cMesh*>(parent);
+
+    // Right now we can only work with cMesh's
+    if (parent_mesh == 0) {
+      m_nextBestProxyGlobalPos = goal;
+      m_touchingObject = parent;
+      return;
+    }
+
+    double mud = parent_mesh->m_material.getDynamicFriction();
+    double mus = parent_mesh->m_material.getStaticFriction();
+
+    // No friction; don't try to compute friction cones
+    if (mud == 0 && mus == 0) {
+      m_nextBestProxyGlobalPos = goal;
+      m_touchingObject = parent;
+      return;
+    }
+
+    // The corresponding friction cone radii
+    double atmd = atan(mud);
+    double atms = atan(mus);
+
+    // Compute a vector from the device to the proxy, for computing
+    // the angle of the friction cone
+    cVector3d vDeviceProxy = cSub(proxy,m_deviceGlobalPos);
+    vDeviceProxy.normalize();
+
+    // Now compute the angle of the friction cone...
+    double theta = acos(vDeviceProxy.dot(normal));
+
+    // Manage the "slip-friction" state machine
+
+    // If the dynamic friction radius is for some reason larger than the
+    // static friction radius, always slip
+    if (mud > mus)
+    {
+      m_slipping = 1;
+    }
+
+    // If we're slipping...
+    else if (m_slipping)
+    {
+      if (theta < atmd * DYNAMIC_FRICTION_HYSTERESIS_MULTIPLIER) m_slipping = 0;
+      else m_slipping = 1; 
+    }
+
+    // If we're not slipping...
+    else
+    {
+      if (theta > atms) m_slipping = 1;
+      else m_slipping = 0;  
+    }
+
+    // The friction coefficient we're going to use...
+    double mu;
+    if (m_slipping) mu = mud;
+    else mu = mus;      
+
+    // Calculate the friction radius as the absolute value of the penetration
+    // depth times the coefficient of friction
+    double frictionRadius = fabs(penetrationDepth * mu);
+
+    // Calculate the distance between the proxy position and the current
+    // goal position.
+    double r = cSub(proxy, goal).length();
+
+    // If this distance is smaller than CHAI_SMALL, we consider the proxy
+    // to be at the same position as the goal, and we're done...
+    if (r < CHAI_SMALL)
+    {
+      m_nextBestProxyGlobalPos = goal;
+    }
+
+    // If the proxy is outside the friction cone, update its position to
+    // be on the perimeter of the friction cone...
+    else if (r > frictionRadius)
+    {
+      m_nextBestProxyGlobalPos = cAdd(goal,cMul(frictionRadius/r,cSub(proxy, goal)));                    
+    }
+    
+    // A hack to prevent the proxy from getting stuck in corners...
+    else if (m_numContacts >= 2)
+      m_nextBestProxyGlobalPos = proxy;
+
+    // Otherwise, if the proxy is inside the friction cone, the proxy
+    // should not be moved (set next best position to current position)
+    else
+    {
+      m_nextBestProxyGlobalPos = proxy; //m_proxyGlobalPos;
+    }
+
+    // We're done; record the fact that we're still touching an object...
+    m_touchingObject = parent;
+    return;
+}
 
 //===========================================================================
 /*!
@@ -680,10 +791,8 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
 //===========================================================================
 void cProxyPointForceAlgo::computeForce()
 {
-    // the stifness is computed by computing the average stiffness
-    // for each triangle
-    //
-    // surface stiffness
+    // A local stiffness is computed by computing the average stiffness
+    // for each triangle we're in contact with...
     double stiffness;
 
     // if there are no contacts between proxy and environment, no force is applied
@@ -717,7 +826,7 @@ void cProxyPointForceAlgo::computeForce()
                       m_triangle2->getParent()->m_material.getStiffness() ) / 3.0;
     }
 
-    // compute the force by modelling a spring between the proxy and the device
+    // compute the force by modeling a spring between the proxy and the device
     cVector3d force;
     m_proxyGlobalPos.subr(m_deviceGlobalPos, force);
     force.mul(stiffness);
@@ -742,9 +851,9 @@ unsigned int cProxyPointForceAlgo::getContacts(cTriangle*& a_t0, cTriangle*& a_t
                                                cTriangle*& a_t2)
 {
     // set the triangle pointers to the contact triangles
-    a_t0 = m_triangle0;
-    a_t1 = m_triangle1;
-    a_t2 = m_triangle2;
+    a_t0 = (m_numContacts>0)?m_triangle0:0;
+    a_t1 = (m_numContacts>1)?m_triangle1:0;
+    a_t2 = (m_numContacts>2)?m_triangle2:0;
 
     // return the number of triangle intersections
     return m_numContacts;

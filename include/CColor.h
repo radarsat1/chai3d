@@ -286,7 +286,7 @@ struct cColorf
     //-----------------------------------------------------------------------
     inline cColorb getColorb() const;   
 
-  private:
+  public:
     // MEMBERS:
     //! Color in \e GLfloat format [R,G,B,A].
     GLfloat m_color[4];
@@ -331,7 +331,7 @@ struct cColorb
     */
     //-----------------------------------------------------------------------
     cColorb(const GLubyte a_red, const GLubyte a_green, const GLubyte a_blue,
-            const GLubyte a_alpha = 1.0)
+            const GLubyte a_alpha = 0xff)
     {
         m_color[0] = a_red;
         m_color[1] = a_green;
@@ -360,7 +360,7 @@ struct cColorb
     */
     //-----------------------------------------------------------------------
     inline void set(const GLubyte a_red, const GLubyte a_green, const GLubyte a_blue,
-                    const GLubyte a_alpha = 1.0)
+                    const GLubyte a_alpha = 0xff)
     {
         m_color[0] = a_red;
         m_color[1] = a_green;
@@ -537,7 +537,7 @@ struct cColorb
     //-----------------------------------------------------------------------
     inline cColorf getColorf() const;
 
-  private:
+  public:
     // MEMBERS:
     //! Color in \e GLubyte format [R,G,B,A].
     GLubyte m_color[4];

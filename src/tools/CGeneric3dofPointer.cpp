@@ -22,7 +22,13 @@
 
 //---------------------------------------------------------------------------
 #include "CGeneric3dofPointer.h"
+#include "CWorld.h"
+#include <conio.h>
 //---------------------------------------------------------------------------
+
+// The radius used for proxy collision detection is equal to 
+// CHAI_SCALE_PROXY_RADIUS * the radius that's rendered
+#define CHAI_SCALE_PROXY_RADIUS 0.01f
 
 //==========================================================================
 /*!
@@ -45,12 +51,10 @@ cGeneric3dofPointer::cGeneric3dofPointer(cWorld* a_world)
     m_colorProxyButtonOn.set(1.0f, 0.4f, 0.0);
     m_colorProxy.set(0.8f, 0.6f, 0.0);
     m_colorLine.set(0.7f, 0.7f, 0.7f);
-    m_displayRadius = 0.1f;
 
-    // set radius of proxy 10% wider than device to avoid rendering artifacts
-    // when both points are at same position
-    m_proxyPointForceAlgo.setProxyRadius(1.1 * m_displayRadius);
-
+    // This sets both the rendering radius and the actual proxy radius
+    setRadius(0.05f);
+    
     // toggle frames off
     m_visualizeFrames = false;
 
@@ -252,7 +256,7 @@ void cGeneric3dofPointer::applyForces()
 
 //==========================================================================
 /*!
-      Render in OpenGL current tool.
+      Render the current tool in OpenGL.
 
       \fn       void cGeneric3dofPointer::render()
       \param    a_renderMode  rendering mode.
@@ -260,82 +264,149 @@ void cGeneric3dofPointer::applyForces()
 //===========================================================================
 void cGeneric3dofPointer::render(const int a_renderMode)
 {
-    if (a_renderMode & CHAI_RENDER_NON_TRANSPARENT)
+    // If multipass transparency is enabled, only render on a single
+    // pass...
+    if (a_renderMode != CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY && a_renderMode != CHAI_RENDER_MODE_RENDER_ALL)
+      return;   
+
+    // render small sphere representing tip of tool
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+    // OpenGL matrix
+    cMatrixGL frameGL;
+
+    // compute local position of proxy
+    cVector3d proxyLocalPos = m_proxyPointForceAlgo.getProxyGlobalPosition();
+    proxyLocalPos.sub(m_globalPos);
+    cMatrix3d tRot;
+    m_globalRot.transr(tRot);
+    tRot.mul(proxyLocalPos);
+
+    if (m_render_mode != RENDER_DEVICE)
     {
+      // render proxy
+      if (m_button)
+      {
+          glColor4fv(m_colorProxyButtonOn.pColor());
+      }
+      else
+      {
+          glColor4fv(m_colorProxy.pColor());
+      }
 
-        // render small sphere representing tip of tool
-        glEnable(GL_COLOR_MATERIAL);
-        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-        // OpenGL matrix
-        cMatrixGL frameGL;
-
-        // compute local position of proxy
-        cVector3d proxyLocalPos = m_proxyPointForceAlgo.getProxyGlobalPosition();
-        proxyLocalPos.sub(m_globalPos);
-        cMatrix3d tRot;
-        m_globalRot.transr(tRot);
-        tRot.mul(proxyLocalPos);
-
-        if (m_render_mode != RENDER_DEVICE)
-        {
-          // render proxy
-          if (m_button)
-          {
-              glColor4fv(m_colorProxyButtonOn.pColor());
-          }
-          else
-          {
-              glColor4fv(m_colorProxy.pColor());
-          }
-
-          frameGL.set(proxyLocalPos);
-          frameGL.glMatrixPushMultiply();
-              cDrawSphere(m_displayRadius, 16, 16);
-          frameGL.glMatrixPop();
-        }
-
-        if (m_render_mode != RENDER_PROXY)
-        {
-          // render device position
-          glColor4fv(m_colorDevice.pColor());
-          frameGL.set(m_deviceLocalPos);
-          frameGL.glMatrixPushMultiply();
-              cDrawSphere(0.95 * m_displayRadius, 16, 16);
-          frameGL.glMatrixPop();
-
-          if (m_visualizeFrames)
-          {
-              // render device orientation
-              frameGL.set(m_deviceLocalPos, m_deviceLocalRot);
-              frameGL.glMatrixPushMultiply();
-                  cDrawFrame(0.28);
-              frameGL.glMatrixPop();
-          }
-        }
-
-        if (m_render_mode == RENDER_PROXY_AND_DEVICE)
-        {
-          // render line between device and proxy
-          glDisable(GL_LIGHTING);
-          glLineWidth(1.0);
-          glColor4fv(m_colorLine.pColor());
-          glBegin(GL_LINES);
-              glVertex3d(m_deviceLocalPos.x, m_deviceLocalPos.y, m_deviceLocalPos.z);
-              glVertex3d(proxyLocalPos.x, proxyLocalPos.y, proxyLocalPos.z);
-          glEnd();
-          glEnable(GL_LIGHTING);
-        }
+      frameGL.set(proxyLocalPos);
+      frameGL.glMatrixPushMultiply();
+          cDrawSphere(m_displayRadius, 16, 16);
+      frameGL.glMatrixPop();
     }
-}
+
+    if (m_render_mode != RENDER_PROXY)
+    {
+      // render device position
+      glColor4fv(m_colorDevice.pColor());
+      frameGL.set(m_deviceLocalPos);
+      frameGL.glMatrixPushMultiply();
+          cDrawSphere(m_displayRadius, 16, 16);
+      frameGL.glMatrixPop();
+
+      if (m_visualizeFrames)
+      {
+          // render device orientation
+          frameGL.set(m_deviceLocalPos, m_deviceLocalRot);
+          frameGL.glMatrixPushMultiply();
+              cDrawFrame(0.28);
+          frameGL.glMatrixPop();
+      }
+    }
+
+    if (m_render_mode == RENDER_PROXY_AND_DEVICE)
+    {
+      // render line between device and proxy
+      glDisable(GL_LIGHTING);
+      glLineWidth(1.0);
+      glColor4fv(m_colorLine.pColor());
+      glBegin(GL_LINES);
+          glVertex3d(m_deviceLocalPos.x, m_deviceLocalPos.y, m_deviceLocalPos.z);
+          glVertex3d(proxyLocalPos.x, proxyLocalPos.y, proxyLocalPos.z);
+      glEnd();
+      glEnable(GL_LIGHTING);
+    }    
+
+    // Really useful debugging code for showing which triangles the proxy is
+    // in contact with...
+
+// #define RENDER_PROXY_CONTACT_TRIANGLES
+#ifdef RENDER_PROXY_CONTACT_TRIANGLES
+    if (m_proxyPointForceAlgo.getContactObject()) {
+      
+      cTriangle *t0, *t1, *t2;
+
+      cGenericObject* obj = m_proxyPointForceAlgo.getContactObject();
+      obj->computeGlobalCurrentObjectOnly();
+      
+      int result = m_proxyPointForceAlgo.getContacts(t0,t1,t2);
+    
+      glDisable(GL_DEPTH_TEST);
+      glDisable(GL_CULL_FACE);
+      glPushMatrix();
+      glLoadMatrixd(m_world->m_worldModelView);
+      glBegin(GL_TRIANGLES);
+
+      if (t0) {
+
+        glColor3f(1.0,0,0);
+        t0->getVertex0()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+        t0->getVertex1()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+        t0->getVertex2()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+
+        glVertex3d(t0->getVertex0()->m_globalPos.x,t0->getVertex0()->m_globalPos.y,t0->getVertex0()->m_globalPos.z);
+        glVertex3d(t0->getVertex1()->m_globalPos.x,t0->getVertex1()->m_globalPos.y,t0->getVertex1()->m_globalPos.z);
+        glVertex3d(t0->getVertex2()->m_globalPos.x,t0->getVertex2()->m_globalPos.y,t0->getVertex2()->m_globalPos.z);        
+      }
+
+      if (t1) {
+
+        glColor3f(0,1.0,0);
+        t1->getVertex0()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+        t1->getVertex1()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+        t1->getVertex2()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+
+        glVertex3d(t1->getVertex0()->m_globalPos.x,t1->getVertex0()->m_globalPos.y,t1->getVertex0()->m_globalPos.z);
+        glVertex3d(t1->getVertex1()->m_globalPos.x,t1->getVertex1()->m_globalPos.y,t1->getVertex1()->m_globalPos.z);
+        glVertex3d(t1->getVertex2()->m_globalPos.x,t1->getVertex2()->m_globalPos.y,t1->getVertex2()->m_globalPos.z);        
+      }
+
+      if (t2) {
+
+        glColor3f(0,0,1.0);
+        t2->getVertex0()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+        t2->getVertex1()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+        t2->getVertex2()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
+
+        glVertex3d(t2->getVertex0()->m_globalPos.x,t2->getVertex0()->m_globalPos.y,t2->getVertex0()->m_globalPos.z);
+        glVertex3d(t2->getVertex1()->m_globalPos.x,t2->getVertex1()->m_globalPos.y,t2->getVertex1()->m_globalPos.z);
+        glVertex3d(t2->getVertex2()->m_globalPos.x,t2->getVertex2()->m_globalPos.y,t2->getVertex2()->m_globalPos.z);        
+      }
+
+      glEnd();
+      glPopMatrix();
+      glEnable(GL_DEPTH_TEST);
+    }
+#endif
+
+      
+
+
+}    
 
 
 //==========================================================================
 /*!
-      Set the radius of the proxy. the value passed as parameter corresponds
+      Set the radius of the proxy. The value passed as parameter corresponds
       to the size of the sphere which is rendered graphically. The physical
-      size of the prozy, one which collides with the triangles is set to
-      1/100th of original value.
+      size of the proxy, one which collides with the triangles is set to
+      CHAI_SCALE_PROXY_RADIUS * a_radius.
 
       \fn       void cGeneric3dofPointer::setRadius(double a_radius)
       \param    a_radius  radius of pointer.
@@ -343,12 +414,11 @@ void cGeneric3dofPointer::render(const int a_renderMode)
 //===========================================================================
 void cGeneric3dofPointer::setRadius(double a_radius)
 {
-    // update radius of device
+    // update the radius that's rendered
     m_displayRadius = a_radius;
 
-    // set radius of proxy 10% wider than device to avoid rendering artifacts
-    // when both points are at same position
-    m_proxyPointForceAlgo.setProxyRadius(a_radius / 100.0);
+    // update the radius used for collision detection
+    m_proxyPointForceAlgo.setProxyRadius(a_radius * CHAI_SCALE_PROXY_RADIUS);
 }
 
 

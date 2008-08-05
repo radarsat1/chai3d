@@ -52,22 +52,24 @@ bool cLoadFileOBJ(cMesh* iMesh, const string& iFileName);
 //  The following code is only used by the parser.
 //===========================================================================
 
-// OBJ File string indentifiers
-#define CHAI_OBJ_VERTEX_ID		 "v"
-#define CHAI_OBJ_TEXCOORD_ID	 "vt"
-#define CHAI_OBJ_NORMAL_ID		 "vn"
-#define CHAI_OBJ_FACE_ID		 "f"
-#define CHAI_OBJ_COMMENT_ID		 "#"
-#define CHAI_OBJ_MTL_LIB_ID		 "mtllib"
-#define CHAI_OBJ_USE_MTL_ID		 "usemtl"
+// OBJ File string identifiers
+#define CHAI_OBJ_VERTEX_ID    "v"
+#define CHAI_OBJ_TEXCOORD_ID  "vt"
+#define CHAI_OBJ_NORMAL_ID    "vn"
+#define CHAI_OBJ_FACE_ID      "f"
+#define CHAI_OBJ_COMMENT_ID   "#"
+#define CHAI_OBJ_MTL_LIB_ID   "mtllib"
+#define CHAI_OBJ_USE_MTL_ID   "usemtl"
 
-// MTL File string indentifiers
-#define CHAI_OBJ_NEW_MTL_ID		  "newmtl"
+// MTL File string identifiers
+#define CHAI_OBJ_NEW_MTL_ID       "newmtl"
 #define CHAI_OBJ_MTL_TEXTURE_ID   "map_Kd"
 #define CHAI_OBJ_MTL_AMBIENT_ID	  "Ka"
 #define CHAI_OBJ_MTL_DIFFUSE_ID	  "Kd"
 #define CHAI_OBJ_MTL_SPECULAR_ID  "Ks"
 #define CHAI_OBJ_MTL_SHININESS_ID "Ns"
+#define CHAI_OBJ_MTL_ALPHA_ID     "Tr"
+#define CHAI_OBJ_MTL_ALPHA_ID_ALT "d"
 
 // Maximum size of a string that could be read out of the OBJ file
 #define CHAI_OBJ_MAX_STR_SIZE 1024
@@ -99,14 +101,27 @@ struct cFace
 // Information about a material property
 struct cMaterialInfo
 {
-    char	m_name[1024];
-    char	m_texture[_MAX_PATH];
+    char m_name[1024];
+    char m_texture[_MAX_PATH];
     int	m_textureID;
     float m_diffuse[3];
     float m_ambient[3];
     float m_specular[3];
     float m_emmissive[3];
+    float m_alpha;
     float m_shininess;
+
+    cMaterialInfo() {
+      m_name[0] = '\0';
+      m_texture[0] = '\0';
+      m_textureID = -1;
+      m_diffuse[0] = m_diffuse[1] = m_diffuse[2] = 0.8f;
+      m_ambient[0] = m_ambient[1] = m_ambient[2] = 0.8f;
+      m_specular[0] = m_specular[1] = m_specular[2] = 0.3f;
+      m_emmissive[0] = m_emmissive[1] = m_emmissive[2] = 0.0f;
+      m_shininess = 0;
+      m_alpha = 1.0f;
+    }
 };
 
 // Main class for OBJ parser.
@@ -120,7 +135,7 @@ class cOBJModel
     ~cOBJModel();
 
     // METHODS:
-    // Load image file.
+    // Load model file.
     bool LoadModel(const char szFileName[]);
 
     // MEMBERS:

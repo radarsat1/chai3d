@@ -3,6 +3,8 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="object_loader"
+	ProjectGUID="{34D319FF-195A-4202-AF28-FA9840C380CE}"
+	RootNamespace="object_loader"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">
@@ -188,10 +190,16 @@
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 			<File
+				RelativePath="..\..\msvc6\object_loader\res\object_loader.ico">
+			</File>
+			<File
 				RelativePath="..\..\msvc6\object_loader\object_loader.rc">
 			</File>
 		</Filter>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="\users\dmorris\chai3d\examples\msvc6\object_loader\object_loader.rc"/>
 	</Globals>
 </VisualStudioProject>

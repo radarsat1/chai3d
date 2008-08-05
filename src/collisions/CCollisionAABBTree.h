@@ -13,9 +13,7 @@
     Professional Edition License.
 
     \author:    <http://www.chai3d.org>
-    \author:    Christopher Sewell
-    \author     Based on code by Charity Lu
-    \author     clu@cs.stanford.edu
+    \author:    Chris Sewell
     \version    1.1
     \date       01/2004
 */
@@ -31,6 +29,12 @@
 #include "CCollisionAABBBox.h"
 //---------------------------------------------------------------------------
 
+typedef enum {
+  AABB_NODE_INTERNAL=0,
+  AABB_NODE_LEAF,
+  AABB_NODE_GENERIC
+} aabb_node_types;
+
 //===========================================================================
 /*!
       \class    cCollisionAABBNode
@@ -44,9 +48,9 @@ class cCollisionAABBNode
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cCollisionAABBNode.
-    cCollisionAABBNode() { m_parent = 0; }
+    cCollisionAABBNode() { m_parent = 0; m_nodeType = AABB_NODE_GENERIC; }
     //! Destructor of cCollisionAABBNode.
-    virtual ~cCollisionAABBNode() {}
+    virtual ~cCollisionAABBNode() { }
 
     // METHODS:
     //! Create a bounding box for the portion of the model at or below the node.
@@ -70,6 +74,9 @@ class cCollisionAABBNode
     int m_depth;
     //! Parent node of this node.
     cCollisionAABBNode* m_parent;
+
+    //! The node type, used only for proper deletion right now
+    int m_nodeType;
 };
 
 
@@ -86,7 +93,7 @@ class cCollisionAABBLeaf : public cCollisionAABBNode
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Default constructor of cCollisionAABBLeaf.
-    cCollisionAABBLeaf() {}
+    cCollisionAABBLeaf() { m_nodeType = AABB_NODE_LEAF; }
     //! Constructor of cCollisionAABBLeaf.
     cCollisionAABBLeaf(cTriangle *a_triangle) : m_triangle(a_triangle)
         {fitBBox();}
@@ -129,12 +136,16 @@ class cCollisionAABBInternal : public cCollisionAABBNode
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Default constructor of cCollisionAABBInternal.
-    cCollisionAABBInternal() { m_depth = 0; }
+    cCollisionAABBInternal() {
+      m_depth = 0;
+      m_nodeType = AABB_NODE_INTERNAL;
+    }
+
     //! Constructor of cCollisionAABBInternal.
     cCollisionAABBInternal(unsigned int a_numLeaves, cCollisionAABBLeaf *a_leaves,
             unsigned int a_depth = -1);
     //! Destructor of cCollisionAABBInternal.
-    ~cCollisionAABBInternal();
+    virtual ~cCollisionAABBInternal();
 
     // METHODS:
     //! Size the bounding box for this node to enclose its children.

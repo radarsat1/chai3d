@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="math"
+	ProjectGUID="{F53A7A11-6914-42D2-8841-02CB6C95AC01}"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">

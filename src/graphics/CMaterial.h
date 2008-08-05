@@ -82,6 +82,13 @@ struct cMaterial
     //! get dynamic friction level
     inline double getDynamicFriction() const { return (m_dynamic_friction); }
     
+    //! tells you whether this material includes partial transparency
+    inline bool isTransparent() const {
+      return (m_ambient[4] < 1.0 || m_diffuse[4] < 1.0 || m_specular[4] < 1.0 || m_emission[4]);
+    }
+
+    //! For debugging: prints the colors contained in this material
+    void print() const;
 
     // MEMBERS:
 
@@ -93,7 +100,8 @@ struct cMaterial
     cColorf m_specular;
     //! Emissive color
     cColorf m_emission;
-
+    //! OpenGL shininess
+    GLuint m_shininess;
 
   protected:
 
@@ -103,8 +111,7 @@ struct cMaterial
     double m_static_friction;
     //! Dynamic friction constant
     double m_dynamic_friction;
-    //! OpenGL shininess
-    GLuint m_shininess;
+
 };
 
 //---------------------------------------------------------------------------

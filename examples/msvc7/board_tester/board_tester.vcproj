@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="board_tester"
+	ProjectGUID="{22B09144-688B-42E3-A418-2247098FF233}"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">

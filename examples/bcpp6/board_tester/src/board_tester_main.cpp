@@ -103,14 +103,14 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button3Click(TObject *Sender)
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_0, &encoder_value);
   Edit2->Text = encoder_value;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button4Click(TObject *Sender)
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_1, &encoder_value);
   Edit3->Text = encoder_value;
 
@@ -118,50 +118,50 @@ void __fastcall TForm1::Button4Click(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button5Click(TObject *Sender)
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_2, &encoder_value);
   Edit4->Text = encoder_value;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button6Click(TObject *Sender)
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_3, &encoder_value);
   Edit5->Text = encoder_value;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button7Click(TObject *Sender)
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_4, &encoder_value);
   Edit6->Text = encoder_value;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button8Click(TObject *Sender)
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_5, &encoder_value);
   Edit7->Text = encoder_value;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button9Click(TObject *Sender)
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_6, &encoder_value);
   Edit8->Text = encoder_value;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button10Click(TObject *Sender)
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_7, &encoder_value);
   Edit9->Text = encoder_value;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button11Click(TObject *Sender)
 {
-        int DACvalue;
-        DACvalue = TckDACvolts->Position;
+        double DACvalue;
+        DACvalue = (double) TckDACvolts->Position;
         board->command(CHAI_CMD_SET_DAC_0,&DACvalue);
 
 }
@@ -173,64 +173,64 @@ void __fastcall TForm1::TckDACvoltsChange(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button12Click(TObject *Sender)
 {
-        int DACvalue;
-        DACvalue = TckDACvolts->Position;
+        double DACvalue;
+        DACvalue = (double) TckDACvolts->Position;
         board->command(CHAI_CMD_SET_DAC_1,&DACvalue);
 
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button13Click(TObject *Sender)
 {
-        int DACvalue;
-        DACvalue = TckDACvolts->Position;
+        double DACvalue;
+        DACvalue = (double) TckDACvolts->Position;
         board->command(CHAI_CMD_SET_DAC_2,&DACvalue);
 
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button14Click(TObject *Sender)
 {
-        int DACvalue;
-        DACvalue = TckDACvolts->Position;
+        double DACvalue;
+        DACvalue = (double) TckDACvolts->Position;
         board->command(CHAI_CMD_SET_DAC_3,&DACvalue);
 
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button15Click(TObject *Sender)
 {
-        int DACvalue;
-        DACvalue = TckDACvolts->Position;
+        double DACvalue;
+        DACvalue = (double) TckDACvolts->Position;
         board->command(CHAI_CMD_SET_DAC_4,&DACvalue);
 
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button16Click(TObject *Sender)
 {
-        int DACvalue;
-        DACvalue = TckDACvolts->Position;
+        double DACvalue;
+        DACvalue = (double) TckDACvolts->Position;
         board->command(CHAI_CMD_SET_DAC_5,&DACvalue);
 
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button17Click(TObject *Sender)
 {
-        int DACvalue;
-        DACvalue = TckDACvolts->Position;
+        double DACvalue;
+        DACvalue = (double) TckDACvolts->Position;
         board->command(CHAI_CMD_SET_DAC_6,&DACvalue);
 
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button18Click(TObject *Sender)
 {
-        int DACvalue;
-        DACvalue = TckDACvolts->Position;
+        double DACvalue;
+        DACvalue = (double) TckDACvolts->Position;
         board->command(CHAI_CMD_SET_DAC_7,&DACvalue);
 
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button19Click(TObject *Sender)
 {
-        int DACvalue = 0;
-        TckDACvolts->Position = 0.0;
+        double DACvalue = 0;
+        TckDACvolts->Position = 0;
         board->command(CHAI_CMD_SET_DAC_0,&DACvalue);
         board->command(CHAI_CMD_SET_DAC_1,&DACvalue);
         board->command(CHAI_CMD_SET_DAC_2,&DACvalue);

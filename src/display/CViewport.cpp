@@ -23,6 +23,7 @@
 //---------------------------------------------------------------------------
 #include "CViewport.h"
 #include "CWorld.h"
+
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -90,6 +91,9 @@ cViewport::cViewport(HWND a_winHandle, cCamera *a_camera, const bool a_stereoEna
 
         m_pixelFormat = pfd;
     }
+
+    m_forceRenderArea.left = m_forceRenderArea.right =
+      m_forceRenderArea.top = m_forceRenderArea.bottom = -1;
 
     if (m_winHandle != NULL)
     {
@@ -196,11 +200,33 @@ bool cViewport::update()
     // check display handle
     if (m_winHandle == NULL) { return (false); }
 
-    // get width and height of display
-    RECT sizeWin;
-    if (GetWindowRect(m_winHandle, &sizeWin) == 0) { return (false); }
-    m_width   = sizeWin.right  - sizeWin.left;
-    m_height  = sizeWin.bottom - sizeWin.top;
+    // Find out the rectangle to which we should be rendering
+    
+    // If we're using the entire window...
+    if (m_forceRenderArea.left == -1)
+    {
+      if (GetWindowRect(m_winHandle, &m_activeRenderingArea) == 0) { return (false); }
+
+      // Convert from screen to window coordinates
+      m_activeRenderingArea.right -= m_activeRenderingArea.left;
+      m_activeRenderingArea.left = 0;
+      
+      m_activeRenderingArea.bottom -= m_activeRenderingArea.top;
+      m_activeRenderingArea.top = 0;
+      
+      // Convert from y-axis-down to y-axis-up, since that's how we store
+      // our rendering area.
+      int height = m_activeRenderingArea.bottom;
+      m_activeRenderingArea.top = height - m_activeRenderingArea.top;
+      m_activeRenderingArea.bottom = height - m_activeRenderingArea.bottom;
+      
+    }
+
+    // Otherwise use whatever rectangle the user wants us to use...
+    else
+    {
+      m_activeRenderingArea = m_forceRenderArea;
+    }
     
     // retrieve handle of the display device context
     m_glDC = GetDC(m_winHandle);
@@ -322,73 +348,102 @@ bool cViewport::render(int imageIndex)
 //===========================================================================
 bool cViewport::renderView(const int a_imageIndex)
 {
-    // viewport enabled and camera exists, then render scene
-    if (m_glReady && m_enabled && (m_camera != NULL))
-    {
-        // check if size of display has been modified
-        RECT sizeWin;
-        if (GetWindowRect(m_winHandle, &sizeWin) == 0) { return (false); }
+    // Make sure the viewport is really ready for rendering
+    if ( (m_glReady == 0) || (m_enabled == 0) || (m_camera == NULL) ) return false;
+    
 
-        unsigned int width   = sizeWin.right  - sizeWin.left;
-        unsigned int height  = sizeWin.bottom - sizeWin.top;
+    // Find out whether we need to update the size of our viewport...
 
-        if ((m_width != width) || (m_height != height))
-        {
-            update();
-        }
+    // If we're using the whole window, see whether the window has
+    // changed size...
+    if (m_forceRenderArea.left == -1) {
+    
+      RECT sizeWin;
+      if (GetWindowRect(m_winHandle, &sizeWin) == 0) { return (false); }
 
-        // Activate display context
-        //
-        // Note that in the general case, this is not strictly necessary,
-        // but if a user is using multiple viewports, we don't want him
-        // to worry about the current rendering context, so we incur a bit
-        // of overhead here.
-        if (!wglMakeCurrent(m_glDC, m_glContext))
-        {
-            // return operation failed
-            return(false);
-        }
+      unsigned int width   = sizeWin.right  - sizeWin.left;
+      unsigned int height  = sizeWin.bottom - sizeWin.top;
 
-        // Set up rendering to the appropriate buffer
-        if (a_imageIndex == CHAI_STEREO_RIGHT)
-        {
-            glDrawBuffer(GL_BACK_RIGHT);
-        }
-        else if (a_imageIndex == CHAI_STEREO_LEFT)
-        {
-            glDrawBuffer(GL_BACK_LEFT);
-        }
-        else
-        {
-            glDrawBuffer(GL_BACK);
-        }
-        
-        // set viewport size
-        glViewport(0, 0, m_width, m_height);
-
-        // render world
-        m_camera->renderView(m_width, m_height, a_imageIndex);
-
-        // Swap buffers
-        // If stereo is enabled, we only swap after the _right_ image is drawn
-        if (m_stereoEnabled == 0 || a_imageIndex == CHAI_STEREO_RIGHT)
-        {
-            if (m_postRenderCallback) m_postRenderCallback->renderSceneGraph();
-            SwapBuffers(m_glDC);
-        }
-
-        // deactivate display context
-        // wglMakeCurrent(m_glDC, 0);
-
-        // operation succeeded
-        return (true);
+      if (
+          (m_activeRenderingArea.left   != 0)     ||
+          (m_activeRenderingArea.bottom != 0)     ||
+          (m_activeRenderingArea.right  != width) ||
+          (m_activeRenderingArea.top    != height)
+         )
+      {
+        update();
+      }
     }
 
+    // Otherwise the user is telling us to use a particular rectangle; see
+    // whether that rectangle has changed...
     else
     {
-        // operation failed
-        return (false);
+      if ( (m_activeRenderingArea.left   != m_forceRenderArea.left)  ||
+           (m_activeRenderingArea.right  != m_forceRenderArea.right) ||
+           (m_activeRenderingArea.top    != m_forceRenderArea.top)   ||
+           (m_activeRenderingArea.bottom != m_forceRenderArea.bottom) )
+      {
+        update();
+      }
     }
+
+    // Activate display context
+    //
+    // Note that in the general case, this is not strictly necessary,
+    // but if a user is using multiple viewports, we don't want him
+    // to worry about the current rendering context, so we incur a bit
+    // of overhead here.
+    if (!wglMakeCurrent(m_glDC, m_glContext))
+    {
+        // return operation failed
+        return(false);
+    }
+
+    // Set up rendering to the appropriate buffer
+    if (a_imageIndex == CHAI_STEREO_RIGHT)
+    {
+        glDrawBuffer(GL_BACK_RIGHT);
+    }
+    else if (a_imageIndex == CHAI_STEREO_LEFT)
+    {
+        glDrawBuffer(GL_BACK_LEFT);
+    }
+    else
+    {
+        glDrawBuffer(GL_BACK);
+    }
+    
+    // set viewport size
+    int width = m_activeRenderingArea.right - m_activeRenderingArea.left;
+    int height = m_activeRenderingArea.top - m_activeRenderingArea.bottom;
+    glViewport(m_activeRenderingArea.left, m_activeRenderingArea.bottom,
+      width,height);
+
+    // set background color
+    cColorf color = m_camera->getParentWorld()->getBackgroundColor();
+    glClearColor(color.getR(), color.getG(), color.getB(), color.getA());
+
+    // clear the color and depth buffers
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // render world
+    m_camera->renderView(width, height, a_imageIndex);
+
+    if (m_postRenderCallback) m_postRenderCallback->renderSceneGraph();
+
+    // Swap buffers
+    // If stereo is enabled, we only swap after the _right_ image is drawn
+    if (m_stereoEnabled == 0 || a_imageIndex == CHAI_STEREO_RIGHT)
+    {        
+        SwapBuffers(m_glDC);
+    }
+
+    // deactivate display context
+    // wglMakeCurrent(m_glDC, 0);
+
+    // operation succeeded
+    return (true);    
 }
 
 
@@ -418,11 +473,14 @@ bool cViewport::select(const unsigned int a_windowPosX, const unsigned int a_win
 
     if (m_camera == 0) return false;
 
+    int width = m_activeRenderingArea.right - m_activeRenderingArea.left;
+    int height = m_activeRenderingArea.top - m_activeRenderingArea.bottom;
+
     // search for intersection between ray and objects in world
     bool result = m_camera->select( a_windowPosX,
                                     a_windowPosY,
-                                    m_width,
-                                    m_height,
+                                    width,
+                                    height,
                                     m_lastSelectedObject,
                                     m_lastSelectedTriangle,
                                     m_lastSelectedPoint,
@@ -448,4 +506,38 @@ void cViewport::setCamera(cCamera *a_camera)
 {
     // set camera
     m_camera = a_camera;
+}
+
+
+
+//===========================================================================
+/*!
+    You can use this to specify a specific rectangle to which you want this
+    viewport to render within the window.  Supply -1 for each coordinate
+    to return to the default behavior (rendering to the whole window).
+    The _positive_ y axis goes _up_.
+
+    \fn     void cViewport::setRenderArea(RECT& r)
+    \param  r  The rendering area within the GL context
+*/
+//===========================================================================
+void cViewport::setRenderArea(RECT& r)
+{
+  m_forceRenderArea = r;
+}
+
+
+
+//===========================================================================
+/*!
+Clients should call this when the scene associated with
+this viewport may need re-initialization, e.g. after a 
+switch to or from fullscreen.
+
+\fn     void cViewport::onDisplayReset()
+*/
+//===========================================================================
+void cViewport::onDisplayReset()
+{
+  m_camera->onDisplayReset(true);
 }

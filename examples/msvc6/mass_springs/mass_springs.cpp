@@ -118,27 +118,24 @@ BOOL Cmass_springsApp::InitInstance() {
   // set background color
   world->setBackgroundColor(0.0f,0.0f,0.0f);
 
-
   // Create a camera
   camera = new cCamera(world);
-  world->addChild(camera);
 
   // Turn on one light...
   light = new cLight(world);
 
   light->setEnabled(true);
 
-  // We don't want a spotlight...
-  light->setCutOffAngle(180.0);
-
   // Put the light somewhere that looks nice
-  light->setPos(cVector3d(220, 200, 200));
-  light->setDir(-1,-1,-1);
-  
-  cVector3d dir  = light->getDir();
-  cVector3d lpos = light->getPos();
-  cVector3d gpos = light->getGlobalPos();
+  light->setDirectionalLight(true);
+  light->setPos(cVector3d(-1, 1, 1));
 
+  //light->setDir(-1,-1,1);
+  // We don't want a spotlight...
+  //light->setCutOffAngle(180.0);
+
+
+  
   // set camera position and orientation
   // 
   // We choose to put it out on the positive z axis, so things appear
@@ -187,7 +184,9 @@ BOOL Cmass_springsApp::InitInstance() {
   // Create an initial ball
   CBall* b = new CBall();
   m_active_balls.push_back(b);
-  cVector3d pos(-1.0,0,1.0);
+
+  // The first ball goes at -1,0,1 (arbitrary)
+  cVector3d pos(-1,0,1);
   b->setPos(pos);
   world->addChild(b);
 
@@ -223,6 +222,9 @@ void Cmass_springsApp::add_ball() {
   CSpring* s = new CSpring();
   m_active_springs.push_back(s);
 
+  // Springs are always "located" at 0,0,0; they render directly
+  // using their endpoint ball positions...
+  s->setPos(0,0,0);
   s->m_endpoint_1 = m_active_balls[ball_index];
   s->m_endpoint_2 = m_active_balls[ball_index-1];
 
@@ -709,9 +711,8 @@ void CSpring::render(const int a_renderMode) {
 
   if (m_endpoint_1 == 0 || m_endpoint_2 == 0) return;
 
-  // glLoadIdentity();
-
   glEnable(GL_COLOR_MATERIAL);
+  glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
   glColor3f(0.2,0.2,0.8);
 
   glLineWidth(4.0);
@@ -732,6 +733,11 @@ void CSpring::render(const int a_renderMode) {
 // springs
 CBall::CBall() {
 
+  m_material.m_ambient.set(0.2,0.7,0.2);
+  m_material.m_diffuse.set(0.2,0.7,0.2);
+  m_material.setShininess(110);
+  m_material.m_specular.set(0.8,0.8,0.9);
+  
   m_radius = 0.2;
   m_velocity.set(0,0,0);
   m_mass = DEFAULT_OBJECT_MASS;
@@ -750,20 +756,13 @@ void CBall::render (const int a_renderMode) {
 
   if (sphereObj == 0) sphereObj = gluNewQuadric();
 
+  m_material.render();
+
   // Render a sphere at the location of this ball
-  glPushMatrix();
-  glLoadIdentity();
-  glTranslatef(m_localPos.x,m_localPos.y,m_localPos.z);
-
-  //float ball_mat[] = { 0.2, 0.8, 0.2, 1.0 };
-  //glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ball_mat);
-  glEnable(GL_COLOR_MATERIAL);
-  glColor3f(0.2,0.8,0.2);
-
-  #define BALL_SLICES 10
-  #define BALL_STACKS 10
   
+  #define BALL_SLICES 15
+  #define BALL_STACKS 15
+
   gluSphere(sphereObj, m_radius, BALL_SLICES, BALL_STACKS);
-  glPopMatrix();
 
 }

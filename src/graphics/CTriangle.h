@@ -37,8 +37,6 @@
 //===========================================================================
 class cTriangle
 {
-    friend cMesh;
-
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //-----------------------------------------------------------------------
@@ -243,7 +241,7 @@ class cTriangle
         Is this triangle allocated to an existing mesh?
 
         \return     Return \b true if triangle is allocated to an existing
-                    mesh, otherwize return \b false.
+                    mesh, otherwise return \b false.
     */
     //-----------------------------------------------------------------------
     inline bool allocated() const
@@ -258,7 +256,7 @@ class cTriangle
         Check if a ray intersects this triangle. The ray is described
         by its origin (/e a_origin) and its direction (/e a_direction).
 
-        If a collision occure, the square distance between the ray origin
+        If a collision occurs, the square distance between the ray origin
         and the collision point in measured and compared to any previous collision
         information stored in parameters \e a_colObject, \e a_colTriangle,
         \e a_colPoint, and \e a_colSquareDistance.
@@ -270,7 +268,7 @@ class cTriangle
         \param  a_rayOrigin  Point from where collision ray starts.
         \param  a_rayDir  Direction vector of collision ray.
         \param  a_colObject  Pointer to nearest collided object.
-        \param  a_colTriangle Pointer to nearest colided triangle.
+        \param  a_colTriangle Pointer to nearest collided triangle.
         \param  a_colPoint  Position of nearest collision.
         \param  a_colSquareDistance  Distance between ray origin and nearest
                 collision point.
@@ -305,7 +303,7 @@ class cTriangle
         
         double t_T = cDot(t_N, cSub(t_vertex0,a_rayOrigin)) / cDot(t_N, a_rayDir);
 
-       //
+        //
         if (t_T + INTERSECT_EPSILON < 0) return (false);
         
         cVector3d t_Q = cSub(cAdd(a_rayOrigin, cMul(t_T, a_rayDir)), t_vertex0);
@@ -332,11 +330,11 @@ class cTriangle
             cVector3d t_I = cAdd(t_vertex0, cMul(t_S0,t_E0), cMul(t_S1, t_E1));
             double t_squareDistance = a_rayOrigin.distancesq(t_I);
 
-            // Collision has occured
+            // Collision has occurred
 
             // If we've already seen a closer collision, don't report
             // this one
-            if (t_squareDistance > a_colSquareDistance) return(false);
+            if (t_squareDistance >= a_colSquareDistance) return(false);
 
             // Okay, we want to report this collision
             a_colObject = m_parent;
@@ -379,7 +377,7 @@ class cTriangle
     //! A mesh can be organized into a network of neighboring triangles, which are stored here...
     std::vector<cTriangle*>* m_neighbors;
 
-  protected:
+  public:
     //! Index number of vertex 0 (defines a location in my owning mesh's vertex array)
     unsigned int m_indexVertex0;
     //! Index number of vertex 1 (defines a location in my owning mesh's vertex array)

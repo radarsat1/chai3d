@@ -278,6 +278,7 @@ int get_phantom_name()
     return -1;
   }
 
+	m_totalPhantomList.clear();
   
   bool DUAL_CONFIG = false;  
   for (int i=0; i<m_totalPhantomNumber; i++) 

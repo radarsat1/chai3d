@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="mass_springs"
+	ProjectGUID="{6241E77E-D9C1-4619-8B85-723C3A3E671E}"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">

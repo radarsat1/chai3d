@@ -62,6 +62,8 @@ public:
 	BOOL	m_usecolors_check;
 	BOOL	m_usetexture_check;
 	BOOL	m_usewireframe_check;
+  BOOL  m_culling_check;
+  BOOL  m_transparency_check;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides
@@ -93,6 +95,11 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnClose();
 	afx_msg void OnCheck();
+  
+  afx_msg void OnMaterialCheck();
+  afx_msg void OnTransparencyCheck();
+  afx_msg void OnColorsCheck();
+
 	afx_msg void OnLoadModelButton();
 	afx_msg void OnLoadTextureButton();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
@@ -106,6 +113,7 @@ protected:
 	afx_msg void OnAnimationButton();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:  
 };
 
 //{{AFX_INSERT_LOCATION}}

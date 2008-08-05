@@ -30,6 +30,11 @@
 #define M_PI 3.1415926535898
 #endif
 
+// Turn off the annoying precision warning in msvc...
+#ifdef _MSVC
+#pragma warning(disable: 4244)
+#endif
+
 /***
 
   This example demonstrates two ways to drive a haptic loop
@@ -76,7 +81,7 @@ cVector3d g_initial_object_pos(1.5,0,-1.2);
 // This is the point where the object will "turn around"
 // when he's being animated...
 #define MAXIMUM_ANIMATION_XVAL 1.0
-  
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -160,8 +165,7 @@ BOOL Cobject_loaderApp::InitInstance() {
 
   // Create a camera
   camera = new cCamera(world);
-  world->addChild(camera);
-
+  
   // set camera position and orientation
   // 
   // We choose to put it out on the positive z axis, so things appear
@@ -181,18 +185,19 @@ BOOL Cobject_loaderApp::InitInstance() {
   // Create a display for graphic rendering
   viewport = new cViewport(g_main_dlg->m_gl_area_hwnd, camera, false);
 
-  // Create a light source and attach it to camera
+  // Create a light source
   light = new cLight(world);
-  camera->addChild(light);
+  
+  // camera->addChild(light);
+  world->addChild(light);
   light->setEnabled(true);
 
-  // A purely positional light, over to the left a little
-  // and behind the camera a little...
-  light->setDirectionalLight(false);
+  // A purely directional light, pointing into the monitor
+  // and a little to the right... note that to accomplish
+  // that, I "place" the light off to the left and behind the
+  // origin (positive z relative to the origin).
+  light->setDirectionalLight(true);
   light->setPos(cVector3d(-1,0,1));
-
-  // If the light was directional, we might do this...
-  // light->rotate(cVector3d(0,0,1), cDegToRad(180));
 
   // Create a mesh - we will build a pyramid manually, and later let the
   // user load 3d models
@@ -219,36 +224,6 @@ BOOL Cobject_loaderApp::InitInstance() {
   //
   // I will create a fancy collision detector later when I load
   // a model from a file.
-
-  // Give a color to each vertex
-  for (unsigned int i=0; i<object->getNumVertices(); i++) {
-    
-    cVertex* nextVertex = object->getVertex(i);
-
-    cColorb color;
-    color.set(
-      GLuint(0xff*(size + nextVertex->getPos().x ) / (2.0 * size)),
-      GLuint(0xff*(size + nextVertex->getPos().y ) / (2.0 * size)),
-      GLuint(0xff* nextVertex->getPos().z / 2*size)
-      );
-
-    nextVertex->setColor(color);
-  }
-
-  // Set object settings.  The parameters tell the object
-  // to apply this alpha level to his textures and to his
-  // children (of course he has neither right now).
-  // object->setTransparencyLevel(0.5, true, true);
-
-  // Give him some material properties...
-  cMaterial material;
-
-  
-  material.m_ambient.set( 0.4, 0.2, 0.2, 1.0 );
-  material.m_diffuse.set( 0.8, 0.6, 0.6, 1.0 );
-  material.m_specular.set( 0.9, 0.9, 0.9, 1.0 );
-  material.setShininess(100);
-  object->m_material = material;
 
   // These two calls are useful for debugging, but not
   // really important...
@@ -376,7 +351,16 @@ int Cobject_loaderApp::render_loop() {
 }
 
 
-void Cobject_loaderApp::update_options_from_gui() {
+void Cobject_loaderApp::copy_rendering_options_to_gui() {
+
+  g_main_dlg->m_usecolors_check = (object->getColorsEnabled()?BST_INDETERMINATE:BST_UNCHECKED);
+  g_main_dlg->m_material_check = (object->getMaterialEnabled()?BST_INDETERMINATE:BST_UNCHECKED);
+  g_main_dlg->m_transparency_check = (object->getTransparencyEnabled()?BST_INDETERMINATE:BST_UNCHECKED);
+  g_main_dlg->UpdateData(FALSE);
+  
+}
+
+void Cobject_loaderApp::update_options_from_gui(int preserve_loaded_properties) {
 
   // The second parameter in each case transfers options to
   // any children the object has...
@@ -384,9 +368,17 @@ void Cobject_loaderApp::update_options_from_gui() {
   object->setShowFrame(g_main_dlg->m_showframe_check, true);
   object->showNormals(g_main_dlg->m_shownormals_check, true);
   object->setShowBox(g_main_dlg->m_showbox_check, true);
+  object->useCulling(g_main_dlg->m_culling_check, true);
   object->useTexture(g_main_dlg->m_usetexture_check, true);
-  object->useColors(g_main_dlg->m_usecolors_check, true);
-  object->useMaterial(g_main_dlg->m_material_check, true);
+
+  if (preserve_loaded_properties == 0) {
+    if (g_main_dlg->m_usecolors_check!=BST_INDETERMINATE)
+      object->useColors(g_main_dlg->m_usecolors_check, true);
+    if (g_main_dlg->m_material_check!=BST_INDETERMINATE)
+      object->useMaterial(g_main_dlg->m_material_check, true);
+    if (g_main_dlg->m_transparency_check!=BST_INDETERMINATE)
+      object->enableTransparency(g_main_dlg->m_transparency_check, true);
+  }
   
   object->setStiffness(g_main_dlg->m_stiffness,1);
   object->setFriction(g_main_dlg->m_static_friction,g_main_dlg->m_dynamic_friction,1);
@@ -585,8 +577,13 @@ int Cobject_loaderApp::LoadModel(char* filename) {
   object = new_object;
   world->addChild(object);
 
+  // Copy relevant rendering variables back to the GUI
+  copy_rendering_options_to_gui();
+
   // This will set up default rendering options and haptic properties
-  update_options_from_gui();
+  //
+  // Don't over-write things we loaded from the file...
+  update_options_from_gui(1);
 
   return 0;
 
@@ -895,7 +892,7 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
       tool->rotate(cVector3d(0,0,1),-90.0*M_PI/180.0);
       tool->rotate(cVector3d(1,0,0),-90.0*M_PI/180.0);
       tool->setRadius(0.05);
-          
+         
     }
     
     // set up the device
@@ -918,7 +915,6 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
     
     // Enable the "dynamic proxy", which will handle moving objects
     cProxyPointForceAlgo* proxy = tool->getProxy();
-
     proxy->enableDynamicProxy(1);
 
 #ifdef USE_MM_TIMER_FOR_HAPTICS
@@ -1127,6 +1123,36 @@ void createCube(cMesh *mesh, float edge) {
   }
   
   start_index += 6;
+
+  // Give a color to each vertex
+  for (unsigned int i=0; i<mesh->getNumVertices(); i++) {
+
+    cVertex* nextVertex = mesh->getVertex(i);
+
+    cColorb color;
+    color.set(
+      GLuint(0xff*(edge + nextVertex->getPos().x ) / (2.0 * edge)),
+      GLuint(0xff*(edge + nextVertex->getPos().y ) / (2.0 * edge)),
+      GLuint(0xff* nextVertex->getPos().z / 2*edge)
+      );
+
+    nextVertex->setColor(color);
+  }
+
+  // Set object settings.  The parameters tell the object
+  // to apply this alpha level to his textures and to his
+  // children (of course he has neither right now).
+  // object->setTransparencyLevel(0.5, true, true);
+
+  // Give him some material properties...
+  cMaterial material;
+
+  material.m_ambient.set( 0.6, 0.3, 0.3, 1.0 );
+  material.m_diffuse.set( 0.8, 0.6, 0.6, 1.0 );
+  material.m_specular.set( 0.9, 0.9, 0.9, 1.0 );
+  material.setShininess(100);
+  mesh->m_material = material;
+
 
   
 }

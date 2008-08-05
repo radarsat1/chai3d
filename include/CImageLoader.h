@@ -55,7 +55,7 @@ class cImageLoader
     cImageLoader();
 
     //! Default constructor; loads the specified filename...
-    cImageLoader(char* filename);
+    cImageLoader(const char* filename);
 
     //! Destructor of cImageLoader
     virtual ~cImageLoader();

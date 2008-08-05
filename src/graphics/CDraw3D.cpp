@@ -141,7 +141,7 @@ void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
   if (a_modifyMaterialState)
   {
       glEnable(GL_COLOR_MATERIAL);
-      glColorMaterial(GL_FRONT, GL_AMBIENT);
+      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 

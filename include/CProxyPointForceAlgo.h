@@ -80,7 +80,9 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     virtual inline unsigned int getContacts(cTriangle*& a_t0, cTriangle*& a_t1,
             cTriangle*& a_t2);
     //! Return a pointer to the object with which device is currently in contact.
-    virtual inline const cGenericObject* getContactObject() { return m_touchingObject; }
+    virtual inline cGenericObject* getContactObject() { return m_touchingObject; }
+		//! Return point of contact between proxy and object.
+		virtual inline cVector3d getContactPoint() { return m_touchingPoint; }
     //! Return global position of object with which device last contacted.
     virtual inline void getContactObjectLastGlobalPos(cVector3d& a_pos)
         { a_pos = m_lastObjectGlobalPos; }
@@ -91,11 +93,13 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     void enableDynamicProxy(int a_enable) { m_dynamicProxy = a_enable; }
     //! Return whether the dynamic proxy flag is on.
     int getDynamicProxyEnabled() { return m_dynamicProxy; }
-
+    
   protected:
     // METHODS - BASIC PROXY:
     //! Compute the next goal position of the proxy.
     virtual void computeNextBestProxyPosition();
+    //! Attempt to move the proxy, subject to friction constraints.
+    void testFrictionAndMoveProxy(const cVector3d& goal, const cVector3d& proxy, cVector3d& normal, cGenericObject* parent);
     //! Compute force to apply to device.
     virtual void computeForce();
 
@@ -114,6 +118,8 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     cVector3d m_lastGlobalForce;
     //! Next best position for the proxy (in global coordinate frame).
     cVector3d m_nextBestProxyGlobalPos;
+    //! Are we currently in a "slip friction" state?
+    int m_slipping;
 
     // MEMBERS - POINTERS TO INTERSECTED OBJECTS:
     //! Number of contacts between proxy and triangles (0, 1, 2 or 3).
@@ -126,6 +132,8 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     cTriangle* m_triangle2;
     //! Pointer to the object (if any) with which the proxy is currently in contact.
     cGenericObject* m_touchingObject;
+		//! Point of contact (if any) between proxy and object.
+		cVector3d m_touchingPoint;
 
     // MEMBERS - DISPLAY PROPERTIES:
     //! Color of rendered proxy.

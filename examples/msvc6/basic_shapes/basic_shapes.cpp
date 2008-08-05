@@ -142,8 +142,6 @@ BOOL Cbasic_shapesApp::InitInstance() {
 
   // Create a camera
   camera = new cCamera(world);
-  world->addChild(camera);
-
 
   // set camera position and orientation
   // 
@@ -158,20 +156,16 @@ BOOL Cbasic_shapesApp::InitInstance() {
     _cprintf("Could not create camera...\n");
   }
 
-
   // Turn on one light...
   light = new cLight(world);
 
   light->setEnabled(true);
 
-  // Put the light somewhere that looks nice
-  light->setPos(cVector3d(240, 200, 200));
-  light->setDir(cVector3d(-1.4, -1.0, -1.0));
-
-  // Don't make it a spotlight
-  light->setCutOffAngle(180.0);
+  // Use a purely directional light, pointing from
+  // somewhere off to the left...
+  light->setDirectionalLight(true);
+  light->setPos(cVector3d(-1, 1, 1));
   
-
   // Create a display for graphic rendering
   viewport = new cViewport(g_main_dlg->m_gl_area_hwnd, camera, false);
 

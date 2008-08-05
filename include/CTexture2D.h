@@ -60,6 +60,9 @@ class cTexture2D
     //! OpenGL texture mode (GL_MODULATE, GL_DECAL, GL_BLEND, or GL_REPLACE)
     GLint texture_environment_mode;
 
+    //! Image loader (use this to get data about the texture itself)
+    cImageLoader m_image_loader;
+        
   private:
     // METHODS:
 
@@ -71,9 +74,6 @@ class cTexture2D
 
     // MEMBERS:
 
-    //! Image loader
-    cImageLoader m_image_loader;
-    
     //! If \b true, texture bitmap has not yet been sent to video card.
     bool m_update_texture_flag;
 

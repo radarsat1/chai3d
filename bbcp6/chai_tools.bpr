@@ -15,7 +15,7 @@
     <LIBFILES value=""/>
     <LIBRARIES value=""/>
     <PACKAGES value=""/>
-    <PATHCPP value=".;..\src\tools;..\src\tools;..\src\tools;..\src\tools;..\src\tools;..\src\tools"/>
+    <PATHCPP value=".;..\src\tools"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>

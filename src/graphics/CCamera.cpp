@@ -58,6 +58,8 @@ cCamera::cCamera(cWorld* a_parentWorld)
 
     // disable multipass transparency rendering by default
     m_useMultipassTransparency = 0;
+
+    m_performingDisplayReset = 0;
 }
 
 
@@ -206,8 +208,8 @@ void cCamera::setClippingPlanes(const double a_distanceNear, const double a_dist
                 cTriangle*& a_selectedTriangle, cVector3d& a_selectedPoint, double a_selectedDistance,
                 const bool a_visibleObjectsOnly);
      
-     \param     a_windowPosX        X coodinate position of mouse click.
-     \param     a_windowPosY        Y coodinate position of mouse click.
+     \param     a_windowPosX        X coordinate position of mouse click.
+     \param     a_windowPosY        Y coordinate position of mouse click.
      \param     a_windowWidth       Width of window display (pixels)
      \param     a_windowHeight      Height of window display (pixels)
      \param     a_selectedObject    Returns a pointer to the selected object (if any)
@@ -261,7 +263,7 @@ bool cCamera::select(const int a_windowPosX, const int a_windowPosY,
                                 a_selectedTriangle,
                                 a_selectedPoint,
                                 a_selectedDistance,
-                                a_visibleObjectsOnly, 0);
+                                a_visibleObjectsOnly, -1, 0);
     
     return result;
 }
@@ -275,8 +277,8 @@ bool cCamera::select(const int a_windowPosX, const int a_windowPosY,
 
       \fn         void cCamera::renderView(const int a_windowWidth,
                   const int a_windowHeight, const int a_imageIndex)
-      \param      a_windowWidth  Width of Viewport.
-      \param      a_windowHeight  Height of Viewport.
+      \param      a_windowWidth  Width of viewport.
+      \param      a_windowHeight  Height of viewport.
       \param      a_imageIndex  One of the following constants, identifying the frame
                   to be rendered:
 
@@ -294,25 +296,13 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
     // compute global pose
     computeGlobalCurrentObjectOnly(true);
 
-    // set background color
-    cColorf color = m_parentWorld->getBackgroundColor();
-    glClearColor(color.getR(), color.getG(), color.getB(), color.getA());
-
-    // clear the color and depth buffers
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // make the depth buffer writable
-    glDepthMask(GL_TRUE);
-
-    // enable depth testing
-    glEnable(GL_DEPTH_TEST);
-
-    // we want to modify the projection matrix
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
     // check window size
     if (a_windowHeight == 0) { return; }
+
+    // render the 'back' 2d object layer; it will set up its own
+    // projection matrix
+    if (m_back_2Dscene.getNumChildren())
+      render2dSceneGraph(&m_back_2Dscene,a_windowWidth,a_windowHeight);    
 
     // set up perspective projection
     double glAspect = ((double)a_windowWidth / (double)a_windowHeight);
@@ -320,12 +310,20 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
     // set the perspective up for monoscopic rendering
     if (a_imageIndex == CHAI_MONO || a_imageIndex == CHAI_STEREO_DEFAULT)
     {
+        // Set up the projection matrix
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+
         gluPerspective(
                 m_fieldViewAngle,   // Field of View Angle.
                 glAspect,           // Aspect ratio of viewing volume.
                 m_distanceNear,     // Distance to Near clipping plane.
                 m_distanceFar);     // Distance to Far clipping plane.
 
+
+        // Now set up the view matrix
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
         // render pose
         cVector3d lookAt = m_globalRot.getCol0();
@@ -369,7 +367,15 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
       double top    =        wd2;
       double bottom = -1.0 * wd2;
 
+      // Set up the projection matrix
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+
       glFrustum(left,right,bottom,top,m_distanceNear,m_distanceFar);
+
+      // Now set up the view matrix
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
 
       // compute the offset we should apply to the current camera position
       cVector3d pos = cAdd(m_globalPos,offsetv);
@@ -378,7 +384,7 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
       cVector3d lookAtPos;
       pos.addr(lookv, lookAtPos);
 
-      // set up the projection matrix
+      // set up the view matrix
       gluLookAt(pos.x,       pos.y,       pos.z,
                 lookAtPos.x, lookAtPos.y, lookAtPos.z,
                 upv.x,       upv.y,       upv.z
@@ -386,18 +392,29 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
 
     }
 
-    // set the matrix mode back to modelview to be nice
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    // Set up reasonable default OpenGL state
+    glEnable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 
-    // render the world
-    m_parentWorld->renderSceneGraph(CHAI_RENDER_NON_TRANSPARENT);
-    
-    // optionally perform additional rendering passes for transparency
+    // optionally perform multiple rendering passes for transparency
     if (m_useMultipassTransparency) {
-      m_parentWorld->renderSceneGraph(CHAI_RENDER_TRANSPARENT_BACK);
-      m_parentWorld->renderSceneGraph(CHAI_RENDER_TRANSPARENT_FRONT);
+      m_parentWorld->renderSceneGraph(CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY);
+      m_parentWorld->renderSceneGraph(CHAI_RENDER_MODE_TRANSPARENT_BACK_ONLY);
+      m_parentWorld->renderSceneGraph(CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY);
     }
+
+    else {
+      m_parentWorld->renderSceneGraph(CHAI_RENDER_MODE_RENDER_ALL);
+    }
+    
+    
+
+    // render the 'front' 2d object layer; it will set up its own
+    // projection matrix
+    if (m_front_2Dscene.getNumChildren())
+      render2dSceneGraph(&m_front_2Dscene,a_windowWidth,a_windowHeight);    
 }
 
 
@@ -428,4 +445,100 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
 //===========================================================================
 void cCamera::enableMultipassTransparency(bool enable) {
     m_useMultipassTransparency = enable;
+}
+
+
+//===========================================================================
+/*!
+This call automatically adjusts the front and back clipping planes to
+optimize usage of the z-buffer.
+
+\fn     void cCamera::adjustClippingPlanes();
+*/
+//===========================================================================
+void cCamera::adjustClippingPlanes()
+{
+  // check if world valid
+  cWorld* world = getParentWorld();
+  if (world == NULL) { return; }
+
+  // compute size of the world
+  world->computeBoundaryBox(true);
+
+  // compute a distance slightly larger the world size
+  cVector3d max = world->getBoundaryMax();
+  cVector3d min = world->getBoundaryMin();
+  double distance = 2.0 * cDistance(min, max);
+
+  // update clipping plane:
+  setClippingPlanes(distance / 1000.0, distance);
+}
+
+
+//===========================================================================
+/*!
+Render a 2d scene within the viewport.
+
+\fn     void cCamera::render2dSceneGraph(cGenericObject* graph)
+\param  a_graph  The root of the 2d scenegraph to be rendered.
+*/
+//===========================================================================
+void cCamera::render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_height)
+{
+  // render widgets over the 3d scene
+  glDisable(GL_LIGHTING);
+
+  // set up an orthographic projection matrix
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  // No real depth clipping...
+  glOrtho(0, a_width, 0, a_height, -100000.0, 100000.0);
+
+  // Now actually render the 2d scene graph with the mv matrix active...
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  // Disable lighting and depth-testing
+  glDisable(GL_LIGHTING);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glDisable(GL_DEPTH_TEST);
+  glDepthMask(GL_FALSE);
+
+  // render widget scene graph
+  a_graph->renderSceneGraph();
+
+  // Put OpenGL back into a useful state
+  glEnable(GL_LIGHTING);
+  glDisable(GL_BLEND);
+  glDepthMask(GL_TRUE);
+  glEnable(GL_DEPTH_TEST);
+
+}
+
+//===========================================================================
+/*!
+  Called by the user or by the viewport when the world needs to have
+  textures and display lists reset (e.g. after a switch to or from
+  fullscreen).
+
+  \fn     void cCamera::onDisplayReset(const bool a_affectChildren = true)
+  \param  a_affectChildren  Should I pass this on to my children?
+*/
+//===========================================================================
+void cCamera::onDisplayReset(const bool a_affectChildren) {
+
+  if (m_performingDisplayReset) return;
+
+  m_performingDisplayReset = 1;
+
+  m_parentWorld->onDisplayReset(true);
+  m_front_2Dscene.onDisplayReset(true);
+  m_back_2Dscene.onDisplayReset(true);
+  
+  // This will pass the call on to any children I might have...
+  cGenericObject::onDisplayReset(a_affectChildren);
+
+  m_performingDisplayReset = 0;
 }

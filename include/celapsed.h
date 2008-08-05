@@ -25,9 +25,7 @@ class CElapsed {
 
       // get the frequency of the counter
       Initialized = QueryPerformanceFrequency( (LARGE_INTEGER *)&Frequency );
-      if (Initialized == 0) {
-        //_cprintf("Very bad error: could not initialize celapsed clock\n");
-      }
+      
     }
 
     int Begin() {
@@ -64,7 +62,6 @@ class CElapsed {
 
     double GetTime() {
       if(Initialized == 0) {
-        //_cprintf("Accessing unitialized celapsed...\n");
         return 0.0;
       }
 

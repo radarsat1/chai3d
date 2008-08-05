@@ -46,6 +46,7 @@ class cTriangle;
 class cVertex;
 //---------------------------------------------------------------------------
 
+
 //===========================================================================
 /*!
       \class      cMesh
@@ -64,10 +65,9 @@ class cMesh : public cGenericObject
     // CONSTRUCTOR & DESTRUCTOR:
 
     //! Constructor of cMesh.
-    cMesh(cWorld* a_parent);
+    cMesh(cWorld* a_world);
     //! Destructor of cMesh.
     virtual ~cMesh();
-
 
     // METHODS - GENERAL
     //! Get parent world
@@ -135,8 +135,10 @@ class cMesh : public cGenericObject
     void setTransparencyLevel(const float a_level, const bool a_applyToTextures=false, const bool a_affectChildren=true);    
     //! Specify whether this mesh should use multipass transparency (see cCamera)
     void setTransparencyRenderMode(const bool a_useMultipassTransparency, const bool a_affectChildren=true);      
-    //! Enable or disable transparency (also see setTransparencyRenderMode)
+    //! Enable or disable transparency (also see setTransparencyRenderMode)... turns the depth mask _off_!
     void enableTransparency(const bool a_useTransparency, const bool a_affectChildren=true);
+    // ! Is transparency enabled for this mesh?
+    bool getTransparencyEnabled() const { return m_useTransparency; }
 
     //! Enable or disable wireframe rendering, optionally propagating the operation to my children
     void setWireMode(const bool a_showWireMode, const bool a_affectChildren=true);
@@ -158,8 +160,13 @@ class cMesh : public cGenericObject
 
     //! Enable or disable the use of per-vertex colors, optionally propagating the operation to my children
     void useColors(const bool a_useColors, const bool a_affectChildren=true);
+    // ! Are vertex colors currently enabled?
+    bool getColorsEnabled() const { return m_useVertexColors; }
+
     //! Enable or disable the use of material properties, optionally propagating the operation to my children
     void useMaterial(const bool a_useMaterial, const bool a_affectChildren=true);
+    // ! Are material properties currently enabled?
+    bool getMaterialEnabled() const { return m_useMaterialProperty; }
     
     //! Enable or disable the rendering of vertex normals, optionally propagating the operation to my children
     void showNormals(const bool a_showNormals, const bool a_affectChildren=true);
@@ -173,6 +180,9 @@ class cMesh : public cGenericObject
     
     //! Enable or disable the use of texture-mapping, optionally propagating the operation to my children
     void useTexture(const bool a_useTexture, const bool a_affectChildren=true);
+    //! Is texture-mapping enabled?
+    bool getTextureEnabled() const { return m_useTextureMapping; }
+
     //! Set my texture, possibly recursively affecting children
     void setTexture(cTexture2D* a_texture, const bool a_affectChildren=0);
     //! Access my texture
@@ -185,18 +195,30 @@ class cMesh : public cGenericObject
     // METHODS - COLLISION DETECTION:
 
     //! Set up an AABB collision detector for this mesh and (optionally) its children
-    void createAABBCollisionDetector(bool a_affectChildren, bool a_useNeighbors);
+    virtual void createAABBCollisionDetector(bool a_affectChildren, bool a_useNeighbors);
     //! Set up a sphere tree collision detector for this mesh and (optionally) its children
-    void createSphereTreeCollisionDetector(bool a_affectChildren, bool a_useNeighbors);
+    virtual void createSphereTreeCollisionDetector(bool a_affectChildren, bool a_useNeighbors);
 
     //! Help create neighbor lists for triangles to speed up collision detection.
     void findNeighbors(std::vector<cTriangle*>* search1,
                              std::vector<cTriangle*>* search2, int v1, int v2);
 
-    // MEMBERS:
+    // METHODS - MESH MANIPULATION:
+
+    //! Extrude each vertex of the mesh by some amount along its normal
+    void extrude(const double a_extrudeDistance, const bool a_affectChildren=0,
+      const bool a_updateCollisionDetector=0);
+
+    //! Simple method used to create new meshes "just like me".
+    virtual cMesh* createMesh() { return new cMesh(m_parentWorld); }
+
+    //! Render triangles, material and texture properties.
+    virtual void renderMesh(const int a_renderMode=0);
+
+		// MEMBERS:
     // material property of mesh
     cMaterial m_material;
-    
+
   protected:
    
     // METHODS:
@@ -204,20 +226,14 @@ class cMesh : public cGenericObject
     //! Render the mesh itself
     virtual void render(const int a_renderMode=0);
     //! Draw a small line for each vertex normal
-    void renderNormals();
-    //! Render triangles, material and texture properties.
-    void renderMesh(const int a_renderMode=0);
-
-
-    // VIRTUAL METHODS:
-
+    virtual void renderNormals();
+    
     //! Update the global position of each of my vertices
     virtual void updateGlobalPositions(const bool a_frameOnly);
     //! Update my boundary box dimensions based on my vertices
     virtual void updateBoundaryBox();
     //! Scale the mesh by the specified scale factor
     virtual void scaleObject(double a_scaleFactor);
-
 
     // MEMBERS - DISPLAY PROPERTIES:
 

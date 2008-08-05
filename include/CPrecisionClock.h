@@ -36,55 +36,55 @@
 class cPrecisionClock
 {
   public:
-	// CONSTRUCTOR & DESTRUCTOR:
-	//! Constructor of cPrecisionClock.
-	cPrecisionClock();
-	//! Destructor of cPrecisionClock.
-	~cPrecisionClock();
+  // CONSTRUCTOR & DESTRUCTOR:
+  //! Constructor of cPrecisionClock.
+  cPrecisionClock();
+  //! Destructor of cPrecisionClock.
+  ~cPrecisionClock();
 
-	// METHODS:
-	//! reset clock to zero.
-	void initialize();
-	//! start counting from current time of clock.
-	long start();
-	//! stop clock counting.
-	long stop();
-	//! return \b true if timer is currently \b on, else return \b false.
-	bool on() { return (m_on); };
-	//! set current time of clock. Units are \e microseconds.
-	void setCurrentTime(long a_currentTime);
-	//! read current time of clock. Units are \e microseconds.
-	long getCurrentTime();
-	//! set the period in microseconds before timeout occures.
-	void setTimeoutPeriod(long a_timeoutPeriod);
-    //! Read the programmed timeout period.
-    long getTimeoutPeriod() { return (m_timeoutPeriod); }
-	//! return \b true if timeout has occured.
-	bool timeoutOccured();
-	//! return \b true if high resolution timers are available on this computer.
-	bool highResolution() { return (m_highres); };
+  // METHODS:
+  //! reset clock to zero.
+  void initialize();
+  //! start counting from current time of clock.
+  long start();
+  //! stop clock counting.
+  long stop();
+  //! return \b true if timer is currently \b on, else return \b false.
+  bool on() { return (m_on); };
+  //! set current time of clock. Units are \e microseconds.
+  void setCurrentTime(long a_currentTime);
+  //! read current time of clock. Units are \e microseconds.
+  long getCurrentTime();
+  //! set the period in microseconds before timeout occurs.
+  void setTimeoutPeriod(long a_timeoutPeriod);
+  //! Read the programmed timeout period.
+  long getTimeoutPeriod() { return (m_timeoutPeriod); }
+  //! return \b true if timeout has occurred.
+  bool timeoutOccured();
+  //! return \b true if high resolution timers are available on this computer.
+  bool highResolution() { return (m_highres); };
 
-    //! If all you want is something that tells you the time, this is your function...
-    double getCPUtime();
+  //! If all you want is something that tells you the time, this is your function...
+  double getCPUtime();
 
   private:
-	//! Stores information about CPU high precision clock.
-	LARGE_INTEGER m_freq;
-	//! Current time of clock.
-	long m_timeCurrent;
-	//! CPU time when clock was started.
-	long m_timeStart;
-	//! Timeout period
-	long m_timeoutPeriod;
-	//! CPU time when timer was started.
-	long m_timeoutStart;
-	//! If \b true, then high precision CPU clock is available.
-	bool m_highres;
-	//! If \b true, clock is \b on.
-	bool m_on;
+  //! Stores information about CPU high precision clock.
+  LARGE_INTEGER m_freq;
+  //! Current time of clock.
+  long m_timeCurrent;
+  //! CPU time when clock was started.
+  long m_timeStart;
+  //! Timeout period
+  long m_timeoutPeriod;
+  //! CPU time when timer was started.
+  long m_timeoutStart;
+  //! If \b true, then high precision CPU clock is available.
+  bool m_highres;
+  //! If \b true, clock is \b on.
+  bool m_on;
 
-	//! Read CPU clock in microseconds.
-	long getCount();
+  //! Read CPU clock in microseconds.
+  long getCount();
 };
 
 //---------------------------------------------------------------------------

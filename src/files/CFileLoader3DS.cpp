@@ -25,6 +25,7 @@
 
 //---------------------------------------------------------------------------
 #include "CFileLoader3DS.h"
+#include <conio.h>
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -53,6 +54,10 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
   // clear all vertices and triangles of the current mesh
   a_mesh->clear();
 
+  // Global rendering flags that we'll use to mark the root mesh usefully
+  bool transparency_enabled = false;
+  bool materials_enabled = false;
+
   // get information about file
 
   // The number of meshes loaded from this file
@@ -65,7 +70,8 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
     LMesh& cur_mesh = loader.GetMesh(current_file_mesh);
 
     // This CHAI mesh corresponds to the 3ds submesh
-    cMesh* sub_mesh = new cMesh(world);
+    cMesh* sub_mesh = a_mesh->createMesh();
+
     a_mesh->addChild(sub_mesh);
 
     // For each mesh in the file, we're going to create an additional mesh for
@@ -74,16 +80,18 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 
     // We'll put material-specific submeshes here if we find them...
     cMesh** newMeshes = 0;
-
+   
     // Process materials if there are any...
     if (num_materials > 0) {
+
+      materials_enabled = true;
 
       newMeshes = new cMesh*[num_materials];
 
       // Create the new meshes and add them to the submesh we're working on now
       for(int i=0; i<num_materials; i++) {
 
-        newMeshes[i] = new cMesh(world);
+        newMeshes[i] = a_mesh->createMesh();
         cMesh* newMesh = newMeshes[i];
         sub_mesh->addChild(newMesh);
 
@@ -122,26 +130,37 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 
         }
 
+        // get transparency
+        double transparency = cur_material.GetTransparency();
+        float alpha = 1.0f - (float)(transparency);
+        if (alpha < 1.0) {
+          transparency_enabled = true;
+          newMesh->enableTransparency(true, false); 
+        }
+
+        float shininess = cur_material.GetShininess();
+        newMesh->m_material.setShininess(int(shininess * 255.0));
+
         // get ambient component:
         LColor3 ambient = cur_material.GetAmbientColor();
-        newMesh->m_material.m_ambient.setR(ambient.r);
-        newMesh->m_material.m_ambient.setG(ambient.g);
-        newMesh->m_material.m_ambient.setB(ambient.b);
-        newMesh->m_material.m_ambient.setA(1.0);
+        newMesh->m_material.m_ambient.setR((float)ambient.r);
+        newMesh->m_material.m_ambient.setG((float)ambient.g);
+        newMesh->m_material.m_ambient.setB((float)ambient.b);
+        newMesh->m_material.m_ambient.setA(alpha);
 
         // get diffuse component:
         LColor3 diffuse = cur_material.GetDiffuseColor();
-        newMesh->m_material.m_diffuse.setR(diffuse.r);
-        newMesh->m_material.m_diffuse.setG(diffuse.g);
-        newMesh->m_material.m_diffuse.setB(diffuse.b);
-        newMesh->m_material.m_diffuse.setA(1.0);
+        newMesh->m_material.m_diffuse.setR((float)diffuse.r);
+        newMesh->m_material.m_diffuse.setG((float)diffuse.g);
+        newMesh->m_material.m_diffuse.setB((float)diffuse.b);
+        newMesh->m_material.m_diffuse.setA(alpha);
 
         // get specular component:
         LColor3 specular = cur_material.GetSpecularColor();
-        newMesh->m_material.m_specular.setR(specular.r);
-        newMesh->m_material.m_specular.setG(specular.g);
-        newMesh->m_material.m_specular.setB(specular.b);
-        newMesh->m_material.m_specular.setA(1.0);
+        newMesh->m_material.m_specular.setR((float)specular.r);
+        newMesh->m_material.m_specular.setG((float)specular.g);
+        newMesh->m_material.m_specular.setB((float)specular.b);
+        newMesh->m_material.m_specular.setA(alpha);
 
         // get shininess
         newMesh->m_material.setShininess((GLuint)(cur_material.GetShininess()));
@@ -206,6 +225,8 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
       unsigned int indexTriangle = cur_chai_mesh->newTriangle(v0,v1,v2);
       cTriangle* curTriangle = cur_chai_mesh->getTriangle(indexTriangle);
 
+      double transparency = cur_chai_mesh->m_material.m_diffuse.getA();
+
       // Give properties to each vertex of this triangle
       for(k=0; k<3; k++) {
         LVector3 norm = cur_tri.vertexNormals[k];
@@ -215,7 +236,7 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
         cVertex* vertex = curTriangle->getVertex(k);
         vertex->setNormal(norm.x,norm.y,norm.z);
         vertex->setTexCoord(uv.x, 1.0 - uv.y);
-        vertex->setColor(color.r,color.g,color.b,1.0);
+        vertex->setColor(color.r,color.g,color.b,(float)transparency);
       }
 
     } // For every triangle in this 3ds mesh
@@ -224,6 +245,14 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 
   } // For every mesh in the 3ds file
 
+  // Copy relevant rendering state as generally useful flags in the main mesh.
+  //
+  // Don't over-write the "real" variables in other submeshes
+
+  a_mesh->enableTransparency(transparency_enabled,false);  
+  a_mesh->useMaterial(materials_enabled,false);
+  a_mesh->useColors(!materials_enabled,false);
+  
   // compute boundary boxes
   a_mesh->computeBoundaryBox(true);
 

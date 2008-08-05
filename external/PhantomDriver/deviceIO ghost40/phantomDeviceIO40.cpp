@@ -181,6 +181,10 @@ FUNCTION int __stdcall   OpenPhantom(char * name)
 		case 130:
 			// 6dof 1.5
 			model_type = 3;
+			// pick the center of the workspace
+			x_center = 0;
+			y_center = 10;
+			z_center = 32;
 			break;
 		default:
 			// all other phantom models, we'll have a conservative approach with them

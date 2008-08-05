@@ -13,7 +13,7 @@
     Professional Edition License.
 
     \author:    <http://www.chai3d.org>
-    \author:    Christopher Sewell
+    \author:    Chris Sewell
     \version    1.1
     \date       01/2004
 */
@@ -59,10 +59,14 @@ cCollisionAABB::cCollisionAABB(vector<cTriangle> *a_triangles, bool a_useNeighbo
 cCollisionAABB::~cCollisionAABB()
 {
     // clear collision tree
-    if (m_root != NULL)
-    {
-        delete[] m_root;
-    }
+    if (m_root != NULL) delete [] m_root;
+    
+    // Delete the allocated array of leaf nodes
+    //
+    // If there's only one triangle, m_root = m_leaves
+    // and we've already deleted the leaves...
+    if (m_numTriangles > 1) 
+      if (m_leaves) delete [] m_leaves;    
 }
 
 
@@ -124,7 +128,7 @@ void cCollisionAABB::initialize()
     // allocate an array to hold all internal nodes of the binary tree
     if (m_numTriangles >= 2)
     {
-      g_nextFreeNode = new cCollisionAABBInternal[m_numTriangles-1];
+      g_nextFreeNode = new cCollisionAABBInternal[m_numTriangles];
       m_root = g_nextFreeNode;
       new(g_nextFreeNode++) cCollisionAABBInternal(m_numTriangles, m_leaves, 0);
     }

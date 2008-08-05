@@ -9,13 +9,51 @@ MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
 DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
-PROJECTS = demoClock1.exe mass_springs.exe demoMath1.exe \
+PROJECTS = chai_timers.lib chai_math.lib chai_devices.lib chai_graphics.lib \
+  chai_forces.lib chai_collisions.lib chai_files.lib chai_tools.lib \
+  chai_displays.lib demoClock1.exe mass_springs.exe demoMath1.exe \
   board_tester_example.exe object_loader.exe basic_shapes.exe
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
 
 
+
+chai_collisions.lib: ..\..\bbcp6\chai_collisions.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_devices.lib: ..\..\bbcp6\chai_devices.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_displays.lib: ..\..\bbcp6\chai_displays.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_files.lib: ..\..\bbcp6\chai_files.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_forces.lib: ..\..\bbcp6\chai_forces.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_graphics.lib: ..\..\bbcp6\chai_graphics.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_math.lib: ..\..\bbcp6\chai_math.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_timers.lib: ..\..\bbcp6\chai_timers.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_tools.lib: ..\..\bbcp6\chai_tools.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
 
 demoClock1.exe: clock\project\demoClock1.bpr
   $(ROOT)\bin\bpr2mak $**

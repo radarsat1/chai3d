@@ -16,7 +16,7 @@
     <LIBFILES value="..\lib\bbcp6\glu32.lib ..\lib\bbcp6\glut32.lib ..\lib\bbcp6\opengl32.lib"/>
     <LIBRARIES value=""/>
     <PACKAGES value=""/>
-    <PATHCPP value=".;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics;..\src\graphics"/>
+    <PATHCPP value=".;..\src\graphics"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>

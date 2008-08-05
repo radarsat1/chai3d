@@ -23,6 +23,7 @@
 #include "CLight.h"
 #include "CMacrosGL.h"
 #include "CWorld.h"
+#include <conio.h>
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -70,7 +71,7 @@ cLight::cLight(cWorld* a_world)
     // light sources are disable by default
     m_enabled = false;
 
-    // lights are purely directional by dfault
+    // lights are purely directional by default
     m_directionalLight = true;
 }
 
@@ -108,7 +109,28 @@ void cLight::setDir(const cVector3d& a_direction)
     // We arbitrarily point lights along the x axis of the stored
     // rotation matrix... this allows matrix transformations
     // to apply to lights.
-    m_localRot.setCol0(a_direction);
+    // m_localRot.setCol0(a_direction);
+
+    cVector3d c0, c1, c2, t;
+    a_direction.copyto(c0);
+
+    // check vector
+    if (c0.lengthsq() < 0.0001) { return; }
+
+    // normalize direction vector
+    c0.normalize();
+
+    // compute 2 vector perpendicular to a_direction
+    t.set(a_direction.y, a_direction.z, a_direction.x);
+    t.crossr(c0, c1);
+    c1.crossr(c0, c2);    
+
+    // c0.negate();
+    c1.negate();
+    c2.negate();
+
+    // update rotation matrix
+    m_localRot.setCol(c0,c1,c2);
     
 }
 
@@ -147,7 +169,7 @@ void cLight::setCutOffAngle(const GLfloat& a_value)
     GLfloat t_newAngle;
 
     // check if a negative value was given in which case light is set to
-    // a non spot configuratation
+    // a non spot configuration
     if (a_value < 0) { t_newAngle = 180.0; }
 
     // check if angle is equal to 180.0 degrees. This corresponds to a non spot light.
@@ -185,6 +207,8 @@ void cLight::renderLightSource()
         return;
     }
 
+    computeGlobalCurrentObjectOnly();
+
     // enable this light in OpenGL
     glEnable(m_glLightNumber);
 
@@ -193,13 +217,17 @@ void cLight::renderLightSource()
     glLightfv(m_glLightNumber, GL_DIFFUSE,  m_diffuse.pColor() );
     glLightfv(m_glLightNumber, GL_SPECULAR, m_specular.pColor());
 
-    // position the light source in (local) space
+    // position the light source in (global) space (because we're not
+    // _rendered_ as part of the scene graph)
     float position[4];
     
-    position[0] = (float)m_localPos.x;
-    position[1] = (float)m_localPos.y;
-    position[2] = (float)m_localPos.z;
-
+    position[0] = (float)m_globalPos.x;
+    position[1] = (float)m_globalPos.y;
+    position[2] = (float)m_globalPos.z;
+    //position[0] = (float)m_localPos.x;
+    //position[1] = (float)m_localPos.y;
+    //position[2] = (float)m_localPos.z;
+    
     // Directional light source...
     if (m_directionalLight) position[3] = 0.0f;
 
@@ -211,8 +239,8 @@ void cLight::renderLightSource()
     // set cutoff angle
     glLightf(m_glLightNumber, GL_SPOT_CUTOFF, m_cutOffAngle);
 
-    // set the direction of my light beam, if I'm a directional light
-    if (m_cutOffAngle != 180.0)
+    // set the direction of my light beam, if I'm a _positional_ spotlight
+    if (m_directionalLight == false)
     {
         cVector3d dir = m_globalRot.getCol0();
         float direction[4];

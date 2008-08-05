@@ -44,7 +44,7 @@ cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
     m_deviceID = a_deviceNumber;
 
     int numDevices = dhdGetDeviceCount();
-    if ((a_deviceNumber + 1) > numDevices)
+    if ((a_deviceNumber + 1) > (unsigned int)numDevices)
     {
         m_systemAvailable = false;
     }

@@ -30,7 +30,7 @@
 #include <HDU/hduVector.h>
 #include <HDU/hduError.h>
 
-
+#include <conio.h>
 
 // =============================================================================
 // Constants
@@ -57,6 +57,7 @@ matrix mat[2];
 HDint stylus_switch[2];
 
 HHD myPhantom[2] = {HD_INVALID_HANDLE, HD_INVALID_HANDLE};
+char myPhantomNames[2][100];
 
 
 bool phantomStatus[2] = {false, false};
@@ -189,7 +190,16 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 FUNCTION int __stdcall   OpenPhantom(char * name)
 {
 	//printErrorMessages(false);
-	int ret_val;	
+	int ret_val;
+	
+	// stop the scheduler if it is already running so it can be reinitialized 
+	// with multiple devices
+	if (gSchedulerCallback != HD_INVALID_HANDLE)
+	{
+		hdStopScheduler();
+        hdUnschedule(gSchedulerCallback);
+		gSchedulerCallback = HD_INVALID_HANDLE;
+	}
 
 	if (numdev == 2)
 	{
@@ -202,6 +212,7 @@ FUNCTION int __stdcall   OpenPhantom(char * name)
 	if (numdev == 1)
 	{
 			myPhantom[1] = hdInitDevice(name);
+			strcpy(myPhantomNames[1], name);
 			HDErrorInfo error;
 			if (HD_DEVICE_ERROR(error = hdGetError()))
 				return PH_INIT_ERR;
@@ -216,6 +227,7 @@ FUNCTION int __stdcall   OpenPhantom(char * name)
 	if (numdev == 0)
 	{
 			myPhantom[0] = hdInitDevice(name);
+			strcpy(myPhantomNames[0], name);
 			HDErrorInfo error;
 			if (HD_DEVICE_ERROR(error = hdGetError()))
 				return PH_INIT_ERR;
@@ -287,6 +299,10 @@ FUNCTION int __stdcall   OpenPhantom(char * name)
 		case 130:
 			// 6dof 1.5
 			model_type = 3;
+			// pick the center of the workspace
+			x_center = 0;
+			y_center = 10;
+			z_center = 32;
 			break;
 		default:
 			// all other phantom models, we'll have a conservative approach with them
@@ -312,12 +328,9 @@ FUNCTION int __stdcall   OpenPhantom(char * name)
 		device_workspace_center_x[ret_val] = (double) x_center;
 		device_workspace_center_y[ret_val] = (double) y_center;
 		device_workspace_center_z[ret_val] = (double) z_center;
-		cube_side[ret_val] = ((double) side) / 2.0;
-
-		
+		cube_side[ret_val] = ((double) side) / 2.0;		
 	}
 
-		
 	// this is the handle for this phantom from the user perspective
 	return ret_val;
 }
@@ -433,6 +446,7 @@ FUNCTION int __stdcall   StartCommunication(int num)
 				HapticCallBack, 0, HD_DEFAULT_SCHEDULER_PRIORITY);
 			phantomStatus[num] = true;
 			forceStatus[num] = false;
+			force[num][0] = force[num][1] = force[num][2] = 0.0;
 			return SUCCESS;
 		}
 		else
@@ -441,6 +455,7 @@ FUNCTION int __stdcall   StartCommunication(int num)
 			hdEnable(HD_FORCE_OUTPUT);
 			phantomStatus[num] = true;
 			forceStatus[num] = false;
+			force[num][0] = force[num][1] = force[num][2] = 0.0;
 			return SUCCESS;
 		}
 	}

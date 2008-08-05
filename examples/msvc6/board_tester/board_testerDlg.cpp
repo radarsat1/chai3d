@@ -230,7 +230,7 @@ HCURSOR CMy06_board_testerDlg::OnQueryDragIcon()
 
 void CMy06_board_testerDlg::OnEnc0() 
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_0, &encoder_value);
   char buffer[100];
   sprintf(buffer, "%d", encoder_value);
@@ -330,7 +330,7 @@ void CMy06_board_testerDlg::OnStartSensoray626()
 
 void CMy06_board_testerDlg::OnEnc1() 
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_1, &encoder_value);
   char buffer[100];
   sprintf(buffer, "%d", encoder_value);
@@ -340,7 +340,7 @@ void CMy06_board_testerDlg::OnEnc1()
 
 void CMy06_board_testerDlg::OnEnc2() 
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_2, &encoder_value);
   char buffer[100];
   sprintf(buffer, "%d", encoder_value);
@@ -350,7 +350,7 @@ void CMy06_board_testerDlg::OnEnc2()
 
 void CMy06_board_testerDlg::OnEnc3() 
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_3, &encoder_value);
   char buffer[100];
   sprintf(buffer, "%d", encoder_value);
@@ -360,7 +360,7 @@ void CMy06_board_testerDlg::OnEnc3()
 
 void CMy06_board_testerDlg::OnEnc4() 
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_4, &encoder_value);
   char buffer[100];
   sprintf(buffer, "%d", encoder_value);
@@ -370,7 +370,7 @@ void CMy06_board_testerDlg::OnEnc4()
 
 void CMy06_board_testerDlg::OnEnc5() 
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_5, &encoder_value);
   char buffer[100];
   sprintf(buffer, "%d", encoder_value);
@@ -380,7 +380,7 @@ void CMy06_board_testerDlg::OnEnc5()
 
 void CMy06_board_testerDlg::OnEnc6() 
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_6, &encoder_value);
   char buffer[100];
   sprintf(buffer, "%d", encoder_value);
@@ -390,7 +390,7 @@ void CMy06_board_testerDlg::OnEnc6()
 
 void CMy06_board_testerDlg::OnEnc7() 
 {
-  int encoder_value;
+  long encoder_value;
   board->command(CHAI_CMD_GET_ENCODER_7, &encoder_value);
   char buffer[100];
   sprintf(buffer, "%d", encoder_value);
@@ -400,8 +400,7 @@ void CMy06_board_testerDlg::OnEnc7()
 
 void CMy06_board_testerDlg::OnZeroDACS() 
 {
-        int DACvalue = 0;
-        //TckDACvolts->Position = 0.0;
+        double DACvalue = 0;
         board->command(CHAI_CMD_SET_DAC_0,&DACvalue);
         board->command(CHAI_CMD_SET_DAC_1,&DACvalue);
         board->command(CHAI_CMD_SET_DAC_2,&DACvalue);
@@ -415,11 +414,10 @@ void CMy06_board_testerDlg::OnZeroDACS()
 
 void CMy06_board_testerDlg::OnSliderDACs() 
 {
-	int DACvalue = 0;
+	double DACvalue = 0;
 	UpdateData(TRUE);
-	//DACvalue = m_sldValue;
-	DACvalue = 8;
-
+	DACvalue = (double) m_sldValue;
+	
 	board->command(CHAI_CMD_SET_DAC_0,&DACvalue);
     board->command(CHAI_CMD_SET_DAC_1,&DACvalue);
     board->command(CHAI_CMD_SET_DAC_2,&DACvalue);

@@ -30,23 +30,27 @@
 #include "CCollisionSpheres.h"
 #include <algorithm>
 
+#ifdef _MSVC
+#include <conio.h>
+#endif
+
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
     Constructor of cMesh
 
-    \fn       cMesh::cMesh(cWorld* a_parent)
+    \fn       cMesh::cMesh(cWorld* a_world)
     \param    a_parent  Pointer to parent world.
 */
 //===========================================================================
-cMesh::cMesh(cWorld* a_parent)
+cMesh::cMesh(cWorld* a_world)
 {
     // initialize parent object of mesh. Not yet a child on an other object.
     m_parent = NULL;
 
     // set parent world of mesh
-    m_parentWorld = a_parent;
+    m_parentWorld = a_world;
 
     // should normals be displayed?
     m_showNormals = false;
@@ -80,7 +84,7 @@ cMesh::cMesh(cWorld* a_parent)
     // initialize texture
     m_texture = NULL;
 
-    // set default collision detector
+    // set default collision detector        
     m_collisionDetector = new cCollisionBrute(&m_triangles);
 
     // turn culling on by default
@@ -985,6 +989,50 @@ void cMesh::useMaterial(const bool a_useMaterial, const bool a_affectChildren)
 }
 
 
+//===========================================================================
+/*!
+Extrude each vertex of the mesh by some amount along its normal
+
+\fn        void cMesh::extrude(double a_extrudeDistance, bool a_affectChildren=0);
+\param     a_extrudeDistance Distance to move each vertex
+\param     a_affectChildren  If \b true, children are also modified.
+\param     a_updateCollisionDetector  If \b true, this mesh's collision detector is
+           re-initialized
+*/
+//===========================================================================
+void cMesh::extrude(const double a_extrudeDistance, const bool a_affectChildren,
+                    const bool a_updateCollisionDetector)
+{
+  // update changes to object
+  int vertexcount = m_vertices.size();
+  for(int i=0; i<vertexcount; i++)
+  {
+    m_vertices[i].m_localPos.add(cMul(a_extrudeDistance,m_vertices[i].m_normal));
+  }  
+
+  // This is an O(N) operation, as is the extrusion, so it seems okay to call
+  // this by default...
+  updateBoundaryBox();
+
+  // propagate changes to my children
+  if (a_affectChildren)
+  {
+    for (unsigned int i=0; i<m_children.size(); i++)
+    {
+      cGenericObject *nextObject = m_children[i];
+
+      cMesh *nextMesh = dynamic_cast<cMesh*>(nextObject);
+      if (nextMesh)
+      {                
+        nextMesh->extrude(a_extrudeDistance, a_affectChildren);
+      }
+    }
+  }
+
+  if (a_updateCollisionDetector && m_collisionDetector)
+    m_collisionDetector->initialize();
+}
+
 
 
 //===========================================================================
@@ -1000,7 +1048,6 @@ void cMesh::useMaterial(const bool a_useMaterial, const bool a_affectChildren)
 //===========================================================================
 void cMesh::setFriction(double a_staticFriction, double a_dynamicFriction, const bool a_affectChildren)
 {
-
   m_material.setStaticFriction(a_staticFriction);
   m_material.setDynamicFriction(a_dynamicFriction);
 
@@ -1553,7 +1600,7 @@ void cMesh::createSphereTreeCollisionDetector(bool a_affectChildren,
 /*!
      Render this mesh in OpenGL.  This method actually just prepares some 
      OpenGL state, and uses renderMesh to actually do the rendering.
-
+     
      \fn       void cMesh::render(const int a_renderMode)
      \param    a_renderMode  Rendering mode (see cGenericObject)
 */
@@ -1570,8 +1617,9 @@ void cMesh::render(const int a_renderMode)
       // the front and back passes
       if (m_useMultipassTransparency)
       {
+
           // render transparent front triangles
-          if (a_renderMode & CHAI_RENDER_TRANSPARENT_FRONT)
+          if (a_renderMode == CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY)
           {
               glEnable(GL_CULL_FACE);
               glCullFace(GL_BACK);
@@ -1579,30 +1627,40 @@ void cMesh::render(const int a_renderMode)
           }
 
           // render transparent back triangles
-          if (a_renderMode & CHAI_RENDER_TRANSPARENT_BACK)
+          else if (a_renderMode == CHAI_RENDER_MODE_TRANSPARENT_BACK_ONLY)
           {
               glEnable(GL_CULL_FACE);
               glCullFace(GL_FRONT);
               renderMesh(a_renderMode);
           }
-      }
 
-      // otherwise render only on the non-transparent pass
-      else
-      {
-          // render non-transparent triangles
-          if (a_renderMode & CHAI_RENDER_NON_TRANSPARENT)
+          // Multipass is enabled for this object but not for the camera, so do 
+          // a simple pass with transparency on...
+          else if (a_renderMode == CHAI_RENDER_MODE_RENDER_ALL)
           {
+              // Turn culling off for transparent objects...
+              glDisable(GL_CULL_FACE);
               renderMesh(a_renderMode);
           }
       }
 
+      // multipass transparency is disabled; render only on non-transparent passes
+      else
+      {
+          if ( (a_renderMode == CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY) || (a_renderMode == CHAI_RENDER_MODE_RENDER_ALL) )
+          {
+              // Turn culling off for transparent objects...
+              glDisable(GL_CULL_FACE);
+              renderMesh(a_renderMode);
+          }
+      }
     }
 
     // if transparency is disabled...
     else
     {
-        if (a_renderMode & CHAI_RENDER_NON_TRANSPARENT)
+        // render only on non-transparent passes
+        if ( (a_renderMode == CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY) || (a_renderMode == CHAI_RENDER_MODE_RENDER_ALL) )
         {
           // render a non-transparent mesh
           if (m_cullingEnabled) 
@@ -1612,25 +1670,21 @@ void cMesh::render(const int a_renderMode)
           }
           
           else
+          {
             glDisable(GL_CULL_FACE);
+          }
 
           renderMesh(a_renderMode);
         }
-
-        // Non-transparent meshes don't render anything on other rendering
-        // passes...
     }
 
 
     // Only render normals on one pass, no matter what the transparency
     // options are...
-    if (a_renderMode & CHAI_RENDER_NON_TRANSPARENT)
+    if ( (a_renderMode == CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY) || (a_renderMode == CHAI_RENDER_MODE_RENDER_ALL) )
     {
         // render normals
-        if (m_showNormals)
-        {
-            renderNormals();
-        }
+        if (m_showNormals) renderNormals();        
     }
 }
 
@@ -1732,16 +1786,32 @@ void cMesh::renderNormals()
     glEnable(GL_LIGHTING);
 }
 
+// Technically this is illegal; display lists aren't necessarily
+// supposed to support vertex arrays.  But it works.  So far, I have
+// not found it to be faster using immediate commands, so we do this
+// for now.  If it turns out that some implementations actually don't
+// allow this, we'll just change this #define later on.
+#define USE_ARRAYS_INSIDE_DISPLAY_LISTS 1
+
+// On some machines, GL_COMPILE_AND_EXECUTE totally blows for some reason,
+// so even though it's more complex on the first rendering pass, we use
+// GL_COMPILE (and _repeat_ the first rendering pass)
+#define DISPLAY_LIST_GENERATION_MODE    GL_COMPILE
 
 //===========================================================================
 /*!
-     Render the mesh itself
+     Render the mesh itself.  This function is declared public to allow
+     sharing of data among meshes, which is not possible given most
+     implementations of 'protected'.  But it should only be accessed
+     from within render() or derived versions of render().
 
      \fn       void cMesh::renderMesh(const int a_renderMode)
 */
 //===========================================================================
 void cMesh::renderMesh(const int a_renderMode)
 {
+
+    int creating_display_list = 0;
 
     // Should we render with a display list?
     if (m_useDisplayList)
@@ -1750,7 +1820,14 @@ void cMesh::renderMesh(const int a_renderMode)
         if (m_displayList == -1)
         {
              m_displayList = glGenLists(1);
-             glNewList(m_displayList,GL_COMPILE_AND_EXECUTE);
+             if (m_displayList == -1) return;
+             glNewList(m_displayList,DISPLAY_LIST_GENERATION_MODE);
+             creating_display_list = 1;             
+
+             // Go ahead and render; we'll create this list now...
+             //
+             // If we're not using compile_and_execute, we'll make another
+             // (recursive) call to renderMesh() at the end of this function.
         }
 
         // Otherwise all we have to do is call the display list
@@ -1764,21 +1841,23 @@ void cMesh::renderMesh(const int a_renderMode)
     }
 
     // initialize rendering arrays
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_VERTEX_ARRAY);
+    if (USE_ARRAYS_INSIDE_DISPLAY_LISTS || m_useDisplayList == false) {
+      glEnableClientState(GL_NORMAL_ARRAY);
+      glEnableClientState(GL_VERTEX_ARRAY);
+    }    
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
     glDisableClientState(GL_EDGE_FLAG_ARRAY);
 
-    // specify pointers to rendering arrays
-    glVertexPointer(3, GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_localPos);
-    glNormalPointer(GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_normal);
-    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(cVertex), m_vertices[0].m_color.pColor());
-    glTexCoordPointer(2, GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_texCoord);
-
     // set polygon and face mode
     glPolygonMode(GL_FRONT_AND_BACK, m_triangleMode);
+
+    // set up useful rendering state
+    glEnable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 
     // enable or disable blending
     if (m_useTransparency)
@@ -1798,20 +1877,25 @@ void cMesh::renderMesh(const int a_renderMode)
         glDepthMask(GL_TRUE);
     }
 
-    // enable lighting
-    glEnable(GL_LIGHTING);
-
     // if material properties exist, render them
     if (m_useMaterialProperty)
     {
-        m_material.render();
+        m_material.render();        
     }
 
     // should we use vertex colors?
     if (m_useVertexColors)
     {
-        glEnable(GL_COLOR_MATERIAL);        
+        // Clear the effects of material properties...
+        if (m_useMaterialProperty == 0)
+        {
+          float fnull[4] = {0,0,0,0};
+          glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (const float *)&fnull);
+          glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, (const float *)&fnull);
+        }
+
         glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+        glEnable(GL_COLOR_MATERIAL);        
         glEnableClientState(GL_COLOR_ARRAY);
     }
     else
@@ -1822,9 +1906,10 @@ void cMesh::renderMesh(const int a_renderMode)
 
     // A default color for objects that don't have vertex colors or
     // material properties (otherwise they're invisible)...
-    if (m_useVertexColors == 0 && m_useMaterialProperty == 0) {
-      glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    if (m_useVertexColors == 0 && m_useMaterialProperty == 0)
+    {
       glEnable(GL_COLOR_MATERIAL);        
+      glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
       glColor4f(1,1,1,1);
     }
 
@@ -1836,15 +1921,26 @@ void cMesh::renderMesh(const int a_renderMode)
         m_texture->render();
     }
 
+    if (USE_ARRAYS_INSIDE_DISPLAY_LISTS || m_useDisplayList == 0) {
+      // specify pointers to rendering arrays
+      glVertexPointer(3, GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_localPos);
+      glNormalPointer(GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_normal);
+      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(cVertex), m_vertices[0].m_color.pColor());
+      glTexCoordPointer(2, GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_texCoord);
+    }
+
     // render all active triangles
     glBegin(GL_TRIANGLES);
     unsigned int i;
     unsigned int numItems = m_triangles.size();
+    
     for(i=0; i<numItems; i++)
     {
         bool allocated = m_triangles[i].m_allocated;
-        if (allocated)
-        {
+        if (allocated==false) continue;
+
+        // Render from vertex arrays if we're not in a display list
+        if (USE_ARRAYS_INSIDE_DISPLAY_LISTS || m_useDisplayList == false) {
           unsigned int index0 = m_triangles[i].m_indexVertex0;
           unsigned int index1 = m_triangles[i].m_indexVertex1;
           unsigned int index2 = m_triangles[i].m_indexVertex2;
@@ -1852,6 +1948,24 @@ void cMesh::renderMesh(const int a_renderMode)
           glArrayElement(index1);
           glArrayElement(index2);
         }
+
+        // Technically, we're supposed to use immediate commands if we're inside a display list.
+        //
+        // I'm still looking at the performance impacts of display lists and the generality of
+        // vertex arrays inside display lists...
+        else {
+          for(int j=0; j<3; j++) {
+// Suppress warnings here because we're consciously casting everything down...            
+#pragma warning(push)
+#pragma warning(disable:4244)  
+            cVertex* v = m_triangles[i].getVertex(j);
+            glNormal3f(v->m_normal.x,v->m_normal.y,v->m_normal.z);
+            if (m_useTextureMapping) glTexCoord2f(v->m_texCoord.x,v->m_texCoord.y);
+            if (m_useVertexColors)   glColor4b(v->m_color.m_color[0],v->m_color.m_color[1],v->m_color.m_color[2],v->m_color.m_color[3]);
+            glVertex3f(v->m_localPos.x,v->m_localPos.y,v->m_localPos.z);            
+#pragma warning(pop)
+          }
+        }         
     }
     glEnd();
 
@@ -1870,8 +1984,16 @@ void cMesh::renderMesh(const int a_renderMode)
     
     // If we've gotten this far and we're using a display list for rendering,
     // we must be capturing it right now...
-    if (m_useDisplayList)
+    if (m_useDisplayList) {
       glEndList();
+
+      // Recursively make a call to actually render this object if
+      // we didn't use compile_and_execute
+#if (DISPLAY_LIST_GENERATION_MODE == GL_COMPILE)
+      if (m_useDisplayList && m_displayList != -1) renderMesh(a_renderMode);
+#endif
+    }
+
 }
 
 

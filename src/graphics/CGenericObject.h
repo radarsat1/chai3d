@@ -14,7 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
-    \authir:    Dan Morris
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
@@ -36,12 +36,16 @@ using std::vector;
 class cTriangle;
 class cGenericCollision;
 class cGenericPointForceAlgo;
+class cMesh;
 //---------------------------------------------------------------------------
 
 // Constants that define specific rendering passes (see cCamera.cpp)
-const int CHAI_RENDER_NON_TRANSPARENT           = 1;
-const int CHAI_RENDER_TRANSPARENT_FRONT         = 2;
-const int CHAI_RENDER_TRANSPARENT_BACK          = 4;
+typedef enum {
+  CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY=0,
+  CHAI_RENDER_MODE_TRANSPARENT_BACK_ONLY,
+  CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY,
+  CHAI_RENDER_MODE_RENDER_ALL
+} chai_render_modes;
 //---------------------------------------------------------------------------
 
 
@@ -88,7 +92,7 @@ class __rtti cGenericObject
     // METHODS - RENDERING:
 
     //! Render the entire scene graph, starting from this object
-    void renderSceneGraph(const int a_renderMode=CHAI_RENDER_NON_TRANSPARENT);
+    void renderSceneGraph(const int a_renderMode=CHAI_RENDER_MODE_RENDER_ALL);
 
   
     // METHODS - GENERAL:
@@ -100,10 +104,16 @@ class __rtti cGenericObject
     // METHODS - TRANSLATION AND ORIENTATION:
     
     //! Set the local position of this object
-    inline void setPos(const cVector3d& a_pos) { m_localPos = a_pos; }
+    inline void setPos(const cVector3d& a_pos) { 
+		  m_lastPos = m_localPos;
+			m_localPos = a_pos; 
+		}
 
     //! Set the local position of this object
-    inline void setPos(const double a_x, const double a_y, const double a_z) { m_localPos.set(a_x, a_y, a_z); }
+    inline void setPos(const double a_x, const double a_y, const double a_z) { 
+		  m_lastPos = m_localPos;
+			m_localPos.set(a_x, a_y, a_z); 
+		}
 
     //! Get the local position of this object
     inline cVector3d getPos() const { return (m_localPos); }
@@ -112,7 +122,10 @@ class __rtti cGenericObject
     inline cVector3d getGlobalPos() const { return (m_globalPos); }
 
     //! Set the local rotation matrix for this object
-    inline void setRot(const cMatrix3d& a_rot) { m_localRot = a_rot; }
+    inline void setRot(const cMatrix3d& a_rot) { 
+		  m_lastRot = m_localRot;
+			m_localRot = a_rot; 
+		}
 
     //! Get the local rotation matrix of this object
     inline cMatrix3d getRot() const { return (m_localRot); }
@@ -149,6 +162,11 @@ class __rtti cGenericObject
          double& a_colSquareDistance, const bool a_visibleObjectsOnly, int a_proxyCall,
          cGenericPointForceAlgo* force_algo=0);
 
+		//! Adjust collision segment for dynamic objects
+		virtual void AdjustCollisionSegment(cVector3d& a_segmentPointA,cVector3d& a_segmentPointB, 
+									   cVector3d& a_localSegmentPointA, cMesh *a_mesh, 
+									   cGenericPointForceAlgo *a_proxyAlgo);
+
     
     // METHODS - GRAPHICS:
 
@@ -156,6 +174,11 @@ class __rtti cGenericObject
     void setShow(const bool a_show, const bool a_affectChildren = false);
     //! Read the display status of object (true means it's visible)
     bool getShow() const { return (m_show); }
+
+		//! Allow this object to be felt (when visible), optionally propagating the change to children
+    void setHapticEnabled(const bool a_hapticEnabled, const bool a_affectChildren = false);
+    //! Read the haptic status of object (true means it can be felt when visible)
+    bool getHapticEnabled() const { return (m_hapticEnabled); }
 
     //! Show or hide the child/parent tree, optionally propagating the change to children
     void setShowTree(const bool a_showTree, const bool a_affectChildren = false);
@@ -187,6 +210,12 @@ class __rtti cGenericObject
 
     //! This function should get called when it's necessary to re-initialize the OpenGL context
     virtual void onDisplayReset(const bool a_affectChildren = true);
+
+	  //! This function tells children that you're not going to change their contents any more	
+	  virtual void finalize(const bool a_affectChildren = true);
+
+	  //! This function tells objects that you may modify their contents
+	  virtual void unfinalize(const bool a_affectChildren = true);
 
 
     // METHODS - FRAME [X,Y,Z]
@@ -247,12 +276,27 @@ class __rtti cGenericObject
     }
 
 
+		// MEMBERS - DYNAMIC OBJECTS
+		//! Are m_lastPos and m_lastRot up-to-date?
+		bool m_historyValid;
+		//! A previous position; exact interpretation up to user.
+		cVector3d m_lastPos;
+		//! A previous rotation; exact interpretation up to user.
+		cMatrix3d m_lastRot;
+
+
+
     // MEMBERS - CUSTOM USER DATA
 
     //! An arbitrary tag, not used by CHAI
     int m_tag;
+
     //! An arbitrary data pointer, not used by CHAI
     void* m_userData;
+
+    //! Set the m_userData pointer for this mesh and - optionally - for my children    
+    virtual void setUserData(void* a_data, const bool a_affectChildren=0);
+
 
   protected:
 
@@ -294,6 +338,8 @@ class __rtti cGenericObject
 
     //! If \b true, this object is rendered
     bool m_show;
+		//! IF \b true, this object can be felt when it can be seen
+		bool m_hapticEnabled;
     //! If \b true, this object's reference frame is rendered as a set of arrows
     bool m_showFrame;
     //! If \b true, this object's boudary box is displayed as a set of lines
@@ -316,7 +362,7 @@ class __rtti cGenericObject
     // VIRTUAL METHODS:
 
     //! Render this object in OpenGL
-    virtual void render(const int a_renderMode=CHAI_RENDER_NON_TRANSPARENT) {};
+    virtual void render(const int a_renderMode=CHAI_RENDER_MODE_RENDER_ALL) {};
 
     //! Update the m_globalPos and m_globalRot properties of any members of this object (e.g. all triangles)
     virtual void updateGlobalPositions(const bool a_frameOnly) {};

@@ -21,6 +21,7 @@
 
 //---------------------------------------------------------------------------
 #include "CMeta3dofPointer.h"
+#include "CMacrosGL.h"
 #include <process.h>
 //---------------------------------------------------------------------------
 
@@ -40,7 +41,7 @@
 */
 //===========================================================================
 cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber, bool a_dio_access)
-    :cGeneric3dofPointer(a_world)
+:cGeneric3dofPointer(a_world)
 {
     bool systemAvailable;
 
@@ -91,20 +92,53 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
         m_device = NULL;
 
         // dvdVirtual.exe is expected to be in the system path
-        spawnl(P_NOWAIT, "dhdVirtual.exe", "dhdVirtual.exe", NULL);
+        char* path = getenv("PATH");
+        char* chai_base = getenv("CHAI_BASE");
 
-        // Wait for the virtual delta process to start up...
-        Sleep(1000);
+        int result = spawnlp(P_NOWAIT, DHD_VIRTUAL_EXE_NAME, DHD_VIRTUAL_EXE_NAME, NULL);
+        if (result == -1) {
+
+          // Try to open it in the chai_base directory, which may not be in
+          // the user's path.
+          if (chai_base != 0) {
+
+              // Remove any trailing '\'
+              char chaibase_copy[_MAX_PATH];
+              strcpy(chaibase_copy,chai_base);
+              if (chaibase_copy[strlen(chaibase_copy)-1]=='\\')
+                chaibase_copy[strlen(chaibase_copy)-1]='\0';
+
+              // Put together the new path
+              char newpath[_MAX_PATH];
+              sprintf(newpath,"%s\\bin\\%s",chaibase_copy,DHD_VIRTUAL_EXE_NAME);
+
+              // Try again...
+              result = spawnlp(P_NOWAIT, newpath, DHD_VIRTUAL_EXE_NAME, NULL);            
+          }          
+      }
+
+  #define MAX_VIRTUAL_DEVICE_SLEEP_CYCLES 20
+
+      // Wait for the virtual delta process to start up...
+      for(int i=0; i<MAX_VIRTUAL_DEVICE_SLEEP_CYCLES; i++) {
         m_device = new cVirtualDevice();
         systemAvailable = m_device->isSystemAvailable();
+        if (systemAvailable) break;
+        delete m_device;
+        m_device = 0;
+        Sleep(50);
+      }        
 
-        if (!systemAvailable)
-        {
-            m_device->close();
-            delete m_device;
-            m_device = NULL;
-            return;
+      if (!systemAvailable)
+      {
+        CHAI_DEBUG_PRINT("Could not open virtual device...\n");
+        if (m_device) {
+          m_device->close();
+          delete m_device;
         }
+        m_device = NULL;
+        return;
+      }
     }
 }
 

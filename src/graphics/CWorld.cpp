@@ -108,7 +108,7 @@ void cWorld::addTexture(cTexture2D* a_texture)
 
     \fn         bool cWorld::removeTexture(cTexture2D* a_texture)
     \param      a_texture  Texture to be removed from textures list.
-    \return     Return \b true if operation succeded
+    \return     Return \b true if operation succeeded
 */
 //===========================================================================
 bool cWorld::removeTexture(cTexture2D* a_texture)
@@ -130,7 +130,7 @@ bool cWorld::removeTexture(cTexture2D* a_texture)
         }
     }
 
-    // opertation failed
+    // operation failed
     return (false);
 }
 
@@ -141,7 +141,7 @@ bool cWorld::removeTexture(cTexture2D* a_texture)
 
     \fn         bool cWorld::deleteTexture(cTexture2D* a_texture)
     \param      a_texture  Texture to be deleted.
-    \return     Return \b true if operation succeded
+    \return     Return \b true if operation suceeded
 */
 //===========================================================================
 bool cWorld::deleteTexture(cTexture2D* a_texture)
@@ -184,7 +184,7 @@ void cWorld::deleteAllTextures()
 //===========================================================================
 /*!
     Set the background color used when rendering.  This really belongs in
-    cCamera or cViewport; it's a historical artifcat that it lives here.
+    cCamera or cViewport; it's a historical artifact that it lives here.
 
     \fn         void cWorld::setBackgroundColor(const GLfloat a_red,
                 const GLfloat a_green, const GLfloat a_blue)
@@ -203,7 +203,7 @@ void cWorld::setBackgroundColor(const GLfloat a_red, const GLfloat a_green,
 //===========================================================================
 /*!
     Set the background color used when rendering.  This really belongs in
-    cCamera or cViewport; it's a historical artifcat that it lives here.
+    cCamera or cViewport; it's a historical artfact that it lives here.
 
     \fn         void cWorld::setBackgroundColor(const cColorf& a_color)
     \param      a_color  new background color.
@@ -223,7 +223,7 @@ void cWorld::setBackgroundColor(const cColorf& a_color)
 
     \fn         bool cWorld::addLightSource(cLight* a_light)
     \param      a_light light source to register.
-    \return     return \b true if light source was registered, otherwize
+    \return     return \b true if light source was registered, otherwise
                 return \b false.
 */
 //===========================================================================
@@ -297,7 +297,7 @@ bool cWorld::addLightSource(cLight* a_light)
 
     \fn         bool cWorld::removeLightSource(cLight* a_light)
     \param      a_light light source to be removed.
-    \return     return \b true if light source was removed, otherwize
+    \return     return \b true if light source was removed, otherwise
                 return \b false.
 */
 //===========================================================================
@@ -322,7 +322,7 @@ bool cWorld::removeLightSource(cLight* a_light)
 
     }
 
-    // opertation failed
+    // operation failed
     return (false);
 }
 
@@ -358,6 +358,10 @@ cLight* cWorld::getLightSource(int index) {
 //===========================================================================
 void cWorld::render(const int a_renderMode)
 {
+
+    // Back up the "global" modelview matrix for future reference
+    glGetDoublev(GL_MODELVIEW_MATRIX,m_worldModelView);
+
     if (m_renderLightSources) 
     {
       // enable lighting
@@ -389,7 +393,7 @@ void cWorld::render(const int a_renderMode)
     \param  a_segmentPointA  Start point of segment.
     \param  a_segmentPointB  End point of segment.
     \param  a_colObject      Pointer to nearest collided object.
-    \param  a_colTriangle    Pointer to nearest colided triangle.
+    \param  a_colTriangle    Pointer to nearest collided triangle.
     \param  a_colPoint       Position of nearest collision.
     \param  a_colDistance    Distance between ray origin and nearest collision point.
     \param  a_proxyCall      If this is > 0, this is a call from a proxy, and the value
@@ -403,59 +407,80 @@ bool cWorld::computeCollisionDetection(
         double& a_colDistance, const bool a_visibleObjectsOnly, int a_proxyCall,
         cGenericPointForceAlgo* force_algo)        
 {
+	 
     // no collision found yet
     bool hit = false;
     double colSquareDistance = CHAI_LARGE;
+    cVector3d a_bck_segmentPointA,bcklocalSegmentPointA;
 
-    // convert collision segment into local coordinate system of the world
+    // convert collision segment into local coordinate system.
     cMatrix3d transLocalRot;
     m_localRot.transr(transLocalRot);
 
     cVector3d localSegmentPointA = a_segmentPointA;
     localSegmentPointA.sub(m_localPos);
     transLocalRot.mul(localSegmentPointA);
+    a_bck_segmentPointA   = a_segmentPointA;
+    bcklocalSegmentPointA = localSegmentPointA;
 
     cVector3d localSegmentPointB = a_segmentPointB;
     localSegmentPointB.sub(m_localPos);
     transLocalRot.mul(localSegmentPointB);
 
     // initialize objects for calls
-    cGenericObject* t_colObject = 0;
-    cTriangle *t_colTriangle = 0;
-    cVector3d t_colPoint(0,0,0);
+    cGenericObject* t_colObject;
+    cTriangle *t_colTriangle;
+    cVector3d t_colPoint;
     double t_colSquareDistance = colSquareDistance;
 
-    // search for collision with all objects in world
     for (unsigned int i=0; i<m_children.size(); i++)
-    {
+		{
+        localSegmentPointA = a_segmentPointA;
+        localSegmentPointA.sub(m_localPos);
+				transLocalRot.mul(localSegmentPointA);
 
-       if( m_children[i]->computeCollisionDetection(localSegmentPointA, localSegmentPointB,
-         t_colObject, t_colTriangle, t_colPoint, t_colSquareDistance, a_visibleObjectsOnly, a_proxyCall,
-         force_algo) )
-       {
-         // object was hit
-         hit = true;
+				cMesh *meshObject = dynamic_cast<cMesh*>(m_children[i]);
+        if (a_proxyCall == 1) {       
+            if ( meshObject != NULL && meshObject->m_historyValid)
+                AdjustCollisionSegment(a_segmentPointA,a_segmentPointB,localSegmentPointA,meshObject,force_algo);
+				}
 
-         if (t_colSquareDistance < colSquareDistance)
-         {
-           a_colObject = t_colObject;
-           a_colTriangle = t_colTriangle;
-           a_colPoint = t_colPoint;
-           colSquareDistance = t_colSquareDistance;
+				int coll = m_children[i]->computeCollisionDetection(localSegmentPointA, localSegmentPointB,
+                      t_colObject, t_colTriangle, t_colPoint, t_colSquareDistance, a_visibleObjectsOnly, a_proxyCall);
 
-           // convert collision point into parent coordinate
-           m_localRot.mul(a_colPoint);
-           a_colPoint.add(m_localPos);
-           
-         }
-       }       
-    }
+        if(coll == 1)
+				{
+            // object was hit
+            hit = true;
 
-    // for optimization reasons, the collision detectors only compute the
-    // square distance between the origin (a_segmentA) and the collision point.
-    //
-    // So now we compute the square root of colSquareDistance to obtain a real
-    // distance value.
+            if (t_colSquareDistance < colSquareDistance) 
+						{
+                a_colObject = t_colObject;
+                a_colTriangle = t_colTriangle;
+                a_colPoint = t_colPoint;
+                colSquareDistance = t_colSquareDistance;
+
+								a_segmentPointA = localSegmentPointA;
+								a_segmentPointB = localSegmentPointB;
+
+                // convert collision point into parent coordinate
+                m_localRot.mul(a_colPoint);
+                a_colPoint.add(m_localPos);
+
+                a_bck_segmentPointA   = a_segmentPointA;
+                bcklocalSegmentPointA = localSegmentPointA;
+						}
+				}
+        else 
+        {
+            a_segmentPointA       = a_bck_segmentPointA;
+            bcklocalSegmentPointA = localSegmentPointA;
+        }
+		}
+
+    // for optimization reasons, the collision detectors only computes the
+    // square distance between origin (a_segmentA) and collision point.
+    // compute square root to obtain real distance.
     a_colDistance = sqrt(colSquareDistance);
 
     // return result

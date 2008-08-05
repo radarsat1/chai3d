@@ -108,9 +108,9 @@ class cGeneric3dofPointer : public cGenericTool3dof
     cProxyPointForceAlgo m_proxyPointForceAlgo;
     //! Implicit function based object
     cPotentialFieldForceAlgo m_potentialFieldForceAlgo;
-    //! Orientation of wrist in local coodinates of device
+    //! Orientation of wrist in local coordinates of device
     cMatrix3d m_deviceLocalRot;
-    //! Orientation of wrist in global coodinates of device
+    //! Orientation of wrist in global coordinates of device
     cMatrix3d m_deviceGlobalRot;
     //! flag for frames visualization
     bool m_visualizeFrames;

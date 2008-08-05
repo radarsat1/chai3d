@@ -13,9 +13,7 @@
     Professional Edition License.
 
     \author:    <http://www.chai3d.org>
-    \author:    Christopher Sewell
-    \author     Based on code by Charity Lu
-    \author     clu@cs.stanford.edu
+    \author:    Chris Sewell
     \version    1.1
     \date       01/2004
 */
@@ -48,7 +46,7 @@ inline bool intersect(cCollisionAABBBox a_0, cCollisionAABBBox a_1)
     if (a_1.getLowerY() > a_0.getUpperY()) return false;
     if (a_1.getLowerZ() > a_0.getUpperZ()) return false;
 
-    // if the boxes are not separated along any axis, a collision has occured
+    // if the boxes are not separated along any axis, a collision has occurred
     return (true);
 }
 
@@ -107,7 +105,7 @@ void cCollisionAABBLeaf::fitBBox()
     \param    a_segmentDirection  Direction of ray from first to second
                                   segment points (i.e., proxy to goal).
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle  Returns pointer to nearest colided triangle.
+    \param    a_colTriangle  Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.
@@ -144,11 +142,21 @@ bool cCollisionAABBLeaf::computeCollision(cVector3d& a_segmentPointA,
 //===========================================================================
 cCollisionAABBInternal::~cCollisionAABBInternal()
 {
+
+    // Note that we don't delete leaf nodes here; they're stored in one big
+    // array and can't be deleted individually...
+
+    // Don't do recursive deletion; everything is allocated in one
+    // giant array when the root node is allocated...
+    /*
     // delete left tree
-    if (m_leftSubTree) delete m_leftSubTree;
+    if (m_leftSubTree && (m_leftSubTree->m_nodeType == AABB_NODE_INTERNAL) )
+      delete m_leftSubTree;          
     
     // delete right tree
-    if (m_rightSubTree) delete m_rightSubTree;
+    if (m_rightSubTree &&  (m_rightSubTree->m_nodeType == AABB_NODE_INTERNAL) )
+      delete m_rightSubTree;
+    */
 }
 
 
@@ -283,7 +291,7 @@ cCollisionAABBInternal::cCollisionAABBInternal(unsigned int a_numLeaves,
     \param    a_segmentDirection  Direction of ray from first to second
                                   segment points (i.e., proxy to goal).
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle  Returns pointer to nearest colided triangle.
+    \param    a_colTriangle  Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.

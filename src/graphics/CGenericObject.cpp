@@ -24,6 +24,7 @@
 #include "CGenericObject.h"
 #include "CGenericCollision.h"
 #include "CProxyPointForceAlgo.h"
+#include "CMesh.h"
 //---------------------------------------------------------------------------
 #include <vector>
 //---------------------------------------------------------------------------
@@ -71,6 +72,12 @@ cGenericObject::cGenericObject()
     // collision detection algorithm
     m_collisionDetector = NULL;
     m_showCollisionTree = false;
+
+		// by default, we do not pay attention to the history of positions
+		m_historyValid = false;
+
+		// by default, this object can be touched if it can be seen
+		m_hapticEnabled = true;
 
     // custom user information
     m_tag = 0;
@@ -409,6 +416,29 @@ void cGenericObject::computeGlobalCurrentObjectOnly(const bool a_frameOnly)
 
 //===========================================================================
 /*!
+    Set the m_userData pointer for this mesh and - optionally - for my children.
+
+    \fn     void cGenericObject::setUserData(void* data, const bool a_affectChildren=0)
+    \param  a_data   The pointer to which we will set m_userData
+    \param  a_affectChildren  If \b true, the operation propagates through the scene graph.
+*/
+//===========================================================================
+void cGenericObject::setUserData(void* a_data, const bool a_affectChildren)
+{
+    m_userData = a_data;
+
+    // update children
+    if (a_affectChildren)
+    {
+      for (unsigned int i=0; i<m_children.size(); i++)
+      {
+        m_children[i]->setUserData(a_data,true);
+      }
+    }
+}
+
+//===========================================================================
+/*!
     Users should call this function when it's necessary to re-initialize the OpenGL
     context; e.g. re-initialize textures and display lists.  Subclasses should
     perform whatever re-initialization they need to do.
@@ -441,6 +471,58 @@ void cGenericObject::onDisplayReset(const bool a_affectChildren)
 
 //===========================================================================
 /*!
+    This call tells an object that you're not going to modify him any more.
+	For example, a mesh-like object might optimize his vertex arrangement
+	when he gets this call.  Always optional; just for performance...
+
+    \fn     void cGenericObject::finalize(const bool a_affectChildren)
+    \param  a_affectChildren  If \b true, the operation propagates through the scene graph
+*/
+//===========================================================================
+void cGenericObject::finalize(const bool a_affectChildren)
+{
+    // We _don't_ call this method on the current object, which allows subclasses
+    // to do their business in this method, then call the cGenericObject version
+    // to propagate the call through the scene graph
+
+    // update children
+    if (a_affectChildren)
+    {
+        for (unsigned int i=0; i<m_children.size(); i++)
+        {
+            m_children[i]->finalize(true);
+        }
+    }
+}
+
+
+//===========================================================================
+/*!
+    This call tells an object that you may modify his contents.  See
+	finalize() for more information.
+
+    \fn     void cGenericObject::unfinalize(const bool a_affectChildren)
+    \param  a_affectChildren  If \b true, the operation propagates through the scene graph
+*/
+//===========================================================================
+void cGenericObject::unfinalize(const bool a_affectChildren)
+{
+    // We _don't_ call this method on the current object, which allows subclasses
+    // to do their business in this method, then call the cGenericObject version
+    // to propagate the call through the scene graph
+
+    // update children
+    if (a_affectChildren)
+    {
+        for (unsigned int i=0; i<m_children.size(); i++)
+        {
+            m_children[i]->unfinalize(true);
+        }
+    }
+}
+
+//===========================================================================
+/*!
     Show or hide this object.
 
     If \e a_affectChildren is set to \b true then all children are updated
@@ -463,6 +545,35 @@ void cGenericObject::setShow(const bool a_show, const bool a_affectChildren)
         for (unsigned int i=0; i<m_children.size(); i++)
         {
             m_children[i]->setShow(a_show, true);
+        }
+    }
+}
+
+
+//===========================================================================
+/*!
+    Allow or disallow the object to be felt (when visible).
+
+    If \e a_affectChildren is set to \b true then all children are updated
+    with the new value.
+
+    \fn     void cGenericObject::setHapticEnabled(const bool a_hapticEnabled,
+            const bool a_affectChildren)
+    \param  a_hapticEnabled  If \b true object can be felt when visible.
+    \param  a_affectChildren  If \b true all children are updated.
+*/
+//===========================================================================
+void cGenericObject::setHapticEnabled(const bool a_hapticEnabled, const bool a_affectChildren)
+{
+    // update current object
+    m_hapticEnabled = a_hapticEnabled;
+
+    // update children
+    if (a_affectChildren)
+    {
+        for (unsigned int i=0; i<m_children.size(); i++)
+        {
+            m_children[i]->setHapticEnabled(a_hapticEnabled, true);
         }
     }
 }
@@ -529,7 +640,7 @@ bool cGenericObject::setFrameSize(const double a_size, const bool a_affectChildr
         }
     }
 
-    // operation succeded
+    // operation succeeded
     return (true);
 }
 
@@ -551,7 +662,7 @@ bool cGenericObject::setFrameSize(const double a_size, const bool a_affectChildr
 void cGenericObject::setShowTree(const bool a_showTree, const bool a_affectChildren)
 {
     // update current object
-    m_showTree = m_showTree;
+    m_showTree = a_showTree;
 
     // update children
     if (a_affectChildren)
@@ -868,16 +979,20 @@ bool cGenericObject::computeCollisionDetection(
         double& a_colSquareDistance, const bool a_visibleObjectsOnly, int a_proxyCall,
         cGenericPointForceAlgo* force_algo)
 {
-    // no collision found yet
+		// no collision found yet
     bool hit = false;
-    
+    cVector3d a_bck_segmentPointA,bcklocalSegmentPointA;
+
     // convert collision segment into local coordinate system.
     cMatrix3d transLocalRot;
     m_localRot.transr(transLocalRot);
 
     cVector3d localSegmentPointA = a_segmentPointA;
+
     localSegmentPointA.sub(m_localPos);
     transLocalRot.mul(localSegmentPointA);
+    a_bck_segmentPointA   = a_segmentPointA;
+    bcklocalSegmentPointA = localSegmentPointA;
 
     cVector3d localSegmentPointB = a_segmentPointB;
     localSegmentPointB.sub(m_localPos);
@@ -889,9 +1004,10 @@ bool cGenericObject::computeCollisionDetection(
     cVector3d t_colPoint;
     double t_colSquareDistance = a_colSquareDistance;
 
-    // check collision with current object
-    if ((m_collisionDetector != NULL) && (!a_visibleObjectsOnly || m_show))
+		// check collision with current object
+    if ((m_collisionDetector != NULL) && (!a_visibleObjectsOnly || m_show) && (m_hapticEnabled))
     {
+
         if (m_collisionDetector->computeCollision(localSegmentPointA, localSegmentPointB,
             t_colObject, t_colTriangle, t_colPoint, t_colSquareDistance, a_proxyCall))
         {
@@ -910,32 +1026,90 @@ bool cGenericObject::computeCollisionDetection(
         }
     }
 
-    // search for collision with all child objects
     for (unsigned int i=0; i<m_children.size(); i++)
-    {
-        if( m_children[i]->computeCollisionDetection(localSegmentPointA, localSegmentPointB,
-            t_colObject, t_colTriangle, t_colPoint, t_colSquareDistance, a_visibleObjectsOnly, a_proxyCall,
-            force_algo))
-        {
+		{
+        localSegmentPointA = a_segmentPointA;
+        localSegmentPointA.sub(m_localPos);
+				transLocalRot.mul(localSegmentPointA);
+
+        if (a_proxyCall == 1) {
+            cMesh *meshObject = dynamic_cast<cMesh*>(m_children[i]);
+            if ( meshObject != NULL && meshObject->m_historyValid)
+                AdjustCollisionSegment(a_segmentPointA,a_segmentPointB,localSegmentPointA,meshObject,force_algo);
+				}
+
+        int coll = m_children[i]->computeCollisionDetection(localSegmentPointA, localSegmentPointB,
+                      t_colObject, t_colTriangle, t_colPoint, t_colSquareDistance, a_visibleObjectsOnly, a_proxyCall);
+
+        if(coll == 1)
+				{
             // object was hit
             hit = true;
 
-            if (t_colSquareDistance < a_colSquareDistance)
-            {
-              a_colObject = t_colObject;
-              a_colTriangle = t_colTriangle;
-              a_colPoint = t_colPoint;
-              a_colSquareDistance = t_colSquareDistance;
+            if (t_colSquareDistance < a_colSquareDistance) 
+						{
+                a_colObject = t_colObject;
+                a_colTriangle = t_colTriangle;
+                a_colPoint = t_colPoint;
+                a_colSquareDistance = t_colSquareDistance;
 
-              // convert collision point into parent coordinate
-              m_localRot.mul(a_colPoint);
-              a_colPoint.add(m_localPos);
-            }
+                // convert collision point into parent coordinate
+                m_localRot.mul(a_colPoint);
+                a_colPoint.add(m_localPos);
+
+                a_bck_segmentPointA   = a_segmentPointA;
+                bcklocalSegmentPointA = localSegmentPointA;
+						}
+				}
+        else 
+        {
+            a_segmentPointA       = a_bck_segmentPointA;
+            bcklocalSegmentPointA = localSegmentPointA;
         }
     }
-
-    // return result
     return (hit);
+}
+
+
+//===========================================================================
+/*!
+    Adjust the given segment such that it tests for intersection of the ray with 
+	objects at their previous positions at the last haptic loop so that collision 
+	detection will work in a dynamic environment.
+
+    \param  a_segmentPointA       Start point of segment.
+    \param  a_segmentPointB       End point of segment.
+    \param  a_localSegmentPointA  Local segment point.
+    \param  a_mesh                Mesh that may have moved since last iteration.
+    \param  a_proxyAlgo           Pointer to force algorithm instance.
+*/
+//===========================================================================
+void cGenericObject::AdjustCollisionSegment(cVector3d& a_segmentPointA,cVector3d& a_segmentPointB, 
+									   cVector3d& a_localSegmentPointA, cMesh *a_mesh, 
+									   cGenericPointForceAlgo *a_proxyAlgo) 
+{
+ 
+    cVector3d newGlobalProxy,n;
+
+    newGlobalProxy = a_segmentPointA;
+    newGlobalProxy.sub(a_mesh->m_lastPos);
+           
+		cMatrix3d m_lastRotT;
+		a_mesh->m_lastRot.transr(m_lastRotT);
+    m_lastRotT.mul(newGlobalProxy);
+    a_mesh->getRot().mul(newGlobalProxy);
+                
+    newGlobalProxy.add(a_mesh->getPos());
+                
+    a_segmentPointA = newGlobalProxy;
+                
+    //World coordinates....
+    a_localSegmentPointA = a_segmentPointA;
+    a_localSegmentPointA.sub(m_localPos);
+                
+    cMatrix3d transLocalRot;
+    m_localRot.transr(transLocalRot);
+    transLocalRot.mul(a_localSegmentPointA);
 }
 
 
@@ -966,7 +1140,11 @@ void cGenericObject::renderSceneGraph(const int a_renderMode)
     m_frameGL.set(m_localPos, m_localRot);
     m_frameGL.glMatrixPushMultiply();
 
-    if (a_renderMode & CHAI_RENDER_NON_TRANSPARENT)
+    // Handle rendering meta-object components, e.g. collision trees, 
+    // bounding boxes, scenegraph tree, etc.
+    
+    // Render only on one pass if multipass transparency is enabled
+    if (a_renderMode == CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY || a_renderMode == CHAI_RENDER_MODE_RENDER_ALL)
     {
         // disable lighting
         glDisable(GL_LIGHTING);

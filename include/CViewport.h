@@ -30,6 +30,7 @@
 #include "CCamera.h"
 #include "CMatrix3d.h"
 #include "CVector3d.h"
+
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -61,10 +62,10 @@ class cViewport
 
     // METHODS:
 
-    //! Get width of viewport.
-    unsigned int getHeight() const { return (m_height); }
-    //! Get height of viewport.
-    unsigned int getWidth() const { return (m_width); }
+    //! Get height of active viewport area.
+    unsigned int getHeight() const { return (m_activeRenderingArea.top - m_activeRenderingArea.bottom); }
+    //! Get width of active viewport area.
+    unsigned int getWidth() const { return (m_activeRenderingArea.right - m_activeRenderingArea.left); }
 
     //! Set the camera through which this viewport will be rendered
     void setCamera(cCamera *a_camera);
@@ -106,6 +107,20 @@ class cViewport
     //! Get distance to last selected object.
     double getLastSelectedDistance(void) { return (m_lastSelectedDistance); }
 
+    //! Clients should call this when the scene associated with
+    //! this viewport may need re-initialization, e.g. after a 
+    //! switch to or from fullscreen.
+    virtual void onDisplayReset();
+
+    //! Return a direct handle to the OpenGL viewing context
+    HDC getGLDC() { return m_glDC; }
+
+    //! You can use this to specify a specific rectangle to which you want this
+    //! viewport to render within the window.  Supply -1 for each coordinate
+    //! to return to the default behavior (rendering to the whole window).
+    //! The _positive_ y axis goes _up_.
+    void setRenderArea(RECT& r);
+    void getRenderArea(RECT& r) { r = this->m_forceRenderArea; }
 
   protected:
 
@@ -133,12 +148,20 @@ class cViewport
     HDC m_glDC;
     //! GL Status
     bool m_glReady;
-    //! Width of viewport
-    unsigned int m_width;
-    //! Height of viewport
-    unsigned int m_height;
+
+    //! The rectangle to which we're rendering within the GL window, equal to
+    //! the window size by default.  The _positive_ y axis goes _up_.
+    RECT m_activeRenderingArea;
+
+    //! If we're forcing rendering to a particular rectangle within the viewport,
+    //! this rectangle contains those coordinates.  Otherwise all coordinates are
+    //! -1, which tells cViewport to use the whole window.  The _positive_ y axis
+    //! goes _up_.
+    RECT m_forceRenderArea;
+
     //! Descriptor of the context opened for OpenGL rendering
     PIXELFORMATDESCRIPTOR m_pixelFormat;
+
     //! If non-zero, this object will get rendered immediately 
     //! before the GL buffer is swapped out, after all other
     cGenericObject* m_postRenderCallback;
@@ -150,8 +173,9 @@ class cViewport
     bool update();
     //! Clean up the current rendering context
     bool cleanup();
-    //! Render the scene in OpenGL.
+    //! Render the scene in OpenGL.  Nukes the contents of the GL buffers.
     bool renderView(const int a_imageIndex);
+    
 };
 
 //---------------------------------------------------------------------------

@@ -26,6 +26,12 @@
 
 #include <conio.h>
 
+// Turn off the annoying precision warning in msvc...
+#ifdef _MSVC
+#pragma warning(disable: 4244)
+#endif
+
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -34,8 +40,8 @@ static char THIS_FILE[] = __FILE__;
 
 // Default haptic parameters for new objects
 #define DEFAULT_STIFFNESS 50.0f
-#define DEFAULT_STATIC_FRICTION 0.3f
-#define DEFAULT_DYNAMIC_FRICTION 0.3f
+#define DEFAULT_STATIC_FRICTION 0.6f
+#define DEFAULT_DYNAMIC_FRICTION 0.45f
 
 #define DEFAULT_STEREO_SEPARATION 0.5f
 #define DEFAULT_STEREO_FOCUS 4.0f
@@ -43,11 +49,14 @@ static char THIS_FILE[] = __FILE__;
 // This many slider scale units equals one friction unit
 #define FRICTION_SLIDER_SCALE 100.0
 
+#define MAXIMUM_FRICTION 2.0
+
 #define SEPARATION_SLIDER_SCALE 50.0
 #define FOCUS_SLIDER_SCALE 10.0
 
 Cobject_loaderDlg::Cobject_loaderDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(Cobject_loaderDlg::IDD, pParent) {
+: CDialog(Cobject_loaderDlg::IDD, pParent)
+{
 	//{{AFX_DATA_INIT(Cobject_loaderDlg)
 	m_material_check = TRUE;
 	m_showbox_check = FALSE;
@@ -56,6 +65,8 @@ Cobject_loaderDlg::Cobject_loaderDlg(CWnd* pParent /*=NULL*/)
 	m_usecolors_check = TRUE;
 	m_usetexture_check = TRUE;
 	m_usewireframe_check = FALSE;
+  m_culling_check = TRUE;
+  m_transparency_check = FALSE;
 	//}}AFX_DATA_INIT
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
   
@@ -76,6 +87,8 @@ void Cobject_loaderDlg::DoDataExchange(CDataExchange* pDX) {
 	DDX_Control(pDX, IDC_DYNAMIC_FRICTION_SLIDER, m_dynamic_friction_slider);
 	DDX_Control(pDX, IDC_CAMZOOM_SLIDER, m_camera_zoom_slider);
 	DDX_Check(pDX, IDC_CHECK_MATERIAL, m_material_check);
+  DDX_Check(pDX, IDC_CHECK_CULLING, m_culling_check);
+  DDX_Check(pDX, IDC_CHECK_TRANSPARENCY, m_transparency_check);
 	DDX_Check(pDX, IDC_CHECK_SHOWBOX, m_showbox_check);
 	DDX_Check(pDX, IDC_CHECK_SHOWFRAME, m_showframe_check);
 	DDX_Check(pDX, IDC_CHECK_SHOWNORMALS, m_shownormals_check);
@@ -89,7 +102,9 @@ BEGIN_MESSAGE_MAP(Cobject_loaderDlg, CDialog)
 	//{{AFX_MSG_MAP(Cobject_loaderDlg)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CLOSE()
-  ON_BN_CLICKED(IDC_CHECK_MATERIAL, OnCheck)
+  ON_BN_CLICKED(IDC_CHECK_MATERIAL, OnMaterialCheck)
+  ON_BN_CLICKED(IDC_CHECK_CULLING, OnCheck)
+  ON_BN_CLICKED(IDC_CHECK_TRANSPARENCY, OnTransparencyCheck)
 	ON_BN_CLICKED(IDC_LOAD_MODEL_BUTTON, OnLoadModelButton)
 	ON_BN_CLICKED(IDC_LOAD_TEXTURE_BUTTON, OnLoadTextureButton)
 	ON_WM_HSCROLL()
@@ -104,7 +119,7 @@ BEGIN_MESSAGE_MAP(Cobject_loaderDlg, CDialog)
   ON_BN_CLICKED(IDC_CHECK_SHOWBOX, OnCheck)
   ON_BN_CLICKED(IDC_CHECK_SHOWFRAME, OnCheck)
   ON_BN_CLICKED(IDC_CHECK_SHOWNORMALS, OnCheck)
-  ON_BN_CLICKED(IDC_CHECK_USECOLORS, OnCheck)
+  ON_BN_CLICKED(IDC_CHECK_USECOLORS, OnColorsCheck)
   ON_BN_CLICKED(IDC_CHECK_USETEXTURE, OnCheck)
   ON_BN_CLICKED(IDC_CHECK_WIREFRAME, OnCheck)
 	ON_BN_CLICKED(IDC_ANIMATION_BUTTON, OnAnimationButton)
@@ -143,11 +158,11 @@ BOOL Cobject_loaderDlg::OnInitDialog() {
   m_camera_zoom_slider.SetPos(45);
   
   // Set up haptic property sliders
-  m_static_friction_slider.SetRange(0,100,1);
+  m_static_friction_slider.SetRange(0,FRICTION_SLIDER_SCALE*MAXIMUM_FRICTION,1);
   m_static_friction = DEFAULT_STATIC_FRICTION;
   m_static_friction_slider.SetPos(m_static_friction*FRICTION_SLIDER_SCALE);
 
-  m_dynamic_friction_slider.SetRange(0,100,1);
+  m_dynamic_friction_slider.SetRange(0,FRICTION_SLIDER_SCALE*MAXIMUM_FRICTION,1);
   m_dynamic_friction = DEFAULT_DYNAMIC_FRICTION;
   m_dynamic_friction_slider.SetPos(m_dynamic_friction*FRICTION_SLIDER_SCALE);
 
@@ -200,6 +215,42 @@ HCURSOR Cobject_loaderDlg::OnQueryDragIcon() {
 }
 
 
+void Cobject_loaderDlg::OnCheck() {
+  UpdateData(TRUE);
+  g_main_app->update_options_from_gui();
+}
+
+
+void Cobject_loaderDlg::OnTransparencyCheck() {  
+  CButton* b = (CButton*)(GetDlgItem(IDC_CHECK_TRANSPARENCY));
+  int curstate = b->GetCheck();
+  int newstate = (curstate == BST_UNCHECKED)?BST_CHECKED:BST_UNCHECKED;
+  b->SetCheck(newstate);
+  m_transparency_check = newstate;
+  g_main_app->update_options_from_gui();
+}
+
+
+void Cobject_loaderDlg::OnMaterialCheck() {
+  CButton* b = (CButton*)(GetDlgItem(IDC_CHECK_MATERIAL));
+  int curstate = b->GetCheck();
+  int newstate = (curstate == BST_UNCHECKED)?BST_CHECKED:BST_UNCHECKED;
+  b->SetCheck(newstate);
+  m_material_check = newstate;
+  g_main_app->update_options_from_gui();
+}
+
+
+void Cobject_loaderDlg::OnColorsCheck() {
+  CButton* b = (CButton*)(GetDlgItem(IDC_CHECK_USECOLORS));
+  int curstate = b->GetCheck();
+  int newstate = (curstate == BST_UNCHECKED)?BST_CHECKED:BST_UNCHECKED;
+  b->SetCheck(newstate);
+  m_usecolors_check = newstate;
+  g_main_app->update_options_from_gui();
+}
+
+
 void Cobject_loaderDlg::OnClose() {
 	
   g_main_app->uninitialize();
@@ -210,11 +261,6 @@ void Cobject_loaderDlg::OnClose() {
 	CDialog::OnClose();
 }
 
-
-void Cobject_loaderDlg::OnCheck() {
-	UpdateData(TRUE);
-  g_main_app->update_options_from_gui();
-}
 
 void Cobject_loaderDlg::OnLoadModelButton() {
 
@@ -401,8 +447,6 @@ void Cobject_loaderDlg::OnToggleStereoButton() {
 
 BOOL Cobject_loaderDlg::PreTranslateMessage(MSG* pMsg) {
 	
-  //_cprintf("message\n");
-
   // Handle mouse messages explicitly...
   if (pMsg->message == WM_LBUTTONDOWN ||
       pMsg->message == WM_RBUTTONDOWN ||
@@ -410,17 +454,17 @@ BOOL Cobject_loaderDlg::PreTranslateMessage(MSG* pMsg) {
       pMsg->message == WM_RBUTTONUP   ||
       pMsg->message == WM_MOUSEMOVE) {
 
-    //_cprintf("mouse msg\n");
-
     int x = LOWORD(pMsg->lParam);
     int y = HIWORD(pMsg->lParam);
     CPoint p(x,y);
 
-    if (pMsg->message == WM_LBUTTONDOWN)      OnLButtonDown(pMsg->wParam,p);
-    else if (pMsg->message == WM_RBUTTONDOWN) OnRButtonDown(pMsg->wParam,p);
-    else if (pMsg->message == WM_LBUTTONUP)   OnLButtonUp(pMsg->wParam,p);
-    else if (pMsg->message == WM_RBUTTONUP)   OnRButtonUp(pMsg->wParam,p);
-    else if (pMsg->message == WM_MOUSEMOVE)   OnMouseMove(pMsg->wParam,p);    
+    if (pMsg->hwnd == m_gl_area_hwnd) {
+      if (pMsg->message == WM_LBUTTONDOWN)      OnLButtonDown(pMsg->wParam,p);
+      else if (pMsg->message == WM_RBUTTONDOWN) OnRButtonDown(pMsg->wParam,p);
+      else if (pMsg->message == WM_LBUTTONUP)   OnLButtonUp(pMsg->wParam,p);
+      else if (pMsg->message == WM_RBUTTONUP)   OnRButtonUp(pMsg->wParam,p);
+      else if (pMsg->message == WM_MOUSEMOVE)   OnMouseMove(pMsg->wParam,p); 
+		}
     
   }
 

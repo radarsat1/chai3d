@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="basic_shapes"
+	ProjectGUID="{AE34383B-4823-4D29-9BDC-2648759C59E9}"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">

@@ -14,8 +14,6 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Christopher Sewell
-    \author     Based on code by Charity Lu
-    \author     clu@cs.stanford.edu
     \version    1.1
     \date       01/2004
 */

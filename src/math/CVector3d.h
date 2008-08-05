@@ -264,7 +264,7 @@ struct cVector3d
 	//-----------------------------------------------------------------------
 	/*!
 		Addition between current vector and external vector passed as
-		parmeter.\n  Result is stored in external \e a_result vector.
+		parameter.\n  Result is stored in external \e a_result vector.
 
 		\param  a_vector  Vector which is added to current one.
 		\param  a_result  Vector where result is stored.
@@ -280,7 +280,7 @@ struct cVector3d
 
 	//-----------------------------------------------------------------------
 	/*!
-		Addition between current vector and vector passed by parmeter.\n
+		Addition between current vector and vector passed by parameter.\n
 		Result is stored in \e a_result vector.
 
 		\param	a_x	 X component.
@@ -335,7 +335,7 @@ struct cVector3d
 	//-----------------------------------------------------------------------
 	/*!
 		Subtraction between current vector and external vector passed as
-		parmeter.\n  Result is stored in external \e a_result vector.
+		parameter.\n  Result is stored in external \e a_result vector.
 
 		\param  a_vector  Vector which is subtracted from current one.
 		\param  a_result  Vector where result is stored.
@@ -351,7 +351,7 @@ struct cVector3d
 
 	//-----------------------------------------------------------------------
 	/*!
-		Subtract current vector from vector passed by parmeter.\n
+		Subtract current vector from vector passed by parameter.\n
 		Result is stored in \e a_result vector.
 
 		\param	a_x	 X component.
@@ -674,6 +674,50 @@ struct cVector3d
 		a_string.append(" )");
 	}
 };
+
+/*!
+An overloaded * operator for vector/scalar multiplication
+*/
+inline cVector3d operator*(const cVector3d& v, const double a_input)
+{
+  return cVector3d(v.x*a_input,v.y*a_input,v.z*a_input);
+}
+
+
+/*!
+An overloaded * operator for scalar/vector multiplication
+*/
+inline cVector3d operator*(const double a_input, const cVector3d& v)
+{
+  return cVector3d(v.x*a_input,v.y*a_input,v.z*a_input);
+}
+
+
+/*!
+An overloaded + operator for vector/vector addition
+*/
+inline cVector3d operator+(const cVector3d& v1, const cVector3d& v2)
+{
+  return cVector3d(v1.x+v2.x,v1.y+v2.y,v1.z+v2.z);
+}
+
+
+/*!
+An overloaded - operator for vector/vector subtraction
+*/
+inline cVector3d operator-(const cVector3d& v1, const cVector3d& v2)
+{
+  return cVector3d(v1.x-v2.x,v1.y-v2.y,v1.z-v2.z);
+}
+
+
+/*!
+An overloaded * operator for vector/vector dotting
+*/
+inline cVector3d operator*(const cVector3d& v1, const cVector3d& v2)
+{
+  return cVector3d(v1.x*v2.x,v1.y*v2.y,v1.z*v2.z);
+}
 
 
 //---------------------------------------------------------------------------

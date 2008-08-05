@@ -99,6 +99,10 @@ public:
   
   // Transiently computed at each time step
   cVector3d current_force;
+
+  // A material property set for rendering the ball
+  cMaterial m_material;
+
 };
 
 // Various physical constants

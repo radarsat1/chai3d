@@ -38,7 +38,6 @@
 //===========================================================================
 class cVertex
 {
-  friend class cMesh;
 
   public:
     // CONSTRUCTOR & DESTRUCTOR:
@@ -269,8 +268,6 @@ class cVertex
         m_globalPos.add(a_globalPos);
     }
 
-  protected:
-    
     // MEMBERS:
 
     //! Local position of this vertex

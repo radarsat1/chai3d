@@ -23,6 +23,11 @@
 //---------------------------------------------------------------------------
 #include "CFileLoaderOBJ.h"
 //---------------------------------------------------------------------------
+
+#ifdef _MSVC
+#include <conio.h>
+#endif
+
 //===========================================================================
 /*!
     Load a Wavefront OBJ file format image into a mesh.
@@ -59,13 +64,14 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
     if (numMaterials == 0)
     {
         // create a new child
-        cMesh *newMesh = new cMesh(world);
+        cMesh *newMesh = a_mesh->createMesh();
         a_mesh->addChild(newMesh);
 
         // Give him a default color
         a_mesh->setVertexColor(cColorb(255,255,255,255),1);
         a_mesh->useColors(1,1);
         a_mesh->useMaterial(0,1);
+        a_mesh->enableTransparency(0,1);
     }
 
     // object has material properties. Create a child for each material
@@ -74,10 +80,12 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
     {
 
         int i = 0;
+        bool found_transparent_material = false;
+
         while (i < numMaterials)
         {
             // create a new child
-            cMesh *newMesh = new cMesh(world);
+            cMesh *newMesh = a_mesh->createMesh();
             a_mesh->addChild(newMesh);
 
             // get next material
@@ -107,23 +115,35 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
                 if (result) newMesh->setTexture(newTexture);
             }
 
+            float alpha = material.m_alpha;
+            if (alpha < 1.0) {
+              newMesh->enableTransparency(1,0);
+              found_transparent_material = true;
+            }
+
             // get ambient component:
             newMesh->m_material.m_ambient.setR(material.m_ambient[0]);
             newMesh->m_material.m_ambient.setG(material.m_ambient[1]);
             newMesh->m_material.m_ambient.setB(material.m_ambient[2]);
-            newMesh->m_material.m_ambient.setA(1.0);
+            newMesh->m_material.m_ambient.setA(alpha);
 
             // get diffuse component:
             newMesh->m_material.m_diffuse.setR(material.m_diffuse[0]);
             newMesh->m_material.m_diffuse.setG(material.m_diffuse[1]);
             newMesh->m_material.m_diffuse.setB(material.m_diffuse[2]);
-            newMesh->m_material.m_diffuse.setA(1.0);
+            newMesh->m_material.m_diffuse.setA(alpha);
 
             // get specular component:
             newMesh->m_material.m_specular.setR(material.m_specular[0]);
             newMesh->m_material.m_specular.setG(material.m_specular[1]);
             newMesh->m_material.m_specular.setB(material.m_specular[2]);
-            newMesh->m_material.m_specular.setA(1.0);
+            newMesh->m_material.m_specular.setA(alpha);
+
+            // get emmissive component:
+            newMesh->m_material.m_emission.setR(material.m_emmissive[0]);
+            newMesh->m_material.m_emission.setG(material.m_emmissive[1]);
+            newMesh->m_material.m_emission.setB(material.m_emmissive[2]);
+            newMesh->m_material.m_emission.setA(alpha);
 
             // get shininess
             newMaterial.setShininess((GLuint)(material.m_shininess));
@@ -134,6 +154,10 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
         // Enable material property rendering
         a_mesh->useColors(0,1);
         a_mesh->useMaterial(1,1);
+
+        // Mark the presence of transparency in the root mesh; don't
+        // modify the value stored in children...
+        a_mesh->enableTransparency(found_transparent_material,0);
         
     }
 
@@ -225,91 +249,91 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
 cOBJModel::cOBJModel()
 {
     m_pVertices	= NULL;
-	m_pFaces = NULL;
-	m_pNormals = NULL;
-	m_pTexCoords = NULL;
-	m_pMaterials = NULL;
+    m_pFaces = NULL;
+    m_pNormals = NULL;
+    m_pTexCoords = NULL;
+    m_pMaterials = NULL;
 }
 
 cOBJModel::~cOBJModel()
 {
-	if (m_pVertices) delete [] m_pVertices;
-	if (m_pNormals)	delete [] m_pNormals;
-	if (m_pTexCoords) delete [] m_pTexCoords;
-	if (m_pMaterials) delete [] m_pMaterials;
-	if (m_pFaces)
-    {
-		for (unsigned int i=0; i<m_OBJInfo.m_faceCount; i++)
-		{
-			// Delete every pointer in the face structure
-			if (m_pFaces[i].m_pNormals) delete [] m_pFaces[i].m_pNormals;
-			if (m_pFaces[i].m_pTexCoords)  delete [] m_pFaces[i].m_pTexCoords;
-			if (m_pFaces[i].m_pVertices)  delete [] m_pFaces[i].m_pVertices;
-			if (m_pFaces[i].m_pVertexIndices)  delete [] m_pFaces[i].m_pVertexIndices;
-		}
-	}
+    if (m_pVertices) delete [] m_pVertices;
+    if (m_pNormals)	delete [] m_pNormals;
+    if (m_pTexCoords) delete [] m_pTexCoords;
+    if (m_pMaterials) delete [] m_pMaterials;
+    if (m_pFaces)
+        {
+        for (unsigned int i=0; i<m_OBJInfo.m_faceCount; i++)
+        {
+            // Delete every pointer in the face structure
+            if (m_pFaces[i].m_pNormals) delete [] m_pFaces[i].m_pNormals;
+            if (m_pFaces[i].m_pTexCoords)  delete [] m_pFaces[i].m_pTexCoords;
+            if (m_pFaces[i].m_pVertices)  delete [] m_pFaces[i].m_pVertices;
+            if (m_pFaces[i].m_pVertexIndices)  delete [] m_pFaces[i].m_pVertexIndices;
+        }
+    }
 }
 
 bool cOBJModel::LoadModel(const char a_fileName[])
 {
     //----------------------------------------------------------------------
-	// Load a OBJ file and render its data into a display list
+    // Load a OBJ file and render its data into a display list
     //----------------------------------------------------------------------
 
-	cOBJFileInfo currentIndex;	  // Current array index
-	char str[CHAI_OBJ_MAX_STR_SIZE];    // Buffer string for reading the file
-	char basePath[_MAX_PATH];	  // Path were all paths in the OBJ start
-	int nScanReturn = 0;		  // Return value of fscanf
-	unsigned int curMaterial = 0; // Current material
+    cOBJFileInfo currentIndex;	  // Current array index
+    char str[CHAI_OBJ_MAX_STR_SIZE];    // Buffer string for reading the file
+    char basePath[_MAX_PATH];	  // Path were all paths in the OBJ start
+    int nScanReturn = 0;		  // Return value of fscanf
+    unsigned int curMaterial = 0; // Current material
 
-	// Get base path
-	strcpy(basePath, a_fileName);
-	makePath(basePath);
+    // Get base path
+    strcpy(basePath, a_fileName);
+    makePath(basePath);
 
     //----------------------------------------------------------------------
-	// Open the OBJ file
+    // Open the OBJ file
     //----------------------------------------------------------------------
-	FILE *hFile = fopen(a_fileName, "r");
+    FILE *hFile = fopen(a_fileName, "r");
 
-	// Success opening file?
-	if (!hFile)
+    // Success opening file?
+    if (!hFile)
     {
-		return (false);
+        return (false);
     }
 
     //----------------------------------------------------------------------
-	// Allocate space for structures that hold the model data
+    // Allocate space for structures that hold the model data
     //----------------------------------------------------------------------
 
-	// Which data types are stored in the file ? How many of each type ?
-	getFileInfo(hFile, &m_OBJInfo, basePath);
+    // Which data types are stored in the file ? How many of each type ?
+    getFileInfo(hFile, &m_OBJInfo, basePath);
 
-	// Vertices and faces
-	if (m_pVertices) delete [] m_pVertices;
-	if (m_pFaces) delete [] m_pFaces;
-	m_pVertices	= new cVector3d[m_OBJInfo.m_vertexCount];
-	m_pFaces = new cFace[m_OBJInfo.m_faceCount];
+    // Vertices and faces
+    if (m_pVertices) delete [] m_pVertices;
+    if (m_pFaces) delete [] m_pFaces;
+    m_pVertices	= new cVector3d[m_OBJInfo.m_vertexCount];
+    m_pFaces = new cFace[m_OBJInfo.m_faceCount];
 
-	// Allocate space for optional model data only if present.
-	if (m_pNormals)	{ delete [] m_pNormals; m_pNormals = NULL; }
-	if (m_pTexCoords) { delete [] m_pTexCoords; m_pTexCoords = NULL; }
-	if (m_pMaterials) { delete [] m_pMaterials; m_pMaterials = NULL; }
-	if (m_OBJInfo.m_normalCount)
-		m_pNormals = new cVector3d[m_OBJInfo.m_normalCount];
-	if (m_OBJInfo.m_texCoordCount)
-		m_pTexCoords = new cVector3d[m_OBJInfo.m_texCoordCount];
-	if (m_OBJInfo.m_materialCount)
-		m_pMaterials = new cMaterialInfo[m_OBJInfo.m_materialCount];
+    // Allocate space for optional model data only if present.
+    if (m_pNormals)	{ delete [] m_pNormals; m_pNormals = NULL; }
+    if (m_pTexCoords) { delete [] m_pTexCoords; m_pTexCoords = NULL; }
+    if (m_pMaterials) { delete [] m_pMaterials; m_pMaterials = NULL; }
+    if (m_OBJInfo.m_normalCount)
+        m_pNormals = new cVector3d[m_OBJInfo.m_normalCount];
+    if (m_OBJInfo.m_texCoordCount)
+        m_pTexCoords = new cVector3d[m_OBJInfo.m_texCoordCount];
+    if (m_OBJInfo.m_materialCount)
+        m_pMaterials = new cMaterialInfo[m_OBJInfo.m_materialCount];
 
-	// Init structure that holds the current array index
-	memset(&currentIndex, 0, sizeof(cOBJFileInfo));
+    // Init structure that holds the current array index
+    memset(&currentIndex, 0, sizeof(cOBJFileInfo));
 
     //----------------------------------------------------------------------
-	// Read the file contents
+    // Read the file contents
     //----------------------------------------------------------------------
 
-	// Start reading the file from the start
-	rewind(hFile);
+    // Start reading the file from the start
+    rewind(hFile);
 
 	// Quit reading when end of file has been reached
 	while (!feof(hFile))
@@ -402,8 +426,10 @@ bool cOBJModel::LoadModel(const char a_fileName[])
 				char libraryFile[_MAX_PATH];
 				strcpy(libraryFile, basePath);
 				strcat(libraryFile, str);
-        			// Append .mtl
-			        //strcat(szLibraryFile, ".mtl");
+
+        // Append .mtl
+        //strcat(szLibraryFile, ".mtl");
+
 				// Load the material library
 				loadMaterialLib(libraryFile, m_pMaterials,
 					&currentIndex.m_materialCount, basePath);
@@ -427,9 +453,9 @@ void cOBJModel::parseFaceString(char a_faceString[], cFace *a_faceOut,
 								const cVector3d *a_pTexCoords,
 								const unsigned int a_materialIndex)
 {
-    //----------------------------------------------------------------------
-	// Convert face string from the OBJ file into a face structure
-    //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  // Convert face string from the OBJ file into a face structure
+  //----------------------------------------------------------------------
 
 	unsigned int i;
 	int iVertex = 0, iTextureCoord = 0, iNormal = 0;
@@ -450,9 +476,9 @@ void cOBJModel::parseFaceString(char a_faceString[], cFace *a_faceOut,
   a_faceOut->m_numVertices = 1;
   iCurTriplet++;
 	
-    //----------------------------------------------------------------------
-	// Get number of vertices in the face
-    //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  // Get number of vertices in the face
+  //----------------------------------------------------------------------
 
 	// Loop trough the whole string
 	for (i=0; i<strlen(a_faceString); i++)
@@ -553,8 +579,10 @@ bool cOBJModel::loadMaterialLib(const char a_fileName[],
 	FILE *hFile = fopen(a_fileName, "r");
 
 	// Success ?
-	if (!hFile)
-		return (false);
+  if (!hFile)
+  {
+    return (false);
+  }
 
     //----------------------------------------------------------------------
 	// Read all material definitions
@@ -581,6 +609,17 @@ bool cOBJModel::loadMaterialLib(const char a_fileName[],
 			// Store material name in the structure
 			strcpy(m_pMaterials[*a_curMaterialIndex].m_name, str);
 		}
+
+    // Transparency
+    if (
+      (!strncmp(str, CHAI_OBJ_MTL_ALPHA_ID, sizeof(CHAI_OBJ_MTL_ALPHA_ID)))
+      ||
+      (!strncmp(str, CHAI_OBJ_MTL_ALPHA_ID_ALT, sizeof(CHAI_OBJ_MTL_ALPHA_ID_ALT)))
+      )
+    {
+      // Read into current material
+      fscanf(hFile, "%f", &m_pMaterials[*a_curMaterialIndex].m_alpha);
+    }
 
 		// Ambient material properties
 		if (!strncmp(str, CHAI_OBJ_MTL_AMBIENT_ID, sizeof(CHAI_OBJ_MTL_AMBIENT_ID)))

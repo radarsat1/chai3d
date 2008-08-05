@@ -58,7 +58,7 @@ cImageLoader::cImageLoader()
     \param  a_filename  Image filename
 */
 //===========================================================================
-cImageLoader::cImageLoader(char* a_filename)
+cImageLoader::cImageLoader(const char* a_filename)
 {
     // init internal variables
     defaults();
@@ -283,16 +283,17 @@ void cImageLoader::convertToRGBA()
     // Don't convert if we're already RGBA
     if (m_format == GL_RGBA) return;
 
-    char* data = new char[m_width*m_height*4];
+    unsigned char* data = new unsigned char[m_width*m_height*4];
 
     int size = m_width*m_height;
-    char* original_image_pos = (char*)(m_data);
-    char* new_image_pos = data;
+    unsigned char* original_image_pos = m_data;
+    unsigned char* new_image_pos = data;
     for(int i=0; i<size; i++) {
 
       new_image_pos[0] = original_image_pos[0];
       new_image_pos[1] = original_image_pos[1];
       new_image_pos[2] = original_image_pos[2];
+      new_image_pos[3] = 255;
 
       new_image_pos += 4;
       original_image_pos += 3;
@@ -300,7 +301,7 @@ void cImageLoader::convertToRGBA()
     }
 
     delete [] m_data;
-    m_data = (unsigned char*)data;
+    m_data = data;
 
     m_format = GL_RGBA;
 }

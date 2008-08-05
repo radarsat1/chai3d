@@ -35,7 +35,7 @@ cPrecisionClock::cPrecisionClock()
 	// clock is currently off
 	m_on = false;
 
-	// test for high performance timer on the local machine. Some old compters
+	// test for high performance timer on the local machine. Some old computers
 	// may not offer this feature
 	QueryPerformanceFrequency (&m_freq);
 	if (m_freq.QuadPart <= 0)
@@ -76,7 +76,7 @@ cPrecisionClock::~cPrecisionClock()
 //===========================================================================
 void cPrecisionClock::initialize()
 {
-	// initialise current time of timer
+	// initialize current time of timer
 	m_timeCurrent = 0;
 	m_timeStart = getCount();
 }
@@ -127,11 +127,11 @@ long cPrecisionClock::stop()
 
 //===========================================================================
 /*!
-	Set the period in \e microseconds before timeout occures. Do not forget
+	Set the period in \e microseconds before timeout occurs. Do not forget
 	to set the timer on by calling start()
 
 	\fn         void cPrecisionClock::setTimeoutPeriod(long a_timeoutPeriod);
-	\param      a_timeoutPeriod  Timout period in \e microseconds.
+	\param      a_timeoutPeriod  Timeout period in \e microseconds.
 */
 //===========================================================================
 void cPrecisionClock::setTimeoutPeriod(long a_timeoutPeriod)
@@ -144,13 +144,13 @@ void cPrecisionClock::setTimeoutPeriod(long a_timeoutPeriod)
 /*!
 	Check if timer has expired its timeout period. if so return \b true.
 
-	\fn         bool cPrecisionClock::timeoutOccured()
-	\return     Return \b true if timeout occured, otherwize \b false.
+	\fn         bool cPrecisionClock::timeoutoccurred()
+	\return     Return \b true if timeout occurred, otherwise \b false.
 */
 //===========================================================================
 bool cPrecisionClock::timeoutOccured()
 {
-	// check if timeout has occured
+	// check if timeout has occurred
 	if (getCurrentTime() > m_timeoutPeriod)
 	{
 		return true;
@@ -219,7 +219,7 @@ long cPrecisionClock::getCount()
 /*!
 	If all you want is something that tells you the time, this is your function...
 
-	\fn			long cPrecisionClock::getCPUtime()
+	\fn         long cPrecisionClock::getCPUtime()
 	\return     Return cpu clock in \e seconds.
 */
 //===========================================================================

@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -27,18 +27,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -66,7 +66,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\object_loader.ico"
+IDR_MAINFRAME           ICON                    "res\\object_loader.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -74,11 +74,11 @@ IDR_MAINFRAME           ICON    DISCARDABLE     "res\\object_loader.ico"
 //
 
 IDD_object_loader_DIALOG DIALOGEX 0, 0, 543, 374
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | 
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | 
     WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "object_loader"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_GL_AREA,"Static",SS_BLACKFRAME | SS_SUNKEN,7,7,
                     428,277,WS_EX_TRANSPARENT
@@ -87,16 +87,16 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,443,19,81,10
     CONTROL         "Show coordinate frame",IDC_CHECK_SHOWFRAME,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,443,32,89,10
-    CONTROL         "Show boundary box",IDC_CHECK_SHOWBOX,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,443,45,79,10
+    CONTROL         "Show boundary box",IDC_CHECK_SHOWBOX,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,443,45,79,10
     CONTROL         "Show vertex normals",IDC_CHECK_SHOWNORMALS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,443,58,81,10
     CONTROL         "Enable texture-mapping",IDC_CHECK_USETEXTURE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,443,71,90,10
     CONTROL         "Enable vertex colors",IDC_CHECK_USECOLORS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,443,84,80,10
+                    BS_3STATE | WS_TABSTOP,443,84,80,10
     CONTROL         "Enable material properties",IDC_CHECK_MATERIAL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,443,97,97,10
+                    BS_3STATE | WS_TABSTOP,443,97,97,10
     PUSHBUTTON      "Load model",IDC_LOAD_MODEL_BUTTON,442,143,94,14
     PUSHBUTTON      "Load texture map",IDC_LOAD_TEXTURE_BUTTON,442,162,94,14
     CONTROL         "Slider1",IDC_CAMZOOM_SLIDER,"msctls_trackbar32",
@@ -126,10 +126,13 @@ BEGIN
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,437,254,97,15
     LTEXT           "Stereo separation: xx",IDC_STEREOSEP_TEXT,441,243,95,8
     PUSHBUTTON      "Animate Object",IDC_ANIMATION_BUTTON,114,353,88,14
+    CONTROL         "Enable face culling",IDC_CHECK_CULLING,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,443,110,81,10
+    CONTROL         "Enable transparency",IDC_CHECK_TRANSPARENCY,"Button",
+                    BS_3STATE | WS_TABSTOP,443,123,81,10
 END
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -152,15 +155,13 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "object_loader MFC Application\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "object_loader\0"
-            VALUE "LegalCopyright", "Copyright (C) 2004\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "object_loader.EXE\0"
-            VALUE "ProductName", "object_loader Application\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "FileDescription", "object_loader MFC Application"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "object_loader"
+            VALUE "LegalCopyright", "Copyright (C) 2004"
+            VALUE "OriginalFilename", "object_loader.EXE"
+            VALUE "ProductName", "object_loader Application"
+            VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -169,8 +170,6 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -178,7 +177,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_object_loader_DIALOG, DIALOG
     BEGIN

@@ -12,12 +12,7 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author     Collision detection algorithm by Joel Brown
-    \author     jbrown@cs.stanford.edu
-    \author     Based on code by Stephen Sorkin
-    \author     ssorkin@cs.stanford.edu
-    \author     Integrated into CHAI by Christopher Sewell
-    \author     csewell@stanford.edu
+    \author     Chris Sewell
     \file       CCollisionSpheresGeometry.h
     \version    1.0
     \date       01/2004

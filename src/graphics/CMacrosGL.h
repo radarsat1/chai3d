@@ -29,6 +29,13 @@
 #include "gl/gl.h"
 //---------------------------------------------------------------------------
 
+#ifdef _MSVC
+#include <conio.h>
+#define CHAI_DEBUG_PRINT _cprintf
+#else 
+#define CHAI_DEBUG_PRINT printf
+#endif
+
 //===========================================================================
 /*!
       \struct   cMatrixGL
@@ -120,7 +127,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-          Createe an OpenGL rotation matrix from a 3x3 rotation matrix passed
+          Create an OpenGL rotation matrix from a 3x3 rotation matrix passed
           as a parameter.
 
           \param    a_rot  The source rotation matrix

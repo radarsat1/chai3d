@@ -87,6 +87,9 @@ class cCamera : public cGenericObject
     //! Get far clipping plane
     double getFarClippingPlane() { return (m_distanceFar); }
 
+    //! Automatically adjust back and front clipping planes
+    void adjustClippingPlanes();
+
     //! Set field of view angle (in degrees)
     void setFieldViewAngle(double a_fieldViewAngle);
 
@@ -105,7 +108,7 @@ class cCamera : public cGenericObject
     //! Get stereo eye separation
     double getStereoEyeSeparation() { return (m_stereoEyeSeparation); }
 
-    //! Render the camera in OpenGL (i.e. set up the projection matrix)... also nukes the contents of the GL buffers
+    //! Render the camera in OpenGL (i.e. set up the projection matrix)...
     virtual void renderView(const int a_windowWidth, const int a_windowHeight, const int a_imageIndex = CHAI_MONO);
 
     //! Query whether the specified position is 'pointing at' any objects in the world
@@ -116,6 +119,21 @@ class cCamera : public cGenericObject
 
     //! Enable or disable additional rendering passes for transparency (see full comment)
     virtual void enableMultipassTransparency(bool enable);
+
+    //! These are special 'children' of the camera that are rendered independently of
+    //! all other objects, intended to contain 2d objects only.  The 'back' scene is
+    //! rendered before the 3d objects; the 'front' scene is rendered after the
+    //! 3d object.  These are made public variables to allow convenient access to
+    //! the scenegraph management functions.
+    //!
+    //! These objects are rendered through an orthographic projection matrix, so the
+    //! positive z axis faces the camera.  Depth is currently not used.  Lighting
+    //! is disabled during rendering.
+    cGenericObject m_front_2Dscene;
+    cGenericObject m_back_2Dscene;
+
+    //! Resets textures and displays for the world associated with this camera
+    virtual void onDisplayReset(const bool a_affectChildren = true);
 
   protected:
 
@@ -142,6 +160,12 @@ class cCamera : public cGenericObject
     //! If true, three rendering passes are performed to approximate back-front sorting (see long comment)
     bool m_useMultipassTransparency;
 
+    //! Render a 2d scene within this camera's view.
+    void render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_height);
+
+    //! Older apps may have the camera as a child of the world, which
+    //! would cause recursion when resetting the display
+    bool m_performingDisplayReset;
 };
 
 //---------------------------------------------------------------------------

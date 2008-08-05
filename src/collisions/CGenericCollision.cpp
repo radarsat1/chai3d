@@ -13,7 +13,7 @@
     Professional Edition License.
 
     \author:    <http://www.chai3d.org>
-    \author:    Christopher Sewell
+    \author:    Francois Conti
     \version    1.1
     \date       01/2004
 */
@@ -35,7 +35,7 @@ cGenericCollision::cGenericCollision()
     // set material properties
     // set default color for rendering collision detector
     m_material.m_ambient.set((float)0.3, (float)0.3, (float)0.3);
-    m_material.m_diffuse.set((float)0.8, (float)0.8, (float)0.0);
+    m_material.m_diffuse.set((float)0.5, (float)0.5, (float)0.5);
     m_material.m_specular.set((float)1.0, (float)1.0, (float)1.0);
     m_material.setShininess(100);
 

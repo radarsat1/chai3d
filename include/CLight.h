@@ -39,7 +39,7 @@ class cWorld;
       \class      cLight
       \brief      cLight describes an OpenGL light source, generally rendered
                   by a cWorld object, which is typically the top of a scene
-                  graph
+                  graph.
 
                   By default, lights are directional and non-spot.
 */
@@ -71,11 +71,11 @@ class cLight : public cGenericObject
 
     // METHODS: LIGHT PROPERTIES
 
-    //! Set the direction of the light beam
+    //! Set the direction of the light beam... only affects _positional_ lights with angular cutoffs (spotlights)
     void setDir(const cVector3d& a_direction);
-    //! Set the direction of the light beam
+    //! Set the direction of the light beam... only affects _positional_ lights with angular cutoffs (spotlights)
     void setDir(const double a_x, const double a_y, const double a_z);
-    //! Read the direction of the light beam
+    //! Read the direction of the light beam... only affects _positional_ lights with angular cutoffs (spotlights)
     cVector3d getDir() const { return (m_localRot.getCol0()); }
 
     //! Set this light to be purely directional (true) or purely positional (false)
@@ -99,7 +99,8 @@ class cLight : public cGenericObject
     void setSpotExponent(const GLfloat& a_value) { m_spotExponent = cClamp(a_value, 0.0f, 100.0f); }
     //! Read concentration level of the light.
     GLfloat getSpotExponent() const { return (m_spotExponent); }
-    //! Set the cutoff angle in degrees
+    
+    //! Set the cutoff angle in degrees (only affects spotlights) (positional lights with angular cutoffs)
     void setCutOffAngle(const GLfloat& a_value);
     //! Read Cut off angle.
     GLfloat getCutOffAngle() const { return (m_cutOffAngle); }

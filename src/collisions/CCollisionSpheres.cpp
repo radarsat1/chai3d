@@ -12,12 +12,7 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author     Collision detection algorithm by Joel Brown
-    \author     jbrown@cs.stanford.edu
-    \author     Based on code by Stephen Sorkin
-    \author     ssorkin@cs.stanford.edu
-    \author     Integrated into CHAI by Christopher Sewell
-    \author     csewell@stanford.edu
+    \author     Chris Sewell
     \file       CCollisionSpheres.cpp
     \version    1.0
     \date       01/2004
@@ -56,6 +51,13 @@ cCollisionSpheres::cCollisionSpheres(vector<cTriangle> *a_triangles,
     m_trigs = a_triangles;
     m_useNeighbors = a_useNeighbors;
     m_root = NULL;
+
+    // set material properties
+    m_material.m_ambient.set(0.1, 0.3, 0.1, 0.3);
+    m_material.m_diffuse.set(0.1, 0.8, 0.1, 0.3);
+    m_material.m_specular.set(0.1, 1.0, 0.1, 0.3);
+    m_material.setShininess(100);
+
 }
 
 
@@ -139,20 +141,31 @@ void cCollisionSpheres::initialize()
 //===========================================================================
 void cCollisionSpheres::render()
 {
-    if (m_root != NULL)
-    {
+  if (m_root == NULL) return;
 
-      // set rendering settings
-      glDisable(GL_LIGHTING);
-      glLineWidth(1.0);
-      glColor4fv(m_material.m_ambient.pColor());
+  bool transparency = m_material.isTransparent();
 
-      // render tree
-      m_root->draw(m_displayDepth);
+  // set up transparency if we need it...
+  if (transparency) {
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
 
-      // restore settings
-      glEnable(GL_LIGHTING);
-    }
+  // set rendering settings
+  glEnable(GL_LIGHTING);
+  glLineWidth(1.0);
+  m_material.render();
+
+  // render tree
+  m_root->draw(m_displayDepth);  
+
+  // turn off transparency if we used it...
+  if (transparency) {
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+  }
+
 }
 
 
@@ -559,23 +572,18 @@ void cCollisionSpheresNode::draw(int a_depth)
     // only render the sphere if this node is at the given depth
     if (a_depth < 0 || a_depth == m_depth)
     {
-
-      // set up transparency so that the actual objects are visible through
-      // the spheres
-      cColorf color;
-      color.set(0.8, 0.8, 0.8, 0.50);
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glPushMatrix();
       glTranslated(m_center.x, m_center.y, m_center.z);
-      glColor4fv( (const float *)&color);
       cDrawSphere(m_radius, 16, 16);
       glPopMatrix();
     }
 
+    // do not go any further if the target depth has been reached
+    if (a_depth == m_depth) { return; }
+
     // recursively call left and right subtrees
-    if (m_left) m_left->draw(m_depth);
-    if (m_right) m_right->draw(m_depth);
+    if (m_left) m_left->draw(a_depth);
+    if (m_right) m_right->draw(a_depth);
 }
 
 
@@ -759,22 +767,11 @@ void cCollisionSpheresLeaf::draw(int a_depth)
 {
     // only render the sphere if this node is at the given depth
     if (a_depth < 0 || a_depth == m_depth)
-    {
-      
-        // set up transparency so that the actual objects are visible through
-        // the spheres
-        cColorf color;
-        color.set(0.8, 0.8, 0.8, 0.2);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glPushMatrix();
-        glTranslatef((float)m_center.x, (float)m_center.y, (float)m_center.z);
-        glColor4fv( (const float *)&color);
-
-        // draw the sphere
-        cDrawSphere(m_radius, 16, 16);
-        glPopMatrix();
-
+    {      
+      glPushMatrix();
+      glTranslated(m_center.x, m_center.y, m_center.z);
+      cDrawSphere(m_radius, 16, 16);
+      glPopMatrix();
     }
 }
 

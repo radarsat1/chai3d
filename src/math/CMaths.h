@@ -710,6 +710,25 @@ inline cMatrix3d cInv(const cMatrix3d& a_matrix)
 
 //===========================================================================
 /*!
+Compute the angle in radian between two vectors.
+
+\param    a_vector0  Input vector.
+\param    a_vector1  Input vector.
+\return   Returns the angle in radian between both vectors.
+*/
+//===========================================================================
+inline double cAngle(const cVector3d& a_vector0, const cVector3d& a_vector1)
+{
+
+  double n0 = a_vector0.length();
+  double n1 = a_vector1.length();
+
+  return(a_vector0.dot(a_vector1)/(n0*n1));
+}
+
+
+//===========================================================================
+/*!
     Compute a rotation matrix given a rotation \e axis and an \e angle.
 
     \param    a_axis  Axis of rotation.
@@ -746,8 +765,41 @@ inline cMatrix3d cRotate(const cMatrix3d a_matrix, const cVector3d& a_axis,
 
 //===========================================================================
 /*!
+Compute the projection of a point on a plane. the plane is expressed
+by a point and a surface normal.
+
+\param    a_point  Point to project on plane.
+\param    a_planePoint   Point on plane.
+\param    n              Plane normal.
+\return   Returns the projection of \e a_point on plane.
+*/
+//===========================================================================
+inline cVector3d cProjectPointOnPlane(const cVector3d& a_point,
+                                      const cVector3d& a_planePoint, const cVector3d& n)
+{    
+  // compute a projection matrix
+  cMatrix3d projectionMatrix;
+
+  projectionMatrix.set(
+    (n.y * n.y) + (n.z * n.z), -(n.x * n.y), -(n.x * n.z),
+    -(n.y * n.x), (n.x * n.x) + (n.z * n.z), -(n.y * n.z),
+    -(n.z * n.x), -(n.z * n.y), (n.x * n.x) + (n.y * n.y) );
+
+  // project point on plane and return projected point.
+  cVector3d point;
+  a_point.subr(a_planePoint, point);
+  projectionMatrix.mul(point);
+  point.add(a_planePoint);
+
+  // return result
+  return (point);
+}
+
+
+//===========================================================================
+/*!
     Compute the projection of a point on a plane. the plane is expressed
-    by a set of three point.
+    by a set of three points.
 
     \param    a_point  Point to project on plane.
     \param    a_planePoint0  Point 0 on plane.
@@ -771,20 +823,7 @@ inline cVector3d cProjectPointOnPlane(const cVector3d& a_point,
     v01.crossr(v02, n);
     n.normalize();
 
-    // compute a projection matrix
-    cMatrix3d projectionMatrix;
-    projectionMatrix.set( (n.y * n.y) + (n.z * n.z), -(n.x * n.y), -(n.x * n.z),
-                         -(n.y * n.x), (n.x * n.x) + (n.z * n.z), -(n.y * n.z),
-                         -(n.z * n.x), -(n.z * n.y), (n.x * n.x) + (n.y * n.y) );
-
-    // project point on plane and return projected point.
-    cVector3d point;
-    a_point.subr(a_planePoint0, point);
-    projectionMatrix.mul(point);
-    point.add(a_planePoint0);
-
-    // return result
-    return (point);
+    return cProjectPointOnPlane(a_point,a_planePoint0,n);  
 }
 
 
@@ -827,7 +866,7 @@ inline cVector3d cProjectPointOnLine(const cVector3d& a_point,
 //===========================================================================
 inline cVector3d cProject(const cVector3d& a_vector0, const cVector3d& a_vector1)
 {
-    cVector3d point, result;
+    cVector3d result;
 
     double lengthSq = a_vector1.lengthsq();
 

@@ -13,7 +13,7 @@
     Professional Edition License.
 
     \author:    <http://www.chai3d.org>
-    \author:    Christopher Sewell
+    \author:    Francois Conti
     \version    1.1
     \date       01/2004
 */

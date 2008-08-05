@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="clock"
+	ProjectGUID="{3196AB59-592E-4369-A353-69E877995169}"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">

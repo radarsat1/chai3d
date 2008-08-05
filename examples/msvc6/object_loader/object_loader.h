@@ -68,7 +68,12 @@ public:
   cLight* light;
 
   // Grab relevant options from checkboxes and sliders in the GUI
-  void update_options_from_gui();
+  //
+  // Optionally preserve properties loaded directly from file
+  void update_options_from_gui(int preserve_loaded_properties=0);
+
+  // Move variables loaded from a mesh out to the GUI  
+  void copy_rendering_options_to_gui();
 
   // Move the on-screen object if necessary
   //
