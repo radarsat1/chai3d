@@ -31,6 +31,8 @@
 #define _snprintf(x,y,...) sprintf(x,__VA_ARGS__) 
 #endif
 
+#include <stdlib.h>
+#include <string.h>
 #include <map>
 
 typedef std::map<unsigned int, unsigned int> uint_uint_map;

@@ -30,6 +30,7 @@
 #include "CFileLoaderTGA.h"
 #include "CMacrosGL.h"
 #include <GL/gl.h>
+#include <string.h>
 //---------------------------------------------------------------------------
 
 #if (defined(_WIN32) && !defined(_POSIX) )

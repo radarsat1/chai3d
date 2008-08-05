@@ -22,6 +22,7 @@
 //---------------------------------------------------------------------------
 #include "CCollisionAABBTree.h"
 //---------------------------------------------------------------------------
+#include <stdlib.h>
 
 //! Pointer for creating new AABB tree nodes, declared in CCollisionAABB.cpp.
 extern cCollisionAABBInternal* g_nextFreeNode;

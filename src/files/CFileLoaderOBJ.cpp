@@ -23,6 +23,7 @@
 //---------------------------------------------------------------------------
 #include "CFileLoaderOBJ.h"
 //---------------------------------------------------------------------------
+#include <string.h>
 
 bool g_objLoaderShouldGenerateExtraVertices = false;
 

@@ -23,6 +23,7 @@
 #include "CWorld.h"
 #include "CLight.h"
 //---------------------------------------------------------------------------
+#include <string.h>
 
 #ifndef _MSVC
 #include <float.h>
