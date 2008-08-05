@@ -1,0 +1,541 @@
+//===========================================================================
+/*
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License("GPL") version 2
+    as published by the Free Software Foundation.
+
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
+
+    \author:    <http://www.chai3d.org>
+    \author:    Francois Conti
+    \version    1.1
+    \date       01/2004
+*/
+//===========================================================================
+
+//---------------------------------------------------------------------------
+#ifndef CColorH
+#define CColorH
+//---------------------------------------------------------------------------
+#include "CMaths.h"
+#include "windows.h"
+#include "gl/gl.h"
+//---------------------------------------------------------------------------
+
+//===========================================================================
+/*!
+      \struct   cColorf
+      \brief    cColorf describes a color composed of 4 \e GLfloat.
+*/
+//===========================================================================
+struct cColorf
+{
+  public:
+
+    // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+    /*!
+        Constructor of cColorf.
+    */
+    //-----------------------------------------------------------------------
+    cColorf()
+    {
+        // initialize color components R,G,B,A
+        m_color[0] = 1.0;
+        m_color[1] = 1.0;
+        m_color[2] = 1.0;
+        m_color[3] = 1.0;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Constructor of cColorf. Define a color by passing its RGBA components.
+        as parameters.
+
+        \param    a_red  Red component.
+        \param    a_green  Green component.
+        \param    a_blue  Blue component.
+        \param    a_transparency  Transparency component.
+    */
+    //-----------------------------------------------------------------------
+    cColorf(const GLfloat a_red, const GLfloat a_green, const GLfloat a_blue,
+           const GLfloat a_transparency = 1.0)
+    {
+        m_color[0] = cClamp( a_red, 0.0f, 1.0f);
+        m_color[1] = cClamp( a_green, 0.0f, 1.0f);
+        m_color[2] = cClamp( a_blue, 0.0f, 1.0f);
+        m_color[3] = cClamp( a_transparency, 0.0f, 1.0f);
+    };
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Destructor of cColorf.
+    */
+    //-----------------------------------------------------------------------
+    ~cColorf() {};
+
+
+    // METHODS:
+    //-----------------------------------------------------------------------
+    /*!
+        Set a color by passing its RGBA components as parameters.
+
+        \param    a_red  Red component.
+        \param    a_green  Green component.
+        \param    a_blue  Blue component.
+        \param    a_transparency  Transparency component.
+    */
+    //-----------------------------------------------------------------------
+    inline void set(const GLfloat a_red, const GLfloat a_green, const GLfloat a_blue,
+                    const GLfloat a_transparency = 1.0)
+    {
+        m_color[0] = cClamp( a_red, 0.0f, 1.0f);
+        m_color[1] = cClamp( a_green, 0.0f, 1.0f);
+        m_color[2] = cClamp( a_blue, 0.0f, 1.0f);
+        m_color[3] = cClamp( a_transparency, 0.0f, 1.0f);
+    };
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Set color by copying three \e GLfloat from an external array each
+        describing the RGB components. Transparency is set to \e 1.
+
+        \param    a_colorRGB  Pointer to array of type \e float.
+    */
+    //-----------------------------------------------------------------------
+    inline void setMem3(const GLfloat* a_colorRGB)
+    {
+        m_color[0] = a_colorRGB[0];
+        m_color[1] = a_colorRGB[1];
+        m_color[2] = a_colorRGB[2];
+        m_color[3] = 1.0;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Set color by copying three \e GLfloat from an external array each
+        describing the RGBA components.
+
+        \param    a_colorRGBA  Pointer to array of type \e float.
+    */
+    //-----------------------------------------------------------------------
+    inline void setMem4(const GLfloat* a_colorRGBA)
+    {
+        m_color[0] = a_colorRGBA[0];
+        m_color[1] = a_colorRGBA[1];
+        m_color[2] = a_colorRGBA[2];
+        m_color[3] = a_colorRGBA[3];
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Set the \e red component.
+
+          \param    a_red  Red component.
+    */
+    //-----------------------------------------------------------------------
+    inline void setR(const GLfloat a_red)
+    {
+        m_color[0] = cClamp( a_red, 0.0f, 1.0f);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Read the \e red component.
+    */
+    //-----------------------------------------------------------------------
+    inline GLfloat getR() const
+    {
+        return(m_color[0]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Set the \e green component.
+
+          \param    a_green  Green component.
+    */
+    //-----------------------------------------------------------------------
+    inline void setG(const GLfloat a_green)
+    {
+        m_color[1] = cClamp( a_green, 0.0f, 1.0f);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Read the \e green component.
+    */
+    //-----------------------------------------------------------------------
+    inline GLfloat getG() const
+    {
+        return(m_color[1]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Set the \e blue component.
+
+          \param    a_blue  Blue component.
+    */
+    //-----------------------------------------------------------------------
+    inline void setB(const GLfloat a_blue)
+    {
+        m_color[2] = cClamp( a_blue, 0.0f, 1.0f);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Read the \e blue component.
+    */
+    //-----------------------------------------------------------------------
+    inline GLfloat getB() const
+    {
+        return(m_color[2]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Set the \e transparency component.
+
+          \param    a_transparency  Transparency component.
+    */
+    //-----------------------------------------------------------------------
+    inline void setA(const GLfloat a_transparency)
+    {
+        m_color[3] = cClamp( a_transparency, 0.0f, 1.0f);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Read the \e transparency component.
+    */
+    //-----------------------------------------------------------------------
+    inline GLfloat getA() const
+    {
+        return(m_color[3]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Render color in OpenGL.
+    */
+    //-----------------------------------------------------------------------
+    inline void render() const
+    {
+        glColor4fv(&m_color[0]);
+    };
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Return pointer to color array.
+    */
+    //-----------------------------------------------------------------------
+    const GLfloat* pColor() const
+    {
+        return (&m_color[0]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Return color converted to \e cColorb format.
+
+          \return   Return color conversion.
+    */
+    //-----------------------------------------------------------------------
+    /*
+    inline cColorb getColorb() const
+    {
+        cColorb color( (GLubyte)(m_color[0] * (GLfloat)0xff),
+                         (GLubyte)(m_color[1] * (GLfloat)0xff),
+                         (GLubyte)(m_color[2] * (GLfloat)0xff),
+                         (GLubyte)(m_color[3] * (GLfloat)0xff) );
+        return (color);
+    }
+    */
+
+  private:
+    // MEMBERS:
+    //! Color in \e GLfloat format [R,G,B,A].
+    GLfloat m_color[4];
+};
+
+
+//===========================================================================
+/*!
+      \struct   cColorb
+      \brief    cColorb describes a color composed of 4 \e bytes.
+*/
+//===========================================================================
+struct cColorb
+{
+  public:
+
+    // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+    /*!
+        Constructor of cColorb.
+    */
+    //-----------------------------------------------------------------------
+    cColorb()
+    {
+        // initialize color components R,G,B,A
+        m_color[0] = 0xff;
+        m_color[1] = 0xff;
+        m_color[2] = 0xff;
+        m_color[3] = 0xff;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Constructor of cColorb. Define a color by passing its RGBA components.
+        as parameters.
+
+        \param    a_red  Red component.
+        \param    a_green  Green component.
+        \param    a_blue  Blue component.
+        \param    a_transparency  Transparency component.
+    */
+    //-----------------------------------------------------------------------
+    cColorb(const GLubyte a_red, const GLubyte a_green, const GLubyte a_blue,
+           const GLubyte a_transparency = 1.0)
+    {
+        m_color[0] = a_red;
+        m_color[1] = a_green;
+        m_color[2] = a_blue;
+        m_color[3] = a_transparency;
+    };
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Destructor of cColorf.
+    */
+    //-----------------------------------------------------------------------
+    ~cColorb() {};
+
+
+    // METHODS:
+    //-----------------------------------------------------------------------
+    /*!
+        Set a color by passing its RGBA components as parameters.
+
+        \param    a_red  Red component.
+        \param    a_green  Green component.
+        \param    a_blue  Blue component.
+        \param    a_transparency  Transparency component.
+    */
+    //-----------------------------------------------------------------------
+    inline void set(const GLubyte a_red, const GLubyte a_green, const GLubyte a_blue,
+                    const GLubyte a_transparency = 1.0)
+    {
+        m_color[0] = a_red;
+        m_color[1] = a_green;
+        m_color[2] = a_blue;
+        m_color[3] = a_transparency;
+    };
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Set color by copying three floats from an external array each
+        describing the RGB components. Transparency is set to \e 0xff.
+
+        \param    a_colorRGB  Pointer to array of type \e GLubyte.
+    */
+    //-----------------------------------------------------------------------
+    inline void setMem3(const GLubyte* a_colorRGB)
+    {
+        m_color[0] = a_colorRGB[0];
+        m_color[1] = a_colorRGB[1];
+        m_color[2] = a_colorRGB[2];
+        m_color[3] = 0xff;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Set color by copying three floats from an external array each
+        describing the RGBA components.
+
+        \param    a_colorRGBA  Pointer to array of type \e float.
+    */
+    //-----------------------------------------------------------------------
+    inline void setMem4(const GLubyte* a_colorRGBA)
+    {
+        m_color[0] = a_colorRGBA[0];
+        m_color[1] = a_colorRGBA[1];
+        m_color[2] = a_colorRGBA[2];
+        m_color[3] = a_colorRGBA[3];
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Set the \e red component.
+
+          \param    a_red  Red component.
+    */
+    //-----------------------------------------------------------------------
+    inline void setR(const GLubyte a_red)
+    {
+        m_color[0] = a_red;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Read the \e red component.
+    */
+    //-----------------------------------------------------------------------
+    inline GLfloat getR() const
+    {
+        return(m_color[0]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Set the \e green component.
+
+          \param    a_green  Green component.
+    */
+    //-----------------------------------------------------------------------
+    inline void setG(const GLubyte a_green)
+    {
+        m_color[1] = a_green;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Read the \e green component.
+    */
+    //-----------------------------------------------------------------------
+    inline GLfloat getG() const
+    {
+        return(m_color[1]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Set the \e blue component.
+
+          \param    a_blue  Blue component.
+    */
+    //-----------------------------------------------------------------------
+    inline void setB(const GLubyte a_blue)
+    {
+        m_color[2] = a_blue;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Read the \e blue component.
+    */
+    //-----------------------------------------------------------------------
+    inline GLfloat getB() const
+    {
+        return(m_color[2]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Set the \e transparency component.
+
+          \param    a_transparency  Transparency component.
+    */
+    //-----------------------------------------------------------------------
+    inline void setA(const GLubyte a_transparency)
+    {
+        m_color[3] = a_transparency;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Read the \e transparency component.
+    */
+    //-----------------------------------------------------------------------
+    inline GLfloat getA() const
+    {
+        return(m_color[3]);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Render color in OpenGL.
+    */
+    //-----------------------------------------------------------------------
+    inline void render() const
+    {
+        glColor4bv((const signed char*)(&m_color[0]));
+    };
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Return pointer to color array.
+
+          \return   Return memory location of color array.
+    */
+    //-----------------------------------------------------------------------
+    const GLubyte* pColor() const
+    {
+        return (&m_color[0]);
+    }
+
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Return color converted to \e cColorf format.
+
+          \return   Return color conversion.
+    */
+    //-----------------------------------------------------------------------
+    inline cColorf getColorf() const
+    {
+        cColorf color ( (GLfloat)m_color[0] / (GLfloat)0xff,
+                          (GLfloat)m_color[1] / (GLfloat)0xff,
+                          (GLfloat)m_color[2] / (GLfloat)0xff,
+                          (GLfloat)m_color[3] / (GLfloat)0xff );
+        return (color);
+    }
+
+  private:
+    // MEMBERS:
+    //! Color in \e GLubyte format [R,G,B,A].
+    GLubyte m_color[4];
+};
+
+
+//---------------------------------------------------------------------------
+#endif
+//---------------------------------------------------------------------------
+

@@ -1,0 +1,34 @@
+/****
+
+ CHAI Example: object_loader
+ 
+ Author: Francois Conti, Christopher Sewell, and Dan Morris
+
+****/
+
+This example builds on the first example (basic_shapes) and adds a more
+complex GUI that allows the user to control various rendering options, and
+the ability to load arbitrary shapes from mesh files (.obj and .3ds are the
+currently supported formats.) 
+
+Relevant items to look at in the code (besidres what was already discussed
+in the README.txt file for the basic_shapes example) are :
+
+* main.cpp is the main application file, which includes
+  initialization and the haptic and graphic rendering loops.
+
+  The important function that makes this example different than the
+  previous example is the TForm1::LoadModelButtonClick(...) function, 
+  which takes a filename (.obj or .3ds), then opens that file up and displays 
+  the model (graphically and haptically).
+
+Also note the use of the object->createAABBCollisionDetector(...) 
+function to create a collision-detection tree using axis-aligned bounding 
+boxes.  Alternatively (by changing selecting the 'Sphere Tree' radio
+button), object->createSphereTreeCollisionDetector(...) creates a collision-
+detection tree using spheres.
+
+  
+
+
+

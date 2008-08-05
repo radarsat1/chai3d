@@ -1,0 +1,38 @@
+/****
+
+ CHAI Example: 01_basic_shapes
+ 
+ Author: Francois Conti
+
+****/
+
+This example demonstrates the use of the core CHAI components by 
+creating an OpenGL environment and allowing the user to render
+a simple object graphically and haptically.
+
+Relevant items to look at in the code are :
+
+* main.cpp is the main application file, which includes
+  initialization and the haptic and graphic rendering loops.
+
+  Useful functions to look at are :
+
+  * TForm1::FormCreate(TObject *Sender): Here we create a CHAI world, 
+    a viewport on that world, a camera, and a simple shape (a cube).
+
+  * Form1::Timer1Timer(TObject *Sender): This is called at intervals of
+    20 msec (as specified in the properites of the Timer object on the
+    main form) and renders the scene graphically.
+
+  * HapticLoop(): This is called by the haptics thread at each haptic 
+    iteration, and it tells the haptic device to render forces.
+
+  * TForm1::ToggleHapticsButtonClick(TObject *Sender): This is called when 
+    the user clicks the 'Haptics' button, and it enables haptic rendering.
+
+  * TForm1::updateCameraPosition(): This changes the field of view, 
+    position, and orientation of the camera, depending on the user's mouse   
+    movements.
+
+
+ 

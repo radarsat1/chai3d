@@ -1,0 +1,72 @@
+<html><head><title>CHAI 3D: Getting Started</title></head>
+<body bgcolor=#ffffff>
+<font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular"><b>CHAI 3D<br>
+Computer Haptics &amp;&nbsp;Active Interfaces</b></font>
+
+
+<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+<b>Getting Started</b></p>
+		<p>
+			<p>
+			<font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+				<hr>
+				<b>Installation</b>
+				<hr>
+			</font>
+			<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+
+The main CHAI distribution file unzips to a set of directories that is ready
+for compilation and linking.  All relevant header files are in the main
+'include' directory.  To link against the CHAI libraries, use the .lib files
+in the lib/msvc6 or lib/bbcp6 directories.</font>
+			<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+
+If you want to modify and/or rebuild CHAI, project files for MSVC6 are
+located in the 'msvc6' directory, and project files for Borland C++ 6 are
+located in the 'bbcp6' directory.  Both projects build straight to the
+appropriate lib directory.</font>
+			<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+
+To run CHAI applications, you should include the main 'bin' directory in your
+system path.  Relevant dll's for interfacing with haptic devices are located
+in this directory.</font>
+			<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+
+If you are planning to use the CHAI interface to the ServoToGo I/O board,
+you'll also need to set up the <a
+href=http://www.driverlinx.com/DownLoad/DlPortIO.htm>dlportio</a> library,
+which we've included in the main bin directory.  You can just copy
+DLPORTIO.sys into your system32/drivers directory, or you can use the
+installer (port95nt.exe) provided by the manufacturer (DriverLinx), which
+we've also included in the 'external' directory.  If Borland users have any
+link-time or run-time trouble with the DLPORTIO libraries provided in
+the DriverLinx installer, there is a free <a
+href=http://www.vclcomponents.com/search.asp?ID_COMPONENTS=16294>wrapper</a>
+available.
+</font>
+			<p>
+			<font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+				<hr>
+				<b>Getting started with CHAI development</b>
+				<hr>
+			</font>
+			<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+
+Although full doxygen documentation can be downloaded from the <a
+href="html/index.html">docs</a> page, the best way to get
+started with CHAI is to take a look at the examples that are provided in the
+main distribution.  Examples are provided for MSVC 6.0 and Borland C++ 6.00.
+Each example includes a README with helpful hints about where the
+"highlights" in in the code are.</font>
+			<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">
+
+The first two examples demonstrate the core features of CHAI, with the second
+example building on the first:</font>
+		<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular"><b>basic_shapes</b> renders a single mesh, and allows the 
+  user to interact with it haptically using a proxy.
+</font>
+		<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular"><b>object_loader</b> allows the user to load mesh files (in .3ds and .obj format) and to manipulate various haptic and graphic rendering options (including stereo display).</font></p>
+		<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">The <b>mass_springs</b> example demonstrates a simple dynamic environment, in which a series of masses are connected by springs, with the haptic device controlling one of the masses. This demonstrates the use of custom graphic and haptic rendering loops that override the default object behavior.</font></p>
+		<p><font size="2" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular">The <b>board_tester</b>, <b>math</b>, and <b>clock</b> examples are specific demonstrations of the i/o board, matrix math, and precision timer (respectively) features of CHAI. They demonstrate these features in isolation and do not create a virtual world. </font></p>
+		<p></p>
+	</body></html>
