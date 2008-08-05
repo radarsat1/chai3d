@@ -694,7 +694,7 @@ struct cMatrixGL
         \param    a_precision  Number of digits
     */
     //-----------------------------------------------------------------------
-    inline void str(std::string a_string, int a_precision)
+    inline void str(std::string& a_string, int a_precision)
     {
         a_string.append("[ ");
         for (int i=0; i<4; i++)

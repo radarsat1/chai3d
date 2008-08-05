@@ -17,7 +17,7 @@ object ActiveFormX: TActiveFormX
     Left = 0
     Top = 0
     Width = 341
-    Height = 262
+    Height = 255
     Align = alClient
     Caption = 'Panel1'
     TabOrder = 0

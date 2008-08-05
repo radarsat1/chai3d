@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="..\..\..\bin\dynamic_meshes_bcpp6.exe"/>
+    <OBJFILES value="obj\main.obj"/>
+    <RESFILES value="dynamic_meshes_bcpp6.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value="..\..\..\lib\bbcp6\DLPortIO.lib ..\..\..\lib\bbcp6\chai_tools.lib 
+      ..\..\..\lib\bbcp6\chai_timers.lib ..\..\..\lib\bbcp6\chai_math.lib 
+      ..\..\..\lib\bbcp6\chai_forces.lib ..\..\..\lib\bbcp6\chai_displays.lib 
+      ..\..\..\lib\bbcp6\chai_devices.lib ..\..\..\lib\bbcp6\chai_collisions.lib 
+      ..\..\..\lib\bbcp6\chai_files.lib ..\..\..\lib\bbcp6\chai_graphics.lib 
+      ..\..\..\lib\bbcp6\chai_scenegraph.lib ..\..\..\lib\bbcp6\chai_widgets.lib 
+      ..\dynamic_ode\ode_imp.lib"/>
+    <LIBRARIES value=""/>
+    <SPARELIBS value=""/>
+    <PACKAGES value="vcl.bpi rtl.bpi vclx.bpi"/>
+    <PATHCPP value=".;..\..\msvc6\dynamic_meshes"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="ilink32"/>
+    <USERDEFINES value=""/>
+    <SYSDEFINES value="NO_STRICT;_NO_VCL;_RTLDLL;USEPACKAGES"/>
+    <MAINSOURCE value="dynamic_meshes_bcpp6.bpf"/>
+    <INCLUDEPATH value="..\..\msvc6\dynamic_meshes;..\dynamic_ode\include;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include"/>
+    <LIBPATH value="..\..\msvc6\dynamic_meshes;..\..\..\external\OpenGL\bbcp6;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\psdk"/>
+    <WARNINGS value="-w-par"/>
+    <OTHERFILES value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -tWC -tWM -c"/>
+    <PFLAGS value="-N2obj -N0obj -$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="-Iobj -D&quot;&quot; -ap -Tpe -x -Gn"/>
+    <OTHERFILES value=""/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0x32.obj $(PACKAGES) $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cw32mti.lib"/>
+    <OTHERFILES value=""/>
+  </LINKER>
+  <FILELIST>
+      <FILE FILENAME="dynamic_meshes_bcpp6.res" FORMNAME="" UNITNAME="dynamic_meshes_bcpp6.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="dynamic_meshes_bcpp6.bpf" FORMNAME="" UNITNAME="dynamic_meshes_bcpp6" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\DLPortIO.lib" FORMNAME="" UNITNAME="DLPortIO.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_tools.lib" FORMNAME="" UNITNAME="chai_tools.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_timers.lib" FORMNAME="" UNITNAME="chai_timers.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_math.lib" FORMNAME="" UNITNAME="chai_math.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_forces.lib" FORMNAME="" UNITNAME="chai_forces.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_displays.lib" FORMNAME="" UNITNAME="chai_displays.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_devices.lib" FORMNAME="" UNITNAME="chai_devices.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_collisions.lib" FORMNAME="" UNITNAME="chai_collisions.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_files.lib" FORMNAME="" UNITNAME="chai_files.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_graphics.lib" FORMNAME="" UNITNAME="chai_graphics.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_scenegraph.lib" FORMNAME="" UNITNAME="chai_scenegraph.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_widgets.lib" FORMNAME="" UNITNAME="chai_widgets.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\msvc6\dynamic_meshes\main.cpp" FORMNAME="" UNITNAME="main" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\dynamic_ode\ode_imp.lib" FORMNAME="" UNITNAME="ode_imp.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=6
+Item0=..\..\msvc6\dynamic_meshes;..\dynamic_ode\include;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include
+Item1=..\..\msvc6\dynamic_meshes;..\..\msvc6\dynamic_ode\include;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include
+Item2=..\..\msvc6\dynamic_meshes;..\..\msvc6\dynamic_ode;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include
+Item3=..\..\msvc6\dynamic_meshes;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include
+Item4=$(BCB)\include;$(BCB)\include\vcl;..\..\..\include
+Item5=D:\chai3d\chai3d\examples\bcpp6\reflections;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=7
+Item0=..\..\msvc6\dynamic_meshes;..\..\..\external\OpenGL\bbcp6;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\psdk
+Item1=..\..\..\external\OpenGL\bbcp6;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\psdk
+Item2=..\..\msvc6\dynamic_meshes;..\..\..\external\OpenGL\bbcp6;$(BCB)\Projects\Lib;D:\chai3d\chai3d\examples\bcpp6\reflections;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\psdk
+Item3=..\..\..\external\OpenGL\bbcp6;$(BCB)\Projects\Lib;D:\chai3d\chai3d\examples\bcpp6\reflections;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\psdk
+Item4=$(BCB)\Projects\Lib;D:\chai3d\chai3d\examples\bcpp6\reflections;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\psdk
+Item5=$(BCB)\Projects\Lib;D:\chai3d\chai3d\examples\bcpp6\reflections;$(BCB)\lib\obj;$(BCB)\lib
+Item6=D:\chai3d\chai3d\examples\bcpp6\reflections;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=1
+Item0=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=obj
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=..\..\..\bin\
+Item1=..\..\..\bin
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteLauncher=
+RemoteCWD=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

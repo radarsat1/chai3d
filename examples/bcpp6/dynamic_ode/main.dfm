@@ -1,6 +1,6 @@
 object Form1: TForm1
   Left = 290
-  Top = 238
+  Top = 171
   Width = 925
   Height = 822
   Caption = 'CHAI 3D - Dynamics'

@@ -84,6 +84,7 @@ cPhantomDevice::~cPhantomDevice()
 {
     if (m_systemReady)
     {
+        setCallback(NULL);
         StopCommunicationPhantom(m_phantomHandle);
         m_num_phantoms--;
         if (m_num_phantoms == 0)
@@ -310,11 +311,31 @@ int cPhantomDevice::command(int a_command, void* a_data)
     \return true if this device supports callbacks, false otherwise                          
 */
 //===========================================================================
-bool cPhantomDevice::setCallback(cCallback* m_callback)
+#ifdef _WIN32
+bool cPhantomDevice::setCallback(cCallback* a_callback)
 {
-  if (SetCallbackPhantom(m_callback) != PH_DLL_PROBLEM) return true;
-  else return false;
+  m_callback = a_callback;
+  if (m_callback!=NULL) {
+    if (SetCallbackPhantom(&callbackFunc, this) != PH_DLL_PROBLEM) return true;
+  } else {
+    if (SetCallbackPhantom(NULL, NULL) != PH_DLL_PROBLEM) return true;
+  }
+  return false;
 }
+#endif
 
+//===========================================================================
+/*!
+    Function passed to SetCallbackPhantom
+    Calls m_callback->callback()
+
+    \fn  cPhantomDevice::callbackFunc(void* a_data)
+    \param a_data  Pointer to instance of cPhantomDevice
+*/
+//===========================================================================
+void cPhantomDevice::callbackFunc(void* a_data)
+{
+    reinterpret_cast<cPhantomDevice*>(a_data)->m_callback->callback();
+}
 #endif // _DISABLE_PHANTOM_SUPPORT
 

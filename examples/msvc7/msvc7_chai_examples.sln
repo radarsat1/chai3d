@@ -80,6 +80,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "force_shading", "force_shad
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dynamic_meshes", "dynamic_meshes\dynamic_meshes.vcproj", "{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -294,6 +298,18 @@ Global
 		{D291FCA6-659E-4B80-B732-27B7359D5297}.Unicode Debug.Build.0 = Debug|Win32
 		{D291FCA6-659E-4B80-B732-27B7359D5297}.Unicode Release.ActiveCfg = Release|Win32
 		{D291FCA6-659E-4B80-B732-27B7359D5297}.Unicode Release.Build.0 = Release|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Debug.ActiveCfg = Debug|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Debug.Build.0 = Debug|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Intel Release.ActiveCfg = Release|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Intel Release.Build.0 = Release|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Release.ActiveCfg = Release|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Release.Build.0 = Release|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Release with symbols.ActiveCfg = Release|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Release with symbols.Build.0 = Release|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Unicode Debug.ActiveCfg = Debug|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Unicode Debug.Build.0 = Debug|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Unicode Release.ActiveCfg = Release|Win32
+		{DCAB22A2-8E60-42F3-8EE0-0098AD8B89E2}.Unicode Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

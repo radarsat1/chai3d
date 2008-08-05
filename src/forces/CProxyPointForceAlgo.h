@@ -63,7 +63,7 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     //! Initialize the algorithm.
     void initialize(cWorld* a_world, const cVector3d& a_initialPos);
     //! Calculate interaction forces between device and meshes.
-    cVector3d computeForces(const cVector3d& a_nextDevicePos);
+    virtual cVector3d computeForces(const cVector3d& a_nextDevicePos);
 
     // METHODS - GETTER AND SETTER FUNCTIONS:
     //! Set radius of proxy.
@@ -104,7 +104,9 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     //! Set whether Zilles friction is used.
     void setUseZillesFriction(const bool& a_useZillesFriction) { m_useZillesFriction = a_useZillesFriction; }
     //! Set whether Melder friction is used.
-    void setUseMelderFriction(const bool& a_useMelderFriction) { m_useMelderFriction = a_useMelderFriction; }
+    void setUseMelderFriction(const bool& a_useMelderFriction) { m_useMelderFriction = a_useMelderFriction; }   
+    //! Set moving object.
+    void setMovingObject(cGenericObject* a_movingObject) { m_movingObject = a_movingObject; }
 
   protected:
 
@@ -125,9 +127,9 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
 
     // METHODS - DYNAMIC PROXY (TO HANDLE MOVING OBJECTS):
     //! Let proxy move along with the object it's touching, if object has moved.
-    void correctProxyForObjectMotion();
+    virtual void correctProxyForObjectMotion();
     //! Set the dynamic proxy state to reflect new contact information.
-    void updateDynamicContactState();
+    virtual void updateDynamicContactState();
 
     // MEMBERS - POSTIONS AND ROTATIONS:
     //! Global position of the proxy.
@@ -162,8 +164,10 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     cTriangle* m_triangle2;
     //! Pointer to the object (if any) with which the proxy is currently in contact.
     cGenericObject* m_touchingObject;
-		//! Point of contact (if any) between proxy and object.
-		cVector3d m_touchingPoint;
+    //! If the proxy is associated with a specific moving object...
+    cGenericObject* m_movingObject;
+	  //! Point of contact (if any) between proxy and object.
+	  cVector3d m_touchingPoint;
 
     // MEMBERS - DISPLAY PROPERTIES:
     //! Color of rendered proxy.

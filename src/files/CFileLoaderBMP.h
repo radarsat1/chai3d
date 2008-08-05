@@ -103,7 +103,7 @@ class cFileLoaderBMP
       //! Load bitmap image file.
       bool loadBMP(char* iFileName);
       //! Get pinter to bitmap
-      char* pBitmap() const { return (m_pBitmap); }
+      unsigned char* pBitmap() const { return (m_pBitmap); }
       //! Get width of image.
       unsigned int getWidth() { return (m_width); }
       //! Get height of image.
@@ -142,7 +142,7 @@ class cFileLoaderBMP
       //! Last error message.
       string m_errorMsg;
       //! pixel data
-      char* m_pBitmap;
+      unsigned char* m_pBitmap;
 
       // METHODS:
       //! Reset internal variables. This function is called by the constructor.

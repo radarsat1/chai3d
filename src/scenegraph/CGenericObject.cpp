@@ -337,10 +337,7 @@ void cGenericObject::enumerateChildren(std::list<cGenericObject*>& a_childList,
 //===========================================================================
 void cGenericObject::translate(const cVector3d& a_translation)
 {
-    // apply the translation to this object and its bounding box
-    m_boundaryBoxMin.add(a_translation);
-    m_boundaryBoxMax.add(a_translation);
-
+    // apply the translation to this object 
     cVector3d new_position = cAdd(m_localPos,a_translation);
     setPos(new_position);
 }

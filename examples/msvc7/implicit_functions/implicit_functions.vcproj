@@ -28,7 +28,7 @@
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				DebugInformationFormat="3"/>
 			<Tool
@@ -36,11 +36,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="FALSE"
-				AdditionalDependencies="glut32.lib atlsd.lib winmm.lib opengl32.lib chai3d_complete.lib glu32.lib"
+				AdditionalDependencies="atlsd.lib winmm.lib opengl32.lib chai3d_complete.lib glu32.lib"
 				OutputFile="../../../bin/implicit_functions_msvc7.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../../../lib/msvc7; ../../../external/OpenGL/msvc6"
-				IgnoreDefaultLibraryNames="msvcprt.lib libc.lib msvcp60.lib MSVCRT.lib"
+				IgnoreDefaultLibraryNames="msvcprt.lib libc.lib msvcp60.lib"
 				GenerateDebugInformation="TRUE"
 				AssemblyDebug="1"
 				ProgramDatabaseFile=".\Debug/implicit_functions.pdb"

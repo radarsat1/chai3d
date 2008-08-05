@@ -54,7 +54,7 @@
 #include <Graphics.hpp>
 #include "CPhantom3dofPointer.h"
 #include "CMeta3dofPointer.h"
-
+#include "CCallback.h"
 //---------------------------------------------------------------------------
 
 bool flagSimulationOn = false;
@@ -112,7 +112,6 @@ __published:
     TCheckBox *ShowCollisionDetectorBox;
     TLabel *Label17;
     TTrackBar *CollisionDepthSlider;
-  TCheckBox *EnableTransparencyBox;
     void __fastcall FormCreate(TObject *Sender);
     void __fastcall Timer1Timer(TObject *Sender);
     void __fastcall ToggleHapticsButtonClick(TObject *Sender);
@@ -157,6 +156,19 @@ private:
     // mouse selection
     bool flagObjectInMotion;
     int mouseX, mouseY;
+
+    // using callback instead of haptic thread
+    bool usingHapticCallback;
+
+    // stops the haptic loop
+    void stopSimulation();
+    class HapticCallback : cCallback {
+    public:
+        void callback();
+        int data;
+    };
+
+    HapticCallback myHapticCallback;
 
 public:
     __fastcall TForm1(TComponent* Owner);

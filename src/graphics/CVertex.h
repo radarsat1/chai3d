@@ -50,7 +50,7 @@ class cVertex
 		\param	a_z	 Z component.
     */
     //-----------------------------------------------------------------------
-    cVertex::cVertex(const double a_x=0.0, const double a_y=0.0, const double a_z=0.0)
+    cVertex(const double a_x=0.0, const double a_y=0.0, const double a_z=0.0)
         : m_localPos(a_x, a_y, a_z), m_globalPos(a_x, a_y, a_z), m_normal(0.0, 0.0, 1.0),
         m_index(-1), m_allocated(false), m_nTriangles(0)
     {}
@@ -271,6 +271,8 @@ class cVertex
     bool m_allocated;
     //! How many triangles use this vertex?
     int m_nTriangles;
+	//! User data
+	int m_tag;
 };
 
 

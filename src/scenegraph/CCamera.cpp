@@ -226,7 +226,7 @@ void cCamera::setClippingPlanes(const double a_distanceNear, const double a_dist
 //===========================================================================
 bool cCamera::select(const int a_windowPosX, const int a_windowPosY,
      const int a_windowWidth, const int a_windowHeight, cGenericObject*& a_selectedObject,
-     cTriangle*& a_selectedTriangle, cVector3d& a_selectedPoint, double a_selectedDistance,
+     cTriangle*& a_selectedTriangle, cVector3d& a_selectedPoint, double& a_selectedDistance,
      const bool a_visibleObjectsOnly)
 {
     // initialize variables

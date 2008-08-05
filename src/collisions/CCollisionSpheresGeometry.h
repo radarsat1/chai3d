@@ -29,8 +29,10 @@
 #include <list>
 #include <map>
 #include <math.h>
+#ifndef _LINUX
 #include <windows.h>
-#include <gl/gl.h>
+#endif
+#include <GL/gl.h>
 //---------------------------------------------------------------------------
 using std::map;
 using std::less;

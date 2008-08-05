@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 290
-  Top = 238
+  Left = 619
+  Top = 532
   Width = 925
   Height = 822
   Caption = 'CHAI 3D - Cubes'
@@ -21,7 +21,7 @@ object Form1: TForm1
     Left = 917
     Top = 0
     Width = 0
-    Height = 704
+    Height = 701
     Cursor = crHSplit
     Align = alRight
   end
@@ -29,7 +29,7 @@ object Form1: TForm1
     Left = 0
     Top = 0
     Width = 917
-    Height = 704
+    Height = 701
     Align = alClient
     Color = clNone
     TabOrder = 0
@@ -39,7 +39,7 @@ object Form1: TForm1
   end
   object Panel2: TPanel
     Left = 0
-    Top = 704
+    Top = 701
     Width = 917
     Height = 91
     Align = alBottom

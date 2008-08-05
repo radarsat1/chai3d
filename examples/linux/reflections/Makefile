@@ -1,6 +1,7 @@
 # Things you might need to change in this Makefile:
 #
-# If you don't have the SensAble libraries installed, take out -lHD and -lHDU from the LIBS line
+# If you don't have the SensAble libraries installed, take out -lHD and -lHDU from the LIBS line.
+# This is the default when we ship CHAI.
 
 OBJECTS = ../../bcpp6/reflections/main.o
 
@@ -11,7 +12,11 @@ DEFS = -D_POSIX -D_MAX_PATH=260 -D_LINUX -DLINUX
 CC   = g++ -c $(DEFS)
 CFLAGS = -O3 $(INCLUDE)
 LD   = g++ -v -o 
+
+# With no Phantom support:
 LIBS = -L. -L../../../lib/linux -lchai3d_linux -lGL -lglut -lGLU -ldhd -lpciscan -lpthread -lusb
+
+# With Phantom support:
 # LIBS = -L. -L../../../lib/linux -lchai3d_linux -lGL -lglut -lGLU -lHDU -lHD -ldhd -lpciscan -lpthread
 
 all: reflections_linux

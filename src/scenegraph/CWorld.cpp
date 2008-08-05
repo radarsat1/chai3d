@@ -45,7 +45,9 @@ cWorld::cWorld()
     // set background properties
     m_backgroundColor.set(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_renderLightSources = 1;    
+    m_renderLightSources = 1;  
+
+    m_performingDisplayReset = 0;
 
     memset(m_worldModelView,0,sizeof(m_worldModelView));
 }
@@ -507,5 +509,29 @@ bool cWorld::computeCollisionDetection(
 
     // return whether there was a collision between the segment and this world
     return (hit);
+}
+
+
+//===========================================================================
+/*!
+    Called by the user or by the viewport when the world needs to have
+    textures and display lists reset (e.g. after a switch to or from
+    fullscreen).
+
+    \fn     void cWorld::onDisplayReset(const bool a_affectChildren = true)
+    \param  a_affectChildren  Should I pass this on to my children?
+*/
+//===========================================================================
+void cWorld::onDisplayReset(const bool a_affectChildren) {
+
+    // Prevent the world from getting reset multiple times when there are multiple cameras
+    if (m_performingDisplayReset) return;
+
+    m_performingDisplayReset = 1;
+
+    // This will pass the call on to any children I might have...
+    cGenericObject::onDisplayReset(a_affectChildren);
+
+    m_performingDisplayReset = 0;
 }
 

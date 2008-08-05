@@ -857,6 +857,87 @@ struct cMatrix3d
         }
         return (true);
     }
+
+    //-----------------------------------------------------------------------
+    /*!
+        Convert the rotation to an angle axis
+
+        \param    a_angle   Angle result
+        \param    a_axis    Axis result
+        \return   return false if conversion failed
+    */
+    //-----------------------------------------------------------------------
+    bool toAngleAxis(double& a_angle, cVector3d& a_axis)
+    {
+        double const epsilon = 0.01;
+        if ( (m[0][1]-m[1][0] < epsilon) && (m[0][1]-m[1][0] > -epsilon) &&
+            (m[0][2]-m[2][0] < epsilon) && (m[0][2]-m[2][0] > -epsilon) &&
+            (m[1][2]-m[2][1] < epsilon) && (m[1][2]-m[2][1] > -epsilon) ) {
+		    // rotation of 0 or pi
+            if ((m[0][1]+m[1][0] < epsilon) && (m[0][1]+m[1][0] > -epsilon) &&
+                (m[0][2]+m[2][0] < epsilon) && (m[0][2]+m[2][0] > -epsilon) &&
+                (m[1][2]+m[2][1] < epsilon) && (m[1][2]+m[2][1] > -epsilon) ) {
+			    // Matrix is identity matrix			    
+			    a_angle = 0;
+                // axis is arbitrary
+			    a_axis[0] = 1.0;
+                a_axis[1] = 0.0;
+                a_axis[2] = 0.0;
+            } else {
+		        // angle is pi
+		        a_angle = CHAI_PI;
+                
+		        a_axis[0] = (m[0][0]+1.0)/2.0;
+		        if (a_axis[0] > 0) {
+			        a_axis[0] = sqrt(a_axis[0]);
+		        } else {
+                   // invalid matrix
+			       return false;
+		        }
+		        a_axis[1] = (m[1][1]+1.0)/2.0;
+		        if (a_axis[1] > 0) {
+			        a_axis[1] = sqrt(a_axis[1]);
+		        } else {
+                    // invalid matrix
+			        return false;
+		        }
+		        a_axis[2] = (m[2][2]+1.0)/2.0;
+		        if (a_axis[2] > 0) {
+			        a_axis[2] = sqrt(a_axis[2]);
+		        } else {
+                    // invalid matrix
+			        return false;
+		        }
+		        bool xIsZero = (a_axis[0] < epsilon && a_axis[0] > -epsilon);
+		        bool yIsZero = (a_axis[1] < epsilon && a_axis[1] > -epsilon);
+		        bool zIsZero = (a_axis[2] < epsilon && a_axis[2] > -epsilon);
+		        bool xyIsPositive = (m[0][1] > 0.0);
+		        bool xzIsPositive = (m[0][2] > 0.0);
+		        bool yzIsPositive = (m[1][2] > 0.0);
+		        if (xIsZero && !yIsZero && !zIsZero) {
+		            if (!yzIsPositive) a_axis[1] = -a_axis[1];
+		        } else if (yIsZero && !zIsZero) {
+		            if (!xzIsPositive) a_axis[2] = -a_axis[2];
+		        } else if (zIsZero) {
+		            if (!xyIsPositive) a_axis[0] = -a_axis[0];
+		        }
+            }
+        } else {
+            double sinthetamag = sqrt((m[2][1] - m[1][2])*(m[2][1] - m[1][2])
+                +(m[0][2] - m[2][0])*(m[0][2] - m[2][0])
+                +(m[1][0] - m[0][1])*(m[1][0] - m[0][1])); 
+	
+    	    a_angle = acos(( m[0][0] + m[1][1] + m[2][2] - 1.0)/2.0);
+	        a_axis[0] = (m[2][1] - m[1][2])/sinthetamag;
+	        a_axis[1] = (m[0][2] - m[2][0])/sinthetamag;
+	        a_axis[2] = (m[1][0] - m[0][1])/sinthetamag;
+
+        }
+        return true;
+    }
+
+
+
 };
 
 

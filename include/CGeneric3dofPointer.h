@@ -67,6 +67,8 @@ class cGeneric3dofPointer : public cGenericTool
     //! set the visual settings of the tool frame
     virtual void setToolFrame(const bool& a_showToolFrame, const double& a_toolFrameSize);
     //! Control proxy rendering options
+    /*! Set to RENDER_PROXY, RENDER_DEVICE, or RENDER_PROXY_AND_DEVICE
+    */
     virtual inline void setRenderingMode(const proxy_render_modes& render_mode) { m_render_mode = render_mode; }
 
     // Initialization / shutdown

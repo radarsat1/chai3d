@@ -1,0 +1,1 @@
+All of the project files in the msvc7 directory will happily open and convert to msvc8, and will compile.  We've only included the object_loader in this directory explicitly as a pre-converted msvc8 example, but all the examples _will_ work in msvc8.

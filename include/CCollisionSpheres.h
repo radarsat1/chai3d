@@ -41,7 +41,7 @@
 #include <list>
 #include <queue>
 #include <vector>
-#include "gl/glu.h"
+#include "GL/glu.h"
 //---------------------------------------------------------------------------
 // TYPEDEFS:
 //! Pointer to list of shape primitives.
@@ -132,7 +132,7 @@ class cCollisionSpheresSphere
     //! Draw the collision sphere for this node, if at the given depth.
     virtual void draw(int a_depth = -1) = 0;
     //! Calculate the distance between the two given collision spheres.
-    static bool cCollisionSpheresSphere::computeCollision(cCollisionSpheresSphere *a_sa,
+    static bool computeCollision(cCollisionSpheresSphere *a_sa,
                 cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
                 cVector3d& a_colPoint, double& a_colSquareDistance,
                 cCollisionSpheresSphere *a_sb);
@@ -184,7 +184,7 @@ class cCollisionSpheresNode : public cCollisionSpheresSphere
     //! Draw the collision sphere if at the given depth.
     void draw(int a_depth);
     //! Check for intersection between given nodes, the first an internal node.
-    static bool cCollisionSpheresNode::computeCollision(cCollisionSpheresNode *a_sa,
+    static bool computeCollision(cCollisionSpheresNode *a_sa,
             cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
             cVector3d& a_colPoint, double& a_colSquareDistance,
             cCollisionSpheresSphere *a_sb);
@@ -228,7 +228,7 @@ class cCollisionSpheresLeaf : public cCollisionSpheresSphere
     //! Draw the collision sphere if at the given depth.
     void draw(int a_depth);
     //! Check for intersection between the two given leaf nodes.
-    static bool cCollisionSpheresLeaf::computeCollision(cCollisionSpheresLeaf *a_sa,
+    static bool computeCollision(cCollisionSpheresLeaf *a_sa,
             cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
             cVector3d& a_colPoint, double& a_colSquareDistance,
             cCollisionSpheresLeaf *a_sb);

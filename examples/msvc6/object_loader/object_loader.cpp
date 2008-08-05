@@ -1009,12 +1009,22 @@ void Cobject_loaderApp::toggle_animation() {
     moving_object = 0;
     object->setPos(g_initial_object_pos);
     object->computeGlobalPositions(true);
+
+    // Disable the "dynamic proxy", which will handle moving objects
+    cProxyPointForceAlgo* proxy = tool->getProxy();
+    proxy->enableDynamicProxy(false);
+    proxy->setMovingObject(0);
   }
 
   // Enable animation
   else {
     moving_object = 1;
     m_last_animation_time = -1.0;
+
+    // Enable the "dynamic proxy", which will handle moving objects
+    cProxyPointForceAlgo* proxy = tool->getProxy();
+    proxy->enableDynamicProxy(true);
+    proxy->setMovingObject(object);
 
     // Put the object at the zero position...
     object->setPos(g_initial_object_pos);
@@ -1126,11 +1136,6 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
     // transformations before performing collision detection, etc.
     tool->computeGlobalPositions();
     tool->setForcesON();
-    
-    // Enable the "dynamic proxy", which will handle moving objects
-    cProxyPointForceAlgo* proxy = tool->getProxy();
-    // The dynamic proxy is in a pretty beta state, so we turn it off for now...
-    // proxy->enableDynamicProxy(true);
 
     // Make sure the haptic device knows where he is in the camera frame
     world->computeGlobalPositions(true);
@@ -1174,7 +1179,7 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
 
     // tell the haptic thread to quit
     haptics_enabled = 0;
-
+    tool->getDevice()->setCallback(0); // unregister the callback
 #ifdef USE_MM_TIMER_FOR_HAPTICS
 
     timer.stop();

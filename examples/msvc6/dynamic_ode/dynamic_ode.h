@@ -90,7 +90,7 @@ public:
 
   virtual int render_loop();
 
-	cODEMesh* create_wall(double a_x, double a_y, double a_z, bool a_top);
+	cODEMesh* create_wall(double a_x, double a_y, double a_z, bool a_ground);
 
   // The box to push around using ODE
   cODEMesh* object;

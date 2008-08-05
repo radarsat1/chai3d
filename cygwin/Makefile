@@ -15,7 +15,7 @@ INCLUDE = -I../src/graphics -I../src/collisions -I../src/devices -I../src/displa
 LOCALOBJS = $(notdir $(OBJECTS) )
 
 # Optionally add -D_DISABLE_PHANTOM_SUPPORT to compile away SensAble's libraries
-DEFS = -D_POSIX -D_MAX_PATH=260 -D_WIN32
+DEFS = -D_POSIX -D_MAX_PATH=260 -D_WIN32 -DNOMINMAX
 
 CC   = g++ -c $(DEFS)
 CFLAGS = -O3 $(INCLUDE)

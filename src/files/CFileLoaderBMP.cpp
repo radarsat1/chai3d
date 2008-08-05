@@ -233,7 +233,7 @@ bool cFileLoaderBMP::convert24(char* tempData)
 	diff = m_width * m_height * RGB_BYTE_SIZE;
 
     //allocate the buffer for the final image data
-    m_pBitmap = new char[diff];
+    m_pBitmap = new unsigned char[diff];
 
     //exit if there is not enough memory
     if (m_pBitmap == NULL)
@@ -309,7 +309,7 @@ bool cFileLoaderBMP::convert8(char* tempData)
 	diff = m_width * m_height * RGB_BYTE_SIZE;
 
     //allocate the buffer for the final image data
-    m_pBitmap = new char[diff];
+    m_pBitmap = new unsigned char[diff];
 
     //exit if there is not enough memory
     if(m_pBitmap == NULL)

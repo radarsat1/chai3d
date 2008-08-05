@@ -14,9 +14,8 @@ device is done by clicking the "Enable second device" button, so it
 can also be run with just one device.) This example lets the user 
 push around a box in a small room, similar to the SensAble Dice demo.  
 
-The ODE library (version 0.039) is in the lib folder within the
-example folder, and the include files are in the include folder within
-the example folder.
+The ODE library is in the lib folder within the msvc6 example folder, 
+and the include files are in the include folder.
 
 The cMesh, class is subclassed as cODEMesh in separate files in order 
 to connect the CHAI mesh to ODE objects.  This is an example of how 

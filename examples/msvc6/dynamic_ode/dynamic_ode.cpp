@@ -31,7 +31,7 @@
 #define MAXCONTACTS 20
 
 // Time step for ODE dynamics simulation
-#define TIME_STEP	0.001//sec 300Hz
+#define TIME_STEP 0.001//sec 300Hz
 
 // Default stiffness and friction for the walls
 #define K 20
@@ -108,9 +108,9 @@ static char THIS_FILE[] = __FILE__;
 #pragma warning(disable: 4800)
 
 BEGIN_MESSAGE_MAP(Cdynamic_odeApp, CWinApp)
-	//{{AFX_MSG_MAP(Cdynamic_odeApp)
-	//}}AFX_MSG
-	ON_COMMAND(ID_HELP, CWinApp::OnHelp)
+  //{{AFX_MSG_MAP(Cdynamic_odeApp)
+  //}}AFX_MSG
+  ON_COMMAND(ID_HELP, CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 // No one really knows why GetConsoleWindow() is not
@@ -122,7 +122,7 @@ Cdynamic_odeApp theApp;
 Cdynamic_odeApp::Cdynamic_odeApp() {
   selected_object = 0;
   haptics_enabled = 0;
-	first_device_enabled = 0;
+  first_device_enabled = 0;
   second_device_enabled = 0;
   tool1 = 0;
   tool2 = 0;
@@ -182,14 +182,14 @@ BOOL Cdynamic_odeApp::InitInstance() {
   AfxEnableControlContainer();
 
 #ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
+  Enable3dControls();     // Call this when using MFC in a shared DLL
 #else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
+  Enable3dControlsStatic(); // Call this when linking to MFC statically
 #endif
 
   memset(keys_to_handle,0,sizeof(keys_to_handle));
-	
-	g_main_dlg = new Cdynamic_odeDlg;
+  
+  g_main_dlg = new Cdynamic_odeDlg;
   m_pMainWnd = g_main_dlg;
 
   g_main_dlg->Create(IDD_dynamic_ode_DIALOG,NULL);
@@ -210,7 +210,7 @@ BOOL Cdynamic_odeApp::InitInstance() {
   // the way OpenGL users expect them to appear, with z going in and
   // out of the plane of the screen.
   int result = camera->set(
-              cVector3d(5,0.0,0),           // position of camera
+              cVector3d(5,0,0),           // position of camera
               cVector3d(0.0, 0.0, 0.0),   // camera looking at origin
               cVector3d(0.0, 0.0, 1.0)  // orientation of camera (standing up)
               );
@@ -223,13 +223,13 @@ BOOL Cdynamic_odeApp::InitInstance() {
   viewport = new cViewport(g_main_dlg->m_gl_area_hwnd, camera, false);
 
   // Initialize the ODE context
-	ode_world = dWorldCreate();
-	dWorldSetGravity (ode_world,0,0,-5);
-	ode_step = TIME_STEP;
-	ode_space = dSimpleSpaceCreate(0);
-	ode_contact_group = dJointGroupCreate(0);
-	ode_collision_callback	  = Cdynamic_odeApp::nearCallback;
-	ode_collision_callback_data  = this;
+  ode_world = dWorldCreate();
+  dWorldSetGravity (ode_world,0,0,-5);
+  ode_step = TIME_STEP;
+  ode_space = dSimpleSpaceCreate(0);
+  ode_contact_group = dJointGroupCreate(0);
+  ode_collision_callback    = Cdynamic_odeApp::nearCallback;
+  ode_collision_callback_data  = this;
 
   // Create a light source
   light = new cLight(world);
@@ -253,9 +253,9 @@ BOOL Cdynamic_odeApp::InitInstance() {
   createCube(object,size);
 
   // initialize ODE parameters
-	// Move the object over some so the Phantom will not initially be
+  // Move the object over some so the Phantom will not initially be
   // inside the object.
-  object->initDynamic(BOX,DYNAMIC_OBJECT, g_initial_object_pos.x , g_initial_object_pos.y, g_initial_object_pos.z);
+  object->initDynamic(DYNAMIC_OBJECT, g_initial_object_pos.x , g_initial_object_pos.y, g_initial_object_pos.z);
   object->setMass(0.2);
 
   // Give a color to each vertex
@@ -272,7 +272,7 @@ BOOL Cdynamic_odeApp::InitInstance() {
     nextVertex->setColor(color);
   }
 
-  // Initialize the box		
+  // Initialize the box   
   object->computeBoundaryBox(true);
   object->computeAllNormals();
   object->setShowBox(true);
@@ -285,14 +285,14 @@ BOOL Cdynamic_odeApp::InitInstance() {
   //object->m_material.m_diffuse.set( 0.8, 0.6, 0.6, 1.0 );
   //object->m_material.m_specular.set( 0.9, 0.9, 0.9, 1.0 );
   //object->m_material.setShininess(100);
-	object->setMaterial(material);
+  object->setMaterial(material);
   
   // Create a room, bounded by cubes, in which we can push around our little box
-	bottom_wall = create_wall(0,0,BOTTOM_WALL_OFFSET,1);
-	left_wall = create_wall(0,LEFT_WALL_OFFSET,WALL_Z_OFFSET,0);
-	right_wall = create_wall(0,RIGHT_WALL_OFFSET,WALL_Z_OFFSET,0);
-	back_wall = create_wall(BACK_WALL_OFFSET,0,WALL_Z_OFFSET,0);
-	front_wall = create_wall(FRONT_WALL_OFFSET,0,0,0);
+  bottom_wall = create_wall(0,0,BOTTOM_WALL_OFFSET,1);
+  left_wall = create_wall(0,LEFT_WALL_OFFSET,WALL_Z_OFFSET,0);
+  right_wall = create_wall(0,RIGHT_WALL_OFFSET,WALL_Z_OFFSET,0);
+  back_wall = create_wall(BACK_WALL_OFFSET,0,WALL_Z_OFFSET,0);
+  front_wall = create_wall(FRONT_WALL_OFFSET,0,0,0);
 
   world->computeGlobalPositions(false);
 
@@ -304,20 +304,40 @@ BOOL Cdynamic_odeApp::InitInstance() {
 }
 
 
-cODEMesh* Cdynamic_odeApp::create_wall(double a_x, double a_y, double a_z, bool a_top) {	
-	cODEMesh* new_mesh = new cODEMesh(world, ode_world, ode_space);	
-  createCube(new_mesh, WALL_SIZE, a_top);
-	new_mesh->m_material.m_ambient.set( 0.7, 0.7, 0.7, 1.0 );
+cODEMesh* Cdynamic_odeApp::create_wall(double a_x, double a_y, double a_z, bool a_ground) { 
+  cODEMesh* new_mesh = new cODEMesh(world, ode_world, ode_space); 
+  createCube(new_mesh, WALL_SIZE, a_ground);
+  new_mesh->m_material.m_ambient.set( 0.7, 0.7, 0.7, 1.0 );
   new_mesh->m_material.m_diffuse.set( 0.7, 0.7, 0.7, 1.0 );
   new_mesh->m_material.m_specular.set( 0.7, 0.7, 0.7, 1.0 );
   new_mesh->m_material.setShininess(100);
   new_mesh->m_material.setStiffness(K);
-	new_mesh->setFriction(MU_S, MU_D, 1);
-  new_mesh->initDynamic(BOX,STATIC_OBJECT,a_x, a_y, a_z);
+  new_mesh->setFriction(MU_S, MU_D, 1);
+  new_mesh->initDynamic(STATIC_OBJECT,a_x, a_y, a_z);
   world->addChild(new_mesh);
   new_mesh->computeAllNormals();
-	
-	return new_mesh;
+
+  // If this is the ground, actually make two boxes -- one used by ODE and one for
+  // haptics, with the one used by ODE slightly above.  This will make the box "float"
+  // slightly above the ground, avoiding the problem of when the proxy gets stuck 
+  // between the falling box and the ground and has to penetrate one or the other
+  if (a_ground)
+  {
+    new_mesh->setHapticEnabled(false, true);
+    cMesh* offset_bottom = new cMesh(world);
+    createCube(offset_bottom, WALL_SIZE, a_ground);
+    offset_bottom->m_material.m_ambient.set( 0.7, 0.7, 0.7, 1.0 );
+    offset_bottom->m_material.m_diffuse.set( 0.7, 0.7, 0.7, 1.0 );
+    offset_bottom->m_material.m_specular.set( 0.7, 0.7, 0.7, 1.0 );
+    offset_bottom->m_material.setShininess(100);
+    offset_bottom->m_material.setStiffness(K);
+    offset_bottom->setFriction(MU_S, MU_D, 1);
+    offset_bottom->translate(a_x, a_y, a_z-0.1);
+    world->addChild(offset_bottom);
+    offset_bottom->computeAllNormals();
+  }
+  
+  return new_mesh;
 }
 
 
@@ -504,149 +524,151 @@ void dynamic_ode_haptic_iteration(void* param) {
   // set it up so that wherever your tool is in the real world when you enable forces, it will be at (1,0,3) in the
   // virtual world, so that it is in side the virtual "room" and not penetrating anything
   if (app->first_device_enabled && app->tool1) 
-	{
-		// update the tool's pose and compute and apply forces
+  {
+    // update the tool's pose and compute and apply forces
     app->tool1->updatePose();
-		
-	  if (!app->tool1_ready)
-		{
-			// Turn off haptic collision detection for the objects in the world 
-	    for (unsigned int i=0; i<app->world->getNumChildren(); i++)
-		    app->world->getChild(i)->setHapticEnabled(0, 1);
+    
+    if (!app->tool1_ready)
+    {
+      // Turn off haptic collision detection for the objects in the world 
+      for (unsigned int i=0; i<app->world->getNumChildren(); i++)
+        app->world->getChild(i)->setHapticEnabled(0, 1);
 
-		  if ( (app->tool1->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&  
-	         (app->tool1->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) && 
-			     (app->tool1->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
-			     (app->tool1->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
-				   (app->tool1->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2)) 
-		    app->tool1_ready = 1;
-		}
+      if ( (app->tool1->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&  
+           (app->tool1->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) && 
+           (app->tool1->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
+           (app->tool1->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
+           (app->tool1->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2)) 
+        app->tool1_ready = 1;
+    }
     else 
-		{
-		  // Turn on haptic collision detection for the objects in the world
-	    for (unsigned int i=0; i<app->world->getNumChildren(); i++)
-		    app->world->getChild(i)->setHapticEnabled(1, 1);
-		}
+    {
+      // Turn on haptic collision detection for the objects in the world
+      for (unsigned int i=0; i<app->world->getNumChildren(); i++)
+        if (app->world->getChild(i) != app->bottom_wall)
+          app->world->getChild(i)->setHapticEnabled(1, 1);
+    }
 
-		app->tool1->computeForces();
-		if (app->tool1_ready)
+    app->tool1->computeForces();
+    if (app->tool1_ready)
       app->tool1->applyForces();
   }
 
   // if two devices are active, update the second one also...
   if (app->second_device_enabled && app->tool2) 
-	{
-	  app->tool2->updatePose();
+  {
+    app->tool2->updatePose();
 
-	  if (!app->tool2_ready)
-		{
-			// Turn off haptic collision detection for the objects in the world 
-	    for (unsigned int i=0; i<app->world->getNumChildren(); i++)
-		    app->world->getChild(i)->setHapticEnabled(0, 1);
+    if (!app->tool2_ready)
+    {
+      // Turn off haptic collision detection for the objects in the world 
+      for (unsigned int i=0; i<app->world->getNumChildren(); i++)
+        app->world->getChild(i)->setHapticEnabled(0, 1);
 
-		  if ( (app->tool2->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&  
-	         (app->tool2->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) && 
-			     (app->tool2->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
-			     (app->tool2->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
-				   (app->tool2->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2)) 
-		    app->tool2_ready = 1;
-		}
+      if ( (app->tool2->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&  
+           (app->tool2->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) && 
+           (app->tool2->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
+           (app->tool2->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
+           (app->tool2->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2)) 
+        app->tool2_ready = 1;
+    }
     else 
-		{
-		  // Turn on haptic collision detection for the objects in the world
-	    for (unsigned int i=0; i<app->world->getNumChildren(); i++)
-		    app->world->getChild(i)->setHapticEnabled(1, 1);
-		}
+    {
+      // Turn on haptic collision detection for the objects in the world
+      for (unsigned int i=0; i<app->world->getNumChildren(); i++)
+        if (app->world->getChild(i) != app->bottom_wall)
+          app->world->getChild(i)->setHapticEnabled(1, 1);
+    }
 
-		app->tool2->computeForces();
-		if (app->tool2_ready)
+    app->tool2->computeForces();
+    if (app->tool2_ready)
       app->tool2->applyForces();
-	}
+  }
 
-	app->object->m_historyValid = false;
+  app->object->m_historyValid = false;
 
   // code to get forces from CHAI and apply them to the appropriate meshes, calling ODE functions to calculate the dynamics
 
   if (app->ode_clock->on()) 
   {  
     if ( (app->ode_clock->timeoutOccurred()) && app->ready) 
-	  {
+    {
       app->ready = false;
 
-			if (app->tool1 && app->first_device_enabled)
-			{
-			  cProxyPointForceAlgo *proxy   = dynamic_cast<cProxyPointForceAlgo*>(app->tool1->getProxy());
+      if (app->tool1 && app->first_device_enabled)
+      {
+        cProxyPointForceAlgo *proxy   = dynamic_cast<cProxyPointForceAlgo*>(app->tool1->getProxy());
 
-		    if (proxy && proxy->getContactObject() != NULL) 
-				{
-			    float x =  proxy->getContactPoint().x;
-			    float y =  proxy->getContactPoint().y;
-			    float z =  proxy->getContactPoint().z;
-			  
-			    float fx = -app->tool1->m_lastComputedGlobalForce.x ;
-			    float fy = -app->tool1->m_lastComputedGlobalForce.y ;
-			    float fz = -app->tool1->m_lastComputedGlobalForce.z ;
+        if (proxy && proxy->getContactObject() != NULL) 
+        {
+          float x =  proxy->getContactPoint().x;
+          float y =  proxy->getContactPoint().y;
+          float z =  proxy->getContactPoint().z;
+        
+          float fx = -app->tool1->m_lastComputedGlobalForce.x ;
+          float fy = -app->tool1->m_lastComputedGlobalForce.y ;
+          float fz = -app->tool1->m_lastComputedGlobalForce.z ;
 
           cGenericObject* cur_object = proxy->getContactObject();
-					bool found = false;
-					cODEMesh* mesh = 0;
-					while (cur_object && !found)
-					{
-			      mesh = dynamic_cast<cODEMesh*>(cur_object);
-						if (mesh) found = true;
-						cur_object = cur_object->getParent();
-					}
+          bool found = false;
+          cODEMesh* mesh = 0;
+          while (cur_object && !found)
+          {
+            mesh = dynamic_cast<cODEMesh*>(cur_object);
+            if (mesh) found = true;
+            cur_object = cur_object->getParent();
+          }
           
-					if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT)) 
-				    dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z);
-				}
-			}
+          if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT)) 
+            dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z);
+        }
+      }
 
-		  if (app->tool2 && app->second_device_enabled) 
-			{
+      if (app->tool2 && app->second_device_enabled) 
+      {
         cProxyPointForceAlgo *proxy   = dynamic_cast<cProxyPointForceAlgo*>(app->tool2->getProxy());
 
-		    if (proxy && proxy->getContactObject() != NULL) 
-				{
-			    float x =  proxy->getContactPoint().x;
-			    float y =  proxy->getContactPoint().y;
-			    float z =  proxy->getContactPoint().z;
-			  
-			    float fx = -app->tool2->m_lastComputedGlobalForce.x ;
-			    float fy = -app->tool2->m_lastComputedGlobalForce.y ;
-			    float fz = -app->tool2->m_lastComputedGlobalForce.z ;
+        if (proxy && proxy->getContactObject() != NULL) 
+        {
+          float x =  proxy->getContactPoint().x;
+          float y =  proxy->getContactPoint().y;
+          float z =  proxy->getContactPoint().z;
+        
+          float fx = -app->tool2->m_lastComputedGlobalForce.x ;
+          float fy = -app->tool2->m_lastComputedGlobalForce.y ;
+          float fz = -app->tool2->m_lastComputedGlobalForce.z ;
 
-					cGenericObject* cur_object = proxy->getContactObject();
-					bool found = false;
-					cODEMesh* mesh = 0;
-					while (cur_object && !found)
-					{
-			      mesh = dynamic_cast<cODEMesh*>(cur_object);
-						if (mesh) found = true;
-						cur_object = cur_object->getParent();
-					}
+          cGenericObject* cur_object = proxy->getContactObject();
+          bool found = false;
+          cODEMesh* mesh = 0;
+          while (cur_object && !found)
+          {
+            mesh = dynamic_cast<cODEMesh*>(cur_object);
+            if (mesh) found = true;
+            cur_object = cur_object->getParent();
+          }
 
-			    if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT)) 
-		  	    dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z); 
-				}
-		  }		  
+          if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT)) 
+            dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z); 
+        }
+      }     
    
       dSpaceCollide (app->ode_space,app->ode_collision_callback_data,app->ode_collision_callback);
-	    dWorldStep(app->ode_world,app->ode_step);
-	    dJointGroupEmpty(app->ode_contact_group);
+      dWorldStep(app->ode_world,app->ode_step);
+      dJointGroupEmpty(app->ode_contact_group);
 
-		  app->object->updateDynamicPosition();
-			app->object->m_historyValid = true;
-			if (app->tool1 && app->first_device_enabled)
-		    app->tool1->computeGlobalPositions(1);
+      app->object->updateDynamicPosition();
+      app->object->m_historyValid = true;
+      if (app->tool1 && app->first_device_enabled)
+        app->tool1->computeGlobalPositions(1);
 
-		  if (app->tool2 && app->second_device_enabled)
-		    app->tool2->computeGlobalPositions(1);
+      if (app->tool2 && app->second_device_enabled)
+        app->tool2->computeGlobalPositions(1);
 
       app->ode_clock->initialize();
-		  app->ready = true;
-		}
-	}
+      app->ready = true;
+    }
+  }
 }
    
 
@@ -685,7 +707,7 @@ void Cdynamic_odeApp::reinitialize_viewport(int stereo_enabled) {
 ***/
 void Cdynamic_odeApp::toggle_haptics(int enable) {
 
-	if (enable == TOGGLE_HAPTICS_TOGGLE) {
+  if (enable == TOGGLE_HAPTICS_TOGGLE) {
 
     if (haptics_enabled) toggle_haptics(TOGGLE_HAPTICS_DISABLE);
     else toggle_haptics(TOGGLE_HAPTICS_ENABLE);
@@ -696,7 +718,7 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
   
     if (haptics_enabled) return;
 
-		tool1_ready = 0;
+    tool1_ready = 0;
     haptics_enabled = 1;
 
     // create a phantom tool with its graphical representation
@@ -705,28 +727,28 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
     // i/o communication mode, depending on the USE_PHANTOM_DIRECT_IO
     // constant
     if (tool1 == 0) 
-		{
+    {
       // create a haptic tool and set up its workspace
       tool1 = new cMeta3dofPointer(world, 0, USE_PHANTOM_DIRECT_IO);
-	    tool1->setWorkspace(3.0,3.0,3.0);
-	
+      tool1->setWorkspace(3.0,3.0,3.0);
+  
       world->addChild(tool1);        
-	    tool1->setRadius(0.05);
-	    tool1->computeGlobalCurrentObjectOnly(true);
+      tool1->setRadius(0.05);
+      tool1->computeGlobalCurrentObjectOnly(true);
 
       // Replace the proxy with our custom ODE proxy
       cProxyPointForceAlgo* old_proxy = (cProxyPointForceAlgo*)(tool1->m_pointForceAlgos[0]);
       tool1->m_pointForceAlgos[0] = new cODEProxy(old_proxy);
       delete old_proxy;
 
-		}
-	
+    }
+  
     // set up the device
     tool1->initialize();
 
     // open communication to the device
     tool1->start();
-		
+    
     // update initial orientation and position of device
     tool1->updatePose();
 
@@ -740,9 +762,9 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
     
     tool1->setForcesON();
       
-	  ode_clock = new cPrecisionClock();
-	  ode_clock->setTimeoutPeriod(TIME_STEP * 1e+6);
-	  ode_clock->start(); 
+    ode_clock = new cPrecisionClock();
+    ode_clock->setTimeoutPeriod(TIME_STEP * 1e+6);
+    ode_clock->start(); 
 
 #ifdef USE_MM_TIMER_FOR_HAPTICS
 
@@ -754,7 +776,7 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
     // start haptic thread
     haptics_thread_running = 1;
 
-		first_device_enabled = 1;
+    first_device_enabled = 1;
     Sleep(100);
     DWORD thread_id;
     ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(dynamic_ode_haptic_loop), this, 0, &thread_id);
@@ -775,7 +797,7 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
     // tell the haptic thread to quit
     haptics_enabled = 0;
 
-		first_device_enabled = 0;
+    first_device_enabled = 0;
 
 #ifdef USE_MM_TIMER_FOR_HAPTICS
 
@@ -792,9 +814,9 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
     tool1->setForcesOFF();
     tool1->stop();
 
-	  // If a second device is also running, stop it too
-	  second_device_enabled = 0;
-	  if (tool2) {
+    // If a second device is also running, stop it too
+    second_device_enabled = 0;
+    if (tool2) {
       tool2->setForcesOFF();
       tool2->stop();
     }       
@@ -816,8 +838,8 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
   
     if (second_device_enabled) return;
 
-		// temporarily disable the first device, because the scheduler will have to be restarted
-		first_device_enabled = 0;
+    // temporarily disable the first device, because the scheduler will have to be restarted
+    first_device_enabled = 0;
 
     // create a phantom tool with its graphical representation
     //
@@ -825,22 +847,22 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
     // i/o communication mode, depending on the USE_PHANTOM_DIRECT_IO
     // constant
     if (tool2 == 0) 
-		{ 
+    { 
       
-	    // create a new tool and set its workspace
+      // create a new tool and set its workspace
       tool2 = new cMeta3dofPointer(world, 1, USE_PHANTOM_DIRECT_IO);
-	    tool2->setWorkspace(3.0,3.0,3.0);
+      tool2->setWorkspace(3.0,3.0,3.0);
 
       // turn on ode proxy algorithm
-	    world->addChild(tool2);       
-	    tool2->setRadius(0.05);
-	    tool2->computeGlobalCurrentObjectOnly(true);
+      world->addChild(tool2);       
+      tool2->setRadius(0.05);
+      tool2->computeGlobalCurrentObjectOnly(true);
 
       // Replace the proxy with our custom ODE proxy
       cProxyPointForceAlgo* old_proxy = (cProxyPointForceAlgo*)(tool2->m_pointForceAlgos[0]);
       tool2->m_pointForceAlgos[0] = new cODEProxy(old_proxy);
       delete old_proxy;
-		}
+    }
 
     // set up the device
     tool2->initialize();
@@ -859,18 +881,18 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
     // transformations before performing collision detection, etc.
     tool2->computeGlobalPositions();
 
-		tool2->setForcesON(); 
+    tool2->setForcesON(); 
 
-		Sleep(100);
+    Sleep(100);
 
-		// The devices are enabled, but are not "ready" for forces until 
-		// the user has moved them into the relevant workspace
-	  tool1_ready = 0;
-	  tool2_ready = 0;
+    // The devices are enabled, but are not "ready" for forces until 
+    // the user has moved them into the relevant workspace
+    tool1_ready = 0;
+    tool2_ready = 0;
 
-		first_device_enabled = 1;
-	  second_device_enabled = 1;
-	
+    first_device_enabled = 1;
+    second_device_enabled = 1;
+  
   } // enabling
 
   else if (enable == TOGGLE_HAPTICS_DISABLE) {
@@ -881,7 +903,7 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
     // tell the haptic thread to quit
     second_device_enabled = 0;
     
-	  // Stop the haptic device...
+    // Stop the haptic device...
     tool2->setForcesOFF();
     tool2->stop();        
   } // disabling
@@ -1042,7 +1064,7 @@ void createCube(cMesh *mesh, float edge, int include_top) {
         (curVertex->getPos().y + radius) / (2.0 * radius)
         );
       curVertex->setNormal(0,0,1);
-	}
+  }
   
     start_index += 6;
   }

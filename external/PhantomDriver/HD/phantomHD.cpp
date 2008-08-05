@@ -71,7 +71,8 @@ double cube_side[2];
 int model_type;
 
 // User-defined callback
-cCallback* userCallback=0;
+void (*userCallback)(void*)=0;
+void* userCallbackData = 0;
 
 //=============================================================================
 // Callbacks
@@ -93,8 +94,6 @@ HDCallbackCode HDCALLBACK HapticCallBack(void *data)
     single = 1;
   else
     valid = 1;
-    
-  if (userCallback) userCallback->callback();
 
   // if only one of the two devices is active
   if (single)
@@ -134,6 +133,9 @@ HDCallbackCode HDCALLBACK HapticCallBack(void *data)
 #endif
 
     hdGetIntegerv(HD_CURRENT_BUTTONS,&stylus_switch[valid]);
+   
+	if (userCallback) userCallback(userCallbackData);
+
     // write forces
     hdSetDoublev(HD_CURRENT_FORCE, force[valid]);
     // if device is 6DOF, render torques too
@@ -196,6 +198,7 @@ HDCallbackCode HDCALLBACK HapticCallBack(void *data)
     hdGetDoublev(HD_CURRENT_TRANSFORM,mat[1]);
     hdGetIntegerv(HD_CURRENT_BUTTONS,&stylus_switch[1]);
 
+    if (userCallback) userCallback(userCallbackData);
 
     hdMakeCurrentDevice(myPhantom[0]);
     hdSetDoublev(HD_CURRENT_FORCE, force[0]);
@@ -948,12 +951,14 @@ FUNCTION int __stdcall   GetWorkspaceScale(const int& num, double& scale) {
 /*!
   Sets up a user-defined callback function.
 
-  \fn     bool SetCallback(cCallback* callback)
-  \param  callback user-defined callback object
+  \fn     bool SetCallback(void (*callbackFunc)(void*), void* a_data)
+  \param  callbackFunc  Function to call
+  \param  void* a_data  Pointer to pass to callback function
   \return error code
 */
 //===========================================================================
-FUNCTION int __stdcall   SetCallback(cCallback* callback) {
-  userCallback = callback;
+FUNCTION int __stdcall   SetCallback(void (*callbackFunc)(void*), void* a_data) {
+  userCallback = callbackFunc;
+  userCallbackData = a_data;
   return  PH_SUCCESS;
 }

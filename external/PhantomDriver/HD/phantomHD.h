@@ -19,8 +19,6 @@
 */
 //===========================================================================
 
-#include "../../../src/devices/CCallback.h"
-
 #define FUNCTION __declspec(dllexport)
 
 const int PH_SUCCESS = 0;
@@ -127,4 +125,4 @@ FUNCTION int __stdcall   GetWorkspaceScale(const int& num, double& scale);
 FUNCTION int __stdcall   ReadVelocity(int num, double &iVelX, double &iVelY, double &iVelZ);
 
 
-FUNCTION int __stdcall   SetCallback(cCallback* callback);
+FUNCTION int __stdcall   SetCallback(void (*callbackFunc)(void*), void* a_data);

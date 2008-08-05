@@ -25,8 +25,6 @@
 #include "stdafx.h"
 #ifdef _MSVC
 #pragma warning (disable : 4786)
-#pragma comment(lib,"oded.lib")
-#pragma comment(lib,"opcode_d.lib")
 #endif
 
 #include "CODEMesh.h"
@@ -97,15 +95,13 @@ cODEMesh::~cODEMesh()
     \fn     cODEMesh::initDynamic()
 */
 //===========================================================================
-void cODEMesh::initDynamic(geomType a_type, objectType a_objType, float a_x, 
+void cODEMesh::initDynamic(objectType a_objType, float a_x, 
                            float a_y, float a_z, float a_density) 
 {
     
     unsigned int nVertex,nIndices;
     float l[3];
-    
-    //calculateInertiaTensor(density,m_Mass,cgx,cgy,cgz,I11,I22,I33,I12,I13,I23);
-    
+       
     computeBoundaryBox(true);
     
     cgx = m_boundaryBoxMin.x + (m_boundaryBoxMax.x - m_boundaryBoxMin.x) / 2.0;
@@ -127,66 +123,30 @@ void cODEMesh::initDynamic(geomType a_type, objectType a_objType, float a_x,
         r = l[1]/2.0;
     else
         r = l[2]/2.0;
-    
-    switch (a_type)
-    {
+       
+    // Create a box that wraps the mesh.
+    m_odeGeom = dCreateBox(m_odeSpace,l[0] ,l[1], l[2]);
         
-    case TRIMESH: {
-        // Create the geometry associated with the body end, then put it in the geometry space
-        // for the collision detection process.
-        if (m_odeTriMeshData != NULL) 
-            dGeomTriMeshDataDestroy(m_odeTriMeshData);
-        m_odeTriMeshData = dGeomTriMeshDataCreate();
-        dGeomTriMeshDataBuildSingle(m_odeTriMeshData, m_odeVertex, 3*sizeof(float), nVertex, 
-            m_odeIndices, nIndices*3, 3 * sizeof(int));
-        m_odeGeom = dCreateTriMesh(m_odeSpace, m_odeTriMeshData, 0, 0, 0);
-        break;
-    }
-        
-    case BOX    : {
-        // Create a box that wraps the mesh.
-        m_odeGeom = dCreateBox(m_odeSpace,l[0] ,l[1], l[2]);
-        break;
-    }
-        
-    case SPHERE : {
-        // Create a sphere that wraps the mesh.
-        m_odeGeom = dCreateSphere(m_odeSpace,r);
-        break;
-    }
-
-    }
-    
-    
     dGeomSetPosition(m_odeGeom, a_x, a_y, a_z);
     setPos(a_x,a_y,a_z);
     
     m_lastPos = m_localPos;
-    // computeGlobalCurrentObjectOnly(true);
     computeGlobalPositions(1);    
     
     m_objType = a_objType;
     if (a_objType == DYNAMIC_OBJECT) 
-    {
-        
+    {      
         //Create the body,...the physical entity...in the world.
-        //The world is the physic engine.
-        //if (odeBody != NULL) dBodyDestroy(odeBody);
-        
         m_odeBody          = dBodyCreate(m_odeWorld);
         dBodySetPosition(m_odeBody, a_x, a_y, a_z);
         
-        //Create the mass entity, calculate the inertia matrix and link all at the body.
-        //dMassSetParameters(&odeMass,m_Mass,cgx,cgy,cgz,I11,I22,I33,I12,I13,I23);
-        
+        //Create the mass entity, calculate the inertia matrix and link all at the body.   
         dMassSetBox(&m_odeMass,a_density,l[0],l[1],l[2]);
         dBodySetMass(m_odeBody,&m_odeMass);
         dGeomSetBody(m_odeGeom,m_odeBody);
         
         dBodySetPosition(m_odeBody, a_x, a_y, a_z);
-    }
-    
-    
+    } 
 }
 
 

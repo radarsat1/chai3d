@@ -27,6 +27,7 @@
 #include "CString.h"
 #include "CConstants.h"
 #include <math.h>
+#include <ostream>
 //---------------------------------------------------------------------------
 
 #ifdef _MSVC
@@ -818,6 +819,71 @@ struct cVector3d
       a_parallel.mul(scale);
       this->subr(a_parallel,a_perpendicular);
     }
+    //-----------------------------------------------------------------------
+    /*!
+        Spherically linearly interpolate between two vectors and store in this vector. 
+        Vectors should have the same length
+
+        \param    a_level         Fraction of distance to a_vector2 (0 is fully at a_vector1, 1.0 is fully at a_vector2)
+        \param    a_vector1       First vector to interpolate from
+        \param    a_vector2       Second vector to interpolate from
+    */
+    //-----------------------------------------------------------------------
+    inline void slerp(double a_level, cVector3d const& a_vector1, cVector3d a_vector2)
+    {
+        // a_vector2 is passed in by value so that we may scale it
+        double a_vec1lensq = a_vector1.lengthsq();
+        double cosomega = a_vector1.dot(a_vector2)/(a_vec1lensq);
+        if ((cosomega-1.0) > -1e-4 && (cosomega-1.0) < 1e-4) {
+            // vectors are (almost) parallel
+            // linearly interpolate
+            *this = a_vector1;
+            this->mul(1.0-a_level);
+            a_vector2.mul(a_level);
+            this->operator +=(a_vector2);
+            this->mul(sqrt(a_vec1lensq/this->lengthsq()));
+        } else {
+            if (cosomega < 0.0) {
+                cosomega = -cosomega;
+                a_vector2.negate();
+            }
+            double ratio1, ratio2;
+            if ((cosomega+1.0) > -1e-4 && (cosomega+1.0) < 1e-4) {
+                // vectors are 180 degrees apart
+                // there is no unique path between them
+                if ((a_vector1.x < a_vector1.y) && (a_vector1.x < a_vector1.z)){
+                    // x component is the smallest
+                    a_vector2.x = 0;
+                    a_vector2.y = -a_vector1.z;
+                    a_vector2.z = a_vector1.y;
+                } else if (a_vector1.y < a_vector1.z) {
+                    // y component is the smallest
+                    a_vector2.x = -a_vector1.z;
+                    a_vector2.y = 0;
+                    a_vector2.z = a_vector1.x;
+                } else {
+                    // z component is the smallest
+                    a_vector2.x = -a_vector1.y;
+                    a_vector2.y = a_vector1.x;
+                    a_vector2.z = 0;
+                }
+                // scale it so it is the same length as before
+                a_vector2.mul(sqrt(a_vec1lensq/a_vector2.lengthsq()));
+
+                ratio1 = sin(CHAI_PI*(0.5-a_level));
+                ratio2 = sin(CHAI_PI*a_level);
+            } else {
+                double omega = acos(cosomega);
+                double sinomega = sin(omega);
+                ratio1 = sin(omega*(1.0-a_level))/sinomega;
+                ratio2 = sin(omega*a_level)/sinomega;
+            }
+            *this = a_vector1;
+            this->mul(ratio1);
+            a_vector2.mul(ratio2);
+            this->add(a_vector2);
+        }
+    }
 };
 
 /*!
@@ -873,6 +939,15 @@ inline double operator*(const cVector3d& v1, const cVector3d& v2)
     return v1.x*v2.x+v1.y*v2.y+v1.z*v2.z;
 }
 
+/*!
+    ostream operator
+    Outputs the vector's components seperated by commas
+*/
+static inline std::ostream &operator << (std::ostream &a_os, cVector3d const& a_vec)
+{
+    a_os << a_vec.x << ", " << a_vec.y << ", " << a_vec.z;
+    return a_os;
+}
 
 //===========================================================================
 /*!

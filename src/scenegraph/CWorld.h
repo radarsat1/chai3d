@@ -94,7 +94,10 @@ class cWorld : public cGenericObject
     virtual void render(const int a_renderMode=0);
 
     //! Get access to a particular light source (between 0 and MAXIMUM_OPENGL_LIGHT_COUNT-1).
-    virtual cLight* getLightSource(int index);       
+    virtual cLight* getLightSource(int index);  
+
+    //! Resets textures and displays for the world
+    virtual void onDisplayReset(const bool a_affectChildren = true);
     
     //! It's useful to store the world's modelview matrix, for rendering stuff in "global" coordinates
     double m_worldModelView[16];
@@ -117,6 +120,8 @@ protected:
     vector<cLight*> m_lights;
     //! Should I render my light sources, or just use the current OpenGL light state?
     bool m_renderLightSources;    
+    //! Some apps may have multiple cameras, which would cause recursion when resetting the display
+    bool m_performingDisplayReset;
 };
 
 //---------------------------------------------------------------------------

@@ -146,6 +146,6 @@ double GetMaxForcePhantom(int num);
 int GetWorkspaceScalePhantom(const int& num, double& scale);
 
 //! Set up a callback for this device.  Only supported by the HD library right now.
-int SetCallbackPhantom(cCallback* a_callback);
+int SetCallbackPhantom(void (*callbackFunc)(void*), void* a_data);
 
 

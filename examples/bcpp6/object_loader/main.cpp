@@ -35,7 +35,7 @@ void HapticLoop();
 const double MESH_SCALE_SIZE = 1.0;
 
 __fastcall TForm1::TForm1(TComponent* Owner)
-    : TForm(Owner)
+    : TForm(Owner), usingHapticCallback(false)
 {
 
 }
@@ -88,6 +88,8 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     // don't start the haptics loop yet
     flagSimulationOn = false;
     flagHasExitedSimulation = true;
+
+    myHapticCallback.data = 1234;
 }
 
 //---------------------------------------------------------------------------
@@ -95,9 +97,8 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 void __fastcall TForm1::FormDestroy(TObject *Sender)
 {
     // stop simulation
-    flagSimulationOn = false;
-    while (!flagHasExitedSimulation) { Sleep(1); }
-
+    stopSimulation();
+    
     // stop graphic rendering
     Timer1->Enabled = false;
 
@@ -119,7 +120,6 @@ void TForm1::updateWorldSettings()
     object->useTexture(UseTextureMappingBox->Checked, true);
     object->useColors(UseVertexColorsBox->Checked, true);
     object->useMaterial(UseMaterialPropertiesBox->Checked, true);
-    object->enableTransparency(EnableTransparencyBox->Checked, true);
 
     // set transparency
     float transparency = (float)TransparencyLevelSlider->Position / 10.0f;
@@ -168,16 +168,8 @@ void __fastcall TForm1::Timer1Timer(TObject *Sender)
     }
 }
 //---------------------------------------------------------------------------
-
-void HapticLoop()
+void HapticIter()
 {
-    // simulation in now ON
-    flagSimulationOn = true;
-    flagHasExitedSimulation = false;
-
-    // main haptics loop
-    while(flagSimulationOn)
-    {
         // read position from haptic device
         Form1->tool->updatePose();
 
@@ -189,6 +181,18 @@ void HapticLoop()
 
         // send forces to haptic device
         Form1->tool->applyForces();
+}
+//---------------------------------------------------------------------------
+void HapticLoop()
+{
+    // simulation in now ON
+    flagSimulationOn = true;
+    flagHasExitedSimulation = false;
+
+    // main haptics loop
+    while(flagSimulationOn)
+    {
+        HapticIter();
     }
 
     // stop haptics
@@ -198,18 +202,36 @@ void HapticLoop()
     // exit thread
     ExitThread(0);
 }
-
 //---------------------------------------------------------------------------
-
-void __fastcall TForm1::LoadModelButtonClick(TObject *Sender)
+void TForm1::HapticCallback::callback()
+{
+    if (data!=1234) {
+        data=0;
+    }
+    HapticIter();
+}
+//---------------------------------------------------------------------------
+void TForm1::stopSimulation()
 {
     // stop current simulation
     flagSimulationOn = false;
-    while (!flagHasExitedSimulation)
-    {
-        Sleep(1);
+    if (usingHapticCallback) {
+        tool->getDevice()->setCallback(0);
+        Form1->tool->stop();
+        flagHasExitedSimulation = true;
+    } else {
+        while (!flagHasExitedSimulation)
+        {
+            Sleep(1);
+        }
     }
-
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::LoadModelButtonClick(TObject *Sender)
+{
+    // stop current simulation
+    stopSimulation();
+    
     if (OpenDialog1->Execute())
     {
         // create a new mesh
@@ -218,7 +240,7 @@ void __fastcall TForm1::LoadModelButtonClick(TObject *Sender)
         // If you don't plan to ever modify the mesh, you can use the
         // vertex-buffer version instead for faster rendering...
         // cMesh* newObject = new cVBOMesh(world);
-        
+
         newObject->setPos(0,0,0);
         objectToCameraDistance = 0.0;
 
@@ -325,15 +347,22 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
         // update the global position of all objects in the world
         world->computeGlobalPositions(true);
 
-        DWORD thread_id;
-        ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(HapticLoop), this, 0, &thread_id);
+        if (tool->getDevice()->setCallback(reinterpret_cast<cCallback*>(&myHapticCallback))) {
+            flagSimulationOn = true;
+            usingHapticCallback = true;
+            flagHasExitedSimulation = false;
+        } else {
+            usingHapticCallback = false;
+            DWORD thread_id;
+            ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(HapticLoop), this, 0, &thread_id);
 
-        // Boost thread and process priority
-        ::SetThreadPriority(&thread_id, THREAD_PRIORITY_ABOVE_NORMAL);
+            // Boost thread and process priority
+            ::SetThreadPriority(&thread_id, THREAD_PRIORITY_ABOVE_NORMAL);
+        }
     }
     else
     {
-        flagSimulationOn = false;
+        stopSimulation();
     }
 }
 

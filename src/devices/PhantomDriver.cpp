@@ -100,7 +100,7 @@ typedef int (CALLBACK* LPFNDLLReadSwitch)(int);
 typedef double (CALLBACK* LPFNDLLGetMaxForce)(int);
 typedef int (CALLBACK* LPFNDLLReadVelocity)(int,double&,double&,double&);
 typedef int (CALLBACK* LPFNDLLGetWorkspaceScale)(const int&,double&);
-typedef int (CALLBACK* LPFNDLLSetCallback)(cCallback*);
+typedef int (CALLBACK* LPFNDLLSetCallback)(void (*callbackFunc)(void*), void*);
 
 
 LPFNDLLOpenPhantom Open; 
@@ -771,19 +771,17 @@ int GetWorkspaceScalePhantom(const int& num, double& scale)
 /*!
     Sets up a user-defined callback function.
 
-    \fn     int SetCallbackPhantom(cCallback* callback)
-    \param  a_callback user-defined callback object
+    \fn     int SetCallbackPhantom(void (*callbackFunc)(void*), void* a_data)
+    \param  void(*callbackFunc)(void*) Pointer to callback function
+    \param void* a_data  Pointer to be passed to callback function
     \return error code
 */
 //===========================================================================
-int SetCallbackPhantom(cCallback* a_callback)
+int SetCallbackPhantom(void (*callbackFunc)(void*), void* a_data)
 {
   if (SetCB && (lib_loaded) && (deviceReady)) {
-    return SetCB(a_callback);
-  }
-  else {
+    return SetCB(callbackFunc, a_data);
+  } else {
     return PH_DLL_PROBLEM;
   }
 }
-
-

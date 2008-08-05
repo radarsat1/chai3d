@@ -79,7 +79,7 @@ object Form1: TForm1
       TabOrder = 1
       object Label16: TLabel
         Left = 20
-        Top = 208
+        Top = 192
         Width = 36
         Height = 13
         Caption = 'Opacity'
@@ -194,7 +194,7 @@ object Form1: TForm1
       end
       object TransparencyLevelSlider: TTrackBar
         Left = 72
-        Top = 204
+        Top = 188
         Width = 97
         Height = 25
         Orientation = trHorizontal
@@ -206,14 +206,6 @@ object Form1: TForm1
         ThumbLength = 15
         TickMarks = tmBottomRight
         TickStyle = tsAuto
-      end
-      object EnableTransparencyBox: TCheckBox
-        Left = 16
-        Top = 184
-        Width = 121
-        Height = 17
-        Caption = 'Use Transparency'
-        TabOrder = 8
       end
     end
     object GroupBox5: TGroupBox

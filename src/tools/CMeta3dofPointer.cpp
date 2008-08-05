@@ -54,6 +54,9 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
 
     m_physicalDevice = -1;
 
+// Allow Delta support to be compiled out
+#ifndef _DISABLE_DELTA_SUPPORT
+
     // try to open a connection to a Delta or Omega haptic device
     m_device = new cDeltaDevice(a_deviceNumber);
     systemAvailable = m_device->isSystemAvailable();
@@ -69,6 +72,7 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
         delete m_device;
         m_device = NULL;
     }
+#endif
 
 // Allow Phantom support to be compiled out
 #ifndef _DISABLE_PHANTOM_SUPPORT

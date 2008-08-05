@@ -64,8 +64,10 @@ class cPhantomDevice : public cGenericDevice
     //! Send a command to the phantom device.
     virtual int command(int a_command, void* a_data);
 
+#ifdef _WIN32
     //! Ask the device to call me back periodically
     virtual bool setCallback(cCallback* m_callback);
+#endif
 
   private:
    //! handle for specific phantom use.
@@ -74,6 +76,8 @@ class cPhantomDevice : public cGenericDevice
    //! Number of Phantoms that have been started.
    static int m_num_phantoms;
 
+   //! Callback function passed to phantom dll
+   static void callbackFunc(void* a_data);
 };
 
 #endif // #ifndef _DISABLE_PHANTOM_SUPPORT

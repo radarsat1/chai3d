@@ -82,6 +82,7 @@ cProxyPointForceAlgo::cProxyPointForceAlgo()
     m_lastObjectGlobalRot.identity();
     m_touchingObject = 0;
     m_numContacts = 0;
+    m_movingObject = 0;
 
     m_slipping = true;
     m_useFriction = true;
@@ -154,7 +155,7 @@ cVector3d cProxyPointForceAlgo::computeForces(const cVector3d& a_nextDevicePos)
       computeForce();
 
       // Update "last-state" dynamic contact information
-      if (m_touchingObject) updateDynamicContactState();
+      updateDynamicContactState();
       
       // return result
       return (m_lastGlobalForce);
@@ -680,6 +681,7 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition(cVector3d a_goal)
 //===========================================================================
 bool cProxyPointForceAlgo::goalAchieved(const cVector3d& a_proxy, const cVector3d& a_goal) const
 {
+    if (m_dynamicProxy) return false;
     return (a_proxy.distance(a_goal) < CHAI_SMALL);
 }
 
@@ -695,6 +697,7 @@ bool cProxyPointForceAlgo::goalAchieved(const cVector3d& a_proxy, const cVector3
 //===========================================================================
 void cProxyPointForceAlgo::offsetGoalPosition(cVector3d& a_goal, const cVector3d& a_proxy) const
 {
+    if (m_dynamicProxy) return;
     a_goal = cAdd(a_goal, cMul(m_radius, cNormalize( cSub(a_goal, a_proxy))));
 }
 
@@ -925,6 +928,20 @@ unsigned int cProxyPointForceAlgo::getContacts(cTriangle*& a_t0, cTriangle*& a_t
 //===========================================================================
 void cProxyPointForceAlgo::updateDynamicContactState()
 {
+    // Update "last-state" dynamic contact information
+    if (m_dynamicProxy && m_movingObject)
+    {
+        cGenericObject* savedTouchingObject = m_touchingObject;
+        m_touchingObject = m_movingObject;      
+        if (m_touchingObject != 0) 
+        {
+            m_lastObjectGlobalPos = m_touchingObject->getGlobalPos();
+            m_lastObjectGlobalRot = m_touchingObject->getGlobalRot();
+        }
+        m_touchingObject = savedTouchingObject;
+        return;
+    }
+
     // if the proxy is not currently in contact with any object, no update
     // is needed
     if (m_touchingObject == 0) return;
@@ -945,6 +962,8 @@ void cProxyPointForceAlgo::updateDynamicContactState()
 //===========================================================================
 void cProxyPointForceAlgo::correctProxyForObjectMotion()
 {
+    if (m_dynamicProxy && m_movingObject) m_touchingObject = m_movingObject;
+
     // if the proxy is not currently in contact with any object, no update
     // is needed
     if (m_touchingObject == NULL) return;

@@ -22,11 +22,14 @@
 //---------------------------------------------------------------------------
 
 #include "CDeltaDevices.h"
+
+#ifndef _DISABLE_DELTA_SUPPORT
+
 #include "CMaths.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
-#include "dhd.h"
+//#include "dhd.h"
 #endif
 
 //---------------------------------------------------------------------------
@@ -51,6 +54,10 @@ int (__stdcall *dhdGetPosition)                (double *px, double *py, double *
 int (__stdcall *dhdSetForce)                   (double  fx, double  fy, double  fz, char ID);
 int (__stdcall *dhdGetOrientationRad)          (double *oa, double *ob, double *og, char ID);
 int (__stdcall *dhdSetTorque)                  (double  ta, double  tb, double  tg, char ID);
+int (__stdcall *dhdGetOrientationFrame)        (double matrix[3][3], char ID);
+int (__stdcall *dhdSetForceAndGripperForce)    (double fx, double fy, double fz, double f, char ID);
+int (__stdcall *dhdGetGripperThumbPos)         (double *tx, double *ty, double *tz,  char ID);
+int (__stdcall *dhdGetGripperFingerPos)        (double *fx, double *fy, double *fz,  char ID);
 
 #endif
 
@@ -80,35 +87,34 @@ cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
     if (dhdDLL==NULL)
     {
         dhdDLL = LoadLibrary("dhd.dll");
-        dhdGetDeviceCount   = (int (__stdcall*)(void))GetProcAddress(dhdDLL, "dhdGetDeviceCount");
-        dhdGetDeviceID      = (int (__stdcall*)(void))GetProcAddress(dhdDLL, "dhdGetDeviceID");
-        dhdGetSystemType    = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdGetSystemType");
-        dhdOpenID           = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdOpenID");
-        dhdClose            = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdClose");
-        dhdGetButton        = (int (__stdcall*)(int, char))GetProcAddress(dhdDLL, "dhdGetButton");
-        dhdReset            = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdReset");
-        dhdGetPosition      = (int (__stdcall*)(double*, double*, double*, char))GetProcAddress(dhdDLL, "dhdGetPosition");
-        dhdSetForce         = (int (__stdcall*)(double, double, double, char))GetProcAddress(dhdDLL, "dhdSetForce");
-        dhdGetOrientationRad = (int( __stdcall*)(double*, double*, double*, char))GetProcAddress(dhdDLL, "dhdGetOrientationRad");
-        dhdSetTorque        = (int (__stdcall *)(double, double, double, char))GetProcAddress(dhdDLL, "dhdSetTorque");
     }
-    
-    // If we failed to load the library or any of the functions, quit...
-    if (dhdDLL==NULL) return;
 
-    if (dhdGetDeviceCount    == 0 || 
-        dhdGetDeviceCount    == 0 ||
-        dhdGetDeviceID       == 0 ||
-        dhdGetSystemType     == 0 ||
-        dhdOpenID            == 0 ||
-        dhdClose             == 0 ||
-        dhdGetButton         == 0 ||
-        dhdReset             == 0 ||
-        dhdGetPosition       == 0 ||
-        dhdSetForce          == 0 ||
-        dhdGetOrientationRad == 0 ||
-        dhdSetTorque         == 0)
+    // check if DLL loaded correctly
+    if (dhdDLL == NULL)
+    {
         return;
+    }
+
+    // load different callbacks
+    dhdGetDeviceCount           = (int (__stdcall*)(void))GetProcAddress(dhdDLL, "dhdGetDeviceCount");
+    dhdGetDeviceID              = (int (__stdcall*)(void))GetProcAddress(dhdDLL, "dhdGetDeviceID");
+    dhdGetSystemType            = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdGetSystemType");
+    dhdOpenID                   = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdOpenID");
+    dhdClose                    = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdClose");
+    dhdGetButton                = (int (__stdcall*)(int, char))GetProcAddress(dhdDLL, "dhdGetButton");
+    dhdReset                    = (int (__stdcall*)(char))GetProcAddress(dhdDLL, "dhdReset");
+    dhdGetPosition              = (int (__stdcall*)(double*, double*, double*, char))GetProcAddress(dhdDLL, "dhdGetPosition");
+    dhdSetForce                 = (int (__stdcall*)(double, double, double, char))GetProcAddress(dhdDLL, "dhdSetForce");
+    dhdGetOrientationRad        = (int( __stdcall*)(double*, double*, double*, char))GetProcAddress(dhdDLL, "dhdGetOrientationRad");
+    dhdSetTorque                = (int (__stdcall*)(double, double, double, char))GetProcAddress(dhdDLL, "dhdSetTorque");
+    dhdGetOrientationFrame      = (int (__stdcall*)(double[3][3], char ID))GetProcAddress(dhdDLL, "dhdGetRotatorMatrix");
+    if (dhdGetOrientationFrame == NULL)
+    {
+        dhdGetOrientationFrame  = (int (__stdcall*)(double[3][3], char ID))GetProcAddress(dhdDLL, "dhdGetOrientationFrame");
+    }
+    dhdSetForceAndGripperForce  = (int (__stdcall*)(double fx, double fy, double fz, double f, char ID))GetProcAddress(dhdDLL, "dhdSetForceAndGripperForce");
+    dhdGetGripperThumbPos       = (int (__stdcall*)(double *tx, double *ty, double *tz,  char ID))GetProcAddress(dhdDLL, "dhdGetGripperThumbPos");
+    dhdGetGripperFingerPos      = (int (__stdcall*)(double *fx, double *fy, double *fz,  char ID))GetProcAddress(dhdDLL, "dhdGetGripperFingerPos");
 
 #endif
 
@@ -128,6 +134,16 @@ cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
     {
         // yes, this ID leads to an existing device
         m_systemAvailable = true;
+    }
+
+    // init code to handle buttons
+    int i = 0;
+    for (i=0; i<8; i++)
+    {
+		m_userSwitchCount[i] = 0;
+        m_userSwitchStatus[i] = 0;
+        m_userSwitchClock[i].initialize();
+        m_userSwitchClock[i].start();
     }
 }
 
@@ -192,10 +208,15 @@ int cDeltaDevice::open()
     }
 
     // read the device type
-    int deviceType = dhdGetSystemType(m_deviceID);
+    m_deviceType = dhdGetSystemType(m_deviceID);
 
-    switch (deviceType)
+    switch (m_deviceType)
     {
+        // default values are set to the omega
+        m_halfSizeWorkspace     = OMEGA_DEVICE_WORKSPACE_HALF_SIZE;
+        m_maximumForces         = OMEGA_DEVICE_MAXIMUM_FORCE;
+
+        // delta devices
         case (DHD_DEVICE_3DOF):
         case (DHD_DEVICE_6DOF):
         case (DHD_DEVICE_6DOF_500):
@@ -205,7 +226,11 @@ int cDeltaDevice::open()
         }
         break;
 
+        // omega devices
         case (DHD_DEVICE_OMEGA):
+        case (DHD_DEVICE_OMEGA3):
+        case (DHD_DEVICE_OMEGA33):
+        case (DHD_DEVICE_OMEGA331):
         {
             m_halfSizeWorkspace = OMEGA_DEVICE_WORKSPACE_HALF_SIZE;
             m_maximumForces     = OMEGA_DEVICE_MAXIMUM_FORCE;
@@ -281,9 +306,10 @@ int cDeltaDevice::command(int a_command, void* a_data)
             // read position of delta device
             case CHAI_CMD_GET_POS_3D:
             {
+                // read position from device
                 dhdGetPosition(&x, &y, &z, m_deviceID);
-
                 cVector3d* position = (cVector3d *) a_data;
+
                 // Convert from m to mm
                 position->mul(1000.0);
                 position->set(x, y, z);
@@ -293,8 +319,10 @@ int cDeltaDevice::command(int a_command, void* a_data)
             // read normalized position of the delta device
             case CHAI_CMD_GET_POS_NORM_3D:
             {
+                // read position from device
                 dhdGetPosition(&x, &y, &z, m_deviceID);
 
+                // normalize position
                 cVector3d* position = (cVector3d *) a_data;
                 position->set(x, y, z);
                 position->div(m_halfSizeWorkspace);
@@ -306,7 +334,6 @@ int cDeltaDevice::command(int a_command, void* a_data)
             {
                 cVector3d* angles = (cVector3d *) a_data;
                 angles->set(0, 0, 0);
-
                 dhdGetOrientationRad(&angles->x, &angles->y, &angles->z, m_deviceID);
             }
             break;
@@ -314,34 +341,76 @@ int cDeltaDevice::command(int a_command, void* a_data)
             // read orientation matrix of wrist
             case CHAI_CMD_GET_ROT_MATRIX:
             {
-                cVector3d angles;
-                angles.set(0,0,0);
+                cMatrix3d frame;
+                frame.identity();
 
-                dhdGetOrientationRad(&angles.x, &angles.y, &angles.z, m_deviceID);
+                switch (m_deviceType)
+                {
+                    // delta devices
+                    case (DHD_DEVICE_3DOF):
+                    case (DHD_DEVICE_6DOF):
+                    case (DHD_DEVICE_6DOF_500):
+                    {
+                        // read angles
+                        cVector3d angles;
+                        angles.set(0,0,0);
+                        dhdGetOrientationRad(&angles.x, &angles.y, &angles.z, m_deviceID);
 
-                angles.mul(1.5);
+                        // compute rotation matrix
+                        angles.mul(1.5);
+                        frame.rotate(cVector3d(1,0,0), angles.x);
+                        frame.rotate(cVector3d(0,1,0), angles.y);
+                        frame.rotate(cVector3d(0,0,1), angles.z);
+                    }
+                    break;
+
+                    // omega devices
+                    case (DHD_DEVICE_OMEGA):
+                    case (DHD_DEVICE_OMEGA3):
+                    case (DHD_DEVICE_OMEGA33):
+                    case (DHD_DEVICE_OMEGA331):
+                    {
+                        // read rotation matrix
+                        double rot[3][3];
+                        rot[0][0] = 1.0; rot[0][1] = 0.0; rot[0][2] = 0.0;
+                        rot[1][0] = 0.0; rot[1][1] = 1.0; rot[1][2] = 0.0;
+                        rot[2][0] = 0.0; rot[2][1] = 0.0; rot[2][2] = 1.0;
+
+                        dhdGetOrientationFrame(rot, m_deviceID);
+
+                        cMatrix3d result;
+                        frame.m[0][0] = rot[0][0];
+                        frame.m[0][1] = rot[0][1];
+                        frame.m[0][2] = rot[0][2];
+                        frame.m[1][0] = rot[1][0];
+                        frame.m[1][1] = rot[1][1];
+                        frame.m[1][2] = rot[1][2];
+                        frame.m[2][0] = rot[2][0];
+                        frame.m[2][1] = rot[2][1];
+                        frame.m[2][2] = rot[2][2];
+                    }
+                    break;
+                }
+
+                // return result
                 cMatrix3d* matrix = (cMatrix3d *) a_data;
-                matrix->identity();
-                matrix->rotate(cVector3d(1,0,0), angles.x);
-                matrix->rotate(cVector3d(0,1,0), angles.y);
-                matrix->rotate(cVector3d(0,0,1), angles.z);
+                *matrix = frame;
+
             }
             break;
 
-            // set force to delta device
+            // set force to device
             case CHAI_CMD_SET_FORCE_3D:
             {
                 cVector3d* force = (cVector3d *) a_data;
-
                 dhdSetForce(force->x, force->y, force->z, m_deviceID);
             }
             break;
 
-            // set torque to delta wrist
+            // set torque to device
             case CHAI_CMD_SET_TORQUE_3D:
             {
                 cVector3d* torque = (cVector3d *) a_data;
-
                 dhdSetTorque(torque->x, torque->y, torque->z, m_deviceID);
             }
             break;
@@ -350,8 +419,7 @@ int cDeltaDevice::command(int a_command, void* a_data)
             case CHAI_CMD_GET_SWITCH_0:
             {
                 int* result = (int *) a_data;
-
-                *result = dhdGetButton(0, m_deviceID);
+                *result = getUserSwitch(m_deviceID);
             }
             break;
 
@@ -361,7 +429,7 @@ int cDeltaDevice::command(int a_command, void* a_data)
                 int* result = (int *) a_data;
 
                 // Force the result to be 0 or 1, since bit 0 should carry button 0's value
-                *result = dhdGetButton(0, m_deviceID) ? 1 : 0;
+                *result = getUserSwitch(m_deviceID) ? 1 : 0;
             }
             break;
 
@@ -392,4 +460,57 @@ int cDeltaDevice::command(int a_command, void* a_data)
     return (result);
 }
 
+//===========================================================================
+/*!
+    Read the user switch of the end-effector
+    This function implements a small filter to avoid reading glitches.
 
+    \fn         int cDeltaDevice::getUserSwitch(int a_deviceID)
+    \param      a_deviceID  device ID.
+*/
+//===========================================================================
+int cDeltaDevice::getUserSwitch(int a_deviceID)
+{
+    const long SWITCHTIMEOUT = 10000; // [us]
+
+    // check device id.
+    if ((a_deviceID < 0) || (a_deviceID > 7))
+    {
+        return (0);
+    }
+
+    // check time
+    if (m_userSwitchClock[a_deviceID].getCurrentTime() < SWITCHTIMEOUT)
+    {
+        return (m_userSwitchStatus[a_deviceID]);
+    }
+    else
+    {
+        // timeout has occured, we read the status again
+        int switchStatus;
+        switchStatus = dhdGetButton(0, (char)a_deviceID);
+
+        // if value equals to zero, check once more time
+        if (switchStatus == 1)
+        {
+            m_userSwitchStatus[a_deviceID] = 1;
+			m_userSwitchCount[a_deviceID] = 0;
+        }
+		else
+		{
+			m_userSwitchCount[a_deviceID]++;
+			if (m_userSwitchCount[a_deviceID] > 6)
+			{
+				m_userSwitchStatus[a_deviceID] = 0;
+				m_userSwitchCount[a_deviceID] = 0;			
+			}
+		}
+
+        m_userSwitchClock[a_deviceID].initialize();
+        m_userSwitchClock[a_deviceID].start();
+
+        return (m_userSwitchStatus[a_deviceID]);
+    }
+}
+
+#endif

@@ -33,10 +33,11 @@
 // Global variables
 // =============================================================================
 
-// predefined value that expresses the absence of a phantom.
+// Tells us how many phantoms are open; incremented with each call to OpenPhantom
+// and reset with each call to ClosePhantoms.
 int numdev = 0;
 
-// handle for the scheduler
+// Handle for the scheduler
 HDSchedulerHandle gSchedulerCallback = HD_INVALID_HANDLE;
 
 hduVector3Dd pos[2];

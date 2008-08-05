@@ -14,7 +14,7 @@ device is done by clicking the "Toggle second device" button, so it
 can also be run with just one device.) This example lets the user 
 push around a box in a small room, similar to the SensAble Dice demo.  
 
-The ODE library (version 0.5) is linked through ode.dll in the main
+The ODE library is linked through ode.dll in the main
 bin directory, a Borland-formatted import library (created using
 Borland's implib tool) is in this example folder, and the include files 
 are in the include folder within the example folder.

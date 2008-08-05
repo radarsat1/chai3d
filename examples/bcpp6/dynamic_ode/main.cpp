@@ -147,9 +147,9 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
   createCube(object,size);
 
   // initialize ODE parameters
-	// Move the object over some so the Phantom will not initially be
+  // Move the object over some so the Phantom will not initially be
   // inside the object.
-  object->initDynamic(BOX,DYNAMIC_OBJECT, g_initial_object_pos.x , g_initial_object_pos.y, g_initial_object_pos.z);
+  object->initDynamic(DYNAMIC_OBJECT, g_initial_object_pos.x , g_initial_object_pos.y, g_initial_object_pos.z);
   object->setMass(0.2);
 
   // Give a color to each vertex
@@ -175,11 +175,11 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
   object->createAABBCollisionDetector(true,true);
 
   // Create a room, bounded by cubes, in which we can push around our little box
-	bottom_wall = create_wall(0,0,BOTTOM_WALL_OFFSET,1);
-	left_wall = create_wall(0,LEFT_WALL_OFFSET,WALL_Z_OFFSET,0);
-	right_wall = create_wall(0,RIGHT_WALL_OFFSET,WALL_Z_OFFSET,0);
-	back_wall = create_wall(BACK_WALL_OFFSET,0,WALL_Z_OFFSET,0);
-	front_wall = create_wall(FRONT_WALL_OFFSET,0,0,0);
+  bottom_wall = create_wall(0,0,BOTTOM_WALL_OFFSET,1);
+  left_wall = create_wall(0,LEFT_WALL_OFFSET,WALL_Z_OFFSET,0);
+  right_wall = create_wall(0,RIGHT_WALL_OFFSET,WALL_Z_OFFSET,0);
+  back_wall = create_wall(BACK_WALL_OFFSET,0,WALL_Z_OFFSET,0);
+  front_wall = create_wall(FRONT_WALL_OFFSET,0,0,0);
 
   world->computeGlobalPositions(false);
 
@@ -192,17 +192,37 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 cODEMesh* TForm1::create_wall(double a_x, double a_y, double a_z, bool a_top) {
 	cODEMesh* new_mesh = new cODEMesh(world, ode_world, ode_space);
   createCube(new_mesh, WALL_SIZE, a_top);
-	new_mesh->m_material.m_ambient.set( 0.7, 0.7, 0.7, 1.0 );
+  new_mesh->m_material.m_ambient.set( 0.7, 0.7, 0.7, 1.0 );
   new_mesh->m_material.m_diffuse.set( 0.7, 0.7, 0.7, 1.0 );
   new_mesh->m_material.m_specular.set( 0.7, 0.7, 0.7, 1.0 );
   new_mesh->m_material.setShininess(100);
   new_mesh->m_material.setStiffness(K);
-	new_mesh->setFriction(MU_S, MU_D, 1);
-  new_mesh->initDynamic(BOX,STATIC_OBJECT,a_x, a_y, a_z);
+  new_mesh->setFriction(MU_S, MU_D, 1);
+  new_mesh->initDynamic(STATIC_OBJECT,a_x, a_y, a_z);
   world->addChild(new_mesh);
   new_mesh->computeAllNormals();
+
+  // If this is the ground, actually make two boxes -- one used by ODE and one for
+  // haptics, with the one used by ODE slightly above.  This will make the box "float"
+  // slightly above the ground, avoiding the problem of when the proxy gets stuck 
+  // between the falling box and the ground and has to penetrate one or the other
+  if (a_top == 1)
+  {
+    new_mesh->setHapticEnabled(false, true);
+    cMesh* offset_bottom = new cMesh(world);
+    createCube(offset_bottom, WALL_SIZE, a_top);
+    offset_bottom->m_material.m_ambient.set( 0.7, 0.7, 0.7, 1.0 );
+    offset_bottom->m_material.m_diffuse.set( 0.7, 0.7, 0.7, 1.0 );
+    offset_bottom->m_material.m_specular.set( 0.7, 0.7, 0.7, 1.0 );
+    offset_bottom->m_material.setShininess(100);
+    offset_bottom->m_material.setStiffness(K);
+    offset_bottom->setFriction(MU_S, MU_D, 1);
+    offset_bottom->translate(a_x, a_y, a_z-0.1);
+    world->addChild(offset_bottom);
+    offset_bottom->computeAllNormals();
+  }
 	
-	return new_mesh;
+  return new_mesh;
 }
 
 //---------------------------------------------------------------------------
@@ -245,148 +265,150 @@ void HapticLoop()
     // set it up so that wherever your tool is in the real world when you enable forces, it will be at (1,0,3) in the
     // virtual world, so that it is in side the virtual "room" and not penetrating anything
     if (Form1->first_device_enabled && Form1->tool1)
-	  {
-		  // update the tool's pose and compute and apply forces
+    {
+      // update the tool's pose and compute and apply forces
       Form1->tool1->updatePose();
 
-	    if (!Form1->tool1_ready)
-		  {
-			  // Turn off haptic collision detection for the objects in the world
-	      for (unsigned int i=0; i<Form1->world->getNumChildren(); i++)
-		      Form1->world->getChild(i)->setHapticEnabled(0, 1);
+      if (!Form1->tool1_ready)
+      {
+        // Turn off haptic collision detection for the objects in the world
+        for (unsigned int i=0; i<Form1->world->getNumChildren(); i++)
+          Form1->world->getChild(i)->setHapticEnabled(0, 1);
 
-		    if ( (Form1->tool1->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&
-	           (Form1->tool1->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
-			       (Form1->tool1->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
-			       (Form1->tool1->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
-				     (Form1->tool1->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2))
-		      Form1->tool1_ready = 1;
-		  }
+        if ( (Form1->tool1->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&
+             (Form1->tool1->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
+             (Form1->tool1->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
+             (Form1->tool1->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
+             (Form1->tool1->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2))
+               Form1->tool1_ready = 1;
+      }
       else
-		  {
-		    // Turn on haptic collision detection for the objects in the world
-	      for (unsigned int i=0; i<Form1->world->getNumChildren(); i++)
-		      Form1->world->getChild(i)->setHapticEnabled(1, 1);
-		  }
+      {
+        // Turn on haptic collision detection for the objects in the world
+        for (unsigned int i=0; i<Form1->world->getNumChildren(); i++)
+          if (Form1->world->getChild(i) != Form1->bottom_wall)
+            Form1->world->getChild(i)->setHapticEnabled(1, 1);
+      }
 
-		  Form1->tool1->computeForces();
-		  if (Form1->tool1_ready)
-        Form1->tool1->applyForces();
+      Form1->tool1->computeForces();
+      if (Form1->tool1_ready)
+      Form1->tool1->applyForces();
     }
 
     // if two devices are active, update the second one also...
     if (Form1->second_device_enabled && Form1->tool2)
-	  {
-	    Form1->tool2->updatePose();
+    {
+      Form1->tool2->updatePose();
 
-	    if (!Form1->tool2_ready)
-		  {
-			  // Turn off haptic collision detection for the objects in the world
-	      for (unsigned int i=0; i<Form1->world->getNumChildren(); i++)
-		      Form1->world->getChild(i)->setHapticEnabled(0, 1);
+      if (!Form1->tool2_ready)
+      {
+        // Turn off haptic collision detection for the objects in the world
+        for (unsigned int i=0; i<Form1->world->getNumChildren(); i++)
+          Form1->world->getChild(i)->setHapticEnabled(0, 1);
 
-		    if ( (Form1->tool2->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&
-	           (Form1->tool2->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
-			       (Form1->tool2->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
-			       (Form1->tool2->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
-			  	   (Form1->tool2->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2))
-		      Form1->tool2_ready = 1;
-	   	}
+          if ( (Form1->tool2->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&
+               (Form1->tool2->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
+               (Form1->tool2->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
+               (Form1->tool2->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
+               (Form1->tool2->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2))
+            Form1->tool2_ready = 1;
+      }
       else
-	   	{
-		    // Turn on haptic collision detection for the objects in the world
-	      for (unsigned int i=0; i<Form1->world->getNumChildren(); i++)
-		      Form1->world->getChild(i)->setHapticEnabled(1, 1);
-		  }
+      {
+        // Turn on haptic collision detection for the objects in the world
+        for (unsigned int i=0; i<Form1->world->getNumChildren(); i++)
+          if (Form1->world->getChild(i) != Form1->bottom_wall)
+            Form1->world->getChild(i)->setHapticEnabled(1, 1);
+      }
 
-		  Form1->tool2->computeForces();
-		  if (Form1->tool2_ready)
+      Form1->tool2->computeForces();
+      if (Form1->tool2_ready)
         Form1->tool2->applyForces();
-	  }
+    }
 
-	  Form1->object->m_historyValid = false;
+    Form1->object->m_historyValid = false;
 
     // code to get forces from CHAI and apply them to the appropriate meshes, calling ODE functions to calculate the dynamics
     if (Form1->ode_clock->on())
     {
       if ( (Form1->ode_clock->timeoutOccurred()) && Form1->ready)
-	    {
+      {
         Form1->ready = false;
 
-			  if (Form1->tool1 && Form1->first_device_enabled)
-			  {
-			    cProxyPointForceAlgo *proxy   = dynamic_cast<cProxyPointForceAlgo*>(Form1->tool1->getProxy());
+        if (Form1->tool1 && Form1->first_device_enabled)
+        {
+          cProxyPointForceAlgo *proxy   = dynamic_cast<cProxyPointForceAlgo*>(Form1->tool1->getProxy());
 
-		      if (proxy && proxy->getContactObject() != NULL)
-				  {
-			      float x =  proxy->getContactPoint().x;
-			      float y =  proxy->getContactPoint().y;
-			      float z =  proxy->getContactPoint().z;
-			  
-			      float fx = -Form1->tool1->m_lastComputedGlobalForce.x ;
-			      float fy = -Form1->tool1->m_lastComputedGlobalForce.y ;
-			      float fz = -Form1->tool1->m_lastComputedGlobalForce.z ;
+          if (proxy && proxy->getContactObject() != NULL)
+          {
+            float x =  proxy->getContactPoint().x;
+            float y =  proxy->getContactPoint().y;
+            float z =  proxy->getContactPoint().z;
+
+            float fx = -Form1->tool1->m_lastComputedGlobalForce.x ;
+            float fy = -Form1->tool1->m_lastComputedGlobalForce.y ;
+            float fz = -Form1->tool1->m_lastComputedGlobalForce.z ;
 
             cGenericObject* cur_object = proxy->getContactObject();
-					  bool found = false;
-				   	cODEMesh* mesh = 0;
-					  while (cur_object && !found)
-					  {
-			        mesh = dynamic_cast<cODEMesh*>(cur_object);
-						  if (mesh) found = true;
-						  cur_object = cur_object->getParent();
-					  }
-          
-					  if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT))
-				      dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z);
-				  }
-			  }
+            bool found = false;
+            cODEMesh* mesh = 0;
+            while (cur_object && !found)
+            {
+              mesh = dynamic_cast<cODEMesh*>(cur_object);
+              if (mesh) found = true;
+              cur_object = cur_object->getParent();
+            }
 
-		    if (Form1->tool2 && Form1->second_device_enabled)
-			  {
+            if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT))
+              dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z);
+          }
+        }
+
+        if (Form1->tool2 && Form1->second_device_enabled)
+        {
           cProxyPointForceAlgo *proxy   = dynamic_cast<cProxyPointForceAlgo*>(Form1->tool2->getProxy());
 
-		      if (proxy && proxy->getContactObject() != NULL)
-				  {
-			      float x =  proxy->getContactPoint().x;
-			      float y =  proxy->getContactPoint().y;
-			      float z =  proxy->getContactPoint().z;
-			  
-			      float fx = -Form1->tool2->m_lastComputedGlobalForce.x ;
-			      float fy = -Form1->tool2->m_lastComputedGlobalForce.y ;
-			      float fz = -Form1->tool2->m_lastComputedGlobalForce.z ;
+          if (proxy && proxy->getContactObject() != NULL)
+          {
+            float x =  proxy->getContactPoint().x;
+            float y =  proxy->getContactPoint().y;
+            float z =  proxy->getContactPoint().z;
 
-					  cGenericObject* cur_object = proxy->getContactObject();
-					  bool found = false;
-					  cODEMesh* mesh = 0;
-					  while (cur_object && !found)
-					  {
-			        mesh = dynamic_cast<cODEMesh*>(cur_object);
-						  if (mesh) found = true;
-						  cur_object = cur_object->getParent();
-					  }
+            float fx = -Form1->tool2->m_lastComputedGlobalForce.x ;
+            float fy = -Form1->tool2->m_lastComputedGlobalForce.y ;
+            float fz = -Form1->tool2->m_lastComputedGlobalForce.z ;
 
-			      if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT))
-		  	      dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z);
-				  }
-		    }
-   
+            cGenericObject* cur_object = proxy->getContactObject();
+            bool found = false;
+            cODEMesh* mesh = 0;
+            while (cur_object && !found)
+            {
+              mesh = dynamic_cast<cODEMesh*>(cur_object);
+              if (mesh) found = true;
+              cur_object = cur_object->getParent();
+            }
+
+            if ((found) && (mesh) && (mesh->m_objType == DYNAMIC_OBJECT))
+            dBodyAddForceAtPos(mesh->m_odeBody,fx,fy,fz,x,y,z);
+          }
+        }
+
         dSpaceCollide (Form1->ode_space,Form1->ode_collision_callback_data,Form1->ode_collision_callback);
-	      dWorldStep(Form1->ode_world,Form1->ode_step);
-	      dJointGroupEmpty(Form1->ode_contact_group);
+        dWorldStep(Form1->ode_world,Form1->ode_step);
+        dJointGroupEmpty(Form1->ode_contact_group);
 
-		    Form1->object->updateDynamicPosition();
-			  Form1->object->m_historyValid = true;
-			  if (Form1->tool1 && Form1->first_device_enabled)
-		      Form1->tool1->computeGlobalPositions(1);
+        Form1->object->updateDynamicPosition();
+        Form1->object->m_historyValid = true;
+        if (Form1->tool1 && Form1->first_device_enabled)
+          Form1->tool1->computeGlobalPositions(1);
 
-		    if (Form1->tool2 && Form1->second_device_enabled)
-		      Form1->tool2->computeGlobalPositions(1);
+        if (Form1->tool2 && Form1->second_device_enabled)
+          Form1->tool2->computeGlobalPositions(1);
 
         Form1->ode_clock->initialize();
-		    Form1->ready = true;
-		  }
-	  }
+        Form1->ready = true;
+      }
+    }
   }
 
   // stop haptics
@@ -414,20 +436,20 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
     // i/o communication mode, depending on the USE_PHANTOM_DIRECT_IO
     // constant
     if (tool1 == 0) 
-		{
+    {
       // create a haptic tool and set up its workspace
       tool1 = new cMeta3dofPointer(world, 0, USE_PHANTOM_DIRECT_IO);
       tool1->setWorkspace(3.0,3.0,3.0);
 
       world->addChild(tool1);        
-	    tool1->setRadius(0.05);
-	    tool1->computeGlobalCurrentObjectOnly(true);
+      tool1->setRadius(0.05);
+      tool1->computeGlobalCurrentObjectOnly(true);
 
       // Replace the proxy with our custom ODE proxy
       cProxyPointForceAlgo* old_proxy = (cProxyPointForceAlgo*)(tool1->m_pointForceAlgos[0]);
       tool1->m_pointForceAlgos[0] = new cODEProxy(old_proxy);
       delete old_proxy;
-		}
+    }
 
     // set up the device
     tool1->initialize();
@@ -444,8 +466,8 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
     Sleep(1000);
 
     ode_clock = new cPrecisionClock();
-	  ode_clock->setTimeoutPeriod(TIME_STEP * 1e+6);
-	  ode_clock->start();
+    ode_clock->setTimeoutPeriod(TIME_STEP * 1e+6);
+    ode_clock->start();
 
     haptics_thread_running = 1;
     first_device_enabled = 1;
@@ -460,12 +482,11 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
   {
     // tell the haptic thread to quit
     haptics_enabled = 0;
-
-		first_device_enabled = 0;
+    first_device_enabled = 0;
 
     // If a second device is also running, stop it too
-	  second_device_enabled = 0;
-	  if (tool2)
+    second_device_enabled = 0;
+    if (tool2)
     {
       tool2->setForcesOFF();
       tool2->stop();
@@ -679,8 +700,8 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
 {
   if (!second_device_enabled)
   {
-		// temporarily disable the first device, because the scheduler will have to be restarted
-		first_device_enabled = 0;
+    // temporarily disable the first device, because the scheduler will have to be restarted
+    first_device_enabled = 0;
 
     // create a phantom tool with its graphical representation
     //
@@ -688,24 +709,24 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
     // i/o communication mode, depending on the USE_PHANTOM_DIRECT_IO
     // constant
     if (tool2 == 0)
-		{
-	    // create a new tool and set its workspace
+    {
+      // create a new tool and set its workspace
       tool2 = new cMeta3dofPointer(world, 1, USE_PHANTOM_DIRECT_IO);
-	    tool2->setWorkspace(3.0,3.0,3.0);
+      tool2->setWorkspace(3.0,3.0,3.0);
 
       // turn on ode proxy algorithm
-	    //tool2->m_proxyODEOn = true;
+      //tool2->m_proxyODEOn = true;
       world->addChild(tool2);       
-	    tool2->setRadius(0.05);
-	    tool2->computeGlobalCurrentObjectOnly(true);
+      tool2->setRadius(0.05);
+      tool2->computeGlobalCurrentObjectOnly(true);
 
       // Replace the proxy with our custom ODE proxy
       cProxyPointForceAlgo* old_proxy = (cProxyPointForceAlgo*)(tool2->m_pointForceAlgos[0]);
       tool2->m_pointForceAlgos[0] = new cODEProxy(old_proxy);
       delete old_proxy;
-		}
+    }
 
-	  // set up the device
+    // set up the device
     tool2->initialize();
 
     // open communication to the device
@@ -720,15 +741,15 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
     tool2->computeGlobalPositions();
     tool2->setForcesON();
 
-		Sleep(100);
+    Sleep(100);
 
-		// The devices are enabled, but are not "ready" for forces until 
-		// the user has moved them into the relevant workspace
-	  tool1_ready = 0;
-	  tool2_ready = 0;
+    // The devices are enabled, but are not "ready" for forces until
+    // the user has moved them into the relevant workspace
+    tool1_ready = 0;
+    tool2_ready = 0;
 
-		first_device_enabled = 1;
-	  second_device_enabled = 1;
+    first_device_enabled = 1;
+    second_device_enabled = 1;
 	
   } // enabling
 
@@ -737,7 +758,7 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
     // tell the haptic thread to quit
     second_device_enabled = 0;
     
-	  // Stop the haptic device...
+    // Stop the haptic device...
     tool2->setForcesOFF();
     tool2->stop();        
   } // disabling

@@ -22,8 +22,11 @@
 //---------------------------------------------------------------------------
 #ifndef CDeltaDevicesH
 #define CDeltaDevicesH
+
+#ifndef _DISABLE_DELTA_SUPPORT
 //---------------------------------------------------------------------------
 #include "CGenericDevice.h"
+#include "CPrecisionClock.h"
 //---------------------------------------------------------------------------
 /*!
     \file CDeltaDevices.h
@@ -34,29 +37,40 @@
 #define DHD_DEVICE_6DOF           61
 #define DHD_DEVICE_6DOF_500       62
 #define DHD_DEVICE_OMEGA          32
+#define DHD_DEVICE_OMEGA3         33
+#define DHD_DEVICE_OMEGA33        34
+#define DHD_DEVICE_OMEGA331       35
+
+//===========================================================================
 /*!
     \class cDeltaDevice
     \brief
-    Interface to delta device
+    Interface to delta and omega devices
 */
+//===========================================================================
 class cDeltaDevice : public cGenericDevice
 {
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cDeltaDevices.
     cDeltaDevice(unsigned int a_deviceNumber = 0);
+
     //! Destructor of cGenericDevice.
     virtual ~cDeltaDevice();
 
     // METHODS:
     //! Open connection to delta device.
     virtual int open();
+
     //! Close connection to delta device
     virtual int close();
+
     //! Calibrate delta device.
     virtual int initialize(const bool a_resetEncoders=false);
+
     //! Set a command to the delta device
     virtual int command(int a_command, void* a_data);
+
     //! Which ForceDimension device is actually connected to this object?
     virtual int getDeviceType() { return m_deviceType; }
 
@@ -76,8 +90,18 @@ class cDeltaDevice : public cGenericDevice
 
     //! Maximum forces
     double m_maximumForces;
+
+    //! Last position of user switch
+    int m_userSwitchCount[8];
+	int m_userSwitchStatus[8];
+    cPrecisionClock m_userSwitchClock[8];
+
+    //! Read user switch from end-effector
+    int getUserSwitch(int a_deviceID);
 };
 
 //---------------------------------------------------------------------------
 #endif
 //---------------------------------------------------------------------------
+
+#endif

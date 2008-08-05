@@ -847,16 +847,14 @@ void cMesh::computeAllNormals(const bool a_affectChildren)
     // normalize all normals (_after_ doing child-normal computations, in case
     // I share vertices with my children)
     while(curv != endv) {
-      if (curv->m_nTriangles) {
+      /*if (curv->m_nTriangles) {
         curv->m_normal /= (double)(curv->m_nTriangles);
-      }
-      curv++;
-      /*
-      if (curv->m_normal.lengthsq() > 0.00000001)
+      }*/
+      if (curv->m_normal.lengthsq() > CHAI_SMALL)
       {
         curv->m_normal.normalize();
       }
-      */
+      curv++;
     }
 
 }
@@ -1950,7 +1948,7 @@ void cMesh::createBruteForceCollisionDetector(bool a_affectChildren,
      Set up for each triangle a list of neighbor triangles
 
      \fn       void cMesh::createTriangleNeighborList(bool a_affectChildren)
-     \param    a_affectChildren   Create collision detectors for children?
+     \param    a_affectChildren   Create neighborlists for children?
 */
 //===========================================================================
 void cMesh::createTriangleNeighborList(bool a_affectChildren)
@@ -1960,14 +1958,9 @@ void cMesh::createTriangleNeighborList(bool a_affectChildren)
     for (i=0; i<m_triangles.size(); i++)
       sort0->push_back(&(m_triangles[i]));
 
-    std::vector<cTriangle*>* sort1 = new std::vector<cTriangle*>;
-    for (i=0; i<m_triangles.size(); i++)
-      sort1->push_back(&(m_triangles[i]));
-
-    std::vector<cTriangle*>* sort2 = new std::vector<cTriangle*>;
-    for (i=0; i<m_triangles.size(); i++)
-      sort2->push_back(&(m_triangles[i]));
-
+    std::vector<cTriangle*>* sort1 = new std::vector<cTriangle*>(*sort0);
+    std::vector<cTriangle*>* sort2 = new std::vector<cTriangle*>(*sort1);
+ 
     // Sort each list by the appropriate vertex index
     std::sort(sort0->begin(), sort0->end(), TriangleSort0);
     std::sort(sort1->begin(), sort1->end(), TriangleSort1);
@@ -1977,9 +1970,11 @@ void cMesh::createTriangleNeighborList(bool a_affectChildren)
     for (i=0; i<m_triangles.size(); i++)
     {
       // Create the neighbor array
-      if (m_triangles[i].m_neighbors) delete m_triangles[i].m_neighbors;
-      m_triangles[i].m_neighbors = new std::vector<cTriangle*>;
-
+      if (m_triangles[i].m_neighbors) {
+          m_triangles[i].m_neighbors->clear();
+      } else { 
+          m_triangles[i].m_neighbors = new std::vector<cTriangle*>;
+      }
       // Include each triangle as its own neighbor
       m_triangles[i].m_neighbors->push_back(&(m_triangles[i]));
     }

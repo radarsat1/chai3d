@@ -19,6 +19,9 @@ It uses the BASS audio library, http://www.un4seen.com/. The
 bass.dll, bass.h, and bass.lib files are included in this
 directory.
 
+Since it uses callbacks for the haptics, it is currently only 
+compatible for use with a Phantom device.
+
 
 
 

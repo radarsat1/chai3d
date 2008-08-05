@@ -36,8 +36,12 @@
 cDelta3dofPointer::cDelta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber)
     : cGeneric3dofPointer(a_world)
 {
+#ifndef _DISABLE_DELTA_SUPPORT
     // open delta driver
     m_device = new cDeltaDevice();
+#else
+    m_device = new cGenericDevice();
+#endif
 }
 
 

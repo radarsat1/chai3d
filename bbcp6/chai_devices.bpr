@@ -20,10 +20,10 @@
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <LINKER value="TLib"/>
-    <USERDEFINES value="WIN32"/>
+    <USERDEFINES value="WIN32;_DEBUG"/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="chai_devices.bpf"/>
-    <INCLUDEPATH value="..\src\devices;$(BCB)\include;$(BCB)\include\vcl;..\src\math"/>
+    <INCLUDEPATH value="..\src\devices;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\timers"/>
     <LIBPATH value="..\src\devices;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-rch -w-8065 -w-pia -w-par -w-8027 -w-csu"/>
     <LISTFILE value=""/>
@@ -32,9 +32,10 @@
   <OPTIONS>
     <IDLCFLAGS value="-I..\src\devices -I$(BCB)\include -I$(BCB)\include\vcl -I..\src\math 
       -src_suffix cpp -DWIN32 -boa"/>
-    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
-    <PFLAGS value="-N2obj -N0obj -$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
-    <AFLAGS value="/mx /w2 /zn"/>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2obj -N0obj -$Y+ -$W -$O- -$A8 -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zi"/>
     <LFLAGS value=""/>
     <OTHERFILES value=""/>
   </OPTIONS>
@@ -89,10 +90,11 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=3
-Item0=..\src\devices;$(BCB)\include;$(BCB)\include\vcl;..\src\math
-Item1=..\src\devices;$(BCB)\include;$(BCB)\include\vcl
-Item2=$(BCB)\include;$(BCB)\include\vcl
+Count=4
+Item0=..\src\devices;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\timers
+Item1=..\src\devices;$(BCB)\include;$(BCB)\include\vcl;..\src\math
+Item2=..\src\devices;$(BCB)\include;$(BCB)\include\vcl
+Item3=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
 Count=2
@@ -105,8 +107,8 @@ Item0=$(BCB)\source\vcl
 
 [HistoryLists\hlConditionals]
 Count=3
-Item0=WIN32
-Item1=WIN32;_DEBUG
+Item0=WIN32;_DEBUG
+Item1=WIN32
 Item2=_DEBUG
 
 [HistoryLists\hlIntOutputDir]
@@ -147,5 +149,10 @@ RemoteDebug=0
 ShowInfoMsgs=0
 LinkDebugVcl=0
 LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
   </IDEOPTIONS>
 </PROJECT>
