@@ -26,6 +26,7 @@
 #include "CGeneric3dofPointer.h"
 #include "CPhantomDevices.h"
 #include "CDeltaDevices.h"
+#include "CFalconDevice.h"
 
 #ifdef _WIN32
 #include "CVirtualDevice.h"
@@ -41,6 +42,7 @@
 #define DEVICE_DHD     1
 #define DEVICE_VIRTUAL 2
 #define DEVICE_MPB     3
+#define DEVICE_FALCON  4
 #define DEVICE_UNINITIALIZED -1
 
 //===========================================================================

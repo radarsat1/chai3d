@@ -9,8 +9,8 @@
 // manual modifications will be lost.                                         
 // ************************************************************************ //
 
-// C++ TLBWRTR : $Revision: 1.18 $
-// File generated on 4/25/2007 1:09:33 PM from Type Library described below.
+// C++ TLBWRTR : $Revision:   1.151.1.0.1.27  $
+// File generated on 5/25/2008 1:15:19 AM from Type Library described below.
 
 // ************************************************************************  //
 // Type Lib: C:\Documents and Settings\francois\Desktop\chai3d\examples\bcpp6\active_x\ActiveFormProj.tlb (1)

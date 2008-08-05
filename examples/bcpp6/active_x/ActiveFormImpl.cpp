@@ -88,7 +88,7 @@ __fastcall TActiveFormX::TActiveFormX(TComponent* AOwner) : TActiveForm(AOwner)
     material.m_diffuse.set( 0.8, 0.6, 0.6, 1.0 );
     material.m_specular.set( 0.9, 0.9, 0.9, 1.0 );
     material.setShininess(100);
-    material.setStiffness(20);
+    material.setStiffness(20 );
     object->m_material = material;
 
     // update camera position

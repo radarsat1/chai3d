@@ -313,6 +313,9 @@
 				RelativePath="..\src\devices\CDriverServotogo.cpp">
 			</File>
 			<File
+				RelativePath="..\src\devices\CFalconDevice.cpp">
+			</File>
+			<File
 				RelativePath="..\src\files\CFileLoader3DS.cpp">
 			</File>
 			<File
@@ -501,6 +504,9 @@
 			</File>
 			<File
 				RelativePath="..\src\devices\CDriverServotogo.h">
+			</File>
+			<File
+				RelativePath="..\src\devices\CFalconDevice.h">
 			</File>
 			<File
 				RelativePath="..\src\files\CFileLoader3DS.h">

@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
     world->addChild(object);
 
     // set material stiffness of object
-    object->m_material.setStiffness(30.0);
+    object->m_material.setStiffness(200.0);
     
     object->m_material.m_ambient.set(0.3, 0.3, 0.3);
     object->m_material.m_diffuse.set(0.8, 0.8, 0.8);

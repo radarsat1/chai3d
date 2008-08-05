@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
     object->rotate(cVector3d(0,1,0), cDegToRad(90));
 
     // set material stiffness of object
-    object->m_material.setStiffness(120.0);
+    object->m_material.setStiffness(200.0);
     
     // let's create a some environment mapping
     cTexture2D* texture = new cTexture2D();

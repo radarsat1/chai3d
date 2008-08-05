@@ -74,6 +74,26 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
     }
 #endif
 
+// Allow Falcon support to be compiled out
+#ifndef _DISABLE_FALCON_DEVICE_SUPPORT
+
+    // try to open a connection to a Falcon haptic device
+    m_device = new cFalconDevice(a_deviceNumber);
+    systemAvailable = m_device->isSystemAvailable();
+
+    if (systemAvailable)
+    {
+        m_device->open();
+        m_physicalDevice = DEVICE_FALCON;
+        return;
+    }
+    else
+    {
+        delete m_device;
+        m_device = NULL;
+    }
+#endif
+
 // Allow Phantom support to be compiled out
 #ifndef _DISABLE_PHANTOM_SUPPORT
 
