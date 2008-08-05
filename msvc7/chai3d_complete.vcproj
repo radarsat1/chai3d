@@ -271,6 +271,9 @@
 				RelativePath="..\src\widgets\CBitmap.cpp">
 			</File>
 			<File
+				RelativePath="..\src\devices\CCallback.cpp">
+			</File>
+			<File
 				RelativePath="..\src\scenegraph\CCamera.cpp">
 			</File>
 			<File
@@ -295,9 +298,6 @@
 				RelativePath="..\src\graphics\CColor.cpp">
 			</File>
 			<File
-				RelativePath="..\src\graphics\CColor.h">
-			</File>
-			<File
 				RelativePath="..\src\tools\CDelta3dofPointer.cpp">
 			</File>
 			<File
@@ -305,9 +305,6 @@
 			</File>
 			<File
 				RelativePath="..\src\graphics\CDraw3D.cpp">
-			</File>
-			<File
-				RelativePath="..\src\graphics\CDraw3D.h">
 			</File>
 			<File
 				RelativePath="..\src\devices\CDriverSensoray626.cpp">
@@ -358,9 +355,6 @@
 				RelativePath="..\src\tools\CGenericTool.cpp">
 			</File>
 			<File
-				RelativePath="..\src\graphics\chai_globals.h">
-			</File>
-			<File
 				RelativePath="..\src\files\CImageLoader.cpp">
 			</File>
 			<File
@@ -373,13 +367,7 @@
 				RelativePath="..\src\graphics\CMacrosGL.cpp">
 			</File>
 			<File
-				RelativePath="..\src\graphics\CMacrosGL.h">
-			</File>
-			<File
 				RelativePath="..\src\graphics\CMaterial.cpp">
-			</File>
-			<File
-				RelativePath="..\src\graphics\CMaterial.h">
 			</File>
 			<File
 				RelativePath="..\src\math\CMaths.cpp">
@@ -421,9 +409,6 @@
 				RelativePath="..\src\graphics\CShaders.cpp">
 			</File>
 			<File
-				RelativePath="..\src\graphics\CShaders.h">
-			</File>
-			<File
 				RelativePath="..\src\scenegraph\CShapeSphere.cpp">
 			</File>
 			<File
@@ -436,13 +421,7 @@
 				RelativePath="..\src\graphics\CTexture2D.cpp">
 			</File>
 			<File
-				RelativePath="..\src\graphics\CTexture2D.h">
-			</File>
-			<File
 				RelativePath="..\src\graphics\CTriangle.cpp">
-			</File>
-			<File
-				RelativePath="..\src\graphics\CTriangle.h">
 			</File>
 			<File
 				RelativePath="..\src\scenegraph\CVBOMesh.cpp">
@@ -454,13 +433,7 @@
 				RelativePath="..\src\graphics\CVertex.cpp">
 			</File>
 			<File
-				RelativePath="..\src\graphics\CVertex.h">
-			</File>
-			<File
 				RelativePath="..\src\display\CViewport.cpp">
-			</File>
-			<File
-				RelativePath="..\src\display\CViewport.h">
 			</File>
 			<File
 				RelativePath="..\src\devices\CVirtualDevice.cpp">
@@ -469,7 +442,7 @@
 				RelativePath="..\src\scenegraph\CWorld.cpp">
 			</File>
 			<File
-				RelativePath="..\src\graphics\glext.h">
+				RelativePath="..\src\devices\PhantomDriver.cpp">
 			</File>
 			<File
 				RelativePath="..\src\devices\Win626.c">
@@ -483,6 +456,9 @@
 			</File>
 			<File
 				RelativePath="..\src\widgets\CBitmap.h">
+			</File>
+			<File
+				RelativePath="..\src\devices\CCallback.h">
 			</File>
 			<File
 				RelativePath="..\src\scenegraph\CCamera.h">
@@ -506,6 +482,9 @@
 				RelativePath="..\src\collisions\CCollisionSpheresGeometry.h">
 			</File>
 			<File
+				RelativePath="..\src\graphics\CColor.h">
+			</File>
+			<File
 				RelativePath="..\src\math\CConstants.h">
 			</File>
 			<File
@@ -515,13 +494,13 @@
 				RelativePath="..\src\devices\CDeltaDevices.h">
 			</File>
 			<File
+				RelativePath="..\src\graphics\CDraw3D.h">
+			</File>
+			<File
 				RelativePath="..\src\devices\CDriverSensoray626.h">
 			</File>
 			<File
 				RelativePath="..\src\devices\CDriverServotogo.h">
-			</File>
-			<File
-				RelativePath="..\src\timers\celapsed.h">
 			</File>
 			<File
 				RelativePath="..\src\files\CFileLoader3DS.h">
@@ -566,6 +545,9 @@
 				RelativePath="..\src\tools\CGenericTool.h">
 			</File>
 			<File
+				RelativePath="..\src\graphics\chai_globals.h">
+			</File>
+			<File
 				RelativePath="..\src\files\CImageLoader.h">
 			</File>
 			<File
@@ -573,6 +555,12 @@
 			</File>
 			<File
 				RelativePath="..\src\scenegraph\CLight.h">
+			</File>
+			<File
+				RelativePath="..\src\graphics\CMacrosGL.h">
+			</File>
+			<File
+				RelativePath="..\src\graphics\CMaterial.h">
 			</File>
 			<File
 				RelativePath="..\src\math\CMaths.h">
@@ -611,6 +599,9 @@
 				RelativePath="..\src\forces\CProxyPointForceAlgo.h">
 			</File>
 			<File
+				RelativePath="..\src\graphics\CShaders.h">
+			</File>
+			<File
 				RelativePath="..\src\scenegraph\CShapeSphere.h">
 			</File>
 			<File
@@ -620,10 +611,22 @@
 				RelativePath="..\src\math\CString.h">
 			</File>
 			<File
+				RelativePath="..\src\graphics\CTexture2D.h">
+			</File>
+			<File
+				RelativePath="..\src\graphics\CTriangle.h">
+			</File>
+			<File
 				RelativePath="..\src\scenegraph\CVBOMesh.h">
 			</File>
 			<File
 				RelativePath="..\src\math\CVector3d.h">
+			</File>
+			<File
+				RelativePath="..\src\graphics\CVertex.h">
+			</File>
+			<File
+				RelativePath="..\src\display\CViewport.h">
 			</File>
 			<File
 				RelativePath="..\src\devices\CVirtualDevice.h">
@@ -633,6 +636,9 @@
 			</File>
 			<File
 				RelativePath="..\src\devices\Dlportio.h">
+			</File>
+			<File
+				RelativePath="..\src\graphics\glext.h">
 			</File>
 			<File
 				RelativePath="..\src\devices\PhantomDriver.h">

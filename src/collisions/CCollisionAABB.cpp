@@ -31,7 +31,7 @@ cCollisionAABBInternal* g_nextFreeNode;
     Constructor of cCollisionAABB.
 
     \fn       cCollisionAABB::cCollisionAABB(vector<cTriangle> *a_triangles, bool a_useNeighbors)
-    \param    a_triangle      Pointer to array of triangles.
+    \param    a_triangles     Pointer to array of triangles.
     \param    a_useNeighbors  Use neighbor lists to speed up collision detection?
 */
 //===========================================================================

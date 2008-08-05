@@ -25,7 +25,7 @@ CFG=chai3d_complete - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=cl.exe
+CPP=xicl6.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
@@ -47,7 +47,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
+LIB32=xilink6.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"../lib/msvc6/chai3d_complete.lib"
 # Begin Special Build Tool
@@ -74,7 +74,7 @@ PostBuild_Cmds=../scripts/copyHeaderFiles.bat
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
+LIB32=xilink6.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"../lib/msvc6/chai3d_complete.lib"
 # Begin Special Build Tool
@@ -352,6 +352,10 @@ SOURCE=..\src\devices\CVirtualDevice.cpp
 # Begin Source File
 
 SOURCE=..\src\scenegraph\CWorld.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\devices\PhantomDriver.cpp
 # End Source File
 # Begin Source File
 

@@ -1,0 +1,15 @@
+/****
+
+ CHAI Example: implicit_functions
+ 
+ Author: Chris Sewell
+
+****/
+
+This example implements a sphere, torus, cone, and cylinder using implicit
+functions, as described in Salisbury and Tarr's paper "Haptic Rendering of 
+Surfaces Defined by Implicit Functions", including static and dynamic
+friction.
+
+
+ 

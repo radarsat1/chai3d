@@ -18,7 +18,9 @@
     \date       01/2004
 */
 //===========================================================================
-
+/*!
+    \file CCollisionAABBTree.h
+*/
 //---------------------------------------------------------------------------
 #ifndef CCollisionAABBTreeH
 #define CCollisionAABBTreeH
@@ -48,7 +50,11 @@ class cCollisionAABBNode
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cCollisionAABBNode.
-    cCollisionAABBNode() { m_parent = 0; m_nodeType = AABB_NODE_GENERIC; }
+    cCollisionAABBNode() : m_parent(0), m_depth(0), m_nodeType(AABB_NODE_GENERIC) { }
+    //! Constructor of cCollisionAABBNode.
+    cCollisionAABBNode(aabb_node_types a_nodeType, int a_depth) : m_parent(0), 
+        m_nodeType(a_nodeType), m_depth(a_depth) { }
+
     //! Destructor of cCollisionAABBNode.
     virtual ~cCollisionAABBNode() {}
 
@@ -93,7 +99,7 @@ class cCollisionAABBLeaf : public cCollisionAABBNode
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Default constructor of cCollisionAABBLeaf.
-    cCollisionAABBLeaf() { m_nodeType = AABB_NODE_LEAF; }
+    cCollisionAABBLeaf() : cCollisionAABBNode(AABB_NODE_LEAF, 0) { }
     //! Constructor of cCollisionAABBLeaf.
     cCollisionAABBLeaf(cTriangle *a_triangle) : m_triangle(a_triangle)
         {fitBBox();}
@@ -136,10 +142,7 @@ class cCollisionAABBInternal : public cCollisionAABBNode
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Default constructor of cCollisionAABBInternal.
-    cCollisionAABBInternal() {
-      m_depth = 0;
-      m_nodeType = AABB_NODE_INTERNAL;
-    }
+    cCollisionAABBInternal() : cCollisionAABBNode(AABB_NODE_INTERNAL, 0) { }
 
     //! Constructor of cCollisionAABBInternal.
     cCollisionAABBInternal(unsigned int a_numLeaves, cCollisionAABBLeaf *a_leaves,

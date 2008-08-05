@@ -21,6 +21,11 @@
 
 //---------------------------------------------------------------------------
 #include "CPrecisionClock.h"
+
+#ifdef _POSIX
+#include <sys/time.h>
+#endif
+
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -35,6 +40,9 @@ cPrecisionClock::cPrecisionClock()
 	  // clock is currently off
 	  m_on = false;
 
+#ifdef _POSIX
+    m_highres = true;
+#else
 	  // test for high performance timer on the local machine. Some old computers
 	  // may not offer this feature
 	  QueryPerformanceFrequency (&m_freq);
@@ -46,6 +54,13 @@ cPrecisionClock::cPrecisionClock()
 	  {
 		   m_highres  = true;
 	  }
+#endif
+
+#ifdef _MSVC
+#if (_MSC_VER >= 1400)
+	  m_highres = false;
+#endif
+#endif
 
 	  // initialize current time
 	  m_timeCurrent = 0;
@@ -59,7 +74,7 @@ cPrecisionClock::cPrecisionClock()
 /*!
 	  Destructor of cPrecisionClock.
 
-	  \fn		~cPrecisionClock::cPrecisionClock()
+	  \fn		cPrecisionClock::~cPrecisionClock()
 */
 //===========================================================================
 cPrecisionClock::~cPrecisionClock()
@@ -144,7 +159,7 @@ void cPrecisionClock::setTimeoutPeriod(long a_timeoutPeriod)
 /*!
 	  Check if timer has expired its timeout period. if so return \b true.
 
-	  \fn         bool cPrecisionClock::timeoutoccurred()
+	  \fn         bool cPrecisionClock::timeoutOccurred()
 	  \return     Return \b true if timeout occurred, otherwise \b false.
 */
 //===========================================================================
@@ -207,7 +222,11 @@ long cPrecisionClock::getCurrentTime()
 //===========================================================================
 long cPrecisionClock::getCount()
 {
-	  long t_count;
+
+// Windows implementation
+#ifndef _POSIX
+
+    long t_count;
 
 	  // if high resolution available
 	  if (m_highres)
@@ -222,8 +241,19 @@ long cPrecisionClock::getCount()
 	  {
 	  	  t_count = 1000*GetTickCount();
 	  }
-
 	  return (t_count);
+
+// POSIX implementation
+#else
+
+    timeval t;
+    gettimeofday(&t,0);
+
+    // Convert everything to usec
+    return t.tv_sec * 1000000 + t.tv_usec;
+
+#endif
+
 }
 
 
@@ -239,6 +269,10 @@ long cPrecisionClock::getCount()
 
 double cPrecisionClock::getCPUtime()
 {
+
+// Windows implementation
+#ifndef _POSIX
+
     if (m_highres)
     {
         __int64 curtime;
@@ -248,5 +282,17 @@ double cPrecisionClock::getCPUtime()
     }
 
     return ((double)(GetTickCount())) / 1000.0;
+
+// POSIX implementation
+#else
+
+  timeval t;
+  gettimeofday(&t,0);
+
+  // Convert everything to sec
+  return (double)t.tv_sec + ((double)t.tv_usec) / 1000000.0;
+
+#endif
+
 }
 

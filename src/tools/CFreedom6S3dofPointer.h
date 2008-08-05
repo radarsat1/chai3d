@@ -29,8 +29,9 @@
 
 //===========================================================================
 /*!
+      \file       CFreedom6S3dofPointer.h
       \class      cFreedom6S3dofPointer
-      \brief      cFreedom6S3dofPointer provides a cursor like tool which is
+      \brief      cFreedom6S3dofPointer provides a cursor-like tool which is
                   graphically rendered by a small sphere illustrating the tip
                   of the device. The tools interacts with the enviornment
                   by using the finger-proxy algorithm

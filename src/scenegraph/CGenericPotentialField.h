@@ -28,6 +28,7 @@
 
 //===========================================================================
 /*!
+      \file       CGenericPotentialField.h
       \class      cGenericPotentialField
       \brief      cGenericPotentialField describes a generic class to create
                   objects which are describe by implicit functions

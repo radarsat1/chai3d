@@ -28,7 +28,7 @@
 /*!
     Constructor of cShapeSphere.
 
-    \fn     cShapeSphere::cShapeSphere(const double a_radius)
+    \fn     cShapeSphere::cShapeSphere(const double& a_radius)
     \param  a_radius    Radius of sphere
 */
 //===========================================================================
@@ -36,6 +36,7 @@ cShapeSphere::cShapeSphere(const double& a_radius)
 {
     // initialize radius of sphere
     m_radius = cAbs(a_radius);
+    m_texture = NULL;
 
     // set material properties
     m_material.setShininess(100);
@@ -146,7 +147,7 @@ cVector3d cShapeSphere::computeLocalForce(const cVector3d& a_localPosition)
 /*!
     Update bounding box of current object.
 
-    \fn       void updateBoundaryBox()
+    \fn       void cShapeSphere::updateBoundaryBox()
 */
 //===========================================================================
 void cShapeSphere::updateBoundaryBox()

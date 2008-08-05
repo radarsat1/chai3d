@@ -22,7 +22,10 @@
 //---------------------------------------------------------------------------
 #include "CMeta3dofPointer.h"
 #include "CMacrosGL.h"
+#ifdef _WIN32
 #include <process.h>
+#endif
+
 //---------------------------------------------------------------------------
 
 //==========================================================================
@@ -34,10 +37,14 @@
       \param    a_world  World in which the tool will operate.
       \param    a_deviceNumber  0-based index used to try to open a phantom
 								device.
-      \param    dio_access  Also used only if the tool ends up being a phantom.
-				If this is 'true', the tool will use the Ghost API's direct-i/o
-				model, if it's available.  Otherwise the gstEffect i/o model will
-				be used.
+
+      \param    dio_access  Also used only if the tool ends up being a phantom AND
+                you're running GHOST, not OpenHaptics.  If you're not using a Phantom
+                or you're using OpenHaptics, ignore this parameter.
+				
+                For Ghost, if dio_access is 'true', the tool will use the Ghost API's
+                direct-i/o model, if it's available.  Otherwise the gstEffect i/o model
+                will be used.
 */
 //===========================================================================
 cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber, bool a_dio_access)
@@ -63,6 +70,9 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
         m_device = NULL;
     }
 
+// Allow Phantom support to be compiled out
+#ifndef _DISABLE_PHANTOM_SUPPORT
+
     // try to open phantom driver
     m_device = new cPhantomDevice(a_deviceNumber, a_dio_access);
     systemAvailable = m_device->isSystemAvailable();
@@ -78,6 +88,12 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
         delete m_device;
         m_device = NULL;
     }
+
+#endif
+
+    // No linux support yet for the virtual device or the f6s...
+
+#ifdef _WIN32
 
     // try to open Freedom6S device
     m_device = new cFreedom6SDevice();
@@ -95,6 +111,10 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
       m_device = NULL;
     }
 
+#endif
+
+// No Linux virtual device yet...
+#ifdef _WIN32
     // try to open a virtual haptic device
     m_device = new cVirtualDevice();
     systemAvailable = m_device->isSystemAvailable();
@@ -119,7 +139,7 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
         char* path = getenv("PATH");
         char* chai_base = getenv("CHAI_BASE");
 
-        int result = spawnlp(P_NOWAIT, DHD_VIRTUAL_EXE_NAME, DHD_VIRTUAL_EXE_NAME, NULL);
+        int result = spawnlp(_P_NOWAIT, DHD_VIRTUAL_EXE_NAME, DHD_VIRTUAL_EXE_NAME, NULL);
         if (result == -1) {
 
           // Try to open it in the chai_base directory, which may not be in
@@ -137,7 +157,7 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
             sprintf(newpath,"%s\\bin\\%s",chaibase_copy,DHD_VIRTUAL_EXE_NAME);
 
             // Try again...
-            result = spawnlp(P_NOWAIT, newpath, DHD_VIRTUAL_EXE_NAME, NULL);            
+            result = spawnlp(_P_NOWAIT, newpath, DHD_VIRTUAL_EXE_NAME, NULL);            
           }          
         }
         
@@ -170,6 +190,13 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
             m_physicalDevice = DEVICE_VIRTUAL;
         }
     }
+
+// Linux...
+#else
+    m_device = NULL;
+    return;
+#endif
+
 }
 
 

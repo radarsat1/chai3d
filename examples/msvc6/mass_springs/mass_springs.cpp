@@ -400,7 +400,7 @@ void Cmass_springsApp::select(CPoint p) {
 }
 
 
-CElapsed g_timer;
+cPrecisionClock g_timer;
 double g_last_iteration_time = -1.0;
 
 // Called from the haptics loop if it's running (from the
@@ -419,7 +419,7 @@ void Cmass_springsApp::compute_spring_forces() {
     removeball_pending = 0;
   }
 
-  double curtime = g_timer.GetTime();
+  double curtime = g_timer.getCPUtime();
   
   if (g_last_iteration_time < 0) {
     g_last_iteration_time = curtime;
@@ -611,9 +611,6 @@ void Cmass_springsApp::toggle_haptics(int enable) {
     
       // set up the device
       tool->initialize();
-
-      // update initial orientation and position of device
-      tool->updatePose();
 
       // set up a nice-looking workspace for the phantom so 
       // it fits nicely with our shape

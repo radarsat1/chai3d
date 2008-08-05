@@ -23,17 +23,22 @@
 #ifndef CPrecisionTimerH
 #define CPrecisionTimerH
 //---------------------------------------------------------------------------
+#ifdef _WIN32
 #include <windows.h>
+#ifndef _POSIX
 #include <mmsystem.h>
-#include "celapsed.h"
+#endif
+#endif
+
+#ifdef _POSIX
+#include <pthread.h>
+#endif
+
+#include "CPrecisionClock.h"
 #include <stdio.h>
 #include <string>
 //---------------------------------------------------------------------------
 using std::string;
-//---------------------------------------------------------------------------
-#ifdef _MSVC
-#include <conio.h>
-#endif
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
@@ -55,12 +60,25 @@ typedef void(PRECISION_TIMER_CALLBACK)(void* pUserData);
     data (like the user's callback function).
 */
 //---------------------------------------------------------------------------
-void CALLBACK internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser,
-                                      DWORD dw1, DWORD dw2);
+#ifdef _WIN32
 
+void CALLBACK internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+
+#else
+
+typedef unsigned int UINT;
+typedef unsigned int DWORD;
+void internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+
+#endif
+
+#ifdef _POSIX
+void *timer_thread_func(void *cptimer);
+#endif
 
 //===========================================================================
 /*!
+      \file     CPrecisionTimer.h
       \class    cPrecisionTimer
       \brief    The cPrecisionTimer class manages high-rate callbacks using win32
                 multimedia timers.  Rates up to 1kHz should be supported.
@@ -125,7 +143,7 @@ class cPrecisionTimer
     void* m_userData;
 
     // Takes care of accurately counting seconds
-    CElapsed m_tick_counter;
+    cPrecisionClock m_tickCounter;
 
     // The callback function that the user wants to execute
     PRECISION_TIMER_CALLBACK* m_userCallback;
@@ -134,16 +152,34 @@ class cPrecisionTimer
     //! Last error message.
     string m_lastErrorMessage;
 
+    //! Our current timing interval in milliseconds
+    long m_interval;
+
+#ifdef _POSIX
+    pthread_mutex_t m_mutex;
+    pthread_cond_t m_condition;
+    pthread_t m_threadID;
+    bool m_cancelThread;
+#else
     // handle to timer
     MMRESULT m_timer;
+#endif
 
     // Assign default values to variables
     void defaults();
 
   // The multimedia timer will need a global function as callback, but we
   // make him a 'friend' so he can access private data.  He'll need to
-  // call the user's callback function and modify the timing statistcs.
-  friend void CALLBACK m_internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+  // call the user's callback function and modify the timing statistics.
+#ifdef _WIN32
+  friend void CALLBACK internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+#else
+  friend void internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+#endif
+
+#ifdef _POSIX
+  friend void *timer_thread_func(void *cptimer);
+#endif
 };
 
 //---------------------------------------------------------------------------

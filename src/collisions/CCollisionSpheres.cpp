@@ -23,6 +23,8 @@
 #include "CCollisionSpheres.h"
 #include <algorithm>
 
+//cTriangle* secret2;
+
 // GLOBAL VARIABLES AND CONSTANTS:
 //! Pointer to first free location in array of sphere tree internal nodes.
 cCollisionSpheresNode* g_nextInternalNode;
@@ -41,7 +43,7 @@ const double LARGE = 1e10;
 
     \fn       cCollisionSpheres::cCollisionSpheres(vector<cTriangle> *a_triangles,
               bool a_useNeighbors)
-    \param    a_triangle  Pointer to array of triangles.
+    \param    a_triangles     Pointer to array of triangles.
     \param    a_useNeighbors  Use neighbor lists to speed up collision detection?
 */
 //===========================================================================
@@ -97,8 +99,10 @@ cCollisionSpheres::~cCollisionSpheres()
 //===========================================================================
 void cCollisionSpheres::initialize()
 {
+	secret = NULL;
     // initialize number of triangles, root pointer, and last intersected triangle
     int numTriangles = m_trigs->size();
+
     m_root = NULL;
     m_lastCollision = NULL;
 
@@ -124,7 +128,7 @@ void cCollisionSpheres::initialize()
         {
             new(&m_firstLeaf[0]) cCollisionSpheresLeaf(&((*m_trigs)[0]));
             m_root = g_nextLeafNode;
-        }
+        }		
     }
 
     // if there are no triangles, just set the root to null
@@ -139,8 +143,7 @@ void cCollisionSpheres::initialize()
 /*!
     Draw the collision spheres at the given level.
 
-    \fn       void cCollisionSpheres::render(int depth)
-    \param    depth   Only draw nodes at this depth in the tree.
+    \fn       void cCollisionSpheres::render()
 */
 //===========================================================================
 void cCollisionSpheres::render()
@@ -317,17 +320,12 @@ bool cCollisionSpheres::computeCollision(cVector3d& a_segmentPointA,
     \return     Return a pointer to new cCollisionSpheresSphere instance.
 */
 //===========================================================================
-cCollisionSpheresSphere::cCollisionSpheresSphere(cCollisionSpheresSphere *a_parent)
+cCollisionSpheresSphere::cCollisionSpheresSphere(cCollisionSpheresSphere *a_parent) :
+    m_parent(a_parent), m_center(0,0,0), m_depth(0)
 {
-    // initialize the parent pointer and the sphere center
-    m_parent = a_parent;
-    m_center.set(0,0,0);
-
     // set the depth of this node to be one below its parent
     if (m_parent)
         m_depth = m_parent->m_depth + 1;
-    else
-        m_depth = 0;
 }
 
 
@@ -419,8 +417,8 @@ cCollisionSpheresNode::cCollisionSpheresNode(std::vector<cTriangle>* a_tris,
     {
         // create cCollisionSpheresPoint primitive object for first point
         cVector3d vpos1 =  (*a_tris)[i].getVertex0()->getPos();
-        cVector3d vpos2 =  (*a_tris)[i].getVertex0()->getPos();
-        cVector3d vpos3 =  (*a_tris)[i].getVertex0()->getPos();
+        cVector3d vpos2 =  (*a_tris)[i].getVertex1()->getPos();
+        cVector3d vpos3 =  (*a_tris)[i].getVertex2()->getPos();
 
         cCollisionSpheresTri* t = new cCollisionSpheresTri(vpos1,vpos2,vpos3);
 
@@ -548,6 +546,7 @@ void cCollisionSpheresNode::ConstructChildren(Plist &a_primList)
         m_center = rc;
         m_radius = rr;
     }
+	m_radius*=1.01;
 }
 
 
@@ -563,7 +562,7 @@ void cCollisionSpheresNode::ConstructChildren(Plist &a_primList)
 void cCollisionSpheresNode::draw(int a_depth)
 {
     // only render the sphere if this node is at the given depth
-    if (a_depth < 0 || a_depth == m_depth)
+    if ( ( (a_depth < 0) && (abs(a_depth) >= m_depth) ) || a_depth == m_depth)
     {
       glPushMatrix();
       glTranslated(m_center.x, m_center.y, m_center.z);
@@ -572,7 +571,7 @@ void cCollisionSpheresNode::draw(int a_depth)
     }
 
     // do not go any further if the target depth has been reached
-    if (a_depth == m_depth) { return; }
+    if (a_depth >= 0 && a_depth == m_depth) { return; }
 
     // recursively call left and right subtrees
     if (m_left) m_left->draw(a_depth);
@@ -611,7 +610,7 @@ void cCollisionSpheresNode::swapptr(void **a_a, void **a_b)
               double& a_colSquareDistance, cCollisionSpheresSphere *a_sb)
     \param    a_sa  The root of one sphere tree to check for collision.
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle  Returns pointer to nearest colided triangle.
+    \param    a_colTriangle  Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.
@@ -751,7 +750,7 @@ cCollisionSpheresLeaf::cCollisionSpheresLeaf(cTriangle* a_tri,
 void cCollisionSpheresLeaf::draw(int a_depth)
 {
     // only render the sphere if this node is at the given depth
-    if (a_depth < 0 || a_depth == m_depth)
+    if ( ( (a_depth < 0) && (abs(a_depth) >= m_depth) ) || a_depth == m_depth)
     {      
       glPushMatrix();
       glTranslated(m_center.x, m_center.y, m_center.z);

@@ -70,6 +70,8 @@ double cube_side[2];
 
 int model_type;
 
+// User-defined callback
+cCallback* userCallback=0;
 
 //=============================================================================
 // Callbacks
@@ -92,6 +94,8 @@ HDCallbackCode HDCALLBACK HapticCallBack(void *data)
   else
     valid = 1;
     
+  if (userCallback) userCallback->callback();
+
   // if only one of the two devices is active
   if (single)
   {
@@ -430,15 +434,12 @@ FUNCTION int __stdcall   OpenPhantom(char * name)
 //==========================================================================
 /*!
   This function closes stops the servoloop for all phantoms. This should
-  be the last opeartion called before exiting the program. Also OpenPhantom()
+  be the last operation called before exiting the program. Also OpenPhantom()
   should not be called after this point.
 
-      \fn       void ClosePhantoms()
-    
+      \fn       void ClosePhantoms()   
 */
 //===========================================================================
-
-
 FUNCTION void __stdcall   ClosePhantoms()
 {
   hdStopScheduler();
@@ -488,20 +489,21 @@ FUNCTION int __stdcall  ResetPhantomEncoders(int num)
       calibrationStyle = HD_CALIBRATION_INKWELL;
       }
     if (supportedCalibrationStyles & HD_CALIBRATION_AUTO)
-      {
+    {
         calibrationStyle = HD_CALIBRATION_AUTO;
     }
 
-      if (calibrationStyle == HD_CALIBRATION_ENCODER_RESET)
+    if (calibrationStyle == HD_CALIBRATION_ENCODER_RESET)
     {
-          hdUpdateCalibration(calibrationStyle);
-        if (hdCheckCalibration() == HD_CALIBRATION_OK)
+      hdUpdateCalibration(calibrationStyle);
+      if (hdCheckCalibration() == HD_CALIBRATION_OK)
         return PH_SUCCESS;
       else 
         return PH_RES_ENC_ERR;
     }
     else 
       return PH_SUCCESS;
+
   }
   else
     return PH_OF;
@@ -939,4 +941,19 @@ FUNCTION int __stdcall   GetWorkspaceScale(const int& num, double& scale) {
     scale = cube_side[num];
     return PH_SUCCESS;
   }
+}
+
+
+//==========================================================================
+/*!
+  Sets up a user-defined callback function.
+
+  \fn     bool SetCallback(cCallback* callback)
+  \param  callback user-defined callback object
+  \return error code
+*/
+//===========================================================================
+FUNCTION int __stdcall   SetCallback(cCallback* callback) {
+  userCallback = callback;
+  return  PH_SUCCESS;
 }

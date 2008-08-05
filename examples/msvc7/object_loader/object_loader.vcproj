@@ -45,11 +45,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib"
+				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib"
 				OutputFile="../../../bin/object_loader_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../../lib/msvc7"
+				AdditionalLibraryDirectories="../../../lib/msvc7;../../../external/OpenGL/msvc6"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\Debug/object_loader.pdb"
@@ -118,11 +118,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib"
+				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib"
 				OutputFile="../../../bin/object_loader_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../../lib/msvc7"
+				AdditionalLibraryDirectories="../../../lib/msvc7;../../../external/OpenGL/msvc6"
 				IgnoreDefaultLibraryNames="msvcprt.lib libc.lib msvcp60.lib libmmdd.lib libmmd.lib"
 				ProgramDatabaseFile=".\Release/object_loader.pdb"
 				SubSystem="2"

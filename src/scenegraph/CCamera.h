@@ -24,11 +24,15 @@
 #ifndef CCameraH
 #define CCameraH
 //---------------------------------------------------------------------------
-#include "cGenericObject.h"
+#include "CGenericObject.h"
 #include "CMaths.h"
-#include "windows.h"
-#include "gl/gl.h"
-#include "gl/glu.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <GL/gl.h>
+#include <GL/glu.h>
 //---------------------------------------------------------------------------
 class cWorld;
 //---------------------------------------------------------------------------
@@ -70,6 +74,7 @@ struct cClippingPlane {
 
 //===========================================================================
 /*!
+      \file       CCamera.h
       \class      cCamera
       \brief      cCamera describes a virtual Camera located inside the world.
                   Its job in life is to set up the OpenGL projection matrix
@@ -201,7 +206,7 @@ class cCamera : public cGenericObject
     //! Render a 2d scene within this camera's view.
     void render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_height);
 
-    //! Older apps may have the camera as a child of the world, which
+    //! Some apps may have the camera as a child of the world, which
     //! would cause recursion when resetting the display
     bool m_performingDisplayReset;
     

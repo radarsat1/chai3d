@@ -24,11 +24,15 @@
 #ifndef CImageLoaderH
 #define CImageLoaderH
 //---------------------------------------------------------------------------
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include "CColor.h"
 //---------------------------------------------------------------------------
-
-// Global utility functions:
+/*!
+    \file CImageLoader.h
+*/
+  //Global utility functions:
 
 //! Finds the extension in a filename and returns a pointer to the character
 //! after the '.' (or to the '.' itself, if include_dot is 'true')
@@ -47,6 +51,9 @@ bool find_directory(char* a_dest, const char* a_source);
 
 //! Converts a_source to lower-case and writes the result to a_dest
 void string_tolower(char* a_dest, const char* a_source);
+
+//! Chops newline characters from the end of a string
+void chop_newlines(char* a_str);
 
 //! Global function to read the contents of a file
 unsigned char* readFile(const char* a_filename, bool a_readAsText);

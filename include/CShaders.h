@@ -27,7 +27,9 @@
 #include "CGenericObject.h"
 #include "glext.h"
 #include <string>
-
+/*!
+    \file   CShaders.h
+*/
 //===========================================================================
 /*!
       \class      cGenericShader

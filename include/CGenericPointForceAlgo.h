@@ -24,7 +24,7 @@
 #define CGenericPointForceAlgoH
 //---------------------------------------------------------------------------
 #include "CVector3d.h"
-#include "cGenericObject.h"
+#include "CGenericObject.h"
 #include <vector>
 //---------------------------------------------------------------------------
 class cWorld;
@@ -32,6 +32,7 @@ class cWorld;
 
 //===========================================================================
 /*!
+      \file     CGenericPointForceAlgo.h
       \class    cGenericPointForceAlgo
       \brief    cGenericPointForceAlgo is an abstract class for algorithms that
                 compute single point force contacts.

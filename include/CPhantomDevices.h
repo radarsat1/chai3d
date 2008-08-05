@@ -22,13 +22,29 @@
 //---------------------------------------------------------------------------
 #ifndef CPhantomDevicesH
 #define CPhantomDevicesH
+/*!
+    \file CPhantomDevices.h
+*/
+// Allow Phantom support to be compiled out
+#ifndef _DISABLE_PHANTOM_SUPPORT
+
 //---------------------------------------------------------------------------
 #include "CGenericDevice.h"
+
+#ifdef _WIN32
 #include "PhantomDriver.h"
+#else
+#include "PhantomDriverLinux.h"
+#endif
+
 #include "CMatrix3d.h"
 #include "CVector3d.h"
 //---------------------------------------------------------------------------
-
+/*!
+    \class cPhantomDevice
+    \brief
+    Class to interface with Phantom devices
+*/
 class cPhantomDevice : public cGenericDevice
 {
   public:
@@ -44,9 +60,12 @@ class cPhantomDevice : public cGenericDevice
     //! Close connection to phantom device.
     virtual int close();
     //! Calibrate phantom device.
-    virtual int initialize();
+    virtual int initialize(const bool a_resetEncoders=false);
     //! Send a command to the phantom device.
     virtual int command(int a_command, void* a_data);
+
+    //! Ask the device to call me back periodically
+    virtual bool setCallback(cCallback* m_callback);
 
   private:
    //! handle for specific phantom use.
@@ -57,6 +76,9 @@ class cPhantomDevice : public cGenericDevice
 
 };
 
+#endif // #ifndef _DISABLE_PHANTOM_SUPPORT
+
 //---------------------------------------------------------------------------
 #endif
 //---------------------------------------------------------------------------
+

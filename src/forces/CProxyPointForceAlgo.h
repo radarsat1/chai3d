@@ -45,6 +45,7 @@ typedef std::map<cGenericObject*,positionData> meshPositionMap;
 
 //===========================================================================
 /*!
+      \file     CProxyPointForceAlgo.h
       \class    cProxyPointForceAlgo
       \brief    Implements the finger-proxy algorithm for computing
                 interaction forces between a point force device and meshes.
@@ -78,7 +79,7 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
 
     // METHODS - DYNAMIC PROXY (TO HANDLE MOVING OBJECTS):
     //! Return the number of current contacts and the associated triangles
-    virtual inline unsigned int getContacts(cTriangle*& a_t0, cTriangle*& a_t1,
+    virtual unsigned int getContacts(cTriangle*& a_t0, cTriangle*& a_t1,
             cTriangle*& a_t2);
     //! Return a pointer to the object with which device is currently in contact.
     virtual inline cGenericObject* getContactObject() { return m_touchingObject; }
@@ -116,9 +117,9 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
 
     // METHODS - BASIC PROXY:
     //! Compute the next goal position of the proxy.
-    virtual void computeNextBestProxyPosition();
+    virtual void computeNextBestProxyPosition(cVector3d a_goal);
     //! Attempt to move the proxy, subject to friction constraints.
-    void testFrictionAndMoveProxy(const cVector3d& goal, const cVector3d& proxy, cVector3d& normal, cGenericObject* parent);
+    void testFrictionAndMoveProxy(const cVector3d& goal, const cVector3d& proxy, cVector3d normal, cGenericObject* parent);
     //! Compute force to apply to device.
     virtual void computeForce();
 

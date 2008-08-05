@@ -1,0 +1,22 @@
+This file is way out of date, so I'm re-writing it to just include things that we've had on our horizon for a while.  Please add to this file as you see fit; we'll discuss it at some future CHAI meeting.
+
+* Important examples I'd really like to see:
+
+  * Rendering with a tool that isn't just a dot, i.e. a nice mesh
+    that rotates with the device.
+
+  * An example with any kind of networking
+
+  * An example where you can grab an object and move it around, a la
+    dice.
+
+  * An example that uses the .net framework
+
+  * An example with deformable objects
+
+* Unit test scripts
+
+* Shadows
+
+
+

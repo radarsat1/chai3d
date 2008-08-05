@@ -1,27 +1,25 @@
 //===========================================================================
 /*
-This file is part of the CHAI 3D visualization and haptics libraries.
-Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
 
-This library is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License("GPL") version 2
-as published by the Free Software Foundation.
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License("GPL") version 2
+    as published by the Free Software Foundation.
 
-For using the CHAI 3D libraries with software that can not be combined
-with the GNU GPL, and for taking advantage of the additional benefits
-of our support services, please contact CHAI 3D about acquiring a
-Professional Edition License.
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
 
-\author:    <http://www.chai3d.org>
-\author:    Dan Morris
-\version    1.0
-\date       3/2005
+    \author:    <http://www.chai3d.org>
+    \author:    Dan Morris
+    \version    1.0
+    \date       3/2005
 */
 //===========================================================================
 
-#include "cLabelPanel.h"
-#include "CViewport.h"
-#include <conio.h>
+#include "CLabelPanel.h"
 
 // Default values for the user-adjustable parameters
 #define DEFAULT_TOP_INTERNAL_BORDER 15
@@ -73,8 +71,8 @@ cLabelPanel::cLabelPanel(cWorld* a_world) : cPanel(a_world)
 
 //===========================================================================
 /*!
-  Destructor of cLabelPanel
-  \fn         cLabelPanel::~cLabelPanel()
+    Destructor of cLabelPanel
+    \fn         cLabelPanel::~cLabelPanel()
 */
 //===========================================================================
 cLabelPanel::~cLabelPanel()
@@ -87,8 +85,8 @@ cLabelPanel::~cLabelPanel()
 
 //===========================================================================
 /*!
-  Clear all stored strings
-  \fn         cLabelPanel::clearLabels()
+    Clear all stored strings
+    \fn         cLabelPanel::clearLabels()
 */
 //===========================================================================
 void cLabelPanel::clearLabels()
@@ -129,6 +127,28 @@ void cLabelPanel::addLabel(const char* a_label, const cMaterial* a_mat)
     }
     layout();
 }
+
+
+//===========================================================================
+/*!
+    Add a new line of text to be rendered.
+    \fn         void cLabelPanel::setLabel(const unsigned int& a_index, const char* a_label)
+    \param      a_index         Which label are we changing?
+    \param      a_label         The text to print   
+*/
+//===========================================================================
+void cLabelPanel::setLabel(const unsigned int& a_index, const char* a_label)
+{
+  if (a_index > m_labels.size()) return;
+
+  char* oldstr = m_labels[a_index];
+  char* buf = new char[strlen(a_label)+1];
+  strcpy(buf,a_label);
+  m_labels[a_index] = buf;
+  delete [] oldstr;
+  layout();
+}
+
 
 
 //===========================================================================
@@ -342,7 +362,7 @@ void cLabelPanel::render(const int a_renderMode)
 //===========================================================================
 /*!
     Read out a particular label
-    \fn         const char* cLabelPanel::getLabel(const unsigned int& a_index)
+    \fn         const char* cLabelPanel::getLabel(const unsigned int& a_index) const
     \param      a_index     Which label do you want to read?
     \return     The requested label, or 0 for an error
 */
@@ -375,8 +395,11 @@ void cLabelPanel::setShowSquares(const bool& a_showSquares)
     \fn         void cLabelPanel::setBorders(const int& a_topBorder, const int& a_bottomBorder,
                                             const int& a_leftBorder, const int& a_rightBorder,
                                             const int& a_interLabelSpacing)
-    \param      a_*     The width, in pixels, of a particular border.  Specify -1 to leave
-                        an option unchanged.
+    \param      a_topBorder     Sets the width, in pixels, of a particular border.
+    \param      a_bottomBorder  Sets the width, in pixels, of a particular border.
+    \param      a_leftBorder    Sets the width, in pixels, of a particular border.
+    \param      a_rightBorder   Sets the width, in pixels, of a particular border.
+    \param      a_interLabelSpacing   Sets the spacing, in pixels, between labels.
 */
 //===========================================================================
 void cLabelPanel::setBorders(const int& a_topBorder, const int& a_bottomBorder, const int& a_leftBorder,
@@ -406,8 +429,12 @@ void cLabelPanel::setBorders(const int& a_topBorder, const int& a_bottomBorder, 
 /*!
     Get the border size and spacing for labels within the panel
     \fn         void cLabelPanel::getBorders(int& a_topBorder, int& a_bottomBorder, int& a_leftBorder,
-                                            int& a_rightBorder, int& a_interLabelSpacing)
-    \param      a_*     Returns the width, in pixels, of a particular border.
+                                            int& a_rightBorder, int& a_interLabelSpacing) const
+    \param      a_topBorder     Returns the width, in pixels, of a particular border.
+    \param      a_bottomBorder  Returns the width, in pixels, of a particular border.
+    \param      a_leftBorder    Returns the width, in pixels, of a particular border.
+    \param      a_rightBorder   Returns the width, in pixels, of a particular border.
+    \param      a_interLabelSpacing     Returns the spacing, in pixels, between labels.
 */
 //===========================================================================
 void cLabelPanel::getBorders(int& a_topBorder, int& a_bottomBorder, int& a_leftBorder,

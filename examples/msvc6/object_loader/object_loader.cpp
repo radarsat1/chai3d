@@ -24,7 +24,7 @@
 #include "object_loaderDlg.h"
 #include <conio.h>
 #include <process.h>
-#include "celapsed.h"
+#include "CPrecisionClock.h"
 #include "CVBOMesh.h"
 #include "CImageLoader.h"
 
@@ -149,7 +149,7 @@ void Cobject_loaderApp::uninitialize() {
   toggle_haptics(TOGGLE_HAPTICS_DISABLE);
   delete world;
   delete viewport;
-  
+
 }
 
 
@@ -192,7 +192,7 @@ BOOL Cobject_loaderApp::InitInstance() {
   int result = camera->set(
               cVector3d(0,0,4),           // position of camera
               cVector3d(0.0, 0.0, 0.0),   // camera looking at origin
-              cVector3d(0.0, 1.0, 0.0)  // orientation of camera (standing up)
+              cVector3d(0.0, 1.0, 0.0)    // orientation of camera (standing up)
               );
 
   if (result == 0) {
@@ -242,7 +242,6 @@ BOOL Cobject_loaderApp::InitInstance() {
   // Move the object over some so the Phantom will not initially be
   // inside the object.
   object->translate(g_initial_object_pos);
-  object->rotate(cVector3d(0,1,0),45.0 * 3.14159 / 180.0);
 
   object->computeGlobalPositions(true);
   object->computeBoundaryBox(true);
@@ -651,8 +650,8 @@ int Cobject_loaderApp::LoadModel(char* filename) {
   // the proxy will work nicely when haptics are enabled.
   _cprintf("Building collision detector...\n");
 
-  new_object->createSphereTreeCollisionDetector(true,true);
-  // new_object->createAABBCollisionDetector(true,true);
+  // new_object->createSphereTreeCollisionDetector(true,true);
+  new_object->createAABBCollisionDetector(true,true);
   
   _cprintf("Finished building collision detector...\n");
 
@@ -930,6 +929,14 @@ void object_loader_haptic_iteration(void* param) {
 }
 
 
+
+// If we're using a device-supported callback mechanism, this is how
+// we'll be called...
+void Cobject_loaderApp::callback() {
+  object_loader_haptic_iteration(this);
+}
+
+
 // We use this in our "animation" routine...
 inline double sgn(const double& a) {
   if (a>=0) return 1.0;
@@ -954,8 +961,8 @@ void Cobject_loaderApp::animate() {
   }
           
 
-  CElapsed clock;
-  double curtime = clock.GetTime();
+  cPrecisionClock clock;
+  double curtime = clock.getCPUtime();
     
   if (moving_object && m_last_animation_time >= 0) {
 
@@ -1111,9 +1118,6 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
     // open communication to the device
     tool->start();
 
-    // update initial orientation and position of device
-    tool->updatePose();
-
     // tell the tool to show his coordinate frame so you
     // can see tool rotation
     tool->visualizeFrames(true);
@@ -1131,25 +1135,36 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
     // Make sure the haptic device knows where he is in the camera frame
     world->computeGlobalPositions(true);
 
+    // If our device supports callbacks, use them to run our haptic loop...
+    bool result = tool->getDevice()->setCallback(this);
+
+    if (result) {
+      _cprintf("Using native haptic device callback...\n");
+    }
+
+    else {
+    
 #ifdef USE_MM_TIMER_FOR_HAPTICS
 
-    // start the mm timer to run the haptic loop
-    timer.set(0,object_loader_haptic_iteration,this);
+      // start the mm timer to run the haptic loop
+      timer.set(0,object_loader_haptic_iteration,this);
 
 #else
 
-    // start haptic thread
-    haptics_thread_running = 1;
+      // start haptic thread
+      haptics_thread_running = 1;
 
-    DWORD thread_id;
-    ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(object_loader_haptic_loop), this, 0, &thread_id);
+      DWORD thread_id;
+      ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(object_loader_haptic_loop), this, 0, &thread_id);
 
-    // Boost thread and process priority
-    ::SetThreadPriority(&thread_id, THREAD_PRIORITY_ABOVE_NORMAL);
-    //::SetPriorityClass(GetCurrentProcess(),ABOVE_NORMAL_PRIORITY_CLASS);
+      // Boost thread and process priority
+      ::SetThreadPriority(&thread_id, THREAD_PRIORITY_ABOVE_NORMAL);
+      //::SetPriorityClass(GetCurrentProcess(),ABOVE_NORMAL_PRIORITY_CLASS);
 
 #endif
-       
+
+    }
+
   } // enabling
 
   else if (enable == TOGGLE_HAPTICS_DISABLE) {

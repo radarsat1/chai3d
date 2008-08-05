@@ -14,23 +14,15 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Federico Barbagli
-    \version    1.2
-    \date       01/2004
+    \author:    Dan Morris
+    \version    2.0
+    \date       03/2005
 */
 //===========================================================================
-
-
-// MS Visual C++ import flag
-#ifdef _cplusplus
-extern "C" {
-#endif
-
-// Borland import flag
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#define FUNCTION __declspec(dllexport)
+/*!
+    \file PhantomDriver.h
+*/
+#include "CCallback.h"
 
 const int PH_SUCCESS = 0;
 const int PH_ERR = -1;
@@ -50,37 +42,37 @@ const int PH_DLL_PROBLEM = -100;
 //! int OpenPhantom(int num),	creates and initializes phantom number num in the control panel (i.e. from top
 //! to bottom of the phantoms registered in the control panel).
 //! The function returns the phantom handle if everything went ok, a negative value otherwise (check list of errors)
-FUNCTION int __stdcall   OpenPhantom(int num);
+int OpenPhantom(int num);
 
 //! int PhantomAccess(int access_type), if i = 1 the system tries to load the deviceIO based phantom access. This will
 //! only take place, however, if ghost4 is installed. This function does not need to be called. If not called
 //! the system loads the gstEffect phantom access by default.
-FUNCTION void __stdcall   PhantomAccess(int access_type);
+void PhantomAccess(int access_type);
 
 //! ClosePhantoms(), closes all Phantoms in the system.
 //! the function should be called as a last operation and no other phantom operation should follow.
-FUNCTION void __stdcall   ClosePhantoms();
+void ClosePhantoms();
  
 //! ResetPhantomEncoders(int num),		resets encoders for phantom num.
 //! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
-FUNCTION int __stdcall   ResetPhantomEncoders(int num);
+int ResetPhantomEncoders(int num);
 
-//! StartCommunicationPhantom(int i), Starts the servoloop for phantom number i, basically enabling forces and position
+//! StartCommunicationPhantom(int num), Starts the servoloop for phantom number i, basically enabling forces and position
 //! reading for such phantom. 
 //! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
-FUNCTION int __stdcall   StartCommunicationPhantom(int i);
+int StartCommunicationPhantom(int num);
 
 //! StopCommunicationPhantom(int i), Stops phantom i, basically disabling forces and position
 //! reading for such phantom. Note that the overall servoloop will still be running since the other phantom
 //! may be not disabled.
 //! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
-FUNCTION int __stdcall   StopCommunicationPhantom(int i);
+int StopCommunicationPhantom(int num);
 
 //! ReadPositionPhantom(int num,double &iPosX,double &iPosY,double &iPosZ); reads tip position for phantom num
 //! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
 //! Note that positions are expressed in mm with respect to the Ghost reference frame (x towards the right, 
 //! y vertically pointing up, z vertical pointing towards the user).
-FUNCTION int __stdcall   ReadPositionPhantom(int num, 
+int ReadPositionPhantom(int num, 
 									  double &iPosX,
 									  double &iPosY,
 									  double &iPosZ);
@@ -89,7 +81,7 @@ FUNCTION int __stdcall   ReadPositionPhantom(int num,
 //! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
 //! Note that velocity is expressed in mm/sec with respect to a Ghost reference frame (x towards the right, 
 //! y vertically pointing up, z vertical pointing towards the user).
-FUNCTION int __stdcall   ReadVelocityPhantom(int num, 
+int ReadVelocityPhantom(int num, 
 									  double &iVelX,
 									  double &iVelY,
 									  double &iVelZ);
@@ -99,9 +91,7 @@ FUNCTION int __stdcall   ReadVelocityPhantom(int num,
 //! Note that positions are expressed with a value included in the interval [-1,1] for a cube centered in the device's workspace center with
 //! respect to a Ghost reference frame (x towards the right, y vertically pointing up, z vertical pointing towards the user).
 //! This is to ensure that a same demo may be used using different devices without having to change any of the code.
-
-
-FUNCTION int __stdcall   ReadNormalizedPositionPhantom(int num, 
+int ReadNormalizedPositionPhantom(int num, 
 									  double &iPosX,
 									  double &iPosY,
 									  double &iPosZ);
@@ -112,7 +102,7 @@ FUNCTION int __stdcall   ReadNormalizedPositionPhantom(int num,
 //! y vertically pointing up, z vertical pointing towards the user). Note: no safety features are implemented other than the 
 //! Ghost ones, i.e. if you start the servoloop and your phantom is inside an object you will probably
 //! get very large forces and undesirable effects.
-FUNCTION int __stdcall   SetForcePhantom(int num, 
+int SetForcePhantom(int num, 
 								  const double &iForceX,
 				                  const double &iForceY,
 								  const double &iForceZ);
@@ -122,7 +112,7 @@ FUNCTION int __stdcall   SetForcePhantom(int num,
 //! the function returns 1 if everything went ok, a negative value otherwise (check list of errors)
 //! Note that torques are expressed in Newtons Meter with respect to a Ghost reference frame (x towards the right, 
 //! y vertically pointing up, z vertical pointing towards the user).
-FUNCTION int __stdcall   SetForceTorquePhantom(int num, 
+int SetForceTorquePhantom(int num, 
 								  const double &iForceX,
 				                  const double &iForceY,
 								  const double &iForceZ,
@@ -136,16 +126,16 @@ FUNCTION int __stdcall   SetForceTorquePhantom(int num,
 //! as		m[0][0]  m[0][1] m[0][2]
 //!			m[1][0]  m[1][1] m[1][2]
 //!			m[2][0]  m[2][1] m[2][2]
-FUNCTION int __stdcall   ReadOrientMat3DOFPhantom(int num, 
+int ReadOrientMat3DOFPhantom(int num, 
  									  double *m);
 
 //! ReadSwitchPhantom(int num), reads the switch from phantom num
 //!
 //! Returns a bitmask with button 0 in bit 0, etc.
-FUNCTION int __stdcall   ReadSwitchPhantom(int num);
+int ReadSwitchPhantom(int num);
 
 //! double GetMaxForcePhantom(int num),	reads what the max force is for Phantom num
-FUNCTION double __stdcall   GetMaxForcePhantom(int num);
+double GetMaxForcePhantom(int num);
 
 
 // OPTIONAL FUNCTIONS
@@ -153,14 +143,9 @@ FUNCTION double __stdcall   GetMaxForcePhantom(int num);
 //! double GetWorkspaceScale(int num),	reads the scale factor from mm to normalized
 //! coordinates for Phantom num.  Multiply normalized coordinates by this value to
 //! get back to mm.
-FUNCTION int __stdcall   GetWorkspaceScalePhantom(const int& num, double& scale);
+int GetWorkspaceScalePhantom(const int& num, double& scale);
 
+//! Set up a callback for this device.  Only supported by the HD library right now.
+int SetCallbackPhantom(cCallback* a_callback);
 
-#ifdef _cplusplus
-}
-#endif
-
-#ifdef __cplusplus
-}
-#endif
 

@@ -26,7 +26,11 @@
 #include "CMatrix3d.h"
 #include <math.h>
 //---------------------------------------------------------------------------
-
+/*!
+    \file   CMaths.h
+    \brief
+    Various mathematical utility functions
+*/
 //===========================================================================
 /*!
     Check if \e value is equal or near zero.
@@ -232,7 +236,7 @@ template<class T> inline void cSwap(T &a_value1, T &a_value2)
     \param    a_level  Interpolation parameter.
     \param    a_value1  First value.
     \param    a_value2  Second value.
-    \return   Return an interpolated result: (1-level) * lo + level * hi.
+    \return   Return an interpolated result: (1-a_level) * a_value1 + a_level * a_value2
 */
 //===========================================================================
 template<class T> inline T cLerp(const double& a_level, const T& a_value1, const T& a_value2)
@@ -313,9 +317,9 @@ template<class T, class V> inline bool cContains(const T& a_value, const V& a_lo
     \return   Return (/e value * /e value).
 */
 //===========================================================================
-inline double cSqr(const double& iValue)
+inline double cSqr(const double& a_value)
 {
-    return(iValue*iValue);
+    return(a_value*a_value);
 }
 
 
@@ -379,13 +383,13 @@ inline double cCosRad(const double& a_angleRad)
 /*!
     Return the sine of an angle defined in radians.
 
-    \param    a_angleRad  Angle in radians.
-    \return   Return the sine of angle.
+    \param    a_value Angle in radians.
+    \return   Return the sine of angle a_value.
 */
 //===========================================================================
-inline double cSinRad(const double& iValue)
+inline double cSinRad(const double& a_value)
 {
-    return (sin(iValue));
+    return (sin(a_value));
 }
 
 
@@ -393,13 +397,13 @@ inline double cSinRad(const double& iValue)
 /*!
     Return the tangent of an angle defined in radians.
 
-    \param    a_angleRad  Angle in radians.
-    \return   Return the tangent of angle.
+    \param    a_value  Angle in radians.
+    \return   Return the tangent of angle a_value.
 */
 //===========================================================================
-inline double cTanRad(const double& iValue)
+inline double cTanRad(const double& a_value)
 {
-    return (tan(iValue));
+    return (tan(a_value));
 }
 
 
@@ -738,16 +742,38 @@ inline cMatrix3d cInv(const cMatrix3d& a_matrix)
 
 //===========================================================================
 /*!
-Compute the angle in radian between two vectors.
+    Compute the angle between two vectors (in radians).
 
-\param    a_vector0  Input vector.
-\param    a_vector1  Input vector.
-\return   Returns the angle in radian between both vectors.
+    \param    a_vector0  Input vector.
+    \param    a_vector1  Input vector.
+    \return   Returns the angle (in radians) between the input vectors.
 */
 //===========================================================================
 inline double cAngle(const cVector3d& a_vector0, const cVector3d& a_vector1)
 {
 
+    double n0 = a_vector0.length();
+    double n1 = a_vector1.length();
+    double val = a_vector0.dot(a_vector1)/(n0*n1);
+
+    if (val > 1.0) { val = 1.0; }
+    else if (val < -1.0) { val = -1.0; }
+  
+    return(acos(val));
+}
+
+
+//===========================================================================
+/*!
+    Compute cosine of the angle between two vectors.
+
+    \param    a_vector0  Input vector.
+    \param    a_vector1  Input vector.
+    \return   Returns the cosine of the angle between the input vectors.
+*/
+//===========================================================================
+inline double cCosAngle(const cVector3d& a_vector0, const cVector3d& a_vector1)
+{
   double n0 = a_vector0.length();
   double n1 = a_vector1.length();
 

@@ -24,8 +24,8 @@
 #ifndef CViewportH
 #define CViewportH
 //---------------------------------------------------------------------------
-#include "windows.h"
-#include "gl/gl.h"
+#include <windows.h>
+#include <GL/gl.h>
 #include "CWorld.h"
 #include "CCamera.h"
 #include "CMatrix3d.h"
@@ -35,6 +35,7 @@
 
 //===========================================================================
 /*!
+      \file       CViewport.h
       \class      cViewport
       \brief
 

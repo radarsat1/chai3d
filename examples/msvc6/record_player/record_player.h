@@ -65,6 +65,9 @@ const char* getRecordName(int a_index);
 class Crecord_playerApp : public CWinApp {
 public:
 	Crecord_playerApp();
+
+	int LoadModel(char* filename);
+
   
   // Call this in place of a destructor to clean up
   void uninitialize();

@@ -30,9 +30,9 @@
      the caller.
 
       \fn     bool cLoadMeshFromFile(cMesh* iMesh, const string& iFileName);
-      \param  cMesh* iMesh  The mesh into which we should write the loaded data
-      \param  string& iFileName The filename from which we should load the mesh
-      \return true is the file is loaded successfully, false for an error
+      \param  iMesh  The mesh into which we should write the loaded data
+      \param  iFileName The filename from which we should load the mesh
+      \return true if the file is loaded successfully, false for an error
 */
 //===========================================================================
 bool cLoadMeshFromFile(cMesh* iMesh, const string& iFileName) {

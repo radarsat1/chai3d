@@ -37,6 +37,7 @@ typedef enum {
    
 //===========================================================================
 /*!
+      \file       CGeneric3dofPointer.h
       \class      cGeneric3dofPointer
       \brief      cGeneric3dofPointer represents a haptic tool that 
                   can apply forces in three degrees of freedom and
@@ -74,8 +75,8 @@ class cGeneric3dofPointer : public cGenericTool
     virtual int start();
     //! Stop communication with the device connected to the tool (0 indicates success)
     virtual int stop();
-    //! Initialize encoders on device connected to the tool (0 indicates success)
-    virtual int initialize();  
+    //! Initialize the device connected to the tool (0 indicates success).
+    virtual int initialize(const bool a_resetEncoders=false);  
     //! Toggle forces on
     virtual int setForcesON();
     //! Toggle forces off
@@ -99,6 +100,8 @@ class cGeneric3dofPointer : public cGenericTool
     virtual void setRadius(const double& a_radius);
     //! Set haptic device driver.
     virtual void setDevice(cGenericDevice *a_device);
+    //! Get haptic device driver.
+    virtual cGenericDevice* getDevice() { return m_device; }
     //! This is a convenience function; it searches the list of force functions for a proxy
     virtual cProxyPointForceAlgo* getProxy();
 
@@ -132,7 +135,8 @@ class cGeneric3dofPointer : public cGenericTool
     //! with this variable
     bool m_waitForSmallForce;
 
-    //! Vector of force algorithms.  By default, a proxy algorithm object is added to this list
+    //! Vector of force algorithms.  By default, a proxy algorithm object and a potential
+    //! field object are added to this list (in that order).
     //!
     //! When a tool is asked to compute forces, it walks this list and asks each algorithm
     //! to compute its forces.

@@ -21,7 +21,7 @@ object Form1: TForm1
     Left = 917
     Top = 0
     Width = 0
-    Height = 697
+    Height = 704
     Cursor = crHSplit
     Align = alRight
   end
@@ -29,14 +29,14 @@ object Form1: TForm1
     Left = 0
     Top = 0
     Width = 917
-    Height = 697
+    Height = 704
     Align = alClient
     Color = clNone
     TabOrder = 0
   end
   object Panel2: TPanel
     Left = 0
-    Top = 697
+    Top = 704
     Width = 917
     Height = 91
     Align = alBottom

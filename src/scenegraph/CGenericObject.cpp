@@ -25,6 +25,7 @@
 #include "CGenericCollision.h"
 #include "CProxyPointForceAlgo.h"
 #include "CMesh.h"
+#include <float.h>
 //---------------------------------------------------------------------------
 #include <vector>
 //---------------------------------------------------------------------------
@@ -36,53 +37,24 @@
     \fn     cGenericObject::cGenericObject()
 */
 //===========================================================================
-cGenericObject::cGenericObject()
+cGenericObject::cGenericObject() : m_parent(NULL), m_localPos(0.0, 0.0, 0.0), 
+m_globalPos(0.0, 0.0, 0.0), m_show(true), m_showFrame(false), m_frameSize(1.0),
+m_frameThicknessScale(1.0), m_boundaryBoxMin(0.0, 0.0, 0.0),
+m_boundaryBoxMax(0.0, 0.0, 0.0), m_showBox(false), m_boundaryBoxColor(0.5, 0.5, 0.0),
+m_showTree(false), m_treeColor(0.5, 0.0, 0.0), m_collisionDetector(NULL),
+m_showCollisionTree(false), m_historyValid(false), m_hapticEnabled(true),
+m_tag(-1), m_userData(0)
 {
-    // initialize parent.
-    m_parent = NULL;
-
     // initialize local position and orientation
-    m_localPos.set(0.0, 0.0 ,0.0);
     m_localRot.identity();
 
     // initialize global position and orientation
-    m_globalPos.set(0.0, 0.0 ,0.0);
     m_globalRot.identity();
 
     // initialize openGL matrix with position vector and orientation matrix
     m_frameGL.set(m_globalPos, m_globalRot);
 
-    // set display status of object
-    m_show = true;
-
-    // set showframe status and frame size
-    m_showFrame = false;
-    m_frameSize = 1.0;
-    m_frameThicknessScale = 1.0;
-
-    // initialize the boundary box
-    m_boundaryBoxMin.zero();
-    m_boundaryBoxMax.zero();
-    m_showBox = false;
-    m_boundaryBoxColor.set(0.5, 0.5, 0.0);
-
-    // set showTree status and default color for tree
-    m_showTree = false;
-    m_treeColor.set(0.5, 0.0, 0.0);
-
-    // collision detection algorithm
-    m_collisionDetector = NULL;
-    m_showCollisionTree = false;
-
-		// by default, we do not pay attention to the history of positions
-		m_historyValid = false;
-
-		// by default, this object can be touched if it can be seen
-		m_hapticEnabled = true;
-
     // custom user information
-    m_tag = -1;
-    m_userData = 0;
     m_objectName[0] = '\0';
 };
 
@@ -136,7 +108,7 @@ void cGenericObject::addChild(cGenericObject* a_object)
 
     \fn     void cGenericObject::scale(const cVector3d& a_scaleFactors,
             const bool a_includeChildren)
-    \param    a_scaleFactor  Possibly non-uniform scale factors
+    \param    a_scaleFactors  Possibly non-uniform scale factors
     \param    a_includeChildren  If true, this message is passed to children.
 */
 //===========================================================================
@@ -179,11 +151,12 @@ void cGenericObject::scale(const double& a_scaleFactor, const bool a_includeChil
 
 //===========================================================================
 /*!
-Does this object have the specified object as a child?
+    Does this object have the specified object as a child?
 
-\fn       bool cGenericObject::containsChild(cGenericObject* a_object,
-            bool a_includeChildren=false)
-\param    a_object  Object to search for
+    \fn       bool cGenericObject::containsChild(cGenericObject* a_object,
+              bool a_includeChildren=false)
+    \param    a_object  Object to search for
+    \param    a_includeChildren  Should we also search this object's descendants?
 */
 //===========================================================================
 bool cGenericObject::containsChild(cGenericObject* a_object, bool a_includeChildren)
@@ -330,12 +303,13 @@ unsigned int cGenericObject::getNumDescendants(bool a_includeCurrentObject)
 
 //===========================================================================
 /*!
-  Fill this list with all of my descendants.  The current object is optionally
-  included in this list.  Does not clear the list before appending to it.
+    Fill this list with all of my descendants.  The current object is optionally
+    included in this list.  Does not clear the list before appending to it.
 
-  \fn     void cGenericObject::enumerateChildren(std::list<cGenericObject*>& a_childList,
-          bool a_includeCurrentObject=true);
-  \param  a_includeCurrentObject Should I include myself on the list?
+    \fn     void cGenericObject::enumerateChildren(std::list<cGenericObject*>& a_childList,
+            bool a_includeCurrentObject=true);
+    \param  a_childList The list to write our enumerated results to
+    \param  a_includeCurrentObject Should I include myself on the list?
 */
 //===========================================================================
 void cGenericObject::enumerateChildren(std::list<cGenericObject*>& a_childList,
@@ -414,7 +388,7 @@ void cGenericObject::rotate(const cMatrix3d& a_rotation)
     \fn     void cGenericObject::rotate(const cVector3d& a_axis,
             const double a_angle)
     \param  a_axis   Rotation axis
-    \parame a_angle  Rotation angle in radians
+    \param  a_angle  Rotation angle in radians
 */
 //===========================================================================
 void cGenericObject::rotate(const cVector3d& a_axis, const double a_angle)
@@ -429,10 +403,15 @@ void cGenericObject::rotate(const cVector3d& a_axis, const double a_angle)
 //===========================================================================
 /*!
     Compute globalPos and globalRot given the localPos and localRot
-    of this object and its children.
+    of this object and its parents.  Optionally propagates to children.
 
-    if \e a_frameOnly is set to \b false, additional global positions such as
-    vertex positions are computed (which can be time-consuming)
+    If \e a_frameOnly is set to \b false, additional global positions such as
+    vertex positions are computed (which can be time-consuming).
+  
+    Call this method any time you've moved an object and will need to access
+    to globalPos and globalRot in this object or its children.  For performance
+    reasons, these values are not kept up-to-date by default, since almost
+    all operations use local positions and rotations.?   
 
     \fn     void cGenericObject::computeGlobalPositions(const bool a_frameOnly,
             const cVector3d& a_globalPos, const cMatrix3d& a_globalRot)
@@ -560,7 +539,7 @@ void cGenericObject::setName(const char* a_name, const bool a_affectChildren)
 /*!
     Set the m_userData pointer for this object and - optionally - for my children.
 
-    \fn     void cGenericObject::setUserData(void* data, const bool a_affectChildren=0)
+    \fn     void cGenericObject::setUserData(void* a_data, const bool a_affectChildren=0)
     \param  a_data   The pointer to which we will set m_userData
     \param  a_affectChildren  If \b true, the operation propagates through the scene graph.
 */
@@ -614,8 +593,8 @@ void cGenericObject::onDisplayReset(const bool a_affectChildren)
 //===========================================================================
 /*!
     This call tells an object that you're not going to modify him any more.
-	For example, a mesh-like object might optimize his vertex arrangement
-	when he gets this call.  Always optional; just for performance...
+    For example, a mesh-like object might optimize his vertex arrangement
+    when he gets this call.  Always optional; just for performance...
 
     \fn     void cGenericObject::finalize(const bool a_affectChildren)
     \param  a_affectChildren  If \b true, the operation propagates through the scene graph
@@ -641,7 +620,7 @@ void cGenericObject::finalize(const bool a_affectChildren)
 //===========================================================================
 /*!
     This call tells an object that you may modify his contents.  See
-	finalize() for more information.
+    finalize() for more information.
 
     \fn     void cGenericObject::unfinalize(const bool a_affectChildren)
     \param  a_affectChildren  If \b true, the operation propagates through the scene graph
@@ -761,7 +740,8 @@ void cGenericObject::setShowFrame(const bool a_showFrame, const bool a_affectChi
 
     \fn     bool cGenericObject::setFrameSize(const double a_size,
             const double a_thickness, const bool a_affectChildren)
-    \param  a_size  Size of graphical representation of frame.
+    \param  a_size            Length of graphical representation of frame.
+    \param  a_thickness       Thickness of graphical representation of frame.
     \param  a_affectChildren  If \b true all children are updated.
 */
 //===========================================================================
@@ -827,7 +807,7 @@ void cGenericObject::setShowTree(const bool a_showTree, const bool a_affectChild
     If \e a_affectChildren is set to \b true then all children are updated
     with the new value.
 
-    \fn     void cGenericObject::setTreeColor(const cColorf& iTreeColor, const bool a_affectChildren=false)
+    \fn     void cGenericObject::setTreeColor(const cColorf& a_treeColor, const bool a_affectChildren=false)
     \param  a_treeColor  Color of tree.
     \param  a_affectChildren  If \b true all children are updated.
 */
@@ -939,7 +919,7 @@ void cGenericObject::showCollisionTree(const bool a_showCollisionTree, const boo
     found.
 
     \fn     void cGenericObject::deleteCollisionDetector(const bool a_affectChildren)
-    \param  a_affectChildren  If \true all my children's cd's are also deleted
+    \param  a_affectChildren  If true, all my children's cd's are also deleted
 */
 //===========================================================================
 void cGenericObject::deleteCollisionDetector(const bool a_affectChildren)
@@ -975,7 +955,7 @@ void cGenericObject::deleteCollisionDetector(const bool a_affectChildren)
     \param  a_color  Color used to render collision detector.
     \param  a_displayDepth  Indicated which depth of collision tree needs to be displayed
                             (see cGenericCollision)
-    \param  a_affectChildren  If \true all children are updated
+    \param  a_affectChildren  If true, all children are updated
 */
 //===========================================================================
 void cGenericObject::setCollisionDetectorProperties(unsigned int a_displayDepth,
@@ -1015,8 +995,8 @@ void cGenericObject::setCollisionDetectorProperties(unsigned int a_displayDepth,
     Note that regardless of this parameter's value, this operation propagates
     down the scene graph.
 
-    \fn     void cGenericObject::computeBoundaryBox(const bool a_includeChildren)
-    \param  a_includeChildren  If \true, then children are included.
+    \fn     void cGenericObject::computeBoundaryBox(const bool a_includeChildren=true)
+    \param  a_includeChildren  If true, then children are included.
 */
 //===========================================================================
 void cGenericObject::computeBoundaryBox(const bool a_includeChildren)
@@ -1025,66 +1005,101 @@ void cGenericObject::computeBoundaryBox(const bool a_includeChildren)
     // compute the bounding box of this object
     updateBoundaryBox();
 
-    // compute the bounding box of all my children
-    for (unsigned int i=0; i<m_children.size(); i++)
-    {
+    if (a_includeChildren == false) return;
 
+    unsigned int n = m_children.size();
+
+    // compute the bounding box of all my children
+    for (unsigned int i=0; i<n; i++)
+    {
         m_children[i]->computeBoundaryBox(a_includeChildren);
 
-        // inlcude children
-        if (a_includeChildren)
+        // see if this child has a _valid_ boundary box
+        bool child_box_valid = (
+          fabs(cDistance(m_children[i]->getBoundaryMax(),
+                          m_children[i]->getBoundaryMin())) >
+                        BOUNDARY_BOX_EPSILON
+          );
+
+        // don't include invalid boxes in my bounding box
+        if (child_box_valid == 0) continue;
+
+        // get position and rotation of child frame
+        cMatrix3d rot = m_children[i]->getRot();
+        cVector3d pos = m_children[i]->getPos();
+        cVector3d V;
+
+        // enumerate each corner of the child's bounding box
+        int xshifts[8] = {0,0,0,0,1,1,1,1};
+        int yshifts[8] = {0,0,1,1,0,0,1,1};
+        int zshifts[8] = {0,1,0,1,0,1,0,1};
+
+        cVector3d childBoxMin, childBoxMax;
+        childBoxMin.set( DBL_MAX,  DBL_MAX,  DBL_MAX);
+        childBoxMax.set(-DBL_MAX, -DBL_MAX, -DBL_MAX);
+
+        cVector3d localmin = m_children[i]->getBoundaryMin();
+        cVector3d localmax = m_children[i]->getBoundaryMax();
+
+        // for each corner...
+        for(int corner=0; corner<8; corner++)
         {
-            // see if this child has a _valid_ boundary box
-            bool child_box_valid = (
-              fabs(cDistance(m_children[i]->getBoundaryMax(),
-                             m_children[i]->getBoundaryMin())) >
-                            BOUNDARY_BOX_EPSILON
-              );
+            // grab this corner of the child's bounding box
+            cVector3d cornerLocation_child;
+            cornerLocation_child.x = (xshifts[corner]) ? localmin.x : localmax.x;
+            cornerLocation_child.y = (yshifts[corner]) ? localmin.y : localmax.y;
+            cornerLocation_child.z = (zshifts[corner]) ? localmin.z : localmax.z;
 
-            // don't include invalid boxes in my bounding box
-            if (child_box_valid == 0) continue;
+            // convert this point into the parent reference frame
+            cVector3d cornerLocation_parent;
+            rot.mulr(cornerLocation_child, cornerLocation_parent);
+            cornerLocation_parent.add(pos);
 
-            // get position and rotation of child frame
-            cMatrix3d rot = m_children[i]->getRot();
-            cVector3d pos = m_children[i]->getPos();
-            cVector3d V;
-
-            // convert value into parent frame
-            cVector3d childBoxMin = m_children[i]->getBoundaryMin();
-            rot.mulr(childBoxMin, V);
-            V.addr(pos, childBoxMin);
-
-            // convert value into parent frame
-            cVector3d childBoxMax = m_children[i]->getBoundaryMax();
-            rot.mulr(childBoxMax, V);
-            V.addr(pos, childBoxMax);
-
-            // see if _I_ have a valid boundary box
-            bool current_box_valid = (
-              fabs(cDistance(m_boundaryBoxMax,m_boundaryBoxMin)) > BOUNDARY_BOX_EPSILON
-              );
-
-            // if I don't, take my child's boundary box, which is valid...
-            if (current_box_valid == 0) {
-              m_boundaryBoxMin = childBoxMin;
-              m_boundaryBoxMax = childBoxMax;
-            }
-
-            else {
-
-              // compute new boundary
-              m_boundaryBoxMin.x = cMin(m_boundaryBoxMin.x, childBoxMin.x);
-              m_boundaryBoxMin.y = cMin(m_boundaryBoxMin.y, childBoxMin.y);
-              m_boundaryBoxMin.z = cMin(m_boundaryBoxMin.z, childBoxMin.z);
-
-              // compute new boundary
-              m_boundaryBoxMax.x = cMax(m_boundaryBoxMax.x, childBoxMax.x);
-              m_boundaryBoxMax.y = cMax(m_boundaryBoxMax.y, childBoxMax.y);
-              m_boundaryBoxMax.z = cMax(m_boundaryBoxMax.z, childBoxMax.z);
-
+            // is this a max or min on any axis?
+            for(int k=0; k<3; k++)
+            {
+                if (cornerLocation_parent[k] < childBoxMin[k]) childBoxMin[k] = cornerLocation_parent[k];
+                if (cornerLocation_parent[k] > childBoxMax[k]) childBoxMax[k] = cornerLocation_parent[k];
             }
         }
-    }
+
+        /*
+        // convert value into parent frame
+        cVector3d childBoxMin = m_children[i]->getBoundaryMin();
+        rot.mulr(childBoxMin, V);
+        V.addr(pos, childBoxMin);
+
+        // convert value into parent frame
+        cVector3d childBoxMax = m_children[i]->getBoundaryMax();
+        rot.mulr(childBoxMax, V);
+        V.addr(pos, childBoxMax);
+        */
+
+        // see if _I_ have a valid boundary box
+        bool current_box_valid = (
+          fabs(cDistance(m_boundaryBoxMax,m_boundaryBoxMin)) > BOUNDARY_BOX_EPSILON
+          );
+
+        // if I don't, take my child's boundary box, which is valid...
+        if (current_box_valid == 0) {
+          m_boundaryBoxMin = childBoxMin;
+          m_boundaryBoxMax = childBoxMax;
+        }
+
+        else {
+
+          // compute new boundary
+          m_boundaryBoxMin.x = cMin(m_boundaryBoxMin.x, childBoxMin.x);
+          m_boundaryBoxMin.y = cMin(m_boundaryBoxMin.y, childBoxMin.y);
+          m_boundaryBoxMin.z = cMin(m_boundaryBoxMin.z, childBoxMin.z);
+
+          // compute new boundary
+          m_boundaryBoxMax.x = cMax(m_boundaryBoxMax.x, childBoxMax.x);
+          m_boundaryBoxMax.y = cMax(m_boundaryBoxMax.y, childBoxMax.y);
+          m_boundaryBoxMax.z = cMax(m_boundaryBoxMax.z, childBoxMax.z);
+
+        }
+    }    
 }
 
 
@@ -1120,6 +1135,7 @@ void cGenericObject::computeBoundaryBox(const bool a_includeChildren)
     \param  a_colPoint       Position of nearest collision.
     \param  a_colSquareDistance  Squared distance between segment origin and
                                  nearest collision point.
+    \param  a_visibleObjectsOnly Should we ignore invisible objects?
     \param  a_proxyCall      If this is > 0, this is a call from a proxy, and the value
                              of a_proxyCall specifies which call this is.  -1 for
                              non-proxy calls.
@@ -1151,7 +1167,7 @@ bool cGenericObject::computeCollisionDetection(
     localSegmentPointB.sub(m_localPos);
     transLocalRot.mul(localSegmentPointB);
 
-		// check for a collision with this object (if it has a collision detector and
+        // check for a collision with this object (if it has a collision detector and
     // is haptically enabled)
     if ((m_collisionDetector != NULL) && (!a_visibleObjectsOnly || m_show) && (m_hapticEnabled))
     {
@@ -1189,14 +1205,14 @@ bool cGenericObject::computeCollisionDetection(
 
     // check for collisions with all children of this object
     for (unsigned int i=0; i<m_children.size(); i++)
-		{
+        {
         // start with the first segment point as it was received
         cVector3d l_segmentPointA = a_segmentPointA;
 
         // convert first endpoint of the segment into local coordinate frame
         localSegmentPointA = l_segmentPointA;
         localSegmentPointA.sub(m_localPos);
-				transLocalRot.mul(localSegmentPointA);
+                transLocalRot.mul(localSegmentPointA);
 
         // if this is a first call from the proxy algorithm, and the current
         // child is a dynamic object, adjust the first segment endpoint so that
@@ -1254,25 +1270,23 @@ bool cGenericObject::computeCollisionDetection(
 //===========================================================================
 /*!
     Adjust the given segment such that it tests for intersection of the ray with 
-	  objects at their previous positions at the last haptic loop so that collision
-	  detection will work in a dynamic environment.
+    objects at their previous positions at the last haptic loop so that collision
+    detection will work in a dynamic environment.
 
     \param  a_segmentPointA       Start point of segment.
-    \param  a_segmentPointB       End point of segment.
-    \param  a_localSegmentPointA  Local segment point.
+    \param  a_localSegmentPointA  Same segment, adjusted to be in local space.
     \param  a_object              Object that may have moved since last iteration.
-    \param  a_proxyAlgo           Pointer to force algorithm instance.
 */
 //===========================================================================
 void cGenericObject::AdjustCollisionSegment(cVector3d& a_segmentPointA,
-									   cVector3d& a_localSegmentPointA, const cGenericObject *a_object)
+                                       cVector3d& a_localSegmentPointA, const cGenericObject *a_object)
 {
     // find the location of a_segmentPointA relative to the rotation/position
     // of a_object at previous haptic iteration
     cVector3d newGlobalProxy = a_segmentPointA;
     newGlobalProxy.sub(a_object->m_lastPos);
-		cMatrix3d m_lastRotT;
-		a_object->m_lastRot.transr(m_lastRotT);
+        cMatrix3d m_lastRotT;
+        a_object->m_lastRot.transr(m_lastRotT);
     m_lastRotT.mul(newGlobalProxy);
 
     // transform this relative location into a global position using a_object's
@@ -1290,6 +1304,43 @@ void cGenericObject::AdjustCollisionSegment(cVector3d& a_segmentPointA,
 }
 
 
+//==========================================================================
+/*!
+      Descend through child objects to compute interaction forces for all 
+      cGenericPotentialField objects.
+
+      \fn       cVector3d cGenericObject::computeForces(const cVector3d& a_probePosition)
+      \param    a_probePosition   Position of the probe in my parent's coordinate frame
+      \return   Returns the computed force in my parent's coordinate frame
+*/
+//===========================================================================
+cVector3d cGenericObject::computeForces(const cVector3d& a_probePosition)
+{
+    // compute the position of the probe in local coordinates.
+    cVector3d probePositionLocal;
+    probePositionLocal = cMul(cTrans(m_localRot), cSub(a_probePosition, m_localPos));
+
+    // compute interaction forces with this object
+    cVector3d localForce;
+    localForce.set(0,0,0);
+
+    // compute interaction forces with children
+    for (unsigned int i=0; i<m_children.size(); i++)
+    {
+        cGenericObject *nextObject = m_children[i];
+
+        // add up the forces of my descendants
+        cVector3d force = nextObject->computeForces(probePositionLocal);
+        localForce.add(force);
+    }
+
+    // convert the reaction force into my parent coordinates
+    cVector3d m_globalForce = cMul(m_localRot, localForce);
+
+    return m_globalForce;
+}
+
+
 //===========================================================================
 /*!
     Render the scene graph starting at this object. This method is called
@@ -1303,10 +1354,15 @@ void cGenericObject::AdjustCollisionSegment(cVector3d& a_segmentPointA,
     The a_renderMode parameter is used to allow multiple rendering passes,
     and takes one of the following values:
 
-    CHAI_RENDER_NON_TRANSPARENT, CHAI_RENDER_TRANSPARENT_FRONT, CHAI_RENDER_TRANSPARENT_BACK
+    CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY=0,
+    CHAI_RENDER_MODE_TRANSPARENT_BACK_ONLY,
+    CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY,
+    CHAI_RENDER_MODE_RENDER_ALL
 
     If you have multipass transparency disabled (see cCamera), your objects will
-    only be rendered once per frame, with a_renderMode set to CHAI_RENDER_NON_TRANSPARENT.
+    only be rendered once per frame, with a_renderMode set to CHAI_RENDER_MODE_RENDER_ALL.
+    This is the default, and unless you enable multipass transparency, you don't 
+    ever need to care about a_renderMode.
 
     \fn     void cGenericObject::renderSceneGraph(const int a_renderMode)
     \param  a_renderMode  Rendering mode
@@ -1404,3 +1460,59 @@ void cGenericObject::renderSceneGraph(const int a_renderMode)
 
 
 
+//===========================================================================
+/*!
+    Render this object.  Subclasses will generally override this method.
+    This is called from renderSceneGraph, which subclasses generally do
+    not need to override.
+
+    The a_renderMode parameter is used to allow multiple rendering passes,
+    and takes one of the following values:
+
+    CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY=0,
+    CHAI_RENDER_MODE_TRANSPARENT_BACK_ONLY,
+    CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY,
+    CHAI_RENDER_MODE_RENDER_ALL
+
+    If you have multipass transparency disabled (see cCamera), your objects will
+    only be rendered once per frame, with a_renderMode set to CHAI_RENDER_MODE_RENDER_ALL.
+    This is the default, and unless you enable multipass transparency, you don't 
+    ever need to care about a_renderMode.
+
+    A word on OpenGL conventions:
+
+    CHAI does not re-initialize the OpenGL state at every rendering
+    pass.  The only OpenGL state variables that CHAI sets explicitly in a typical
+    rendering pass are:
+    
+    * lighting is enabled (cWorld)
+    * depth-testing is enabled (cWorld)
+    * glColorMaterial is enabled and set to GL_AMBIENT_AND_DIFFUSE/GL_FRONT_AND_BACK (cWorld)
+    * a perspective projection matrix is set up (cCamera)
+
+    This adherence to the defaults is nice because it lets an application change an important
+    piece of state globally and not worry about it getting changed by CHAI objects.
+
+    It is expected that objects will "clean up after themselves" if they change
+    any rendering state besides:
+   
+    * color (glColor)
+    * material properties (glMaterial)
+    * normals (glNormal)
+
+    For example, if my object changes the rendering color, I don't need to set it back
+    before returning, but if my object turns on vertex buffering, I should turn it
+    off before returning.  Consequently if I care about the current color, I should
+    set it up in my own render() function, because I shouldn't count on it being
+    meaningful when my render() function is called.
+
+    Necessary exceptions to these conventions include:
+
+    * cLight will change the lighting state for his assigned GL_LIGHT
+    * cCamera sets up relevant transformation matrices
+    
+    \fn     void cGenericObject::render(const int a_renderMode=CHAI_RENDER_MODE_RENDER_ALL)
+    \param  a_renderMode  Rendering mode; see above
+*/
+//===========================================================================
+void cGenericObject::render(const int a_renderMode) { }

@@ -75,6 +75,12 @@ public:
   
 protected:
 	HICON m_hIcon;
+
+  // These variables will be -1 if we just started scrolling, 0
+  // if we're not scrolling, 1 if we're really scrolling now
+  //
+  // This is necessary because setcapture apparently changes the
+  // origin of mouse events in a bizarre way...
   int m_left_scrolling_gl_area;
   int m_middle_scrolling_gl_area;
   int m_right_scrolling_gl_area;

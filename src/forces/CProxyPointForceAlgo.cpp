@@ -27,7 +27,6 @@
 #include "CMesh.h"
 #include "CWorld.h"
 #include <float.h>
-#include <conio.h>
 
 //---------------------------------------------------------------------------
 
@@ -146,7 +145,7 @@ cVector3d cProxyPointForceAlgo::computeForces(const cVector3d& a_nextDevicePos)
       if (m_dynamicProxy) correctProxyForObjectMotion();
 
       // compute next best position of proxy
-      computeNextBestProxyPosition();
+      computeNextBestProxyPosition(m_deviceGlobalPos);
 
       // update proxy to next best position
       m_proxyGlobalPos = m_nextBestProxyGlobalPos;
@@ -180,10 +179,11 @@ cVector3d cProxyPointForceAlgo::computeForces(const cVector3d& a_nextDevicePos)
     The process is repeated if necessary, bringing the proxy to its
     final location.
 
-    \fn   void cProxyPointForceAlgo::computeNextBestProxyPosition()
+    \fn   void cProxyPointForceAlgo::computeNextBestProxyPosition(cVector3d a_goal)
+	\param  a_goal  The goal towards which to move the proxy, subject to constraints
 */
 //===========================================================================
-void cProxyPointForceAlgo::computeNextBestProxyPosition()
+void cProxyPointForceAlgo::computeNextBestProxyPosition(cVector3d a_goal)
 {
     // local variable declarations
 
@@ -249,7 +249,7 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
     // Read the current position of proxy and device; the device position
     // is considered the initial goal position for the proxy.
     proxy = m_proxyGlobalPos;
-    goal = m_deviceGlobalPos;
+    goal = a_goal;
 
     // Store the previous number of contacts for debugging...
     int previousNumberOfContacts = m_numContacts;
@@ -316,7 +316,7 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
     normal0 = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
 
     // Align the surface normal to point away from the device
-    vDeviceProxy = cSub(proxy,m_deviceGlobalPos);
+    vDeviceProxy = cSub(proxy,a_goal);
     vDeviceProxy.normalize();
     if (cDot(normal0,vDeviceProxy) < 0) normal0.negate();
 
@@ -372,7 +372,7 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
     // point to the original goal (device position) on this plane; this point
     // is computed by projecting the ideal goal onto the plane defined by the
     // intersected triangle
-    goal = cProjectPointOnPlane(m_deviceGlobalPos, vertex0, vertex1, vertex2 );
+    goal = cProjectPointOnPlane(a_goal, vertex0, vertex1, vertex2 );
 
     // Since the proxy has a radius, the new goal position is offset to be
     // on the same side of the plane as the proxy, so the proxy will not
@@ -408,7 +408,7 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
         // coefficient of the intersected triangle's mesh times the vector between the
         // proxy and the device...
         force = cMul(colTriangle->getParent()->m_material.getStiffness(),
-                cSub(proxy, m_deviceGlobalPos));
+                cSub(proxy, a_goal));
 
         // Calculate the normal component of that force...
         m_normalForce = cProject(force, normal0);
@@ -484,7 +484,7 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
     normal1 = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
 
     // Align the surface normal to point away from the device
-    vDeviceProxy = cSub(proxy,m_deviceGlobalPos);
+    vDeviceProxy = cSub(proxy,a_goal);
     vDeviceProxy.normalize();
     if (cDot(normal1,vDeviceProxy) < 0) normal1.negate();
 
@@ -534,7 +534,7 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
 
     // Compute the projection of the device position (goal) onto the line; this
     // gives us the new goal position.
-    goal = cProjectPointOnLine(m_deviceGlobalPos, proxy, line);
+    goal = cProjectPointOnLine(a_goal, proxy, line);
 
     // Before moving the proxy to this new goal position, we need to check
     // if a third triangle could stop the proxy from reaching its new goal.
@@ -559,7 +559,7 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
         // coefficient of the intersected triangle's mesh times the vector between the
         // proxy and the device.
         force = cMul(colTriangle->getParent()->m_material.getStiffness(),
-                cSub(proxy, m_deviceGlobalPos));
+                cSub(proxy, a_goal));
 
         // Calculate the normal component of this force
         m_normalForce = cProject(force, normal1);
@@ -688,7 +688,7 @@ bool cProxyPointForceAlgo::goalAchieved(const cVector3d& a_proxy, const cVector3
 /*!
     Offset the current goal position to account for the volume/shape of the proxy.
    
-    \fn   virtual void cProxyPointForceAlgo::offsetGoalPosition(cVector3d& a_goal, const cVector3d& a_proxy);
+    \fn   virtual void cProxyPointForceAlgo::offsetGoalPosition(cVector3d& a_goal, const cVector3d& a_proxy) const;
     \param    a_goal        The location to which we'd like to move the proxy, offset upon return
     \param    a_proxy       The current position of the proxy
 */
@@ -707,7 +707,7 @@ void cProxyPointForceAlgo::offsetGoalPosition(cVector3d& a_goal, const cVector3d
   known surface.
 
   \fn   void cProxyPointForceAlgo::testFrictionAndMoveProxy(const cVector3d& goal, const cVector3d& proxy,
-             cVector3d& normal, cGenericObject* parent)
+             cVector3d normal, cGenericObject* parent)
   \param    goal        The location to which we'd like to move the proxy
   \param    proxy       The current position of the proxy
   \param    normal      The surface normal at the obstructing surface
@@ -715,7 +715,7 @@ void cProxyPointForceAlgo::offsetGoalPosition(cVector3d& a_goal, const cVector3d
 */
 //===========================================================================
 void cProxyPointForceAlgo::testFrictionAndMoveProxy(const cVector3d& goal, const cVector3d& proxy,
-  cVector3d& normal, cGenericObject* parent)
+  cVector3d normal, cGenericObject* parent)
 {
     if (m_useFriction == false || m_useMelderFriction == false)
     {
@@ -894,7 +894,7 @@ void cProxyPointForceAlgo::computeForce()
     Return the number of current contacts, and the associated triangles in the
     output parameters.
 
-    \fn       void cProxyPointForceAlgo::getContacts(cTriangle*& a_t0,
+    \fn       unsigned int cProxyPointForceAlgo::getContacts(cTriangle*& a_t0,
               cTriangle*& a_t1, cTriangle*& a_t2);
     \param    a_t0  Returns pointer to first contact triangle.
     \param    a_t1  Returns pointer to second contact triangle.

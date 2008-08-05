@@ -29,6 +29,7 @@
 
 //===========================================================================
 /*!
+      \file       CDriverSensoray626.h
       \class      cDriverSensoray626
       \brief      cDriverSensoray626 offers an interface to the Sensoray 626 boards.
 */
@@ -49,7 +50,7 @@ class cDriverSensoray626 : public cGenericDevice
     int close();
 
     //! Initialize Sensoray626 board
-    int initialize();
+    int initialize(const bool a_resetEncoders=false);
 
     //! Send a command to the Sensoray626 board
     //! possible commands are:
@@ -68,7 +69,7 @@ class cDriverSensoray626 : public cGenericDevice
 
   private:
     // METHODS:
-    //! Set Encoders to the right opeartion mode
+    //! Set encoders to the right operation mode
     void encoderInit();
 
     // MEMBERS:

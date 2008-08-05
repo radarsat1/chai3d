@@ -1,0 +1,6 @@
+#!/bin/tcsh
+g++ -c -D_POSIX -D_MAX_PATH=260 -D_LINUX -DLINUX -O3 -I../src/graphics -I../src/collisions -I../src/devices -I../src/display -I../src/files -I../src/forces -I../src/math -I../src/scenegraph -I../src/timers -I../src/tools -I../src/widgets -I../include/dhd $1
+ar rc libchai3d_linux.a CCollisionAABB.o CCollisionAABBTree.o CCollisionBrute.o CCollisionSpheres.o CCollisionSpheresGeometry.o CGenericCollision.o CDeltaDevices.o CGenericDevice.o CPhantomDevices.o CFileLoader3DS.o CFileLoaderBMP.o CFileLoaderOBJ.o CFileLoaderTGA.o CImageLoader.o CMeshLoader.o CGenericPointForceAlgo.o CPotentialFieldForceAlgo.o CProxyPointForceAlgo.o CColor.o CDraw3D.o CMacrosGL.o CMaterial.o CTexture2D.o CTriangle.o CVertex.o CMaths.o CMatrix3d.o CString.o CVector3d.o CCamera.o CGenericObject.o CGenericPotentialField.o CLight.o CMesh.o CShapeSphere.o CShapeTorus.o CWorld.o CPrecisionClock.o CPrecisionTimer.o CDelta3dofPointer.o CGeneric3dofPointer.o CGenericTool.o CMeta3dofPointer.o CPhantom3dofPointer.o CBitmap.o CFont.o CLabelPanel.o CPanel.o PhantomDriverLinux.o
+ranlib libchai3d_linux.a
+mv -f libchai3d_linux.a ../lib/linux
+

@@ -23,7 +23,6 @@
 //---------------------------------------------------------------------------
 #include "CGeneric3dofPointer.h"
 #include "CWorld.h"
-#include <conio.h>
 //---------------------------------------------------------------------------
 
 // The radius used for proxy collision detection is equal to 
@@ -119,8 +118,9 @@ cGeneric3dofPointer::~cGeneric3dofPointer()
 /*!
     Define a haptic device driver for this tool.
 
-    \fn       cGeneric3dofPointer::void setDevice(cGenericDevice *a_device);
-
+    \fn       void cGeneric3dofPointer::setDevice(cGenericDevice *a_device);
+    \param    a_device  This is the device that should be associated with
+                        this tool.
 */
 //===========================================================================
 void cGeneric3dofPointer::setDevice(cGenericDevice *a_device)
@@ -133,18 +133,25 @@ void cGeneric3dofPointer::setDevice(cGenericDevice *a_device)
 /*!
     Initialize device
 
-    \fn       void cGeneric3dofPointer::initialize()
+    \fn       void cGeneric3dofPointer::initialize(const bool a_resetEncoders=false)
+    \param    a_resetEncoders  If true, this resets the device's 0 position
+              to the current position (if this device supports re-zero'ing).
+              That means that if your device supports re-zero'ing (e.g. Phantom
+              premiums), you should be careful about calling this function
+              in the middle of your program with a_resetEncoders set to 'true'.
+              Or if you do call it with a_resetEncoders set to true, you should 
+              make sure your user knows to hold the Phantom in place.
     \return   0 indicates success, non-zero indicates an error
 */
 //===========================================================================
-int cGeneric3dofPointer::initialize()
+int cGeneric3dofPointer::initialize(const bool a_resetEncoders)
 {
     // check if device is available
     if (m_device == NULL) { return -1; }
 
     // initialize (calibrate) device
     if (m_device->open() != 0) return -1;
-    if (m_device->initialize() != 0) return -1;
+    if (m_device->initialize(a_resetEncoders) != 0) return -1;
     updatePose();
     if (m_device->close() != 0) return -1;
 
@@ -164,7 +171,7 @@ int cGeneric3dofPointer::initialize()
 
 //==========================================================================
 /*!
-      Reset the tool.
+      Starts communication with the haptic device.
 
       \fn       void cGeneric3dofPointer::start()
       \return   0 indicates success, non-zero indicates an error
@@ -206,8 +213,8 @@ int cGeneric3dofPointer::stop()
       -1.0 --> 1.0) are multiplied by half of the workspace edges to get
       the values that are used to position the pointer.
 
-      \fn       void cGeneric3dofPointer::setWorkspace(double a_width,
-                double a_height, double a_depth)
+      \fn       void cGeneric3dofPointer::setWorkspace(const double& a_width,
+                const double& a_height, const double& a_depth)
       \param    a_width   Width of workspace.
       \param    a_height  Height of workspace.
       \param    a_depth   Depth of workspace.
@@ -252,6 +259,9 @@ void cGeneric3dofPointer::updatePose()
                             m_halfWorkspaceAxisY * pos.y,
                             m_halfWorkspaceAxisZ * pos.z);
     }
+    else {
+      m_deviceLocalPos.set(pos.x,pos.y,pos.z);
+    }
 
     // update global position of tool
     cVector3d tPos;
@@ -287,10 +297,10 @@ void cGeneric3dofPointer::computeForces()
 {
     unsigned int i;
 
-    // init temp variable
+    // temporary variable to store forces
     cVector3d force;
     force.zero();
-
+  
     // compute forces in world coordinates for each point force algorithm
     for (i=0; i<m_pointForceAlgos.size(); i++)
     {
@@ -346,8 +356,8 @@ void cGeneric3dofPointer::applyForces()
 /*!
       Render the current tool in OpenGL.
 
-      \fn       void cGeneric3dofPointer::render()
-      \param    a_renderMode  rendering mode.
+      \fn       void cGeneric3dofPointer::render(const int a_renderMode=0)
+      \param    a_renderMode  rendering mode; see cGenericObject.cpp.
 */
 //===========================================================================
 void cGeneric3dofPointer::render(const int a_renderMode)
@@ -505,7 +515,7 @@ void cGeneric3dofPointer::render(const int a_renderMode)
       size of the proxy, one which collides with the triangles is set to
       CHAI_SCALE_PROXY_RADIUS * a_radius.
 
-      \fn       void cGeneric3dofPointer::setRadius(double a_radius)
+      \fn       void cGeneric3dofPointer::setRadius(const double& a_radius)
       \param    a_radius  radius of pointer.
 */
 //===========================================================================
@@ -553,9 +563,9 @@ cProxyPointForceAlgo* cGeneric3dofPointer::getProxy()
       Toggles on and off the visualization of a reference frame
       located on the tool's point.
 
-      \fn       void cGeneric3dofPointer::setToolFrame(bool a_showToolFrame, double a_toolFrameSize)
+      \fn       void cGeneric3dofPointer::setToolFrame(const bool& a_showToolFrame, const double& a_toolFrameSize)
       \param    a_showToolFrame Flag which controls the tool frame display.
-      \param    m_toolFrameSize Size of the tool frame.
+      \param    a_toolFrameSize Size of the tool frame.
 */
 //===========================================================================
 void cGeneric3dofPointer::setToolFrame(const bool& a_showToolFrame, const double& a_toolFrameSize)
@@ -610,7 +620,7 @@ int cGeneric3dofPointer::setForcesOFF()
     By default, cGeneric3dofPointer accesses the _normalized_ device position;
     this lets you convert back to absolute coordinates.
 
-    \fn       void cGeneric3dofPointer::getWorkspaceScaleFactor()
+    \fn       cVector3d cGeneric3dofPointer::getWorkspaceScaleFactors()
     \return   Scale factors: coordinates * scale = mm
 */
 //===========================================================================
@@ -623,3 +633,4 @@ cVector3d cGeneric3dofPointer::getWorkspaceScaleFactors() {
     toReturn *= scale;
     return toReturn;
 }
+

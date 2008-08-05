@@ -14,7 +14,7 @@ class.  In this case, that class is embedded in an ActiveX
 control.
 
 The provided project compiles to an .ocx file (an ActiveX control)
-in the 'examples/bin' directory, and an .html file is provided in that
+in the 'bin' directory, and an .html file is provided in that
 directory as well, for testing the control.
 
 We have not built a full installer for the activex control.  It should

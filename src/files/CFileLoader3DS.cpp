@@ -26,8 +26,9 @@
 //---------------------------------------------------------------------------
 #include "CFileLoader3DS.h"
 
-#ifdef _MSVC
-#include <conio.h>
+// We want to get around snprintf in posix environments
+#ifdef _POSIX
+#define _snprintf(x,y,...) sprintf(x,__VA_ARGS__) 
 #endif
 
 #include <map>
@@ -256,7 +257,7 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 
       }
 
-      unsigned int indexTriangle = -1;
+      unsigned int indexTriangle = 0;
       bool foundTriangle = false;
 
       if (g_3dsLoaderShouldGenerateExtraVertices == false) {
@@ -459,14 +460,18 @@ typedef unsigned long ulong;
 
 void ErrorMsg(const char *msg)
 {
-
+  /*
+  char buf[1000];
+  sprintf(buf,"%s\n",msg);
+  CHAI_DEBUG_PRINT(buf);
+  */
 }
 
 //---------------------------------------------------------------------------
 
 LColor3 black = {0, 0, 0};
 
-LVector3 zero3 = {0, 0, 0};
+LVector3 zero3(0,0,0);
 
 LVector4 zero4 = {0, 0, 0, 0};
 
@@ -791,8 +796,10 @@ uint LMesh::GetTriangleCount()
 
 void LMesh::SetTriangleArraySize(uint value)
 {
-    m_triangles.resize(value);
+    m_triangles.reserve(value);
+    m_tris.reserve(value);
     m_tris.resize(value);
+    m_triangles.resize(value);    
 }
 
 const LVector4& LMesh::GetVertex(uint index)
@@ -1567,6 +1574,7 @@ bool L3DS::LoadFile(const char *filename) {
     m_buffer = 0;
     m_bufferSize = 0;
 
+
     /***
 
      Added by Dan Morris.
@@ -1599,7 +1607,7 @@ bool L3DS::LoadFile(const char *filename) {
 
           LMaterial& mat = this->GetMaterial(mat_id);
 
-          LColor3& c = mat.GetDiffuseColor();
+          LColor3 c = mat.GetDiffuseColor();
 
           // Set each vertex's color          
           mesh.SetColor(c, mesh.m_tris[j].a);
@@ -1828,6 +1836,8 @@ bool L3DS::Read3DS()
     }
     GotoChunk(edit);
 
+    int chunkcount = 0;
+
     obj.id = EDIT_OBJECT;
     {
         while (FindChunk(obj, edit))
@@ -1835,17 +1845,21 @@ bool L3DS::Read3DS()
             ReadASCIIZ(m_objName, 99);
             ml = ReadChunk();
             if (ml.id == OBJ_TRIMESH)
+            {
                 ReadMesh(ml);
-			else
-            if (ml.id == OBJ_LIGHT)
+            }
+            else if (ml.id == OBJ_LIGHT)
+            {
                 ReadLight(ml);
-			else
-            if (ml.id == OBJ_CAMERA)
+            }
+            else if (ml.id == OBJ_CAMERA)
+            {
                 ReadCamera(ml);
+            }
             SkipChunk(obj);
         }
     }
-    
+
     // read the keyframer data here to find out correct object orientation
 
     LChunk keyframer;
@@ -2059,7 +2073,8 @@ void L3DS::ReadFaceList(const LChunk &chunk, LMesh &mesh)
     tri.smoothingGroups = 1;
     // read the number of faces
     count = ReadShort();
-    mesh.SetTriangleArraySize(count);
+    mesh.SetTriangleArraySize(count);    
+    
     for (i=0; i<count; i++)
     {
         tri.a = ReadShort();
@@ -2068,6 +2083,7 @@ void L3DS::ReadFaceList(const LChunk &chunk, LMesh &mesh)
         ReadShort();
         mesh.SetTri(tri, i);
     }
+
     // now read the optional chunks
     ch = ReadChunk();
     int mat_id;

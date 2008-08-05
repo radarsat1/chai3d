@@ -14,7 +14,7 @@ class.  In this case, that class is embedded in an ActiveX
 control.
 
 The provided project compiles to an .ocx file (an ActiveX control)
-in the 'web' directory, and an .html file is provided in that
+in the 'bin' directory, and an .html file is provided in that
 directory as well, for testing the control.  Note that you must
 register the component (i.e., by choosing Run->Register Active X
 Server in Borland) before it will work on your computer. 

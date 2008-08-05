@@ -24,10 +24,6 @@
 #include "CFileLoaderOBJ.h"
 //---------------------------------------------------------------------------
 
-#ifdef _MSVC
-#include <conio.h>
-#endif
-
 bool g_objLoaderShouldGenerateExtraVertices = false;
 
 //===========================================================================
@@ -929,7 +925,10 @@ void cOBJModel::getTokenParameter(char a_str[],
   strcpy(a_str, first_non_whitespace_character);
 
   // Remove newline character after the token
-  a_str[strlen(a_str) - 1] = '\0';
+  if (a_str[strlen(a_str) - 1] == '\r' || a_str[strlen(a_str) - 1] == '\n')
+    a_str[strlen(a_str) - 1] = '\0';
+  if (a_str[strlen(a_str) - 1] == '\r' || a_str[strlen(a_str) - 1] == '\n')
+    a_str[strlen(a_str) - 1] = '\0';
 }
 
 

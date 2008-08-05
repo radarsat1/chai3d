@@ -28,16 +28,18 @@
 
 // Different compilers like slightly different GLUT's 
 #ifdef _MSVC
-#include "../../../external/OpenGL/msvc6/glut.h"
+  #include "../../../external/OpenGL/msvc6/glut.h"
 #else
-#include "../../../external/OpenGL/bbcp6/glut.h"
+  #ifdef _POSIX
+    #include <GL/glut.h>
+  #else
+    #include "../../../external/OpenGL/bbcp6/glut.h"
+  #endif
 #endif
 
-#include <windows.h>
 //---------------------------------------------------------------------------
 #include "CCamera.h"
 #include "CLight.h"
-#include "CViewport.h"
 #include "CWorld.h"
 #include "CMesh.h"
 #include "CTriangle.h"
@@ -56,7 +58,7 @@
 // the world in which we will create our environment
 cWorld* world;
 
-// the camera which is used view the environment in a wondow
+// the camera which is used view the environment in a window
 cCamera* camera;
 
 // a light source
@@ -81,7 +83,7 @@ cVector3d lastCursorPos;
 cVector3d cursorVel;
 
 // precision clock to synch dynamic simulation
-cPrecisionClock clock;
+cPrecisionClock g_clock;
 double timeCounter;
 
 // haptic timer callback
@@ -131,8 +133,10 @@ void key(unsigned char key, int x, int y)
         // stop the tool
         cursor->stop();
 
+#ifndef _POSIX 
         // wait for the simulation timer to close
         Sleep(100);
+#endif
 
         // exit application
         exit(0);
@@ -196,14 +200,14 @@ void hapticsLoop(void* a_pUserData)
     cursor->computeForces();
 
     // stop the simulation clock
-    clock.stop();
+    g_clock.stop();
 
     // read the time increment in seconds
-    double increment = clock.getCurrentTime() / 1000000.0;
+    double increment = g_clock.getCurrentTime() / 1000000.0;
 
     // restart the simulation clock
-    clock.initialize();
-    clock.start();
+    g_clock.initialize();
+    g_clock.start();
 
     // get position of cursor in global coordinates
     cVector3d cursorPos = cursor->m_deviceGlobalPos;
@@ -297,7 +301,7 @@ int main(int argc, char* argv[])
 
     // let's project a world map onto the sphere
     cTexture2D* texture = new cTexture2D();
-    texture->loadFromFile(".\\resources\\images\\earth.bmp");
+    texture->loadFromFile("./resources/images/earth.bmp");
     texture->setEnvironmentMode(GL_MODULATE);
     object->m_texture = texture;
 
@@ -321,7 +325,7 @@ int main(int argc, char* argv[])
 
     // load a little chai bitmap logo which will located at the bottom of the screen
     logo = new cBitmap();
-    logo->m_image.loadFromFile(".\\resources\\images\\chai3d.bmp");
+    logo->m_image.loadFromFile("./resources/images/chai3d.bmp");
     logo->setPos(10,10,0);
     camera->m_front_2Dscene.addChild(logo);
 

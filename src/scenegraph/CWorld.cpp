@@ -38,7 +38,7 @@
 //===========================================================================
 cWorld::cWorld()
 {
-    #ifndef _MSVC
+    #ifdef _BCPP
     _control87(MCW_EM,MCW_EM);
     #endif
 
@@ -53,7 +53,8 @@ cWorld::cWorld()
 
 //===========================================================================
 /*!
-      Destructor of cWorld
+      Destructor of cWorld.  Deletes the world, all his children, and all
+      his textures.
 
       \fn       cWorld::~cWorld()
 */
@@ -143,7 +144,7 @@ bool cWorld::removeTexture(cTexture2D* a_texture)
 
     \fn         bool cWorld::deleteTexture(cTexture2D* a_texture)
     \param      a_texture  Texture to be deleted.
-    \return     Return \b true if operation suceeded
+    \return     Return \b true if operation succeeded
 */
 //===========================================================================
 bool cWorld::deleteTexture(cTexture2D* a_texture)
@@ -349,6 +350,12 @@ cLight* cWorld::getLightSource(int index) {
 void cWorld::render(const int a_renderMode)
 {
 
+    // Set up the CHAI openGL defaults (see cGenericObject::render())
+    glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+
     // Back up the "global" modelview matrix for future reference
     glGetDoublev(GL_MODELVIEW_MATRIX,m_worldModelView);
 
@@ -361,10 +368,7 @@ void cWorld::render(const int a_renderMode)
       unsigned int i;
       for (i=0; i<m_lights.size(); i++)
       {
-          if (m_lights[i]->m_enabled)
-          {
-            m_lights[i]->renderLightSource();
-          }
+          m_lights[i]->renderLightSource();
       }    
     }
 }
@@ -400,6 +404,7 @@ void cWorld::render(const int a_renderMode)
     \param  a_colTriangle    Pointer to nearest collided triangle.
     \param  a_colPoint       Position of nearest collision.
     \param  a_colDistance    Distance between segment origin and nearest collision point.
+    \param  a_visibleObjectsOnly  Should we ignore invisible objects?
     \param  a_proxyCall      If this is > 0, this is a call from a proxy, and the value
                              of a_proxyCall specifies which call this is.  -1 for
                              non-proxy calls.

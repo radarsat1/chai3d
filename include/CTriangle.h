@@ -30,6 +30,7 @@
 
 //===========================================================================
 /*!
+      \file     CTriangle.h
       \struct   cTriangle
       \brief    cTriangle defines a triangle, typically bound to a mesh for
                 graphic rendering.
@@ -50,36 +51,20 @@ class cTriangle
     */
     //-----------------------------------------------------------------------
     cTriangle(cMesh* a_parent, const unsigned int a_indexVertex0,
-              const unsigned int a_indexVertex1, const unsigned int a_indexVertex2)
-    {
-        // set vertices of new triangle
-        m_indexVertex0 = a_indexVertex0;
-        m_indexVertex1 = a_indexVertex1;
-        m_indexVertex2 = a_indexVertex2;
-
-        // set parent of triangle
-        m_parent = a_parent;
-
-        // triangle is not yet allocated by a mesh
-        m_allocated = false;
-
-        m_tag = 0;
-        m_neighbors = 0;
-    }
+        const unsigned int a_indexVertex1, const unsigned int a_indexVertex2) :
+        m_indexVertex0(a_indexVertex0), m_indexVertex1(a_indexVertex1), 
+        m_indexVertex2(a_indexVertex2), m_parent(a_parent), m_allocated(false),
+        m_tag(0), m_neighbors(0), m_index(0)
+    { }
 
     //-----------------------------------------------------------------------
     /*!
         Default constructor of cTriangle.
     */
     //-----------------------------------------------------------------------
-    cTriangle()
-    {
-      m_indexVertex0 = m_indexVertex1 = m_indexVertex2 = m_index = 0;
-      m_parent = 0;
-      m_allocated = false;
-      m_tag = 0;
-      m_neighbors = 0;
-    }
+    cTriangle() : m_indexVertex0(0), m_indexVertex1(0), m_indexVertex2(0),
+        m_index(0), m_parent(0), m_allocated(false), m_tag(0), m_neighbors(0)
+    { }
 
 
     //-----------------------------------------------------------------------
@@ -90,8 +75,8 @@ class cTriangle
     ~cTriangle() {
       if (m_neighbors) {
         m_neighbors->clear();
-        delete m_neighbors;
-        m_neighbors = 0;
+        //delete m_neighbors;
+        //m_neighbors = 0;
       }
     }
 
@@ -168,7 +153,7 @@ class cTriangle
     /*!
         Access a pointer to the specified vertex of this triangle
 
-        \param      int vi  The triangle (0, 1, or 2) to access
+        \param      vi  The triangle (0, 1, or 2) to access
         \return     Returns a pointer to the requested triangle, or 0 for an
                     illegal index
     */
@@ -192,10 +177,10 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-    Access the index of the specified vertex of this triangle
+        Access the index of the specified vertex of this triangle
 
-    \param      int vi  The triangle (0, 1, or 2) to access
-    \return     Returns the index of the specified triangle
+        \param      vi  The triangle (0, 1, or 2) to access
+        \return     Returns the index of the specified triangle
     */
     //-----------------------------------------------------------------------
     inline unsigned int getVertexIndex(int vi) const

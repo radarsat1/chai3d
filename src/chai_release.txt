@@ -4,16 +4,26 @@ all of which is compilation time) :
 * Make sure that the changelog is appropriately up-to-date, and
   add a 'released version x.xx' to the top of it.
 
+* If there are new examples, update the examples.html file in the 
+  bin directory, following the form used for the other examples.
+
 * Open the msvc7 example solution file and do a batch rebuild.
   All the release versions should be selected.  This will build the
-  CHAI libraries too.  Leave object_loader as the active project.
-  Make the solution window look pretty by closing all open documents
-  and all open project folders.
+  CHAI libraries too.  Leave object_loader or chai_complete as the
+  active project.  Make the solution window look pretty by closing all
+  open documents and all open project folders.
 
 * Open the msvc6 example solution file and build chai3d_complete.
   Then do a batch rebuild; all the release versions should be selected.
   Leave object_loader as the active project.  Make the solution window look
   pretty by closing all open documents and all open project folders.
+
+* [Optional]: Open the msvc7_intel .icproj file and build the Intel version
+  of CHAI.
+
+* Open a cygwin shell and cd into the examples/cygwin directory.  Run
+  the build_cygwin_examples script, which will forcibly rebuild CHAI and
+  all the cygwin examples.
 
 * Open the Borland example project group.  Make sure all the projects
   and libs are set to _release_ mode and do a 'build all' (not 'make
@@ -29,14 +39,15 @@ all of which is compilation time) :
   This step gets skipped for a 'beta' release.  If it's a 'beta' release,
   at least test a few things as a sanity check.
 
-* Open doxygen and load the doc/doxyfile.  Run doxygen.
+* Open doxygen and load the doc/doxyfile.  Run doxygen.  Be sure to update
+  the release #.  Fix any errors logged by doxygen.
 
 * Use windows search to find all files with these extensions and remove
   them:
 
-  *.pch;*.pchi;*.obj;*.idb;*.pdb;*.tds;*.~*;BuildLog.*;*.dg;*.#*
+  *.pch;*.pchi;*.obj;*.idb;*.pdb;*.tds;*.~*;BuildLog.*;*.dg;*.#*;*.o
 
-  ...except for turntable.obj and other actual model files!
+  ...except for can.obj, turntable.obj, and other actual model files!
 
   [FYI you can paste the above string into Windows find...]
 
@@ -45,14 +56,20 @@ all of which is compilation time) :
   Also search for files greater than 50k and make sure there's nothing that
   doesn't belong.
 
-  Delete the intel lib file if you've compiled it.
+* Copy the top-level directory (should be called chai3d) to a
+  temporary directory.  This is just for the purpose of removing
+  CVS directories, so if your archive program is smart enough
+  to let you exlcude */CVS, */CVS/*, */CVS/*/*, etc., you can skip
+  this.
+
+* Remove all CVS directories (again using Windows find) from your
+  temporary CHAI dir.
 
 * Zip the top-level directory (should be called chai3d) up into
-  chai3d[vx.xx].zip .  The zipfile should be around 20MB.
+  chai3d[vx.xx].zip .  The zipfile should be around 29MB.  Be sure to
+  exclude directories called "CVS" when you zip.
 
-* Open the zipfile and remove 'chai_todo.txt' from the source directory; this
-  contains internal todo's that the world doesn't need to see.  Also remove
-  all directories called "CVS".
+* Nuke your temporary CHAI dir.
 
 * ftp the zipfile to the CHAI 'builds' directory
 

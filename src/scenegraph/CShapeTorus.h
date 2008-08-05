@@ -30,6 +30,7 @@
 
 //===========================================================================
 /*!
+      \file       CShapeTorus.h
       \class      cShapeTorus
       \brief      cShapeTorus describes a simple torus potential field
 */

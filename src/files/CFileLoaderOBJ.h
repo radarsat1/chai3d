@@ -83,6 +83,7 @@ typedef std::map<vertexIndexSet,unsigned int,ltVertexIndexSet> vertexIndexSet_ui
 
 //===========================================================================
 /*!
+      \file     CFileLoaderOBJ.h
       \brief    The following file provides a parser to load 3d images
                 supporting the alias/wavefront file format.
 */
@@ -173,7 +174,9 @@ struct cMaterialInfo
     }
 };
 
-// Main class for OBJ parser.
+//    Main class for OBJ parser.
+
+
 class cOBJModel
 {
   public:

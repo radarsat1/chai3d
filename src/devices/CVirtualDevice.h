@@ -18,7 +18,9 @@
     \date       01/2004
 */
 //===========================================================================
-
+/*!
+    \file CVirtualDevice.h
+*/
 //---------------------------------------------------------------------------
 #ifndef CVirtualDeviceH
 #define CVirtualDeviceH
@@ -46,7 +48,11 @@ struct cVirtualDeviceData
     bool         CmdReset; // Command Reset
 };
 
-
+/*!
+    \class cVirtualDevice
+    \brief
+    Class which interfaces with the virtual device
+*/
 class cVirtualDevice : public cGenericDevice
 {
   public:
@@ -57,13 +63,13 @@ class cVirtualDevice : public cGenericDevice
     virtual ~cVirtualDevice();
 
     // METHODS:
-    //! Open connection to delta device.
+    //! Open connection to virtual device.
     virtual int open();
-    //! Close connection to delta device
+    //! Close connection to virtual device
     virtual int close();
-    //! Calibrate delta device.
-    virtual int initialize();
-    //! Set a command to the delta device
+    //! Calibrate virtual device.
+    virtual int initialize(const bool a_resetEncoders=false);
+    //! Set a command to the virtual device
     virtual int command(int a_command, void* a_data);
 
   private:

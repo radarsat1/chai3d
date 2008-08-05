@@ -19,7 +19,6 @@ Professional Edition License.
 */
 //===========================================================================
 #include "CVBOMesh.h"
-#include <conio.h>
 #include "cVertex.h"
 #include "CTriangle.h"
 
@@ -294,8 +293,8 @@ void cVBOMesh::renderMesh(const int a_renderMode)
     glEnd();
   }
 
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, NULL);
-  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, NULL);
+  glBindBufferARB(GL_ARRAY_BUFFER_ARB, (unsigned int)NULL);
+  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, (unsigned int)NULL);
    
   // Restore OpenGL settings to reasonable defaults
   glDisable(GL_BLEND);

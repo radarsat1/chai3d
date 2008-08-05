@@ -26,20 +26,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Different compilers like slightly different GLUT's
+// Different compilers like slightly different GLUT's 
 #ifdef _MSVC
 #include "../../../external/OpenGL/msvc6/glut.h"
 #else
-#include "../../../external/OpenGL/bbcp6/glut.h"
+  #ifdef _POSIX
+    #include <GL/glut.h>
+  #else
+    #include "../../../external/OpenGL/bbcp6/glut.h"
+  #endif
 #endif
 
-// #include <GL/glut.h>
-
-#include <windows.h>
 //---------------------------------------------------------------------------
 #include "CCamera.h"
 #include "CLight.h"
-#include "CViewport.h"
 #include "CWorld.h"
 #include "CMesh.h"
 #include "CTriangle.h"
@@ -77,7 +77,7 @@ cVector3d rotVelocity;
 cMeta3dofPointer* cursor;
 
 // precision clock to sync dynamic simulation
-cPrecisionClock clock;
+cPrecisionClock g_clock;
 
 // haptic timer callback
 cPrecisionTimer timer;
@@ -125,8 +125,10 @@ void key(unsigned char key, int x, int y)
         // stop the tool
         cursor->stop();
 
+#ifndef _POSIX
         // wait for the simulation timer to close
         Sleep(100);
+#endif
 
         // exit application
         exit(0);
@@ -191,14 +193,14 @@ void hapticsLoop(void* a_pUserData)
     cursor->applyForces();
 
     // stop the simulation clock
-    clock.stop();
+    g_clock.stop();
 
     // read the time increment in seconds
-    double increment = clock.getCurrentTime() / 1000000.0;
+    double increment = g_clock.getCurrentTime() / 1000000.0;
 
     // restart the simulation clock
-    clock.initialize();
-    clock.start();
+    g_clock.initialize();
+    g_clock.start();
 
     // get position of cursor in global coordinates
     cVector3d cursorPos = cursor->m_deviceGlobalPos;
@@ -257,7 +259,7 @@ int main(int argc, char* argv[])
     
     // let's create a some environment mapping
     cTexture2D* texture = new cTexture2D();
-    texture->loadFromFile(".\\resources\\images\\spheremap.bmp");
+    texture->loadFromFile("./resources/images/spheremap.bmp");
     texture->setEnvironmentMode(GL_DECAL);
     texture->setSphericalMappingEnabled(true);
     object->m_texture = texture;
@@ -275,7 +277,7 @@ int main(int argc, char* argv[])
 
     // load a little chai bitmap logo which will located at the bottom of the screen
     logo = new cBitmap();
-    logo->m_image.loadFromFile(".\\resources\\images\\chai3d.bmp");
+    logo->m_image.loadFromFile("./resources/images/chai3d.bmp");
     logo->setPos(10,10,0);
     camera->m_front_2Dscene.addChild(logo);
 

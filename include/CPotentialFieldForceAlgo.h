@@ -28,6 +28,7 @@
 
 //===========================================================================
 /*!
+      \file     CPotentialFieldForceAlgo.h
       \class    cPotentialFieldForceAlgo
       \brief    cPotentialFieldForceAlgo is an abstract class for algorithms
                 that compute single point force contacts.

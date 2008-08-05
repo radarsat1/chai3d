@@ -56,6 +56,7 @@ class cCollisionSpheresLeaf;
 
 //===========================================================================
 /*!
+      \file     CCollisionSpheres.h
       \class    cCollisionSpheres
       \brief    cCollisionSpheres provides methods to create a sphere tree for
                 collision detection, and to use this tree to check for the
@@ -93,6 +94,7 @@ class cCollisionSpheres : public cGenericCollision
     bool m_useNeighbors;
     //! Pointer to the beginning of list of leaf nodes.
     cCollisionSpheresLeaf *m_firstLeaf;
+	cTriangle* secret;
 };
 
 
@@ -116,7 +118,7 @@ class cCollisionSpheresSphere
     //! Constructor of cCollisionSpheresSphere.
     cCollisionSpheresSphere(cCollisionSpheresSphere *a_parent);
     //! Default constructor of cCollisionSpheresSphere.
-    cCollisionSpheresSphere() { m_center.set(0,0,0); m_parent = 0; };
+    cCollisionSpheresSphere() : m_center(0,0,0), m_parent(0), m_depth(0) { };
     //! Destructor of cCollisionsSpheresSphere.
     virtual ~cCollisionSpheresSphere() {};
 
@@ -126,7 +128,7 @@ class cCollisionSpheresSphere
     //! Return the radius of the sphere.
     inline double getRadius() { return m_radius; }
     //! Return whether the node is a leaf node.
-    virtual bool isLeaf() = 0;
+    virtual int isLeaf() = 0;
     //! Draw the collision sphere for this node, if at the given depth.
     virtual void draw(int a_depth = -1) = 0;
     //! Calculate the distance between the two given collision spheres.
@@ -135,7 +137,7 @@ class cCollisionSpheresSphere
                 cVector3d& a_colPoint, double& a_colSquareDistance,
                 cCollisionSpheresSphere *a_sb);
 
-  protected:
+  //protected:
     // PROPERTIES:
     //! The parent of the node in the tree.
     cCollisionSpheresSphere *m_parent;
@@ -145,6 +147,9 @@ class cCollisionSpheresSphere
     double m_radius;
     //! The depth of this node in the collision tree.
     int m_depth;
+
+	int m_num;
+	
 };
 
 
@@ -167,7 +172,7 @@ class cCollisionSpheresNode : public cCollisionSpheresSphere
     cCollisionSpheresNode(std::vector<cTriangle> *a_tris,
             cCollisionSpheresSphere *a_parent = NULL);
     //! Default constructor of cCollisionSpheresNode.
-    cCollisionSpheresNode() : cCollisionSpheresSphere() { m_left = m_right = 0; };
+    cCollisionSpheresNode() : cCollisionSpheresSphere(), m_left(0), m_right(0) { };
     //! Destructor of cCollisionSpheseNode.
     virtual ~cCollisionSpheresNode() {};
 
@@ -175,7 +180,7 @@ class cCollisionSpheresNode : public cCollisionSpheresSphere
     //! Create subtrees by splitting primitives into left and right lists.
     void ConstructChildren(Plist &a_primList);
     //! Return whether the node is a leaf node. (In this class, it is not.)
-    bool isLeaf()  { return false; }
+    int isLeaf()  { return 0; }
     //! Draw the collision sphere if at the given depth.
     void draw(int a_depth);
     //! Check for intersection between given nodes, the first an internal node.
@@ -219,7 +224,7 @@ class cCollisionSpheresLeaf : public cCollisionSpheresSphere
 
     // METHODS:
     //! Return whether the node is a leaf node. (In this class, it is.)
-    bool isLeaf()  { return true; }
+    int isLeaf()  { return 1; }
     //! Draw the collision sphere if at the given depth.
     void draw(int a_depth);
     //! Check for intersection between the two given leaf nodes.

@@ -23,14 +23,18 @@
 #ifndef CGenericToolH
 #define CGenericToolH
 //---------------------------------------------------------------------------
-#include "windows.h"
-#include "gl/gl.h"
-#include "gl/glu.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include "CGenericObject.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
+      \file       CGenericTool.h
       \class      cGenericTool
       \brief      cGenericTool describes a generic class to create virtual
                   tools inside a virtual environment (cWorld) and connecting
@@ -62,7 +66,7 @@ class cGenericTool : public cGenericObject
     //! Stop communication with the device connected to the tool (0 indicates success)
     virtual int stop()         { return -1; }
     //! Initialize encoders on device connected to the tool (0 indicates success)
-    virtual int initialize()   { return -1; }
+    virtual int initialize(const bool a_resetEncoders=false)   { return -1; }
     //! Toggle forces on
     virtual int setForcesON()  { return -1; }
     //! Toggle forces off

@@ -122,7 +122,6 @@ bool cFileLoaderBMP::loadBMP(char* a_fileName)
     // check for the magic number that says this is a bitmap
     if (m_bmfh.bfType != BITMAP_MAGIC_NUMBER)
     {
-        m_errorMsg = "File is not in DIB format";
         fclose(in);
         return false;
     }
@@ -192,7 +191,7 @@ bool cFileLoaderBMP::loadBMP(char* a_fileName)
     else if (m_bpp == 24)
     {
     	m_loaded = convert24(tempData);
-   	}
+    }
 
     // clean up memory
     delete[] tempData;
@@ -271,10 +270,10 @@ bool cFileLoaderBMP::convert24(char* tempData)
         int j = m_dataSize-3;
 
         //count backwards so you start at the front of the image
-		//here you can start from the back of the file or the front,
-		//after the header  The only problem is that some programs
-		//will pad not only the data, but also the file size to
-		//be divisible by 4 bytes.
+        //here you can start from the back of the file or the front,
+        //after the header  The only problem is that some programs
+        //will pad not only the data, but also the file size to
+        //be divisible by 4 bytes.
 
         for(unsigned int i=0; i<m_dataSize; i+=3)
         {

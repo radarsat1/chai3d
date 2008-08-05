@@ -113,6 +113,7 @@ void Cbasic_shapesApp::uninitialize() {
   toggle_haptics(TOGGLE_HAPTICS_DISABLE);
   delete world;
   delete viewport;
+  delete camera;
   
 }
 
@@ -434,9 +435,6 @@ void Cbasic_shapesApp::toggle_haptics(int enable) {
     
       // set up the device
       tool->initialize();
-
-      // update initial orientation and position of device
-      tool->updatePose();
 
       // set up a nice-looking workspace for the phantom so 
       // it fits nicely with our shape

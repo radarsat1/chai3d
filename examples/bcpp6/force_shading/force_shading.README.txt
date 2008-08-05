@@ -1,0 +1,16 @@
+/****
+
+ CHAI Example: force_shading_collisions
+ 
+ Author: Chris Sewell
+
+****/
+
+This example demonstrates a somewhat simplified implementation of
+the force shading algorithm described in Section 4 of "The Haptic 
+Display of Complex Graphical Environments" by Diego Ruspini, 
+Krasimir Kolarov, and Oussama Khatib, SIGGRAPH 1997, pp. 345-352.
+Force shading can be toggled on and off with the checkbox.  
+
+
+ 

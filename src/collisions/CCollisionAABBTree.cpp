@@ -30,7 +30,7 @@ extern cCollisionAABBInternal* g_nextFreeNode;
 /*!
     Determine whether the two given boxes intersect each other.
 
-    \fn       inline bool intersect(const cCollisionAABBBox& a_0, const cCollisionAABBox& a_1)
+    \fn       bool intersect(const cCollisionAABBBox& a_0, const cCollisionAABBBox& a_1)
     \param    a_0   First box; may intersect with second box.
     \param    a_1   Second box; may intersect with first box.
     \return   Return whether there is any overlap of the two boxes.
@@ -57,13 +57,18 @@ inline bool intersect(const cCollisionAABBBox& a_0, const cCollisionAABBBox& a_1
 
     \fn       void cCollisionAABBLeaf::render(int a_depth)
     \param    a_depth  Only draw nodes at this depth in the tree.
-                       a_depth = -1 renders the complete tree.
+                       a_depth < 0 render _up to_ abs(a_depth).
 */
 //===========================================================================
 void cCollisionAABBLeaf::render(int a_depth)
 {
-    if (a_depth < 0 || a_depth == m_depth)
+    if ( ( (a_depth < 0) && (abs(a_depth) >= m_depth) ) || a_depth == m_depth)
     {
+        if (a_depth < 0)
+        {
+            cColorf c(1.0, 0.0, 0.0, 1.0);
+            glColor4fv(c.pColor());
+        }
         m_bbox.render();
     }
 }
@@ -98,12 +103,13 @@ void cCollisionAABBLeaf::fitBBox()
     this leaf node by calling the triangle's collision detection method.
 
     \fn       bool cCollisionAABBLeaf::computeCollision(cVector3d& a_segmentPointA,
-              cVector3d& a_segmentPointB, cCollisionAABBBox &a_lineBox,
+              cVector3d& a_segmentDirection, cCollisionAABBBox &a_lineBox,
               cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance)
     \param    a_segmentPointA  Initial point of segment.
     \param    a_segmentDirection  Direction of ray from first to second
                                   segment points (i.e., proxy to goal).
-    \param    a_colObject  Returns pointer to nearest collided object.
+    \param    a_lineBox  A bounding box for the incoming segment, for quick
+                         discarding of collision tests.
     \param    a_colTriangle  Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
@@ -154,14 +160,19 @@ cCollisionAABBInternal::~cCollisionAABBInternal()
 
     \fn       void cCollisionAABBInternal::render(int a_depth)
     \param    a_depth   Only draw nodes at this level in the tree.
-                        a_depth = -1 renders the complete tree.
+                        a_depth < 0 render _up to_ this level.
 */
 //===========================================================================
 void cCollisionAABBInternal::render(int a_depth)
 {
     // render current node
-    if (a_depth < 0 || a_depth == m_depth)
+    if ( ( (a_depth < 0) && (abs(a_depth) >= m_depth) ) || a_depth == m_depth)
     {
+        if (a_depth < 0)
+        {
+            cColorf c(1.0, 0.0, 0.0, 1.0);
+            glColor4fv(c.pColor());
+        }
         m_bbox.render();
     }
 
@@ -278,7 +289,7 @@ cCollisionAABBInternal::cCollisionAABBInternal(unsigned int a_numLeaves,
     \return   Return true if line segment intersects the bounding box.
 */
 //===========================================================================
-bool hitBoundingBox(double a_minB[3], double a_maxB[3], double a_origin[3], double a_dir[3])
+bool hitBoundingBox(const double a_minB[3], const double a_maxB[3], const double a_origin[3], const double a_dir[3])
 {
     const int RIGHT	= 0;
     const int LEFT = 1;
@@ -292,51 +303,68 @@ bool hitBoundingBox(double a_minB[3], double a_maxB[3], double a_origin[3], doub
     double maxT[3];
     double candidatePlane[3];
 
-    /* Find candidate planes; this loop can be avoided if
-    rays cast all from the eye(assume perpsective view) */
+    // Find candidate planes; this loop can be avoided if
+    // rays cast all from the eye (assume perspective view)
     for (i=0; i<3; i++)
-      if(a_origin[i] < a_minB[i]) {
-        quadrant[i] = LEFT;
-        candidatePlane[i] = a_minB[i];
-        inside = false;
-      }else if (a_origin[i] > a_maxB[i]) {
-        quadrant[i] = RIGHT;
-        candidatePlane[i] = a_maxB[i];
-        inside = false;
-      }else	{
-        quadrant[i] = MIDDLE;
-      }
-
-    /* Ray origin inside bounding box */
-    if(inside)	{
-      //coord = origin;
-      return (true);
+    {
+        if(a_origin[i] < a_minB[i])
+        {
+            quadrant[i] = LEFT;
+            candidatePlane[i] = a_minB[i];
+            inside = false;
+        }
+        else if (a_origin[i] > a_maxB[i])
+        {
+            quadrant[i] = RIGHT;
+            candidatePlane[i] = a_maxB[i];
+            inside = false;
+        }
+        else
+        {
+           quadrant[i] = MIDDLE;
+        }
     }
 
-    /* Calculate T distances to candidate planes */
-    for (i = 0; i < 3; i++)
-      if (quadrant[i] != MIDDLE && a_dir[i] !=0.)
-        maxT[i] = (candidatePlane[i]-a_origin[i]) / a_dir[i];
-      else
-        maxT[i] = -1.;
+    // Ray origin inside bounding box
+    if (inside)
+    {
+        //coord = origin;
+        return (true);
+    }
 
-    /* Get largest of the maxT's for final choice of intersection */
+    // Calculate T distances to candidate planes
+    for (i = 0; i < 3; i++)
+    {
+        if (quadrant[i] != MIDDLE && a_dir[i] !=0.)
+            maxT[i] = (candidatePlane[i]-a_origin[i]) / a_dir[i];
+        else
+            maxT[i] = -1.;
+    }
+
+    // Get largest of the maxT's for final choice of intersection
     whichPlane = 0;
     for (i = 1; i < 3; i++)
-      if (maxT[whichPlane] < maxT[i])
-        whichPlane = i;
+        if (maxT[whichPlane] < maxT[i])
+            whichPlane = i;
 
-    /* Check final candidate actually inside box */
+    // Check final candidate actually inside box
     if (maxT[whichPlane] < 0.) return (false);
     for (i = 0; i < 3; i++)
-      if (whichPlane != i) {
-        coord[i] = a_origin[i] + maxT[whichPlane] * a_dir[i];
-        if (coord[i] < a_minB[i] || coord[i] > a_maxB[i])
-          return (false);
-      } else {
-        coord[i] = candidatePlane[i];
+    {
+        if (whichPlane != i)
+        {
+            coord[i] = a_origin[i] + maxT[whichPlane] * a_dir[i];
+            if (coord[i] < a_minB[i] || coord[i] > a_maxB[i])
+                return (false);
+        }
+        else
+        {
+            coord[i] = candidatePlane[i];
+        }
     }
-    return (true);				/* ray hits box */
+
+    // Ray hits box...
+    return (true);
 }
 
 
@@ -354,7 +382,8 @@ bool hitBoundingBox(double a_minB[3], double a_maxB[3], double a_origin[3], doub
     \param    a_segmentPointA  Initial point of segment.
     \param    a_segmentDirection  Direction of ray from first to second
                                   segment points (i.e., proxy to goal).
-    \param    a_colObject  Returns pointer to nearest collided object.
+    \param    a_lineBox  A bounding box for the incoming segment, for quick
+                         discarding of collision tests.
     \param    a_colTriangle  Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
@@ -378,15 +407,21 @@ bool cCollisionAABBInternal::computeCollision(cVector3d& a_segmentPointA,
 
     if (m_testLineBox)
     {
-      double minB[3];
-      double maxB[3];
-      double origin[3];
-      double dir[3];
-      minB[0] = m_bbox.getLowerX(); minB[1] = m_bbox.getLowerY(); minB[2] = m_bbox.getLowerZ();
-      maxB[0] = m_bbox.getUpperX(); maxB[1] = m_bbox.getUpperY(); maxB[2] = m_bbox.getUpperZ();
-      origin[0] = a_segmentPointA.x; origin[1] = a_segmentPointA.y; origin[2] = a_segmentPointA.z;
-      dir[0] = a_segmentDirection.x; dir[1] = a_segmentDirection.y; dir[2] = a_segmentDirection.z;
-      if (!hitBoundingBox(minB, maxB, origin, dir))
+      // Avoid unnecessary copying by casting straight to double...
+      //double minB[3];
+      //double maxB[3];
+      //double origin[3];
+      //double dir[3];
+      //minB[0] = m_bbox.getLowerX(); minB[1] = m_bbox.getLowerY(); minB[2] = m_bbox.getLowerZ();
+      //maxB[0] = m_bbox.getUpperX(); maxB[1] = m_bbox.getUpperY(); maxB[2] = m_bbox.getUpperZ();
+      //origin[0] = a_segmentPointA.x; origin[1] = a_segmentPointA.y; origin[2] = a_segmentPointA.z;
+      //dir[0] = a_segmentDirection.x; dir[1] = a_segmentDirection.y; dir[2] = a_segmentDirection.z;
+      //if (!hitBoundingBox(minB, maxB, origin, dir))
+      if (!hitBoundingBox(
+        (const double*)(&m_bbox.m_min),
+        (const double*)(&m_bbox.m_max),
+        (const double*)(&a_segmentPointA),
+        (const double*)(&a_segmentDirection)))
         return (false);
     }
 
@@ -460,9 +495,9 @@ bool cCollisionAABBInternal::contains_triangle(int a_tag)
     Sets this node's parent pointer and optionally propagate
     assignments to its children (setting their parent pointers to this node).
 
-    \fn       void cCollisionAABBInternal::setParent(cCollisionAABBNode* parent,
-              int recursive);
-    \param    a_parent  Pointer to this node's parent.
+    \fn       void cCollisionAABBInternal::setParent(cCollisionAABBNode* a_parent,
+              int a_recursive);
+    \param    a_parent     Pointer to this node's parent.
     \param    a_recursive  Propagate assignment down the tree?
 */
 //===========================================================================

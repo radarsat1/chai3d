@@ -21,14 +21,18 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "CImageLoader.h"
 #include "CFileLoaderBMP.h"
 #include "CFileLoaderTGA.h"
 #include "CMacrosGL.h"
-#include <gl/gl.h>
+#include <GL/gl.h>
 //---------------------------------------------------------------------------
 
-#ifdef _WIN32
+#if (defined(_WIN32) && !defined(_POSIX) )
 
 // Don't let the ATL headers decide for themselves which lib file to
 // link against; let us link here or in client applications...
@@ -46,7 +50,11 @@
 //---------------------------------------------------------------------------
 
 // For gl image formats...
-#include <gl/gl.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <GL/gl.h>
 
 //---------------------------------------------------------------------------
 
@@ -178,7 +186,7 @@ cColorb cImageLoader::getPixelColor(const unsigned int a_x, const unsigned int a
 
     \param  a_x X coordinate of the pixel
     \param  a_y Y coordinate of the pixel
-    \param  new color of the pixel
+    \param  a_color new color of the pixel
 */
 //===========================================================================
 void cImageLoader::setPixelColor(const unsigned int a_x, const unsigned int a_y, const cColorb& a_color)
@@ -201,7 +209,7 @@ void cImageLoader::setPixelColor(const unsigned int a_x, const unsigned int a_y,
     Clear an image with a defined color
 
     \fn     void cImageLoader::clear(const cColorb& a_color)
-    \param  new color of the image
+    \param  a_color  new color of the image
 */
 //===========================================================================
 void cImageLoader::clear(const cColorb& a_color)
@@ -390,6 +398,7 @@ int cImageLoader::loadFromFile(const char* filename)
     //--------------------------------------------------------------------
     else if (strcmp(lower_extension,"bmp")==0)
     {
+
         cFileLoaderBMP bmp_image;
 
         int result = bmp_image.loadBMP(m_filename);
@@ -414,7 +423,7 @@ int cImageLoader::loadFromFile(const char* filename)
         memcpy(m_data,bmp_image.pBitmap(),(m_bits_per_pixel/8)*m_width*m_height);
     }
 
-#ifdef _WIN32
+#if (defined(_WIN32) && !defined(_POSIX))
 
     //--------------------------------------------------------------------
     // Unrecognized file format - use win32 loader
@@ -447,7 +456,7 @@ int cImageLoader::loadFromFile(const char* filename)
         // Extra sanity check to avoid deep recursion
         recursive_call = 1;
 
-        char new_filename[MAX_PATH];
+        char new_filename[_MAX_PATH];
 
         // Replace the extension
         strcpy(new_filename,filename);
@@ -487,9 +496,9 @@ int cImageLoader::loadFromFile(const char* filename)
 /*!
   Copies the string a_input to a_dest, replacing a_input's extension
   \fn     replace_extension(char* a_dest, const char* a_input, const char* a_extension);
-  \param  char* a_input The input filename
-  \param  char* a_dest  The output filename
-  \param  char* a_extension  The extension to replace a_input's extension with
+  \param  a_input The input filename
+  \param  a_dest  The output filename
+  \param  a_extension  The extension to replace a_input's extension with
 
 */
 //===========================================================================
@@ -515,7 +524,8 @@ void replace_extension(char* a_dest, const char* a_input, const char* a_extensio
     or 0 if no '.' is found.
 
     \fn     char* find_extension(const char* input, const bool include_dot=0);
-    \param  char* a_input The input filename string
+    \param  a_input The input filename string
+    \param  include_dot Should we include the '.' in the output?
     \return Returns a pointer to the character after the '.', or 0 for an error
 */
 //===========================================================================
@@ -588,7 +598,8 @@ void cImageLoader::convertToRGBA()
 
     \fn     bool find_directory(char* a_dest, const char* a_source)
     \param  a_dest    String which will contain the directory name
-    \return a_source  Input string containing path and filename
+    \param  a_source  Input string containing path and filename
+    \return true for success, false if there's no separator
 */
 //===========================================================================
 bool find_directory(char* a_dest, const char* a_source)
@@ -613,7 +624,8 @@ bool find_directory(char* a_dest, const char* a_source)
 //===========================================================================
 /*!
     Discards the path component of a filename and returns the filename itself,
-    optionally including the extension, in a_dest
+    optionally including the extension, in a_dest.  If there are no path 
+    separators, copies the whole string.
 
     \fn     void find_filename(char* a_dest, const char* a_input, bool a_includeExtension);
     \param  a_dest    String which will contain the resulting filename
@@ -625,12 +637,14 @@ void find_filename(char* a_dest, const char* a_input, const bool a_includeExtens
 {
     // Find the last '/' or '\' in the filename
     int len = strlen(a_input);
-    int last_separator_index = 0;
+    int last_separator_index = -1;
 
     for(int i=0; i<len; i++)
     {
         if (a_input[i] == '/' || a_input[i] == '\\') last_separator_index = i;
     }
+
+    // If no separators are found, last_separator_index is still -1
 
     // Copy the whole filename (including extension)
     strcpy(a_dest,a_input+last_separator_index+1);
@@ -677,7 +691,7 @@ void string_tolower(char* a_dest, const char* a_source)
 int cImageLoader::loadFromFileOLE(const char* szPathName)
 {
 
-#ifndef _WIN32
+#if (!defined(_WIN32) || defined(_POSIX))
   
     return -1;
 
@@ -688,8 +702,8 @@ int cImageLoader::loadFromFileOLE(const char* szPathName)
     HDC       hdcTemp;              // The DC To Hold Our Bitmap
     HBITMAP   hbmpTemp;             // Holds The Bitmap Temporarily
     IPicture  *pPicture;            // IPicture Interface
-    OLECHAR   wszPath[MAX_PATH+1];  // Full Path To Picture (WCHAR)
-    char      szPath[MAX_PATH+1];   // Full Path To Picture
+    OLECHAR   wszPath[_MAX_PATH+1];  // Full Path To Picture (WCHAR)
+    char      szPath[_MAX_PATH+1];   // Full Path To Picture
     long      lWidth;               // Width In Logical Units
     long      lHeight;              // Height In Logical Units
     
@@ -698,7 +712,7 @@ int cImageLoader::loadFromFileOLE(const char* szPathName)
     strcpy(szPath, szPathName);
 
     // Convert From ASCII To Unicode
-    MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, MAX_PATH);
+    MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, _MAX_PATH);
 
     // Load the picture
     HRESULT hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
@@ -711,14 +725,14 @@ int cImageLoader::loadFromFileOLE(const char* szPathName)
       char* extension = find_extension(szPath);
       if (extension == 0) return -1;
       strcpy(extension,"jpg");
-      MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, MAX_PATH);
+      MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, _MAX_PATH);
       hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
 
       if(FAILED(hr)) {
         char* extension = find_extension(szPath);
         if (extension == 0) return -1;
         strcpy(extension,"bmp");
-        MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, MAX_PATH);
+        MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, _MAX_PATH);
         hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
       }
 
@@ -848,4 +862,21 @@ unsigned char* readFile(const char* a_filename, bool a_readAsText)
     fclose(f);
       
     return contents;
+}
+
+
+//===========================================================================
+/*!
+    Chops newline characters from the end of a string.
+
+    \fn     void chop_newlines(char* a_str);
+    \param  a_str  The string to clean up.
+*/
+//===========================================================================
+void chop_newlines(char* a_str)
+{
+  while (a_str[strlen(a_str)-1]=='\n'
+    ||
+    a_str[strlen(a_str)-1]=='\r')
+    a_str[strlen(a_str)-1] = '\0';
 }

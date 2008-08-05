@@ -215,7 +215,7 @@ DWORD HapticLoop(void* param)
 	{
 		HapticIteration(param);
 	}
-	app->haptics_thread_running = 0;
+  app->haptics_thread_running = 0;
 	return 0;
 }
 
@@ -284,11 +284,8 @@ void CActive_xCtrl::toggle_haptics(int enable)
 		// Open communication with the device
 		tool->start();      
 
-		// update initial orientation and position of device
-		tool->updatePose();
-		
-	    // tell the tool to show his coordinate frame so you
-	    // can see tool rotation
+		// tell the tool to show his coordinate frame so you
+	  // can see tool rotation
 		tool->visualizeFrames(true);
 
 		// I need to call this so the tool can update its internal

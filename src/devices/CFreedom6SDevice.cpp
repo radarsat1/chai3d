@@ -27,7 +27,7 @@
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-HINSTANCE hDLL = NULL;
+HINSTANCE hf6sDLL = NULL;
 
 //---------------------------------------------------------------------------
 // Copied from f6s.h in the Freedom6S API
@@ -71,7 +71,7 @@ int cFreedom6SDevice::m_activeFreedom6SDevices = 0;
 
 //===========================================================================
 /*!
-    Constructor of cFreedom6SDevice. \r
+    Constructor of cFreedom6SDevice.
     Loads interface DLL.
 
     \fn     cFreedom6SDevice::cFreedom6SDevice()
@@ -85,21 +85,21 @@ cFreedom6SDevice::cFreedom6SDevice() : cGenericDevice()
 
     m_activeFreedom6SDevices++;
 
-    if (hDLL==NULL)
+    if (hf6sDLL==NULL)
     {
-        hDLL = LoadLibrary("freedom6s.dll");
+        hf6sDLL = LoadLibrary("freedom6s.dll");
 
-        if (hDLL==NULL)
+        if (hf6sDLL==NULL)
             return;
 
-        f6s_Initialize = (F6SRC (*)( HF6S* )) GetProcAddress(hDLL, "f6s_Initialize");
-        f6s_ComputeJointVel = (F6SRC (*)( HF6S , float , int  )) GetProcAddress(hDLL, "f6s_ComputeJointVel");
-        f6s_Cleanup = (F6SRC (*)( HF6S  )) GetProcAddress(hDLL, "f6s_Cleanup");
-        f6s_SetHoldDist = (F6SRC (*)( HF6S , float  )) GetProcAddress(hDLL, "f6s_SetHoldDist");
-        f6s_SetForceTorque = (F6SRC (*)( HF6S , const double [3], const double [3] )) GetProcAddress(hDLL, "f6s_SetForceTorque");
-        f6s_GetPositionMatrixGL = (F6SRC (*)( HF6S , double [16] )) GetProcAddress(hDLL, "f6s_GetPositionMatrixGL");
-        f6s_UpdateKinematics = (F6SRC (*)( HF6S  )) GetProcAddress(hDLL, "f6s_UpdateKinematics");
-        f6s_GetVelocityGL = (F6SRC (*)( HF6S hf6s, double [3],  double [3] )) GetProcAddress(hDLL, "f6s_GetVelocityGL");
+        f6s_Initialize = (F6SRC (*)( HF6S* )) GetProcAddress(hf6sDLL, "f6s_Initialize");
+        f6s_ComputeJointVel = (F6SRC (*)( HF6S , float , int  )) GetProcAddress(hf6sDLL, "f6s_ComputeJointVel");
+        f6s_Cleanup = (F6SRC (*)( HF6S  )) GetProcAddress(hf6sDLL, "f6s_Cleanup");
+        f6s_SetHoldDist = (F6SRC (*)( HF6S , float  )) GetProcAddress(hf6sDLL, "f6s_SetHoldDist");
+        f6s_SetForceTorque = (F6SRC (*)( HF6S , const double [3], const double [3] )) GetProcAddress(hf6sDLL, "f6s_SetForceTorque");
+        f6s_GetPositionMatrixGL = (F6SRC (*)( HF6S , double [16] )) GetProcAddress(hf6sDLL, "f6s_GetPositionMatrixGL");
+        f6s_UpdateKinematics = (F6SRC (*)( HF6S  )) GetProcAddress(hf6sDLL, "f6s_UpdateKinematics");
+        f6s_GetVelocityGL = (F6SRC (*)( HF6S hf6s, double [3],  double [3] )) GetProcAddress(hf6sDLL, "f6s_GetVelocityGL");
 
         if (  !f6s_Initialize
           ||  !f6s_ComputeJointVel
@@ -110,8 +110,8 @@ cFreedom6SDevice::cFreedom6SDevice() : cGenericDevice()
           ||  !f6s_UpdateKinematics
           ||  !f6s_GetVelocityGL)
         {
-            FreeLibrary(hDLL);
-            hDLL = NULL;
+            FreeLibrary(hf6sDLL);
+            hf6sDLL = NULL;
         }
     }
 
@@ -133,10 +133,10 @@ cFreedom6SDevice::~cFreedom6SDevice()
 
     m_activeFreedom6SDevices--;
 
-    if (m_activeFreedom6SDevices == 0 && hDLL)
+    if (m_activeFreedom6SDevices == 0 && hf6sDLL)
     {
-        FreeLibrary(hDLL);
-        hDLL = NULL;
+        FreeLibrary(hf6sDLL);
+        hf6sDLL = NULL;
     }
 }
 
@@ -171,11 +171,12 @@ int cFreedom6SDevice::close()
     Calibrate Freedom6S device. Initializes the driver, loading appropriate
   settings according to current Freedom6S configuration.
 
-    \fn     int cFreedom6SDevice::initialize()
+    \fn     int cFreedom6SDevice::initialize(const bool a_resetEncoders=false)
+    \param  a_resetEncoders Ignored; exists for forward compatibility.
     \return Return 0 is operation succeeds, -1 if an error occurs.
 */
 //===========================================================================
-int cFreedom6SDevice::initialize()
+int cFreedom6SDevice::initialize(const bool a_resetEncoders)
 {
     if (m_hf6s != 0)
         return -1;

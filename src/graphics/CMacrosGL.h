@@ -14,19 +14,26 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
 //===========================================================================
-
+/*!
+    \file CMacrosGL.h
+*/
 //---------------------------------------------------------------------------
 #ifndef CMacrosGLH
 #define CMacrosGLH
 //---------------------------------------------------------------------------
 #include "CVector3d.h"
 #include "CMatrix3d.h"
-#include "windows.h"
-#include "gl/gl.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <GL/gl.h>
 //---------------------------------------------------------------------------
 
 #ifdef _MSVC
@@ -36,6 +43,9 @@
 #define CHAI_DEBUG_PRINT printf
 #endif
 
+//! Align the current -z axis with a reference frame; a la gluLookAt
+void cLookAt(const cVector3d& a_eye, const cVector3d& a_at, const cVector3d& a_up);
+
 //===========================================================================
 /*!
       \struct   cMatrixGL
@@ -43,7 +53,7 @@
                 and 3D vectors (cVector3d) to express position or translation.
                 On the OpenGL side 4x4 matrices are required to perform all
                 geometrical transformations. cMatrixGL provides a structure
-                which encapsulates all the necessary functionaly to generate 4x4
+                which encapsulates all the necessary functionality to generate 4x4
                 OpenGL transformation matrices from 3D position vectors and rotation
                 matrices.
 

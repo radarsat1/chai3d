@@ -48,7 +48,7 @@ echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;
 				Outputs="$(OutDir)\regsvr32.trg"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib "
+				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib"
 				OutputFile="../../../bin/active_x_msvc7.ocx"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -121,7 +121,7 @@ echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;
 				Outputs="$(OutDir)\regsvr32.trg"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib"
+				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib"
 				OutputFile="../../../bin/active_x_msvc7.ocx"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"

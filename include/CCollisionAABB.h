@@ -34,6 +34,7 @@
 
 //===========================================================================
 /*!
+      \file     CCollisionAABB.h
       \class    cCollisionAABB
       \brief    cCollisionAABB provides methods to create an Axis-Aligned
                 Bounding Box collision detection tree, and to use

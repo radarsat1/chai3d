@@ -22,10 +22,16 @@
 //---------------------------------------------------------------------------
 #include "CShapeTorus.h"
 #include "CDraw3D.h"
+
+// Different compilers like slightly different GLUT's 
 #ifdef _MSVC
 #include "../../external/OpenGL/msvc6/glut.h"
 #else
-#include "../../external/OpenGL/bbcp6/glut.h"
+  #ifdef _POSIX
+    #include <GL/glut.h>
+  #else
+    #include "../../external/OpenGL/bbcp6/glut.h"
+  #endif
 #endif
 
 //---------------------------------------------------------------------------
@@ -49,7 +55,7 @@ cShapeTorus::cShapeTorus(const double& a_insideRadius, const double& a_outsideRa
     m_material.m_ambient.set((float)0.3, (float)0.3, (float)0.3);
     m_material.m_diffuse.set((float)0.1, (float)0.7, (float)0.8);
     m_material.m_specular.set((float)1.0, (float)1.0, (float)1.0);
-    m_material.setStiffness(100);
+    m_material.setStiffness(100.0);
 };
 
 
@@ -58,7 +64,7 @@ cShapeTorus::cShapeTorus(const double& a_insideRadius, const double& a_outsideRa
     Render sphere in OpenGL
 
     \fn       void cShapeTorus::render(const int a_renderMode)
-    \param    const int a_renderMode  See cGenericObject::render()
+    \param    a_renderMode  See cGenericObject::render()
 */
 //===========================================================================
 void cShapeTorus::render(const int a_renderMode)
@@ -149,7 +155,7 @@ void cShapeTorus::updateBoundaryBox()
 /*!
     Scale the torus with a uniform scale factor
 
-    \fn       void cShapeTorus::scaleObject(const cVector3d a_scaleFactors)
+    \fn       void cShapeTorus::scaleObject(const cVector3d& a_scaleFactors)
     \param    a_scaleFactors x,y,z scale factors
 */
 //===========================================================================

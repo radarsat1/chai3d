@@ -1,3 +1,527 @@
+8/5/2006 - dmorris
+
+* Released version 1.51
+
+* Updated examples.html to reflect Chris's new examples
+
+
+8/4/2006 - Chris
+
+* No changes to the code, but a couple of comments relating to my testing
+  of CHAI in vs.net 2005:
+
+  CHAI is generally friendly to vs.net 2005.  The only problems I found were:
+
+  1) The examples which use MFC or GLUT all compile and work fine with MSVC8. 
+     However, the three examples that explicitly use .net (implicit_functions,
+     force_shading, and mesh_mesh_collisions) all give a few errors (~8 each)
+     related to changes in the framework.  However, the error messages are very
+     self-explanitory, and very easy to fix manually.
+
+  2) When you open a MSVC7 solution in MSVC8 and convert it, the working
+     directory is not carried over.  Therefore, the examples which explicitly
+     load resources (models, sounds, etc.) will not be able to find those
+     resources if the example is run from the IDE.  This is easily fixed by
+     manually entering "../../../bin" as the working directory after converting
+     to MSVC8.
+
+
+8/3/2006 - Chris
+
+* Corrected a problem that caused Borland and MSVC6 record_player examples
+  to crash when haptics is turned on.
+
+* Added "../../../external/OpenGL/msvc6" directory to library paths for
+  MSVC6 examples that generated a linker error on compilation, unable to
+  find glut32.lib.  
+
+* Set the working directory to "../../../bin" for MSVC6 earth and reflections
+  examples and MSVC7 earth example so that textures load when running
+  from the IDE. 
+
+
+8/3/2006 - dmorris
+
+* Added a build_cygwin_examples script to the cygwin/examples dir
+
+* Fixed a problem with error codes in the ghost4 dll that was breaking
+  ghost4 support.
+
+* Fixed a problem in cworld that prevented lights from being disabled.
+
+* updateboundarybox in cMesh will now proceed through a mesh that has
+  no triangles, since it may be a vertex-carrying parent of children
+  whose triangles use its vertices.
+
+* Massive comment changes to fix all doxygen errors.
+
+
+7/29/2006 - fongpwf
+
+* Converted simple and/or often constructed classes to use initializer
+  lists. cMaterial, cVector3d, cGenericObject, cTriangle, cVertex,
+  cRay3D, cSegment3D, cCollisionAABBNode, cCollisionAABBLeaf,
+  cCollisionAABBInternal, cCollisionBrute, cCollisionSpheresSphere,
+  cCollisionSpheresNode, cCollisionSpheresGenericShape
+
+
+7/28/2006 - fongpwf
+
+* Added \file tags to all .h files that have doxygen style comments in them.
+  As a result we now get documentation for globals.
+
+* Added \class tags to cDeltaDevice, cFileLoaderTGA, cPhantomDevice, and
+  cVirtualDevice
+
+* Fixed \class tag for cGenericCollision.
+
+
+7/16/2006 - dmorris
+
+* Changed default m_displayDepth in cGenericCollision to 3; it was sort
+  of counterintuitive that calling setShowCollisionTree on an object
+  didn't actually draw anything because m_displayDepth was 0 by default.
+
+* When rendering collision detectors, it used to be that using depth = -1
+  would render the whole tree.  Now depth = -n renders up to and including
+  level n, so depth = -(big number) will render the whole tree.  In this
+  mode, the AABB tree will also use different colors for each level.
+
+* Added a series of colors called "CHAI_PASTEL_COLORS", analagous to
+  the existing CHAI_BASIC_COLORS.  Used when you need to just grab
+  some pretty colors.
+
+
+7/14/2006 - fongpwf
+
+* Changed constructors of cVector3d to take simple types and pointers by
+  value instead of by reference.  Taking non-const pointers by reference 
+  prevented construction from rvalues.
+
+
+7/11/2006 - fongpwf
+
+* Added getShowNormals and getWireMode to cMesh
+
+
+7/7/2006 - dmorris
+
+* Fixed a bug in the new cDrawFrame()
+
+
+6/30/2006 - dmorris
+
+* The m_nTriangles and m_allocated variables in cVertex are now maintained in
+  cMesh::newTriangle() and cMesh::removeTriangle()
+
+* Fixed a bug in the new cDrawFrame()
+
+Phil says:
+> Turning rendering normals on in cMesh causes a GL_INVALID_OPERATION error.
+> I think this is because in cMesh::renderNormals, the last glEnd() is in
+> the wrong place.  It should go inside the else part of the if statement on
+> a_trianglesOnly.
+
+* Fixed
+
+
+Phil says: 
+
+> Currently, as far as I can tell, a_trianglesOnly is always true because
+> there is no way to change m_showNormalsForTriangleVerticesOnly.  As a
+> result it always uses the true clause of the if statement.  That
+> unneccesarilly calls glBegin and glEnd three times in every iteration of
+> the for loop.  You can move them outside the for loop.
+
+* Fixed (for the loops in _both_ cases)
+
+
+> Also, since triangles share vertices, you waste time drawing almost every
+> normal multiple times. It's probably better to iterate over the vertices and only
+> draw normals for the ones that have m_nTriangles > 0 (assuming m_nTriangles
+> actually means something).
+
+* I changed the default to m_showNormalsForTriangleVerticesOnly to be false; 
+  very few meshes in practice have unused vertices and this will avoid this
+  problem.  m_nTriangles is not generally meaningful; it's only maintained
+  during certain operations.  I'll update the comment accordingly.
+  
+
+6/27/2006 - dmorris
+
+* Fixed lots of warnings (mostly casting and signing) in the mesh-mesh collisions
+  example.
+
+* A bug in object_loader was making the camera get deleted twice on exit.  Fixed.
+
+
+Phil says:
+> After a whole bunch of trial and error, I figured out that you need todefine _MSVC,
+> otherwise you get all kinds of errors in the CHAI headers.
+
+Dan says:
+* Good point.  I put the following in CHAI, to solve the problem without making a lot of changes:
+
+  #if (defined(_MSC_VER) && (!(defined(_MSVC))))
+  #define _MSVC
+  #endif
+
+
+Phil says:
+> cMesh needs const versions of its data accessor functions (getVertex,
+> pVertices, etc.).  Without them you cannot access the cMesh from inside
+> const functions.
+
+Dan says:
+* I added const versions of getVertex and pVertices.  Good point.
+
+
+Phil says:
+
+> cDrawFrame is painfully inefficient
+
+Dan says:
+* I couldn't resist the joy of writing Matlab code to give me straight vertex arrays and
+  simplify this.  I ditched the indexing scheme, which costs some efficiency but is probably
+  negligible, and rendered straight vertex arrays.
+
+
+
+6/27/2006 - dmorris
+
+* Fixed a bug in find_filename
+
+
+6/19/2006 - dmorris
+
+* Did some optimization in cMesh::computeAllNormals()
+
+
+6/12/2006 - dmorris
+
+* Added a function to cVector3d to decompose a vector into components parallel
+  to and perpendicular to another vector.
+
+* Added a 'getBoundaryCenter' method to cGenericObject
+
+* Added an 'addVertices' method to cMesh, to add multiple vertices 
+  at once from an array of cVector3d's.
+
+* Fonts weren't working in apps with no cviewport (glut apps).  Now
+  if no viewport has been created, cFont uses the glut font system
+  by default (instead of the win32 font system).
+
+
+5/31/2006 - dmorris
+
+* Added cRay3D and cSegment3D to cVector3D.h as generalizations
+  of cVector3D.  We should start using these classes wherever
+  it makes notation more concise.  cSegment3D also provides a 
+  closest-point function.
+
+
+5/17/2006 - dmorris
+
+* A few small optimizations in the AABB tree; nothing logical, just
+  code optimizations.
+
+* Reworked the intel project files a bit.
+
+
+5/23/2006 - Chris
+
+* Added SetCallback to the list of functions in phantomHD.def
+* Changed the sounds examples to use haptic callbacks, and all of the sounds
+  examples to do some things previously done in the haptic loop in the graphic
+  loop to speed them up.
+
+
+5/16/2006 - Chris
+
+* Added a virtual "computeForces" method to cGenericObject (as well as changes to
+  cPotentialFieldForceAlgo and cGenericPotentialField) so that the entire 
+  scenegraph can be traversed to find cGenericPotentialField objects.  
+  Previously only cGenericPotentialField objects that could trace their
+  ancestory directly to the world through only other cGenericPotentialField
+  objects would be used for force computation.
+
+5/8/2006 - Chris
+
+* Changed the way the sphere tree creates bounding spheres for triangles so that a
+  circumscribing sphere is calculated, and then compared with the three enclosing 
+  spheres centered along an edge, and the smallest of these four spheres is used.  
+  This results in a tighter and more efficient hierarchy than it did previously.
+
+* Changes to the project settings of various examples, including record_player,
+  sounds, and dynamic_ode. 
+
+* Changed the mesh_mesh_collisions example to have the option of coloring the
+  colliding triangles (rather than the whole colliding meshes) using vertex
+  colors.
+
+
+5/5/2006 - Chris
+
+Added three new examples for MSVC6, MSVC7, and Borland.  The MSVC7 examples are the first
+CHAI examples are also the first CHAI examples to use .net (rather than MFC) in MSVC7.
+
+* implicit_functions: This example implements a sphere, torus, cone, and cylinder using implicit
+  functions, as described in Salisbury and Tarr's paper "Haptic Rendering of 
+  Surfaces Defined by Implicit Functions", including static and dynamic
+  friction.
+
+* mesh_mesh_collisions: This example allows the user to control the position and rotation of
+  a mesh using the haptic device, and detects collisions between this
+  mesh and other meshes of the world.  The tool mesh is yellow when
+  not in collision and red when it is in collision with another mesh.
+  The algorithm makes use of the CHAI sphere trees as well as Tomas
+  Moller's triangle-triangle primitive intersection algorithm.  By 
+  default, it only determines one pair of colliding triangles, but it 
+  can also return all pairs (if you call setFindAll(true)), though this 
+  is much slower.  This example currently provides no force feedback; the
+  tool mesh just changes color when it is in collision.
+
+* force_shading: This example demonstrates a somewhat simplified implementation of
+  the force shading algorithm described in Section 4 of "The Haptic 
+  Display of Complex Graphical Environments" by Diego Ruspini, 
+  Krasimir Kolarov, and Oussama Khatib, SIGGRAPH 1997, pp. 345-352.
+  Force shading can be toggled on and off with the checkbox.
+
+
+4/17/2006 - dmorris
+
+* Specified dependencies in the MSVC7 example solution, so when you build everything,
+  the CHAI lib will build before any of the examples.
+
+
+4/14/2006 - Chris
+
+* Initialized m_texture to NULL in the constructor of cShapeSphere; this uninitialized variable was
+  resulting in crashes when using cShapeSphere objects.
+
+* Added "#include CTriangle.h" to CPanel.h.  The widgets library would not compile
+  in Borland without this, getting confused about the size of a cTriangle object.
+
+* Added celapsed.h into the folder for the Borland mass_springs example; it uses that, which was 
+  apparently removed from the timers library.  Presumably the example should be rewritten to use
+  cPrecisionClock, but at least it compiles and runs again for now.
+
+* Removed PhantomDriver.lib from the project file for the Borland earth example; its absence caused 
+  this project to be unable to compile.
+
+* Fixed a number of problems with both the MSVC6 and MSVC7 versions of the dynamic_ode example that
+  were preventing them from compiling.  (In MSVC6, it complained about the #ifdef _MSVC #include 
+  "stdafx.h" #endif line in CODEMesh.cpp; in MSVC7, it complained about #include <windows.h> being
+  included twice, and about PhantomDriver.lib.)
+
+* Added ../../../external/OpenGL/msvc6 to the paths for several MSVC7 examples (earth, reflections, 
+  meshviewer, object_loader) and fixed problems with the inclusion of PhantomDriver.lib in several 
+  examples.
+
+
+4/8/2006 - dmorris
+
+* Running CHAI on linux:
+
+If you unzip and you're in the directory you just unzipped from, you should be able to do this:
+
+cd chai3d/linux;
+make;
+cd ../examples/linux;
+chmod a+x make_linux_examples;
+./make_linux_examples;
+cd ../../bin;
+
+Now you can run any of the three supplied Linux examples:
+
+./viewmesh_linux resources/models/CAN.obj;
+./reflections_linux;
+./earth_linux;
+
+
+4/7/2006 - Chris
+
+* Changed m_freeVertices.erase(0); to m_freeVertices.erase(m_freeVertices.begin()); 
+  in cMesh::newVertex to get CHAI to compile in MSVC 2005.
+
+
+4/4/2006 - dmorris
+
+* Fixed a bug in the object loader that assumed one-character newlines
+  and therefore broke when opening DOS text files under Linux
+
+* Some notes on coding conventions that are important to making things
+  work under Linux:
+  * Make sure your #includes are case-accurate, and make sure you use
+    #include "blah" for local files and #include <blah> for system
+    headers.
+  * Don't include windows.h unless you need to, and make sure you
+    do an #ifdef _WIN32 if you need to.  In that case, be sure to
+    #ifdef _WIN32 any code that is Windows-specific.
+  * Don't include CViewport.h directly; it's not used in the cygwin
+    or Linux builds.
+  * Remember that when you open a text file, it might have _two_ 
+    newline character ("\r\n") and you need to handle that case.  In
+    particular, when removing newlines, you should do:
+
+    if (the last character is \r or \n) remove the last character
+    if (the last character is \r or \n) remove the last character
+
+    (I wrote that twice in purpose...)
+
+
+3/31/2006 - dmorris
+
+* Added a callback mechanism to cGenericDevice, so we don't have to spawn a 
+  silly third thread when the device can call us back (like the Phantom does).
+  You register your callback with cGenericDevice, and he calls you back every
+  time the device wants you to compute a force.  Most devices won't support
+  this, in which case setCallback returns false, and you can create a thread
+  or timer just like you've always done.
+
+  This is only currently supported for the Phantom, and only for OpenHaptics.
+
+
+3/29/2006 - dmorris
+
+* Fixed a bug in the msvc object_loader that caused it to "jump" when you first
+  clicked on an object.  It had to do with an apparent change in viewport origin
+  when calling "SetCapture"; now the initial click position is ignored and all
+  is well.
+ 
+* Added a new example called 'viewmesh' to the MSVC7, cygwin, and linux
+  directories.  This is a glut-based command-line mesh loader that lets us
+  demonstrate most of CHAI's functionality for linux and cygwin.  The source
+  lives in just one place, just like with the other glut examples, and all the
+  environments share that one source file.
+
+* Changed 'clock' to 'g_clock' in the GLUT examples; clock is a POSIX
+  function and using it as a variable confused gcc.
+
+* Phantom encoders will no longer be reset automatically when you 
+  initialize a Phantom.  This means that you won't have to hold premiums
+  in their reset position every time you start an app.
+
+  I added a parameter to all the device and pointer initialize() methods to control
+  this behavior (a_resetEncoders).  False by default.  If you want to reset
+  your device's encoders, call initialize(true).
+
+* When useNormailizedPositions was false in cGeneric3dofPointer, pose was
+  never updated.  Fixed.
+
+* _Tons_ of documentaion fixes thanks to Phil's acute eye.
+
+* Removed updatePose from every example's initialization, since it was
+  redundant with calling device::initialize().
+
+* Compiling with -D_DISABLE_PHANTOM_SUPPORT now prevents the inclusion of
+  SensAble's headers and turns the Phantom off in the meta device.  Useful
+  if you want to compile away Phantom support in Linux so you don't need
+  the SensAble runtime to distribute CHAI apps.
+
+* I had to remove the double* operators from cVector3d due to a bug in Borland
+  that leaves it unable to decide between const and non-const versions.  I 
+  put back the old [] operators - which had been replaced by double* - so everyone
+  can compile.  But you can't cast a cVector3d to a double* any more.
+
+* For posterity, here are my notes on setting up a Phantom in Linux:
+
+  # update your linux kernel
+  yum update
+
+  # install openhaptics
+  unzip OpenHaptics_AE_LinuxV2.0.zip
+  rpm -ivh phantomdevicedrivers-4.3-1.i686.rpm
+  rpm -ivh openhaptics-ae-2.0-1.i686.rpm
+
+  # load the raw 1394 driver
+  /sbin/modprobe raw1394
+
+  # make sure it got loaded
+  lsmod | grep raw1394
+
+  # on Fedora, raw1394 is in a diff't location than SensAble expects
+  ln -s /dev/raw/raw1394 /dev/raw1394
+
+  # see how your Phantom is doing...
+  /usr/sbin/PHANToMConfiguration
+  /usr/sbin/PHANToMTest
+
+  # I needed to get the secret version of the driver and install
+  # this instead... you shouldn't generally have to do this.
+  rpm -ivh phantomdevicedrivers-4.3-2.i686.rpm
+
+  # compile the examples and make sure the build environment is okay
+  cd /usr/share/3DTouch/examples/HD/graphics
+  make CC=gcc32 CXX=g++32
+
+
+* Delta installation: just copy everything to the CHAI dir.  Much easier.
+
+3/24/2006 - dmorris
+
+* Added Linux support.  You'll see some #ifdef _LINUX's around, and a linux
+  directory plus a linux examples directory.  Features that are left out in Linux
+  are:
+  * Vertex shaders
+  * Vertex buffer objects
+  * Fonts are simplified to use GLUT only
+  * No virtual device
+  * No boards support
+  * The freedom 6 is not supported yet (will fix that soon)
+  * Only one phantom can be opened right now (will fix that soon)
+
+* There was a bug in cGenericObject:computeBoundaryBox; taking the max and min
+  from each child and rotating them up into the parent is not enough.  You need
+  to check all 8 corners of each child's bounding box.
+
+* cAngle was actually computing the cosine of the angle between the input
+  vectors.  This was fixed, and a cCosAngle function was added to cmaths.h
+
+
+3/22/2006 - dmorris
+
+* Added an 'examples/cygwin' directory, with makefiles for 'earth' and
+  'reflections'
+
+* Added a 'cygwin' directory, with a makefile to build CHAI in cygwin.
+  This builds everything in CHAI except the board support files.
+
+* Added #ifdef _POSIX versions of cPrecisionClock (using gettimeofday) and
+  cPrecisionTimer (using pthread_cond_timedwait)
+
+* Removed celapsed.h, which was redundant with cPrecisionClock
+
+* Finally got rid of PhantomLib.dll, by moving all of his code - intact - into
+  CHAI.  I removed the dll source and binaries from CVS, and removed all references
+  to the library from the CHAI examples.  Ahhhh, no more DLL issues.
+
+
+3/20/2006 - dmorris
+
+* Removed celapsed.h, which was redundant with cPrecisionClock
+
+* Finally got rid of PhantomLib.dll, by moving all of his code - intact - into
+  CHAI.  I removed the dll source and binaries from CVS, and removed all references
+  to the library from the CHAI examples.  Ahhhh, no more DLL issues.
+
+3/2/2006 - dmorris
+
+* Added the cDrawArrow function to cDraw to draw pretty cone/cylinder arrows
+
+* Added the cLookAt function to cMacrosGL to orient the current rendering
+  frame according to two points, a la gluLookAt
+
+2/27/2006 - dmorris
+
+* Removed opengl32.dll and glu32.dll from the bin directory.  Also removed
+  them from the 1.41 zipfile and re-posted it as 1.42.
+
+2/17/2006 - dmorris
+
+* Fixed a bug in cvirtualdevice.cpp that prevented the virtual switch from being
+  accessed in some cases.
+
 1/25/2006 - dmorris
 
 * Released version 1.41, with CVS files removed and some changes to the doxygen

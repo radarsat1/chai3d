@@ -34,7 +34,7 @@
 #include "CTexture2D.h"
 #include "CColor.h"
 //---------------------------------------------------------------------------
-#include "gl/glu.h"
+#include <GL/glu.h>
 #include <vector>
 #include <list>
 //---------------------------------------------------------------------------
@@ -49,6 +49,7 @@ class cVertex;
 
 //===========================================================================
 /*!
+      \file       CMesh.h
       \class      cMesh
       \brief      cMesh represents a collection of vertices, triangles, materials,
                   and texture properties that can be rendered graphically and
@@ -82,19 +83,28 @@ class cMesh : public cGenericObject
     unsigned int newVertex(const double a_x, const double a_y, const double a_z);
     //! Create a new vertex and add it to the vertex list.
     unsigned int newVertex(const cVector3d& a_pos) { return( newVertex(a_pos.x, a_pos.y, a_pos.z) ); }
+    //! Add an array of vertices to the vertex list given an array of vertex positions.
+    void addVertices(const cVector3d* a_vertexPositions, const unsigned int& a_numVertices);
 
     //! Remove the vertex at the specified position in my vertex array
     bool removeVertex(const unsigned int a_index);
     
     //! Access the vertex at the specified position in my vertex array (and maybe my childrens' arrays)
     cVertex* getVertex(unsigned int a_index, bool a_includeChildren = false);
+    inline const cVertex* getVertex(unsigned int a_index, bool a_includeChildren = false) const
+    {
+      return (const cVertex*)(getVertex(a_index,a_includeChildren));
+    }
 
     //! Read the number of stored vertices, optionally including those of my children
     unsigned int getNumVertices(bool a_includeChildren = false) const;
     
     //! Access my vertex list directly (use carefully)
     inline virtual vector<cVertex>* pVertices() { return (&m_vertices); }
+    inline virtual const vector<cVertex>* pVertices() const { return (&m_vertices); }
 
+    //! Access the first non-empty vertex list in any of my children (use carefully)
+    virtual vector<cVertex>* pVerticesNonEmpty();
 
     // METHODS - TRIANGLES
 
@@ -139,6 +149,8 @@ class cMesh : public cGenericObject
 
     //! Enable or disable wireframe rendering, optionally propagating the operation to my children
     void setWireMode(const bool a_showWireMode, const bool a_affectChildren=true);
+    //! Return whether wireframe rendering is enabled
+    bool getWireMode() const { return m_triangleMode == GL_LINE; }
 
     //! Set color of each vertex, optionally propagating the operation to my children
     void setVertexColor(const cColorb& a_color, const bool a_affectChildren=true);
@@ -166,9 +178,11 @@ class cMesh : public cGenericObject
     bool getMaterialEnabled() const { return m_useMaterialProperty; }
     
     //! Enable or disable the rendering of vertex normals, optionally propagating the operation to my children
-    void showNormals(const bool& a_showNormals, const bool a_affectChildren=true, const bool a_trianglesOnly = true);
+    void showNormals(const bool& a_showNormals, const bool a_affectChildren=true, const bool a_trianglesOnly = false);
     //! Set graphic properties for normal-rendering, optionally propagating the operation to my children
     void setNormalsProperties(const double a_length, const cColorf& a_color, const bool a_affectChildren);
+    //! Returns whether rendering of normals is enabled
+    bool getShowNormals() const { return m_showNormals; }
 
     //! Set the haptic stiffness, possibly recursively affecting children
     void setStiffness(double a_stiffness, const bool a_affectChildren=0);
@@ -214,6 +228,12 @@ class cMesh : public cGenericObject
     //! Extrude each vertex of the mesh by some amount along its normal
     void extrude(const double a_extrudeDistance, const bool a_affectChildren=false,
       const bool a_updateCollisionDetector=false);
+
+    //! Shifts all vertex positions by the specified amount.
+    //!
+    //! Use setPos() if you want to move the whole mesh for rendering.
+    virtual void offsetVertices(const cVector3d& a_offset, const bool a_affectChildren=false,
+      const bool a_updateCollisionDetector=true);
 
     //! Scale vertices and normals by the specified scale factors and re-normalize
     virtual void scaleObject(const cVector3d& a_scaleFactors);

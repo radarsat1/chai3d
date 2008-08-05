@@ -22,7 +22,7 @@ Professional Edition License.
 #ifndef _VBO_MESH_H_
 #define _VBO_MESH_H_
 
-#include "cMesh.h"
+#include "CMesh.h"
 
 #include "glext.h"
 
@@ -52,6 +52,7 @@ typedef cMesh vbo_mesh_parent_mesh_type;
 
 //===========================================================================
 /*!
+\file       CVBOMesh.h
 \class      cVBOMesh
 \brief      This class is a replacement for cMesh that uses vertex buffers
             for rendering.  It allows for much faster rendering, but requires

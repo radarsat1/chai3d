@@ -33,7 +33,7 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/dynamic_ode.pch"
+				PrecompiledHeaderFile=""
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
@@ -45,7 +45,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib "
+				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib "
 				OutputFile="../../../bin/dynamic_ode_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -114,7 +114,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib ode.lib"
+				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib ode.lib"
 				OutputFile="../../../bin/dynamic_ode_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"

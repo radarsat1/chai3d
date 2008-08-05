@@ -19,15 +19,7 @@
 */
 //===========================================================================
 
-// MS Visual C++ import flag
-#ifdef _cplusplus
-extern "C" {
-#endif
-
-// Borland import flag
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "../../../src/devices/CCallback.h"
 
 #define FUNCTION __declspec(dllexport)
 
@@ -135,11 +127,4 @@ FUNCTION int __stdcall   GetWorkspaceScale(const int& num, double& scale);
 FUNCTION int __stdcall   ReadVelocity(int num, double &iVelX, double &iVelY, double &iVelZ);
 
 
-#ifdef _cplusplus
-}
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
+FUNCTION int __stdcall   SetCallback(cCallback* callback);

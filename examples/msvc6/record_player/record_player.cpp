@@ -77,7 +77,6 @@ const char* getRecordName(int a_index) {
 
 void HapticLoop(void* param);
 
-
 /***
 
   CHAI supports two modes of communication with the Phantom... via
@@ -105,9 +104,9 @@ static char THIS_FILE[] = __FILE__;
 #pragma warning(disable: 4800)
 
 BEGIN_MESSAGE_MAP(Crecord_playerApp, CWinApp)
-	//{{AFX_MSG_MAP(Crecord_playerApp)
-	//}}AFX_MSG
-	ON_COMMAND(ID_HELP, CWinApp::OnHelp)
+    //{{AFX_MSG_MAP(Crecord_playerApp)
+    //}}AFX_MSG
+    ON_COMMAND(ID_HELP, CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 // No one really knows why GetConsoleWindow() is not
@@ -128,21 +127,21 @@ unsigned int pos = 0;
 // Load an audio file in .wav format
 bool LoadAudioFile(LPCSTR szFileName)
 {
-	// Load the data from the specified file
+  // Load the data from the specified file
   HSTREAM file_stream = BASS_StreamCreateFile(FALSE,szFileName,0,0,BASS_STREAM_DECODE);
 
-	// Get the length and header info from the loaded file
-	stream_length=BASS_StreamGetLength(file_stream); 
-	BASS_ChannelGetInfo(file_stream, &info);
+  // Get the length and header info from the loaded file
+  stream_length=BASS_StreamGetLength(file_stream); 
+  BASS_ChannelGetInfo(file_stream, &info);
 
-	// Get the audio samples from the loaded file
-	data = new char[(unsigned int)stream_length];
-	BASS_ChannelGetData(file_stream, data, (unsigned int)stream_length);
-	
-	// Set playing to begin at the beginning of the loaded data
-	pos = 0;
+  // Get the audio samples from the loaded file
+  data = new char[(unsigned int)stream_length];
+  BASS_ChannelGetData(file_stream, data, (unsigned int)stream_length);
+    
+  // Set playing to begin at the beginning of the loaded data
+  pos = 0;
 
-	return false;
+  return false;
 }
 
 
@@ -150,50 +149,50 @@ bool LoadAudioFile(LPCSTR szFileName)
 DWORD CALLBACK MyStreamWriter(HSTREAM handle, void *buf, DWORD len, DWORD user)
 {
   // Cast the buffer to a character array
-	char *d=(char*)buf;
+  char *d=(char*)buf;
 
   // Loop the file when it reaches the beginning or end
   if ((pos >= stream_length) && (record_direction == 1))
-		pos = 0;
-	if ((pos <= 0) && (record_direction == -1))
-		pos = (unsigned int)stream_length;
-		
-	// If record is spinning in positive direction, write requested 
-	// amount of data from current position forwards
-	if (record_direction == 1)
-	{
-		int up = len + pos;
-		if (up > stream_length) 
-			up = (unsigned int)stream_length; 
+    pos = 0;
+  if ((pos <= 0) && (record_direction == -1))
+    pos = (unsigned int)stream_length;
+        
+  // If record is spinning in positive direction, write requested 
+  // amount of data from current position forwards
+  if (record_direction == 1)
+  {
+    int up = len + pos;
+    if (up > stream_length) 
+      up = (unsigned int)stream_length; 
 
     for (int i=pos; i<up; i+=1) 
-			d[(i-pos)] = data[i]; 
+      d[(i-pos)] = data[i]; 
 
-		int amt = (up-pos);
-		pos += amt;
-		return amt;
-	 }
+    int amt = (up-pos);
+    pos += amt;
+    return amt;
+  }
 
   // If record is spinning in negative direction, write requested 
-	// amount of data from current position backwards
-	if (record_direction == -1)
-	{
-		int up = pos - len;
+  // amount of data from current position backwards
+  if (record_direction == -1)
+  {
+    int up = pos - len;
 
-		if (up < 0)
-			up = 0;
+    if (up < 0)
+      up = 0;
 
-	  int cnt = 0;
+    int cnt = 0;
     for (int i=pos; i>up; i-=1) 
-			d[cnt++] = data[i]; 
+      d[cnt++] = data[i]; 
 
-		int amt = cnt;
-		pos -= amt;
+    int amt = cnt;
+    pos -= amt;
 
-		return amt;
-	 }
+    return amt;
+  }
 
-	 return 0;
+  return 0;
 }
 
 
@@ -224,28 +223,166 @@ Crecord_playerApp::Crecord_playerApp() {
 void Crecord_playerApp::uninitialize() {
 
   toggle_haptics(TOGGLE_HAPTICS_DISABLE);
-  delete world;
-  delete viewport;
-  
 }
+
+
+int Crecord_playerApp::LoadModel(char* filename) {
+
+  // create a new mesh
+  cMesh* new_object = new cMesh(world);
+  _cprintf("Loading mesh file %s\n",filename);
+
+  // load 3d object file
+  int result = new_object->loadFromFile(filename);
+
+  if (result == 0) {
+
+    _cprintf("Could not load model %s\n",filename);
+    delete new_object;
+    return -1;
+  }
+
+  // I'm going to scale the object so his maximum axis has a
+  // size of MESH_SCALE_SIZE. This will make him fit nicely in
+  // our viewing area.
+
+  // Tell him to compute a bounding box...
+  new_object->computeBoundaryBox(true);
+
+  cVector3d min = new_object->getBoundaryMin();
+  cVector3d max = new_object->getBoundaryMax();
+
+  // This is the "size" of the object
+  cVector3d span = max;
+  span.sub(min);
+
+  // Find his maximum dimension
+  float max_size = span.x;
+  if (span.y > max_size) max_size = span.y;
+  if (span.z > max_size) max_size = span.z;
+
+  // We'll center all vertices, then multiply by this amount,
+  // to scale to the desired size.
+  float scale_factor = MESH_SCALE_SIZE / max_size;
+
+  // To center vertices, we add this amount (-1 times the
+  // center of the object's bounding box)
+  cVector3d offset = max;
+  offset.add(min);
+  offset.div(2.0);
+  offset.negate();
+
+  // Now we need to actually scale all the vertices.  However, the
+  // vertices might not actually be in this object; they might
+  // be in children or grand-children of this mesh (depending on how the 
+  // model was defined in the file).
+  // 
+  // So we find all the sub-meshes we loaded from this file, by descending
+  // through all available children.
+
+  // This will hold all the meshes we need to operate on... we'll fill
+  // it up as we find more children.
+  std::list<cMesh*> meshes_to_scale;
+
+  // This will hold all the parents we're still searching...
+  std::list<cMesh*> meshes_to_descend;
+  meshes_to_descend.push_front(new_object);
+
+  // Keep track of how many meshes we've found, just to print
+  // it out for the user
+  int total_meshes = 0;
+
+  // While there are still parent meshes to process
+  while(meshes_to_descend.empty() == 0) {
+
+    total_meshes++;
+
+    // Grab the next parent
+    cMesh* cur_mesh = meshes_to_descend.front();
+    meshes_to_descend.pop_front();
+    meshes_to_scale.push_back(cur_mesh);
+
+    // Put all his children on the list of parents to process
+    for(unsigned int i=0; i<cur_mesh->getNumChildren(); i++) {
+
+      cGenericObject* cur_object = cur_mesh->getChild(i);
+
+      // Only process cMesh children
+      cMesh* cur_mesh = dynamic_cast<cMesh*>(cur_object);
+      if (cur_mesh) meshes_to_descend.push_back(cur_mesh);
+    }
+  }
+
+  _cprintf("Loaded %d vertices in %d meshes from model %s\n",
+    new_object->getNumVertices(true),total_meshes,filename);
+  
+  std::list<cMesh*>::iterator mesh_iter;
+
+  //_cprintf("Offset: %f %f %f\n", offset.x, offset.y, offset.z);
+
+  // Now loop over _all_ the meshes we found...
+  for(mesh_iter = meshes_to_scale.begin(); mesh_iter != meshes_to_scale.end(); mesh_iter++) {
+
+    cMesh* cur_mesh = *mesh_iter;
+    vector<cVertex>* vertices = cur_mesh->pVertices();
+    int num_vertices = cur_mesh->getNumVertices(false);
+    cVertex* cur_vertex = (cVertex*)(vertices);
+
+    // Move and scale each vertex in this mesh...
+    for(int i=0; i<num_vertices; i++) {
+      cur_vertex = cur_mesh->getVertex(i);
+      cVector3d pos = cur_vertex->getPos();      
+      pos.add(offset);
+      pos.mul(scale_factor);
+      cur_vertex->setPos(pos);
+      cur_vertex++;
+    }
+    cur_mesh->computeGlobalPositions(false);
+  }
+
+  int size = new_object->pTriangles()->size();
+
+  // Re-compute a bounding box
+  new_object->computeBoundaryBox(true);
+  
+  // Build a nice collision-detector for this object, so
+  // the proxy will work nicely when haptics are enabled.
+  _cprintf("Building collision detector...\n");
+
+  new_object->computeGlobalPositions(false);
+
+  // new_object->createSphereTreeCollisionDetector(true,true);
+  new_object->createAABBCollisionDetector(true,true);
+  
+  _cprintf("Finished building collision detector...\n");
+
+  new_object->computeGlobalPositions();
+  
+  object = new_object;
+  
+  world->addChild(object);
+  return 0;
+
+}
+
 
 
 BOOL Crecord_playerApp::InitInstance() {
 
-	AfxEnableControlContainer();
+    AfxEnableControlContainer();
 
 #ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
+    Enable3dControls();         // Call this when using MFC in a shared DLL
 #else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
+    Enable3dControlsStatic();   // Call this when linking to MFC statically
 #endif
 
-	g_main_dlg = new Crecord_playerDlg;
+    g_main_dlg = new Crecord_playerDlg;
   m_pMainWnd = g_main_dlg;
 
   g_main_dlg->Create(IDD_record_player_DIALOG,NULL);
     
-	// create a new world
+    // create a new world
   world = new cWorld();
 
   // set background color
@@ -292,56 +429,23 @@ BOOL Crecord_playerApp::InitInstance() {
   m_RFDInitialAngle = 0.0;
   m_inContact = false;
 
-	// create a new mesh
-	object = new cMesh(world);
-     
-	// load 3d object file     
-	object->loadFromFile(TURNTABLE_MODEL);
+  LoadModel(TURNTABLE_MODEL);
 
-  // compute size of object
-  object->computeBoundaryBox(true);
+  object->translate(0,0,-0.3);
 
-  cVector3d min = object->getBoundaryMin();
-  cVector3d max = object->getBoundaryMax();
-
-  // This is the "size" of the object
-  cVector3d span = cSub(max, min);
-  double size = cMax(span.x, cMax(span.y, span.z));
-
-  // We'll center all vertices, then multiply by this amount,
-  // to scale to the desired size.
-  double scaleFactor = MESH_SCALE_SIZE / size;
-  object->scale(scaleFactor);
-
-  // compute size of object again
-  object->computeBoundaryBox(true);
-
-  // Build a collision-detector for this object, so
-  // the proxy will work nicely when haptics are enabled.
-  object->createAABBCollisionDetector(true,true);
-
-  // set size of frame
-  object->setFrameSize(0.2, 1.0, true);
-
-  // set size of normals
-  object->setNormalsProperties(0.01, cColorf(1.0, 0.0, 0.0, 1.0), true);
-
-  // update global position
-  object->computeGlobalPositions();
-
-  // remove previous object from world and add new one
-  world->addChild(object);
-
-	// set stiffness
+  // set stiffness
   double stiffness = (double)35;
   object->setStiffness(stiffness, true);
 
-	// Initialize sound device and create audio stream
+  // Initialize sound device and create audio stream
   if (!BASS_Init(1,44100,0,0,NULL))
-	  _cprintf("Init error %d\n", BASS_ErrorGetCode());
+      _cprintf("Init error %d\n", BASS_ErrorGetCode());
     
-	// Load a record onto the record player
+  // Load a record onto the record player
   load_record(0);
+  
+  object->computeGlobalPositions(false);
+  world->computeGlobalPositions(false);
 
   return TRUE;
 }
@@ -401,7 +505,7 @@ int Crecord_playerApp::Run() {
 int Crecord_playerApp::render_loop() {
 
   // Just draw the scene...
-	if (viewport) viewport->render();
+    if (viewport) viewport->render();
 
   return 0;
 
@@ -433,15 +537,15 @@ void Crecord_playerApp::scroll(CPoint p, int left_button) {
   // selected object
   if (left_button) {
 
-		m_recordMesh->translate(cMul(-0.04, m_recordMesh->getRot().getCol2()));
+        m_recordMesh->translate(cMul(-0.04, m_recordMesh->getRot().getCol2()));
     cVector3d axis1(-1,0,0);
     object->rotate(axis1,-1.0*(float)p.y / 50.0);
-		m_recordMesh->rotate(axis1,-1.0*(float)p.y / 50.0);
+        m_recordMesh->rotate(axis1,-1.0*(float)p.y / 50.0);
   
     cVector3d axis2(0,1,0);
     object->rotate(axis2,(float)p.x / 50.0);
-		m_recordMesh->rotate(axis2,(float)p.x / 50.0);
-		m_recordMesh->translate(cMul(0.04, m_recordMesh->getRot().getCol2()));
+        m_recordMesh->rotate(axis2,(float)p.x / 50.0);
+        m_recordMesh->translate(cMul(0.04, m_recordMesh->getRot().getCol2()));
   }
 
   // If the left button is being held down, move the
@@ -449,15 +553,15 @@ void Crecord_playerApp::scroll(CPoint p, int left_button) {
   else {
 
     object->translate(0, 0, -1.0*(float)p.y / 100.0);
-		m_recordMesh->translate(0, 0, -1.0*(float)p.y / 100.0);
+        m_recordMesh->translate(0, 0, -1.0*(float)p.y / 100.0);
     object->translate(0, 1.0*(float)p.x / 100.0, 0);
-		m_recordMesh->translate(0, 1.0*(float)p.x / 100.0, 0);
+        m_recordMesh->translate(0, 1.0*(float)p.x / 100.0, 0);
 
   }
 
   // Let the object re-compute his global position data
   object->computeGlobalPositions();
-	m_recordMesh->computeGlobalPositions();
+    m_recordMesh->computeGlobalPositions();
   object->computeBoundaryBox(true);  
   
 }
@@ -485,7 +589,7 @@ void Crecord_playerApp::select(CPoint p) {
 void HapticLoop(void* param)
 {
   // simulation in now ON
-	Crecord_playerApp* app = (Crecord_playerApp*)(param);
+    Crecord_playerApp* app = (Crecord_playerApp*)(param);
 
   // read position from haptic device
   app->tool->updatePose();
@@ -530,45 +634,39 @@ void HapticLoop(void* param)
 ***/
 void Crecord_playerApp::toggle_haptics(int enable) {
 
-	if (enable == TOGGLE_HAPTICS_TOGGLE)
-	{
-	  if (haptics_enabled) toggle_haptics(TOGGLE_HAPTICS_DISABLE);
-		else toggle_haptics(TOGGLE_HAPTICS_ENABLE);
-	}
+  if (enable == TOGGLE_HAPTICS_TOGGLE)
+  {
+    if (haptics_enabled) toggle_haptics(TOGGLE_HAPTICS_DISABLE);
+    else toggle_haptics(TOGGLE_HAPTICS_ENABLE);
+  }
 
   else if (enable == TOGGLE_HAPTICS_ENABLE)
   {
-		if (haptics_enabled) return;
+    if (haptics_enabled) return;
     haptics_enabled = 1;
-		
-	  if (tool == NULL)
-		{
+        
+    if (tool == NULL)
+    {
 
       tool = new cMeta3dofPointer(world, 0);
       world->addChild(tool);
       tool->setPos(0.0, 0.0, 0.0);
 
       // turn on dynamic proxy
-      cProxyPointForceAlgo* forceAlgo = tool->getProxy();
-      
+      cProxyPointForceAlgo* forceAlgo = tool->getProxy();  
       forceAlgo->enableDynamicProxy(true);
 
       // set up a nice-looking workspace for the phantom so
       // it fits nicely with our models
       tool->setWorkspace(2.0,2.0,2.0);
-
-      // Rotate the tool so its axes align with our opengl-like axes
       tool->setRadius(0.02);
-		}
+    }
 
     // set up the device
     tool->initialize();
 
     // open communication to the device
     tool->start();
-
-    // update initial orientation and position of device
-    tool->updatePose();
 
     // I need to call this so the tool can update its internal
     // transformations before performing collision detection, etc.
@@ -583,7 +681,7 @@ void Crecord_playerApp::toggle_haptics(int enable) {
 
   }
   else if (enable == TOGGLE_HAPTICS_DISABLE) 
-	{
+  {
 
     // Don't do anything if haptics are already off
     if (haptics_enabled == 0) return;
@@ -592,9 +690,9 @@ void Crecord_playerApp::toggle_haptics(int enable) {
     haptics_enabled = 0;
     timer.stop();
 
-		if (stream) BASS_ChannelStop(stream);
-		   
-		// Stop the haptic device...
+    if (stream) BASS_ChannelStop(stream);
+           
+    // Stop the haptic device...
     tool->setForcesOFF();
     tool->stop();
   }
@@ -611,21 +709,21 @@ void Crecord_playerApp::load_record(int a_index)
   if (a_index < 0 || a_index >= NUM_RECORDS) return;
 
   if (stream) { BASS_ChannelStop(stream); Sleep(100); }
-	int restart_haptics = 0;
-	if (haptics_enabled) {
-		restart_haptics = 1;
-		toggle_haptics();
-	}
-	pos = 0;
+  int restart_haptics = 0;
+  if (haptics_enabled) {
+    restart_haptics = 1;
+    toggle_haptics();
+  }
+  pos = 0;
 
   LoadAudioFile(g_audio_files[a_index]);
-	
-	stream=BASS_StreamCreate(info.freq,info.chans,0,&MyStreamWriter,0);
+    
+  stream=BASS_StreamCreate(info.freq,info.chans,0,&MyStreamWriter,0);
         
-	// delete existing record
-	if (m_recordMesh) { world->removeChild(m_recordMesh); delete m_recordMesh; }
+  // delete existing record
+  if (m_recordMesh) { world->removeChild(m_recordMesh); delete m_recordMesh; }
 
-	// create new record
+  // create new record
   m_recordMesh = new cMesh(world);
   createTexCoords(m_recordMesh, 0.33);
   cTexture2D *record = new cTexture2D();
@@ -650,21 +748,21 @@ void Crecord_playerApp::load_record(int a_index)
 
   // add object to world and translate
   world->addChild(m_recordMesh);
-  m_recordMesh->translate(0, 0, 0.04);
+  m_recordMesh->translate(-0.1, 0, -0.21);
 
-	// set stiffness
+  // set stiffness
   double stiffness = (double)35;
   if (m_recordMesh)
     m_recordMesh->setStiffness(stiffness, true);
 
-	// set static and dynamic friction
+  // set static and dynamic friction
   double staticFriction = (double)100 / 100.0;
   double dynamicFriction = (double)100 / 100.0;
   if (m_recordMesh)
     m_recordMesh->setFriction(staticFriction, dynamicFriction, true);
 
-	m_rotVel = 0.0;
-	if (restart_haptics) toggle_haptics();
+  m_rotVel = 0.0;
+  if (restart_haptics) toggle_haptics();
 }
 //---------------------------------------------------------------------------
 
@@ -680,7 +778,7 @@ void Crecord_playerApp::animateObject(cVector3d force)
   // get position of proxy on plane, get vector from center to application point
   cProxyPointForceAlgo* forceAlgo = tool->getProxy();
   m_proxyPos = forceAlgo->getProxyGlobalPosition();
-	m_proxyPos.sub(m_recordMesh->getGlobalPos());
+    m_proxyPos.sub(m_recordMesh->getGlobalPos());
   cVector3d radius;
   radius.set(m_proxyPos.x, m_proxyPos.y, 0);
 
@@ -696,19 +794,19 @@ void Crecord_playerApp::animateObject(cVector3d force)
   m_rotVel = m_rotVel + m_torque/m_inertia * time_step;
   m_rotPos = m_rotPos + m_rotVel * time_step;
 
-	// set audio direction and frequency based on rotational velocity
+    // set audio direction and frequency based on rotational velocity
   if (haptics_enabled && (fabs(m_rotVel)) > 0.0)
-	{
-		if (m_rotVel < 0.0) record_direction = 1;
-		else record_direction = -1;
+    {
+        if (m_rotVel < 0.0) record_direction = 1;
+        else record_direction = -1;
     BASS_ChannelSetAttributes(stream, (int)(info.freq*fabs(m_rotVel)/6.5), -1, -1); 
-		if (!(BASS_ChannelPlay(stream,FALSE)))
-		  _cprintf("Play error %d\n", BASS_ErrorGetCode());	
-	}
-	else
-	{
-		BASS_ChannelStop(stream);
-	}
+        if (!(BASS_ChannelPlay(stream,FALSE)))
+          _cprintf("Play error %d\n", BASS_ErrorGetCode()); 
+    }
+    else
+    {
+        BASS_ChannelStop(stream);
+    }
 
   // rotate object
   m_recordMesh->rotate(m_recordMesh->getRot().getCol2(), m_rotVel * time_step);

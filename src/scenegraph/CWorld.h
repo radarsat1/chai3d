@@ -27,6 +27,7 @@
 #ifndef CWorldH
 #define CWorldH
 //---------------------------------------------------------------------------
+#include "chai_globals.h"
 #include "CCamera.h"
 #include "CGenericObject.h"
 #include "CTriangle.h"
@@ -41,6 +42,7 @@ class cLight;
 
 //===========================================================================
 /*!
+      \file       CWorld.h
       \class      cWorld
       \brief      cWorld defines the typical root of the CHAI scene graph.
                   It stores lights, allocates textures, and serves as the
@@ -100,7 +102,7 @@ class cWorld : public cGenericObject
 protected:
     // METHODS:
     //! Add a light source to this world
-    friend cLight;
+    friend class cLight;
     bool addLightSource(cLight* a_light);
     //! Remove a light source from this world
     bool removeLightSource(cLight* a_light);

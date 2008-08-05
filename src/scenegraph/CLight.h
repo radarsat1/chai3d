@@ -23,8 +23,11 @@
 #ifndef CLightH
 #define CLightH
 //---------------------------------------------------------------------------
-#include "windows.h"
-#include "gl/gl.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <GL/gl.h>
 #include "CColor.h"
 #include "CMaths.h"
 #include "CMacrosGL.h"
@@ -36,6 +39,7 @@ class cWorld;
 
 //===========================================================================
 /*!
+      \file       CLight.h
       \class      cLight
       \brief      cLight describes an OpenGL light source, generally rendered
                   by a cWorld object, which is typically the top of a scene

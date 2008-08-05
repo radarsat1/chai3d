@@ -33,13 +33,14 @@
 cGenericCollision::cGenericCollision()
 {
     // set material properties
+
     // set default color for rendering collision detector
-    m_material.m_ambient.set((float)0.3, (float)0.3, (float)0.3);
-    m_material.m_diffuse.set((float)0.5, (float)0.5, (float)0.5);
+    m_material.m_ambient.set((float)0.1, (float)0.5, (float)0.5);
+    m_material.m_diffuse.set((float)0.1, (float)0.6, (float)0.6);
     m_material.m_specular.set((float)1.0, (float)1.0, (float)1.0);
     m_material.setShininess(100);
 
     // set default value for display depth (level 0 = root)
-    m_displayDepth = 0;
+    m_displayDepth = 3;
 }
 

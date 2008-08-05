@@ -25,8 +25,11 @@
 #define CGenericDeviceH
 //---------------------------------------------------------------------------
 
+#include "CCallback.h"
+
 //===========================================================================
 /*!
+    \file   CGenericDevice.h
     \brief  The following constants define a set of generic commands
             supported by the cGenericDevice:command method. For each
             generic command, we describe the data type and information
@@ -161,7 +164,7 @@ class cGenericDevice
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cGenericDevice.
-    cGenericDevice() { m_systemAvailable = false; m_systemReady = false; };
+    cGenericDevice() { m_systemAvailable = false; m_systemReady = false; m_callback = 0; };
     //! Destructor of cGenericDevice.
     virtual ~cGenericDevice() {};
 
@@ -171,7 +174,7 @@ class cGenericDevice
     //! Close connection to device (0 indicates success)
     virtual int close() { return -1; }
     //! Initialize or calibrate device (0 indicates success)
-    virtual int initialize() { return -1; }
+    virtual int initialize(const bool a_resetEncoders=false) { return -1; }
     //! Send a command to the device (0 indicates success)
     virtual int command(int a_command, void* a_data) { return CHAI_MSG_NOT_IMPLEMENTED; }
 
@@ -180,11 +183,16 @@ class cGenericDevice
     //! Returns true if the device is ready for us
     bool isSystemReady() { return m_systemReady; }
 
+    //! Ask the device to call me back periodically
+    virtual bool setCallback(cCallback* m_callback);
+
   protected:
     //! Flag that indicates is hardware device is available.
     bool m_systemAvailable;
     //! Flag that indicates if connection to system was opened successfully.
     bool m_systemReady;
+    //! A callback method for this device (or zero if none has been registered)
+    cCallback* m_callback;
 };
 
 //---------------------------------------------------------------------------

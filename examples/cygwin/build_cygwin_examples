@@ -1,0 +1,12 @@
+cd ../../cygwin
+make clean
+make
+cd ../examples/cygwin
+cd earth
+make
+cd ../reflections
+make
+cd ../viewmesh
+make
+cd ..
+

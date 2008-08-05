@@ -47,15 +47,8 @@ cVector3d cGenericPotentialField::computeForces(const cVector3d& a_probePosition
     for (unsigned int i=0; i<m_children.size(); i++)
     {
         cGenericObject *nextObject = m_children[i];
-
-        // Only propagate to potential field objects
-        cGenericPotentialField* nextField = dynamic_cast<cGenericPotentialField*>(nextObject);
-
-        if (nextField)
-        {
-            cVector3d force = nextField->computeForces(probePositionLocal);
-            localForce.add(force);
-        }
+        cVector3d force = nextObject->computeForces(probePositionLocal);
+        localForce.add(force);
     }
 
     // convert the reaction force into my parent coordinates

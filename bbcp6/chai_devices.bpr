@@ -6,7 +6,7 @@
     <PROJECT value="..\lib\bbcp6\chai_devices.lib"/>
     <OBJFILES value="obj\CVirtualDevice.obj obj\CPhantomDevices.obj obj\CGenericDevice.obj 
       obj\cDriverSensoray626.obj obj\WIN626.obj obj\CDriverServotogo.obj 
-      obj\CDeltaDevices.obj obj\CFreedom6SDevice.obj"/>
+      obj\CDeltaDevices.obj obj\CFreedom6SDevice.obj obj\PhantomDriver.obj"/>
     <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -55,6 +55,7 @@
       <FILE FILENAME="..\lib\bbcp6\DLPortIO.lib" FORMNAME="" UNITNAME="DLPortIO.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\devices\CDeltaDevices.cpp" FORMNAME="" UNITNAME="CDeltaDevices" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\devices\CFreedom6SDevice.cpp" FORMNAME="" UNITNAME="CFreedom6SDevice" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\src\devices\PhantomDriver.cpp" FORMNAME="" UNITNAME="PhantomDriver" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>

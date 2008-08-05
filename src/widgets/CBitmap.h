@@ -23,7 +23,10 @@
 #ifndef CBitmapH
 #define CBitmapH
 //---------------------------------------------------------------------------
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
 #include <GL/gl.h>
 #include "CGenericObject.h"
 #include "CImageLoader.h"
@@ -31,6 +34,7 @@
 
 //===========================================================================
 /*!
+      \file       CBitmap.h
       \class      cBitmap
       \brief      This class provides functionalities to display a bitmap
                   image

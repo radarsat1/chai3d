@@ -40,6 +40,7 @@
 #include "CLight.h"
 #include "CLabelPanel.h"
 #include "CShaders.h"
+#include "CCallback.h"
 
 typedef enum {
   MOUSE_BUTTON_RIGHT=0,MOUSE_BUTTON_LEFT,MOUSE_BUTTON_MIDDLE
@@ -57,7 +58,7 @@ void createCube(cMesh *mesh, float edge);
 int FileBrowse(char* buffer, int length, int save=0, char* forceExtension=0,
                char* extension_string=0, char* title=0);
 
-class Cobject_loaderApp : public CWinApp {
+class Cobject_loaderApp : public CWinApp, cCallback {
 public:
 	Cobject_loaderApp();
   
@@ -170,6 +171,8 @@ public:
 
   int keys_to_handle[1024];
   
+  void callback();
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(Cobject_loaderApp)

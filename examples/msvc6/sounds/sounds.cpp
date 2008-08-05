@@ -22,6 +22,7 @@
 #include "stdafx.h"
 #include "sounds.h"
 #include "soundsDlg.h"
+#include "CCallback.h"
 #include <conio.h>
 #include <process.h>
 
@@ -33,6 +34,28 @@ const double MESH_SCALE_SIZE = 1.0;
 
 // vector of sound-enabled meshes in the world
 std::vector<cSoundMesh*> sound_meshes;
+cGenericObject* contactObject;
+cVector3d normalForce, tangentialForce;
+
+
+class cSoundsHapticCallback : public cCallback
+{
+public:
+  cGeneric3dofPointer* m_tool;
+  void callback()
+  {
+	  m_tool->updatePose();
+	  m_tool->computeForces();
+	  if (m_tool->getProxy()->getContactObject())
+      {
+        contactObject = m_tool->getProxy()->getContactObject();
+        normalForce = m_tool->getProxy()->getNormalForce();
+        tangentialForce = m_tool->getProxy()->getTangentialForce();
+      }
+	  m_tool->applyForces();
+  }
+};
+
 
 /***
 
@@ -78,9 +101,9 @@ static char THIS_FILE[] = __FILE__;
 #pragma warning(disable: 4800)
 
 BEGIN_MESSAGE_MAP(CsoundsApp, CWinApp)
-	//{{AFX_MSG_MAP(CsoundsApp)
-	//}}AFX_MSG
-	ON_COMMAND(ID_HELP, CWinApp::OnHelp)
+    //{{AFX_MSG_MAP(CsoundsApp)
+    //}}AFX_MSG
+    ON_COMMAND(ID_HELP, CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 // No one really knows why GetConsoleWindow() is not
@@ -95,44 +118,40 @@ CsoundsApp theApp;
 // Write the requested data from the .wav file to the sound card
 DWORD CALLBACK MyStreamWriter(HSTREAM handle, void *buf, DWORD len, DWORD user)
 {
-	char *cb=(char*)buf;
+    char *cb=(char*)buf;
 
-	cSoundMesh* sound_mesh;
-	sound_mesh = sound_meshes[user];
-	for (unsigned int i=0; i<len; i++) 
+    cSoundMesh* sound_mesh;
+    sound_mesh = sound_meshes[user];
+    for (unsigned int i=0; i<len; i++) 
     cb[i] = sound_mesh->getSound()->play(/*sound_mesh->getContactForce()*/);
-	return len; 
+    return len; 
 }
 
 
 CsoundsApp::CsoundsApp() {
 
-  selected_object = 0;
+	selected_object = 0;
 
-  haptics_enabled = 0;
+	haptics_enabled = 0;
 
-  tool = 0;
+	tool = 0;
 
-  AllocConsole();
+	AllocConsole();
 
-  HWND con_wnd = GetConsoleWindow();
+	HWND con_wnd = GetConsoleWindow();
 
-  // We want the console to pop up over any non-CHAI windows, although
-  // we'll put the main dialog window above it.
-  ::SetForegroundWindow(con_wnd);
-  
-  SetWindowPos(con_wnd,HWND_TOP,0,0,0,0,SWP_NOSIZE);
+	// We want the console to pop up over any non-CHAI windows, although
+	// we'll put the main dialog window above it.
+	::SetForegroundWindow(con_wnd);
+	  
+	SetWindowPos(con_wnd,HWND_TOP,0,0,0,0,SWP_NOSIZE);
 
-  g_main_app = this;
+	g_main_app = this;
 }
 
 
 void CsoundsApp::uninitialize() {
-
-  toggle_haptics(TOGGLE_HAPTICS_DISABLE);
-  delete world;
-  delete viewport;
-  
+	toggle_haptics(TOGGLE_HAPTICS_DISABLE);
 }
 
 
@@ -141,7 +160,7 @@ void CsoundsApp::createObject(std::string fileName, cVector3d loc, cColorf color
     cSoundMesh* new_mesh = new cSoundMesh(world);
     new_mesh->loadFromFile(fileName);
 
-		new_mesh->rotate(cVector3d(1,0,0), -M_PI/2.0);
+    new_mesh->rotate(cVector3d(1,0,0), -M_PI/2.0);
 
     // compute size of object
     new_mesh->computeBoundaryBox(true);
@@ -173,7 +192,7 @@ void CsoundsApp::createObject(std::string fileName, cVector3d loc, cColorf color
     // update global position
     new_mesh->computeGlobalPositions();
 
-		// set material properties
+    // set material properties
     cMaterial material;
     material.m_ambient.set( color.getR(), color.getG(), color.getB(), color.getA() );
     material.m_diffuse.set( color.getR(), color.getG(), color.getB(), color.getA() );
@@ -182,86 +201,86 @@ void CsoundsApp::createObject(std::string fileName, cVector3d loc, cColorf color
     new_mesh->setMaterial(material, true);
     new_mesh->useMaterial(true, true);
 
-		// set sound parameters and create stream
+    // set sound parameters and create stream
     new_mesh->getSound()->setParams(type);
-		new_mesh->getSound()->stream=BASS_StreamCreate(44100, 1 ,BASS_DEVICE_8BITS,&MyStreamWriter,tag);
+    new_mesh->getSound()->stream=BASS_StreamCreate(44100, 1 ,BASS_DEVICE_8BITS,&MyStreamWriter,tag);
 
-		// translate and set stiffness and friction
+    // translate and set stiffness and friction
     new_mesh->translate(loc.x, loc.y, loc.z);
     new_mesh->setStiffness(15.0, true);
-		new_mesh->setFriction(0.6, 0.4, true);
+    new_mesh->setFriction(0.6, 0.4, true);
 
-		// add this to the world and to the vector of sound meshes
-	  sound_meshes.push_back(new_mesh);
+    // add this to the world and to the vector of sound meshes
+    sound_meshes.push_back(new_mesh);
     world->addChild(new_mesh);
 }
 
 
 BOOL CsoundsApp::InitInstance() {
 
-	AfxEnableControlContainer();
+    AfxEnableControlContainer();
 
 #ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
+    Enable3dControls();         // Call this when using MFC in a shared DLL
 #else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
+    Enable3dControlsStatic();   // Call this when linking to MFC statically
 #endif
 
-	g_main_dlg = new CsoundsDlg;
-  m_pMainWnd = g_main_dlg;
+    g_main_dlg = new CsoundsDlg;
+	m_pMainWnd = g_main_dlg;
 
-  g_main_dlg->Create(IDD_sounds_DIALOG,NULL);
-    
-  // Now we should have a display context to work with...
+	g_main_dlg->Create(IDD_sounds_DIALOG,NULL);
+	    
+	// Now we should have a display context to work with...
 
-  world = new cWorld();
+	world = new cWorld();
 
-  // set background color
-  world->setBackgroundColor(0.0f,0.0f,0.0f);
+	// set background color
+	world->setBackgroundColor(0.0f,0.0f,0.0f);
 
 
-  // Create a camera
-  camera = new cCamera(world);
+	// Create a camera
+	camera = new cCamera(world);
 
-  // set camera position and orientation
-  // 
-  // We choose to put it out on the positive z axis, so things appear
-  // the way OpenGL users expect them to appear, with z going in and
-  // out of the plane of the screen.
-  int result = camera->set(cVector3d(0,0,1.5),   // position of camera
-              cVector3d(0.0, 0.0, 0.0),   // camera looking at origin
-              cVector3d(0.0, 1.0, 0.0));  // orientation of camera (standing up)
+	// set camera position and orientation
+	// 
+	// We choose to put it out on the positive z axis, so things appear
+	// the way OpenGL users expect them to appear, with z going in and
+	// out of the plane of the screen.
+	int result = camera->set(cVector3d(0,0,1.5),   // position of camera
+				cVector3d(0.0, 0.0, 0.0),   // camera looking at origin
+				cVector3d(0.0, 1.0, 0.0));  // orientation of camera (standing up)
 
-  if (result == 0) {
-    _cprintf("Could not create camera...\n");
-  }
+	if (result == 0) {
+		_cprintf("Could not create camera...\n");
+	}
 
-  // Turn on one light...
-  light = new cLight(world);
+	// Turn on one light...
+	light = new cLight(world);
 
-  light->setEnabled(true);
+	light->setEnabled(true);
 
-  // Use a purely directional light, pointing from
-  // somewhere off to the left...
-  light->setDirectionalLight(true);
-  light->setPos(cVector3d(-1, 1, 1));
-  
-  // Create a display for graphic rendering
-  viewport = new cViewport(g_main_dlg->m_gl_area_hwnd, camera, false);
+	// Use a purely directional light, pointing from
+	// somewhere off to the left...
+	light->setDirectionalLight(true);
+	light->setPos(cVector3d(-1, 1, 1));
+	  
+	// Create a display for graphic rendering
+	viewport = new cViewport(g_main_dlg->m_gl_area_hwnd, camera, false);
 
-	// Initialize sound device and create audio stream
-  if (!BASS_Init(1,44100,BASS_DEVICE_8BITS,0,NULL))
-	  _cprintf("Init error %d\n", BASS_ErrorGetCode());
+		// Initialize sound device and create audio stream
+	if (!BASS_Init(1,44100,BASS_DEVICE_8BITS,0,NULL))
+		_cprintf("Init error %d\n", BASS_ErrorGetCode());
 
-	// create a sound-enabled bell
-  createObject("resources\\models\\handbell.3ds", cVector3d(-0.9,-0.4,0), cColorf(0.82, 0.7, 0.0, 1.0), BELL, 0);
+		// create a sound-enabled bell
+	createObject("resources\\models\\handbell.3ds", cVector3d(-0.9,-0.4,0), cColorf(0.82, 0.7, 0.0, 1.0), BELL, 0);
 
-  // create a sound-enabled teapot
-  createObject("resources\\models\\teapot.3ds", cVector3d(0.1,-0.4,0), cColorf(0.5, 0.5, 0.5, 1.0), TEAPOT, 1);
+	// create a sound-enabled teapot
+	createObject("resources\\models\\teapot.3ds", cVector3d(0.1,-0.4,0), cColorf(0.5, 0.5, 0.5, 1.0), TEAPOT, 1);
 
-  world->computeGlobalPositions(false);	
+	world->computeGlobalPositions(false); 
 
-  return TRUE;
+	return TRUE;
 }
 
 
@@ -318,11 +337,51 @@ int CsoundsApp::Run() {
 // Our main drawing loop...
 int CsoundsApp::render_loop() {
 
-  // Just draw the scene...
-  viewport->render();
+	// see if there is a collision with a sound-enabled object (including
+	// objects who have a sound-enabled parent mesh)
+	cSoundMesh* sound_mesh = NULL;
+	if (tool)
+	{
+		if (contactObject)
+		{
+			cGenericObject* parent = contactObject;
+			contactObject = NULL;
+			sound_mesh = dynamic_cast<cSoundMesh*>(parent);
+			while ((parent) && (!sound_mesh))
+			{
+				parent = parent->getParent();
+				sound_mesh = dynamic_cast<cSoundMesh*>(parent);
+			}
+		}
 
-  return 0;
+		// call play methods for sound-enabled objects
+		for (unsigned int i=0; i<sound_meshes.size(); i++)
+		{
+			
+			// send the current force to the currently contacted object, if any
+			if (sound_meshes[i] == sound_mesh)
+			    sound_mesh->getSound()->setContactForce(normalForce, tangentialForce);
+			else
+				sound_meshes[i]->getSound()->setContactForce(cVector3d(0,0,0), cVector3d(0,0,0));
 
+			// if there is a new contact, reset and restart playing the sound
+			if ((sound_meshes[i]->getSound()->getNormalForce().lengthsq() > 0.01) && 
+				(sound_meshes[i]->getSound()->getPreviousForce().lengthsq() <= 0.01))
+			{
+				// reset for new contact
+				sound_meshes[i]->getSound()->reset();
+
+				// restart playing this stream
+				if (!(BASS_ChannelPlay(sound_meshes[i]->getSound()->stream,TRUE)))
+					_cprintf("error %d\n", BASS_ErrorGetCode());
+			}
+		}
+	}
+
+	// Just draw the scene...
+	viewport->render();
+
+    return 0;
 }
 
 
@@ -339,37 +398,6 @@ void CsoundsApp::zoom(int zoom_level) {
 // while a button is held down
 void CsoundsApp::scroll(CPoint p, int left_button) {
 
-  // If the user hasn't clicked on any objects, we don't
-  // have to move or rotate anyone
-  if (selected_object == 0) return;
-
-  cGenericObject* object_to_move = selected_object;
-
-  // If the left button is being held down, rotate the
-  // selected object
-  if (left_button) {
-
-    cVector3d axis1(-1,0,0);
-    object_to_move->rotate(axis1,-1.0*(float)p.y / 50.0);
-  
-    cVector3d axis2(0,1,0);
-    object_to_move->rotate(axis2,(float)p.x / 50.0);
-
-  }
-
-  // If the left button is being held down, move the
-  // selected object
-  else {
-
-    object_to_move->translate((float)p.x / 100.0, 0, 0);
-    object_to_move->translate(0, -1.0*(float)p.y / 100.0, 0);
-
-  }
-
-  // Let the object re-compute his global position data
-  object->computeGlobalPositions();
-  object->computeBoundaryBox(true);  
-  
 }
 
 
@@ -378,88 +406,8 @@ void CsoundsApp::scroll(CPoint p, int left_button) {
 // Lets CHAI figure out which object was clicked on.
 void CsoundsApp::select(CPoint p) {
 
-  if (viewport->select(p.x, p.y, true)) {
-    selected_object = viewport->getLastSelectedObject();         
-  }
-  else {    
-    selected_object = 0;
-  }
-
 }
 
-
-// Our haptic loop... just computes forces on the 
-// phantom every iteration, until haptics are disabled
-// in the supplied CsoundsApp
-
-// A single iteration through the loop...
-void sounds_haptic_iteration(void* param) {
-
-  CsoundsApp* app = (CsoundsApp*)(param);
-
-  app->tool->updatePose();
-
-  app->tool->computeForces();
-
-	// see if there is a collision with a sound-enabled object (including
-  // objects who have a sound-enabled parent mesh)
-  cSoundMesh* sound_mesh = NULL;
-  if (app->tool->getProxy()->getContactObject())
-  {
-    cGenericObject* parent = app->tool->getProxy()->getContactObject();
-    sound_mesh = dynamic_cast<cSoundMesh*>(parent);
-    while ((parent) && (!sound_mesh))
-    {
-      parent = parent->getParent();
-      sound_mesh = dynamic_cast<cSoundMesh*>(parent);
-    }
-  }
-
-  // call play methods for sound-enabled objects
-  for (unsigned int i=0; i<sound_meshes.size(); i++)
-  {
-    
-    // send the current force to the currently contacted object, if any
-    if (sound_meshes[i] == sound_mesh)
-			sound_mesh->getSound()->setContactForce(app->tool->getProxy()->getNormalForce(), 
-				  app->tool->getProxy()->getTangentialForce());
-    else
-			sound_meshes[i]->getSound()->setContactForce(cVector3d(0,0,0), cVector3d(0,0,0));
-
-		// if there is a new contact, reset and restart playing the sound
-    if ((sound_meshes[i]->getSound()->getNormalForce().lengthsq() > 0.01) && 
-			  (sound_meshes[i]->getSound()->getPreviousForce().lengthsq() <= 0.01))
-		{
-			// reset for new contact
-      sound_meshes[i]->getSound()->reset();
-
-			// restart playing this stream
-			if (!(BASS_ChannelPlay(sound_meshes[i]->getSound()->stream,TRUE)))
-		    _cprintf("error %d\n", BASS_ErrorGetCode());
-		}
-  }
-
-  app->tool->applyForces();
-}
-
-
-// This loop is used only in the threaded version of this
-// application... all it does is call the main haptic
-// iteration loop
-DWORD sounds_haptic_loop(void* param) {
-
-  CsoundsApp* app = (CsoundsApp*)(param);
-
-  while(app->haptics_enabled) {
-
-    sounds_haptic_iteration(param);
-
-  }
-
-  app->haptics_thread_running = 0;
-
-  return 0;
-}
 
 
 /***
@@ -476,98 +424,89 @@ DWORD sounds_haptic_loop(void* param) {
 void CsoundsApp::toggle_haptics(int enable) {
 
   
-  if (enable == TOGGLE_HAPTICS_TOGGLE) {
+	if (enable == TOGGLE_HAPTICS_TOGGLE) {
 
-    if (haptics_enabled) toggle_haptics(TOGGLE_HAPTICS_DISABLE);
-    else toggle_haptics(TOGGLE_HAPTICS_ENABLE);
+		if (haptics_enabled) toggle_haptics(TOGGLE_HAPTICS_DISABLE);
+		else toggle_haptics(TOGGLE_HAPTICS_ENABLE);
 
-  }
+	}
 
-  else if (enable == TOGGLE_HAPTICS_ENABLE) {
-  
-    if (haptics_enabled) return;
+	else if (enable == TOGGLE_HAPTICS_ENABLE) {
+	  
+		if (haptics_enabled) return;
 
-    haptics_enabled = 1;
+		haptics_enabled = 1;
 
-    // create a phantom tool with its graphical representation
-    //
-    // Use device zero, and use either the gstEffect or direct 
-    // i/o communication mode, depending on the USE_PHANTOM_DIRECT_IO
-    // constant
-    if (tool == 0) {
+		// create a phantom tool with its graphical representation
+		//
+		// Use device zero, and use either the gstEffect or direct 
+		// i/o communication mode, depending on the USE_PHANTOM_DIRECT_IO
+		// constant
+		if (tool == 0) {
 
-      // tool = new cPhantom3dofPointer(world, 0, USE_PHANTOM_DIRECT_IO);
-      tool = new cMeta3dofPointer(world, 0, USE_PHANTOM_DIRECT_IO);
+		// tool = new cPhantom3dofPointer(world, 0, USE_PHANTOM_DIRECT_IO);
+		tool = new cMeta3dofPointer(world, 0, USE_PHANTOM_DIRECT_IO);
 
-      world->addChild(tool);
-    
-      // set up the device
-      tool->initialize();
+		world->addChild(tool);
+	    
+		// set up the device
+		tool->initialize();
 
-      // update initial orientation and position of device
-      tool->updatePose();
+		// set up a nice-looking workspace for the phantom so 
+		// it fits nicely with our shape
+		tool->setWorkspace(2.0,2.0,2.0);
+	    
+		// Rotate the tool so its axes align with our opengl-like axes
+		tool->rotate(cVector3d(0,0,1),-90.0*M_PI/180.0);
+		tool->rotate(cVector3d(1,0,0),-90.0*M_PI/180.0);
+		tool->setRadius(0.05);
+	      
+		}
+	    
+		// I need to call this so the tool can update its internal
+		// transformations before performing collision detection, etc.
+		tool->computeGlobalPositions();
 
-      // set up a nice-looking workspace for the phantom so 
-      // it fits nicely with our shape
-      tool->setWorkspace(2.0,2.0,2.0);
-    
-      // Rotate the tool so its axes align with our opengl-like axes
-      tool->rotate(cVector3d(0,0,1),-90.0*M_PI/180.0);
-      tool->rotate(cVector3d(1,0,0),-90.0*M_PI/180.0);
-      tool->setRadius(0.05);
-      
-    }
-    
-    // I need to call this so the tool can update its internal
-    // transformations before performing collision detection, etc.
-    tool->computeGlobalPositions();
+		// Open communication with the device
+		tool->start();      
 
-    // Open communication with the device
-    tool->start();      
+		// Enable forces
+		tool->setForcesON();
 
-    // Enable forces
-    tool->setForcesON();
+		// Tell the proxy algorithm associated with this tool to enable its
+		// "dynamic mode", which allows interaction with moving objects
+	    
+		// The dynamic proxy is in a pretty beta state, so we turn it off for now...
+		// tool->getProxy()->enableDynamicProxy(1);
 
-    // Tell the proxy algorithm associated with this tool to enable its
-    // "dynamic mode", which allows interaction with moving objects
-    
-    // The dynamic proxy is in a pretty beta state, so we turn it off for now...
-    // tool->getProxy()->enableDynamicProxy(1);
+			// Use Zilles Friction algorithm (to get tangential forces)
+			tool->getProxy()->setUseZillesFriction(true);
+			tool->getProxy()->setUseMelderFriction(false);
+	    
+		// start haptic thread
+		haptics_thread_running = 1;
 
-		// Use Zilles Friction algorithm (to get tangential forces)
-		tool->getProxy()->setUseZillesFriction(true);
-		tool->getProxy()->setUseMelderFriction(false);
-    
-    // start haptic thread
-    haptics_thread_running = 1;
+		cSoundsHapticCallback* cb = new cSoundsHapticCallback();
+		cb->m_tool = tool;
+		((cPhantomDevice*)(tool->getDevice()))->setCallback(cb);
+	       
+	} // enabling
 
-    DWORD thread_id;
-    ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(sounds_haptic_loop), this, 0, &thread_id);
+	else if (enable == TOGGLE_HAPTICS_DISABLE) {
 
-    // Boost thread and process priority
-    ::SetThreadPriority(&thread_id, THREAD_PRIORITY_ABOVE_NORMAL);
-    //::SetPriorityClass(GetCurrentProcess(),ABOVE_NORMAL_PRIORITY_CLASS);
-       
-  } // enabling
+		// Don't do anything if haptics are already off
+		if (haptics_enabled == 0) return;
 
-  else if (enable == TOGGLE_HAPTICS_DISABLE) {
+		// tell the haptic thread to quit
+		haptics_enabled = 0;
+	    
+		// Stop the haptic device...
+		tool->setForcesOFF();
+		tool->stop();
+	    
+		// SetPriorityClass(GetCurrentProcess(),NORMAL_PRIORITY_CLASS);    
 
-    // Don't do anything if haptics are already off
-    if (haptics_enabled == 0) return;
-
-    // tell the haptic thread to quit
-    haptics_enabled = 0;
-
-    // wait for the haptic thread to quit
-    while(haptics_thread_running) Sleep(1);
-    
-    // Stop the haptic device...
-    tool->setForcesOFF();
-    tool->stop();
-    
-    // SetPriorityClass(GetCurrentProcess(),NORMAL_PRIORITY_CLASS);    
-
-  } // disabling
+	} // disabling
 
 } // toggle_haptics()
 

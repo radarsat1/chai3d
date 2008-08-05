@@ -26,6 +26,9 @@
     \date       03/2004
 */
 //===========================================================================
+/*!
+    \file CFileLoaderTGA.h
+*/
 
 //---------------------------------------------------------------------------
 #ifndef CFileLoaderTGAH
@@ -40,7 +43,11 @@ typedef unsigned char byte;
 typedef unsigned int uint;
 
 enum LImageType {itUndefined, itRGB, itRGBA, itGreyscale};
-
+/*!
+    \class cFileLoaderTGA
+    \brief
+    Class that loads TGA files
+*/
 //---------------------------------------------------------------------------
 class cFileLoaderTGA
 {

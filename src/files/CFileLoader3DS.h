@@ -53,6 +53,7 @@ extern bool g_3dsLoaderShouldGenerateExtraVertices;
 
 //===========================================================================
 /*!
+      \file CFileLoader3DS.h
       \brief    The following file provides a parser to load 3d images
                 supporting the 3d studio max format.
 */
@@ -69,7 +70,13 @@ bool cLoadFile3DS(cMesh* iMesh, const string& iFileName);
   copyright (c) 2001-2002 Lev Povalahev
 
 ******/
-  
+
+#ifdef _MSVC
+// Tell VC++ not to pad any structures
+#pragma pack(push)
+#pragma pack(1)
+#endif
+
 // copyright (c) 2001-2002 Lev Povalahev
 // this is a 3ds importer version 2
 //
@@ -101,6 +108,15 @@ struct LVector3
     float x;
     float y;
     float z;
+    LVector3()
+    {
+        x = y = z = 0;
+    }
+    LVector3(float x, float y, float z)
+    {
+        this->x = x; this->y = y; this->z = z;
+    }
+
 };
 
 struct LVector2
@@ -135,6 +151,12 @@ struct LTri
     LVector3 tangent;
     LVector3 binormal;
     uint materialId;
+    LTri()
+    {
+      a = b = c = 0;
+      smoothingGroups = 0;
+      materialId = 0;
+    }
 };
 
 //---------------------------------------------------------------------------
@@ -537,7 +559,7 @@ protected:
 class L3DS : public LImporter
 {
 public:
-    // the default contructor
+    // the default constructor
     L3DS();
     // constructs the object and loads the file
     L3DS(const char *filename);
@@ -606,6 +628,10 @@ protected:
     // reads the keyheader structure from the current offset and returns the frame number
     long ReadKeyheader();
 };
+
+#ifdef _MSVC
+#pragma pack(pop)
+#endif
 
 //---------------------------------------------------------------------------
 #endif

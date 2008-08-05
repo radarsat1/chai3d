@@ -24,6 +24,7 @@
 #ifndef CGenericObjectH
 #define CGenericObjectH
 //---------------------------------------------------------------------------
+#include "chai_globals.h"
 #include "CMaths.h"
 #include "CDraw3D.h"
 #include "CColor.h"
@@ -56,6 +57,7 @@ typedef enum {
 
 //===========================================================================
 /*!
+      \file       CGenericObject.h
       \class      cGenericObject
       \brief      This class is the root of basically every render-able object
                   in CHAI.  It defines a reference frame (position and rotation)
@@ -79,7 +81,11 @@ typedef enum {
 #ifdef _MSVC
 class cGenericObject
 #else
+#ifdef _POSIX
+class cGenericObject
+#else
 class __rtti cGenericObject
+#endif
 #endif
 {    
 
@@ -173,6 +179,9 @@ class __rtti cGenericObject
     virtual void AdjustCollisionSegment(cVector3d& a_segmentPointA,
                  cVector3d& a_localSegmentPointA, const cGenericObject *a_object);
 
+    //! Descend through child objects to compute interaction forces for all cGenericPotentialFields
+    virtual cVector3d computeForces(const cVector3d& a_probePosition);
+
     // METHODS - GRAPHICS:
 
     //! Show or hide this object, optionally propagating the change to children
@@ -181,7 +190,7 @@ class __rtti cGenericObject
     //! Read the display status of object (true means it's visible)
     bool getShow() const { return (m_show); }
 
-		//! Allow this object to be felt (when visible), optionally propagating the change to children
+        //! Allow this object to be felt (when visible), optionally propagating the change to children
     void setHapticEnabled(const bool a_hapticEnabled, const bool a_affectChildren = false);
 
     //! Read the haptic status of object (true means it can be felt when visible)
@@ -246,8 +255,11 @@ class __rtti cGenericObject
     //! Read the maximum point of this object's boundary box
     cVector3d getBoundaryMax() const { return (m_boundaryBoxMax); }
 
+    //! Compute the center of this object's boundary box
+    cVector3d getBoundaryCenter() const { return (m_boundaryBoxMax+m_boundaryBoxMin)/2.0; }
+    
     //! Re-compute this object's bounding box, optionally forcing it to bound child objects
-    void computeBoundaryBox(const bool a_includeChildren);
+    void computeBoundaryBox(const bool a_includeChildren=true);
 
 
     // METHODS - COLLISION DETECTION
@@ -422,7 +434,7 @@ class __rtti cGenericObject
     // VIRTUAL METHODS:
 
     //! Render this object in OpenGL
-    virtual void render(const int a_renderMode=CHAI_RENDER_MODE_RENDER_ALL) {};
+    virtual void render(const int a_renderMode=CHAI_RENDER_MODE_RENDER_ALL);
 
     //! Update the m_globalPos and m_globalRot properties of any members of this object (e.g. all triangles)
     virtual void updateGlobalPositions(const bool a_frameOnly) {};

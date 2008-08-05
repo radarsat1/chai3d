@@ -48,6 +48,7 @@ typedef union
 
 //===========================================================================
 /*!
+      \file       CDriverServotogo.h
       \class      cDriverServotogo
       \brief      cDriverServotogo offers an interface to the Servo2Go boards.
 */
@@ -69,7 +70,7 @@ class cDriverServotogo : public cGenericDevice
     virtual int close();
 
     //! Initialize Sensoray626 board
-    virtual int initialize();
+    virtual int initialize(const bool a_resetEncoders=false);
 
     //! Send a command to the Servo2Go board
     //! possible commands are:

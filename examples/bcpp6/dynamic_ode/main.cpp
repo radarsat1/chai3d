@@ -435,9 +435,6 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
     // open communication to the device
     tool1->start();
 
-    // update initial orientation and position of device
-    tool1->updatePose();
-
     // I need to call this so the tool can update its internal
     // transformations before performing collision detection, etc.
     tool1->computeGlobalPositions();
@@ -713,9 +710,6 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
 
     // open communication to the device
     tool2->start();
-
-    // update initial orientation and position of device
-    tool2->updatePose();
 
     // tell the tool to show his coordinate frame so you
     // can see tool rotation

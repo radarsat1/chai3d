@@ -64,7 +64,7 @@ class cSound
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cSound.
-		cSound() { m_counter = 0; m_normalForce.set(0,0,0); m_tangentialForce.set(0,0,0);};
+    cSound() { m_counter = 0; m_normalForce.set(0,0,0); m_tangentialForce.set(0,0,0);};
     //! Destructor of cSound.
     ~cSound() {};
 
@@ -74,34 +74,34 @@ class cSound
     //! Get the next sound sample
     int play();
     //! Reset the sound computations when a new contact is made
-		void reset();
+    void reset();
     //! Get function for current normal contact force on this sound object
-		cVector3d getNormalForce() { return m_normalForce; }
+    cVector3d getNormalForce() { return m_normalForce; }
     //! Get function for current tangential contact force on this sound object
-		cVector3d getTangentialForce() { return m_tangentialForce; }
+    cVector3d getTangentialForce() { return m_tangentialForce; }
     //! Get function for current previous normal force on this sound object
-		cVector3d getPreviousForce() { return m_previousForce; }
+    cVector3d getPreviousForce() { return m_previousForce; }
     //! Set function for current contact force on this object; also sets m_previousForce to former value
-		void setContactForce(cVector3d a_normalForce, cVector3d a_tangentialForce) {
+    void setContactForce(cVector3d a_normalForce, cVector3d a_tangentialForce) {
          m_previousForce = m_normalForce; m_normalForce = a_normalForce;
          m_tangentialForce = a_tangentialForce; }
     //! BASS stream associated with this sound
-		HSTREAM stream;
+    HSTREAM stream;
 
   private:
     // PROPERTIES:
     //! Number of modes
     int n;
     //! Frequency, amplitude, and decay coefficient material sound properties
-		std::vector<double> a, f, d;
+    std::vector<double> a, f, d;
     //! Arrays for calculating sound data
     double *yreal, *yimag, *treal, *timag, *tyreal, *tyimag;
     //! Value to scale sound samples by to be in 0-256 range
     double scale;
     //! Counter; used to attenuate normal force over time
-		int m_counter;
+    int m_counter;
     //! Previous contact force on this object; used to determine when a new contact has been made
-		cVector3d m_previousForce;
+    cVector3d m_previousForce;
     //! Current normal force on this object
     cVector3d m_normalForce;
     //! Current tangential force on this object

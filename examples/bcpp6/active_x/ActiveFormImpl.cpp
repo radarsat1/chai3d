@@ -223,9 +223,6 @@ void __fastcall TActiveFormX::Panel1DblClick(TObject *Sender)
         // open communication to the device
         tool->start();
 
-        // update initial orientation and position of device
-        tool->updatePose();
-
         // tell the tool to show his coordinate frame so you
         // can see tool rotation
         tool->visualizeFrames(true);

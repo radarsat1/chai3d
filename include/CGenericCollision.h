@@ -35,8 +35,9 @@ using std::vector;
 
 //===========================================================================
 /*!
-      \class    cCollision
-      \brief    cCollision is an abstract class for collision-detection
+      \file     cGenericCollision.h
+      \class    cGenericCollision
+      \brief    cGenericCollision is an abstract class for collision-detection
                 algorithms for meshes with line segments.
 */
 //===========================================================================
@@ -71,7 +72,8 @@ class cGenericCollision
 
   protected:
     // MEMBERS:
-    //! Level of collision tree to render
+    //! Level of collision tree to render... negative values force rendering
+    //! up to and including this level, positive values render _just_ this level
     int m_displayDepth;
 };
 

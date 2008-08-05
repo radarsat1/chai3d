@@ -28,6 +28,7 @@
 
 //===========================================================================
 /*!
+    \file   CFreedom6SDevice.h
     \class  cFreedom6SDevice
     \brief  cFreedom6SDevice describes an interface to the Freedom6S haptic
 			device from MPB Technologies Inc.
@@ -43,13 +44,13 @@ class cFreedom6SDevice : public cGenericDevice
     virtual ~cFreedom6SDevice();
 
     // METHODS:
-    //! Open connection to phantom device.
+    //! Open connection to MPB device.
     virtual int open();
-    //! Close connection to phantom device.
+    //! Close connection to MPB device.
     virtual int close();
-    //! Calibrate phantom device.
-    virtual int initialize();
-    //! Set a command to the phantom device.
+    //! Initialize MPB device.
+    virtual int initialize(const bool a_resetEncoders=false);
+    //! Set a command to the MPB device.
     virtual int command(int a_command, void* a_data);
 
   protected:

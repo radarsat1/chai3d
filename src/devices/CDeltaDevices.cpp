@@ -20,15 +20,24 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
+
 #include "CDeltaDevices.h"
 #include "CMaths.h"
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "dhd.h"
+#endif
+
 //---------------------------------------------------------------------------
 const double DELTA_DEVICE_WORKSPACE_HALF_SIZE  = 0.15;  // [meters]
 const double DELTA_DEVICE_MAXIMUM_FORCE        = 20.0;  // [newtons]
 const double OMEGA_DEVICE_WORKSPACE_HALF_SIZE  = 0.075; // [meters]
 const double OMEGA_DEVICE_MAXIMUM_FORCE        = 12.0;  // [newtons]
 //---------------------------------------------------------------------------
+
+#ifdef _WIN32
+
 HINSTANCE dhdDLL = NULL;
 
 int (__stdcall *dhdGetDeviceCount)             (void);
@@ -42,6 +51,8 @@ int (__stdcall *dhdGetPosition)                (double *px, double *py, double *
 int (__stdcall *dhdSetForce)                   (double  fx, double  fy, double  fz, char ID);
 int (__stdcall *dhdGetOrientationRad)          (double *oa, double *ob, double *og, char ID);
 int (__stdcall *dhdSetTorque)                  (double  ta, double  tb, double  tg, char ID);
+
+#endif
 
 // Initialize dhd dll reference count
 int cDeltaDevice::m_activeDeltaDevices = 0;
@@ -62,6 +73,8 @@ cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
     m_deviceType = DHD_DEVICE_UNINITIALIZED;
 
     m_activeDeltaDevices++;
+
+#ifdef _WIN32
 
     // load dhd.dll library
     if (dhdDLL==NULL)
@@ -96,6 +109,8 @@ cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
         dhdGetOrientationRad == 0 ||
         dhdSetTorque         == 0)
         return;
+
+#endif
 
     // get the number ID of the device we wish to communicate with
     m_deviceID = a_deviceNumber;
@@ -134,11 +149,16 @@ cDeltaDevice::~cDeltaDevice()
 
     m_activeDeltaDevices--;
 
+#ifdef _WIN32
+
     if (m_activeDeltaDevices == 0 && dhdDLL)
     {
       FreeLibrary(dhdDLL);
       dhdDLL = 0;
     }
+
+#endif
+
 }
 
 
@@ -221,12 +241,16 @@ int cDeltaDevice::close()
 
 //===========================================================================
 /*!
-    Calibrate delta device.
+    Calibrate delta device. 
+    
+    This function does nothing right now; the a_resetEncoders parameter is ignored.
 
-    \fn     int cDeltaDevice::initialize()
+    \fn     int cDeltaDevice::initialize(const bool a_resetEncoders = false)
+    \param  a_resetEncoders Ignored; exists for forward compatibility.
+    \return Always 0
 */
 //===========================================================================
-int cDeltaDevice::initialize()
+int cDeltaDevice::initialize(const bool a_resetEncoders)
 {
     return (0);
 }
@@ -234,12 +258,13 @@ int cDeltaDevice::initialize()
 
 //===========================================================================
 /*!
-    Set command for the delta device
+    Send a command to the delta device
 
     \fn         int cDeltaDevice::command(int a_command, void* a_data)
     \param      a_command  Selected command.
     \param      a_data  Pointer to the corresponding data structure.
-    \return     Return status of command.
+    \return     Return status of command.  CHAI_MSG_OK is good, anything
+                else is probably not good.
 */
 //===========================================================================
 int cDeltaDevice::command(int a_command, void* a_data)
@@ -336,7 +361,7 @@ int cDeltaDevice::command(int a_command, void* a_data)
                 int* result = (int *) a_data;
 
                 // Force the result to be 0 or 1, since bit 0 should carry button 0's value
-                *result = dhdGetButton(0, m_deviceID) ? 1 : 0;                
+                *result = dhdGetButton(0, m_deviceID) ? 1 : 0;
             }
             break;
 

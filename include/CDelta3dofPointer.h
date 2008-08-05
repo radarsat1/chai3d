@@ -29,6 +29,7 @@
 
 //===========================================================================
 /*!
+      \file      CDelta3dofPointer.h
       \class     cDelta3dofPointer
       \brief     cDelta3dofPointer inherites from all tool properties
                  of cGeneric3dofPointer.

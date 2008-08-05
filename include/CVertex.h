@@ -30,6 +30,7 @@
 
 //===========================================================================
 /*!
+      \file       CVertex.h
       \struct     cVertex
       \brief      cVertex defines a point in 3 dimensional space and the
                   associated rendering properties (position, color, texture
@@ -49,26 +50,11 @@ class cVertex
 		\param	a_z	 Z component.
     */
     //-----------------------------------------------------------------------
-    cVertex::cVertex(const double a_x, const double a_y, const double a_z)
-    {
-        // set local position
-        m_localPos.set(a_x, a_y, a_z);
-
-        // set global position
-        m_globalPos.set(a_x, a_y, a_z);
-
-        // set a default normal vector
-        m_normal.set(0.0, 0.0, 1.0);
-
-        // init texture coordinate
-        m_texCoord.set(0.0, 0.0, 0.0);
-
-        // init index number
-        m_index = -1;
-
-        // vertex is not yet allocated to a triangle
-        m_allocated = false;
-    }
+    cVertex::cVertex(const double a_x=0.0, const double a_y=0.0, const double a_z=0.0)
+        : m_localPos(a_x, a_y, a_z), m_globalPos(a_x, a_y, a_z), m_normal(0.0, 0.0, 1.0),
+        m_index(-1), m_allocated(false), m_nTriangles(0)
+    {}
+     
 
     //-----------------------------------------------------------------------
     /*!
@@ -84,11 +70,11 @@ class cVertex
         Set the position coordinates of vertex.
 
         \param	a_x	 X component.
-		\param  a_y	 Y component.
-		\param	a_z	 Z component.
+        \param  a_y	 Y component.
+        \param	a_z	 Z component.
     */
     //-----------------------------------------------------------------------
-    inline void setPos(const double a_x, const double a_y, const double a_z)
+    inline void setPos(const double& a_x, const double& a_y, const double& a_z)
     {
         // set local position
         m_localPos.set(a_x, a_y, a_z);
@@ -161,11 +147,11 @@ class cVertex
         as parameters
 
         \param	a_x	 X component.
-		\param  a_y	 Y component.
-		\param	a_z	 Z component.
+        \param  a_y	 Y component.
+        \param	a_z	 Z component.
     */
     //-----------------------------------------------------------------------
-    inline void setNormal(const double a_x, const double a_y, const double a_z)
+    inline void setNormal(const double& a_x, const double& a_y, const double& a_z)
     {
         m_normal.set(a_x, a_y, a_z);
     }
@@ -202,11 +188,11 @@ class cVertex
     /*!
         Set texture coordinate by passing its coordinates as parameters.
 
-        \param	    a_x	 X component.
-		\param      a_y	 Y component.
+        \param	    a_tx	 X component.
+        \param      a_ty	 Y component.
     */
     //-----------------------------------------------------------------------
-    inline void setTexCoord(double a_tx, double a_ty)
+    inline void setTexCoord(const double& a_tx, const double& a_ty)
     {
         m_texCoord.set(a_tx, a_ty, 0.0);
     }
@@ -229,7 +215,7 @@ class cVertex
         \param      a_color  Color.
     */
     //-----------------------------------------------------------------------
-    inline void setColor(cColorb& a_color) { m_color = a_color; }
+    inline void setColor(const cColorb& a_color) { m_color = a_color; }
 
 
     //-----------------------------------------------------------------------
@@ -242,8 +228,8 @@ class cVertex
         \param    a_alpha  Alpha component.
     */
     //-----------------------------------------------------------------------
-    inline void setColor(float a_red, float a_green,
-                         float a_blue, float a_alpha )
+    inline void setColor(const float& a_red, const float& a_green,
+                         const float& a_blue, const float a_alpha=1.0 )
     {
         m_color.set( (GLubyte)(a_red   * (GLfloat)0xff),
                      (GLubyte)(a_green * (GLfloat)0xff),
@@ -281,8 +267,10 @@ class cVertex
     cColorb m_color;
     //! My index in the vertex list of the mesh that owns me
     int m_index;
-    //! Is this vertex allocated to a triangle?
+    //! Is this vertex allocated?
     bool m_allocated;
+    //! How many triangles use this vertex?
+    int m_nTriangles;
 };
 
 

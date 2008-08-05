@@ -36,12 +36,16 @@ cViewport* cViewport::lastActiveViewport = 0;
                 const bool a_stereoEnabled, PIXELFORMATDESCRIPTOR* a_pixelFormat=0)
     \param      a_winHandle    Handle to the actual win32 window
     \param      a_camera       The camera through which this viewport should be rendered
-    \param      a_useStereo    If \b true, a stereo rendering context is created
+    \param      a_stereoEnabled    If \b true, a stereo rendering context is created
     \param      a_pixelFormat  If non-zero, this custom pixel format is used to initialize the viewport
 */
 //===========================================================================
 cViewport::cViewport(HWND a_winHandle, cCamera *a_camera, const bool a_stereoEnabled, PIXELFORMATDESCRIPTOR* a_pixelFormat)
 {
+
+    // If no viewport has been created at all, creation is enough to make this
+    // the active viewport
+    if (lastActiveViewport == 0) lastActiveViewport = this;
 
     memset(m_glViewport,0,sizeof(m_glViewport));
 
@@ -315,7 +319,7 @@ bool cViewport::update(bool resizeOnly)
         want to get control back between the left and right frames.    
 
     \fn         bool cViewport::render(int imageIndex)
-    \param      int imageIndex Either CHAI_STEREO_DEFAULT, CHAI_MONO, CHAI_STEREO_LEFT, or CHAI_STEREO_RIGHT
+    \param      imageIndex Either CHAI_STEREO_DEFAULT, CHAI_MONO, CHAI_STEREO_LEFT, or CHAI_STEREO_RIGHT
     \return     Return \b true if operation succeeded.
 */
 //===========================================================================
@@ -360,7 +364,7 @@ bool cViewport::render(int imageIndex)
 /*!
     Renders the OpenGL scene in the buffer specified by a_imageIndex
 
-    \fn         void cViewport::render()
+    \fn         void cViewport::renderView(const int a_imageIndex)
     \param      a_imageIndex  CHAI_MONO, CHAI_STEREO_LEFT or CHAI_STEREO_RIGHT
     \return     Return \b true if operation succeeded.
 */
@@ -488,6 +492,7 @@ bool cViewport::renderView(const int a_imageIndex)
                 const unsigned int a_windowPosY, const bool a_selectVisibleObjectsOnly)
      \param     a_windowPosX  X coordinate position of mouse click.
      \param     a_windowPosY  Y coordinate position of mouse click.
+     \param     a_selectVisibleObjectsOnly  Should we ignore invisible objects?
      \return    Return \b true if an object has been hit.
 */
 //===========================================================================

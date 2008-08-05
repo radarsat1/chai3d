@@ -21,59 +21,55 @@
 
 //---------------------------------------------------------------------------
 #include "CPhantomDevices.h"
-#include <windows.h>
+
+#ifndef _DISABLE_PHANTOM_SUPPORT
+
 //---------------------------------------------------------------------------
 int cPhantomDevice::m_num_phantoms = 0;
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-    Constructor of cPhantomDevice. \r
+    Constructor of cPhantomDevice.
     No servo loop is yet created, encoders are NOT reset.
 
     \fn     cPhantomDevice::cPhantomDevice(int a_num, bool a_dio_access)
 
-    \param  num  0-based index of the Phantom that this
+    \param  a_num  0-based index of the Phantom that this
                  tool should talk to.
-    \param  dio_access  If this is 'true', the tool will use the
+    \param  a_dio_access  If this is 'true', the tool will use the
             Ghost API's direct-i/o model, if it's available.  Otherwise
             the gstEffect i/o model will be used.
 */
 //===========================================================================
 cPhantomDevice::cPhantomDevice(int a_num, bool a_dio_access)
 {
-    HINSTANCE checkVal;
 
-    // load phantom driver
-    checkVal = LoadLibrary("PhantomDriver.dll");
+#ifdef _WIN32
+  if (a_dio_access)
+  {
+      PhantomAccess(1);
+  }
+  else
+  {
+      PhantomAccess(0);
+  }
+#endif
 
-    // check if driver is available
-    if (checkVal == NULL)
-    {
-        m_systemReady = false;
-        m_systemAvailable = false;
-    }
-    else
-    {
-        if (a_dio_access)
-        {
-            PhantomAccess(1);
-        }
 
-        m_phantomHandle = OpenPhantom(a_num);
+  m_phantomHandle = OpenPhantom(a_num);
 
-        if (m_phantomHandle < 0)
-        {
-            m_systemReady = false;
-            m_systemAvailable = false;
-        }
-        else
-        {
-            m_systemReady = false;
-            m_systemAvailable = true;
-            m_num_phantoms++;
-        }
-    }
+  if (m_phantomHandle < 0)
+  {
+    m_systemReady = false;
+    m_systemAvailable = false;
+  }
+  else
+  {
+    m_systemReady = false;
+    m_systemAvailable = true;
+    m_num_phantoms++;
+  }
 }
 
 
@@ -141,19 +137,22 @@ int cPhantomDevice::close()
 
 //===========================================================================
 /*!
-    Calibrate phantom device. Desktop devices that have been initialized with
-    Dice will not be initialized. For Phantom Premiums it is fundamental to place
-    the device in its reset position before calling init.
-
-    \fn     int cPhantomDevice::initialize()
-    \return Return 0 is operation succeeds, -1 if an error occurs.
+    Initialize the phantom device.
+    
+    For desktops and omnis, the a_resetEncoders parameter is ignored.
+    For premiums, if you specify a_resetEncoders as true, you should
+    be holding the Phantom in its rest position when this is called.
+    
+    \fn     int cPhantomDevice::initialize(const bool a_resetEncoders=false)
+    \param  a_resetEncoders Should I re-zero the encoders?  (affects premiums only...)
+    \return Return 0 if operation succeeds, -1 if an error occurs.
 */
 //===========================================================================
-int cPhantomDevice::initialize()
+int cPhantomDevice::initialize(const bool a_resetEncoders)
 {
     if (m_systemReady)
     {
-        ResetPhantomEncoders(m_phantomHandle);
+        if (a_resetEncoders) ResetPhantomEncoders(m_phantomHandle);
         return 0;
     }
 
@@ -297,4 +296,25 @@ int cPhantomDevice::command(int a_command, void* a_data)
     return result;
 }
 
+
+//===========================================================================
+/*!
+    Ask the device to call me back periodically.  If this device supports
+    timed callbacks, this function will return 'true' and will call the
+    supplied m_callback method at haptic rates.  If not, this function will
+    return 'false', and you should create your own haptic thread.
+
+    \fn  cPhantomDevice::setCallback(cCallback* m_callback)
+    \param  m_callback  The callback to trigger periodically, or 0 to cancel
+                        an existing callback. 
+    \return true if this device supports callbacks, false otherwise                          
+*/
+//===========================================================================
+bool cPhantomDevice::setCallback(cCallback* m_callback)
+{
+  if (SetCallbackPhantom(m_callback) != PH_DLL_PROBLEM) return true;
+  else return false;
+}
+
+#endif // _DISABLE_PHANTOM_SUPPORT
 

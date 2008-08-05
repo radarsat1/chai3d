@@ -24,3 +24,21 @@
 //---------------------------------------------------------------------------
 
 
+//===========================================================================
+/*!
+
+    Ask the device to call me back periodically.  If this device supports
+    timed callbacks, this function will return 'true' and will call the
+    supplied m_callback method at haptic rates.  If not, this function will
+    return 'false', and you should create your own haptic thread.
+
+    \fn  cGenericDevice::setCallback(cCallback* m_callback)
+    \param  m_callback  The callback to trigger periodically, or 0 to cancel
+                        an existing callback. 
+    \return true if this device supports callbacks, false otherwise                          
+*/
+//===========================================================================
+bool cGenericDevice::setCallback(cCallback* m_callback)
+{
+  return false;
+}

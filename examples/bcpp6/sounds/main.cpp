@@ -35,6 +35,9 @@ const double MESH_SCALE_SIZE = 0.5;
 
 // vector of sound-enabled meshes in the world
 std::vector<cSoundMesh*> sound_meshes;
+cGenericObject* contactObject;
+cVector3d normalForce, tangentialForce;
+
 
 __fastcall TForm1::TForm1(TComponent* Owner)
     : TForm(Owner)
@@ -162,6 +165,7 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     // don't start the haptics loop yet
     flagSimulationOn = false;
     flagHasExitedSimulation = true;
+    tool = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -220,6 +224,48 @@ void __fastcall TForm1::Timer1Timer(TObject *Sender)
     // update camera position
     updateCameraPosition();
 
+    if (tool)
+    {
+      // see if there is a collision with a sound-enabled object (including
+      // objects who have a sound-enabled parent mesh)
+      cSoundMesh* sound_mesh = NULL;
+      if (contactObject != NULL)
+      {
+        cGenericObject* parent = contactObject; //tool->getProxy()->getContactObject();
+        contactObject = NULL;
+        sound_mesh = dynamic_cast<cSoundMesh*>(parent);
+        while ((parent) && (!sound_mesh))
+        {
+          parent = parent->getParent();
+          sound_mesh = dynamic_cast<cSoundMesh*>(parent);
+        }
+      }
+
+      // call play methods for sound-enabled objects
+      for (unsigned int i=0; i<sound_meshes.size(); i++)
+      {
+
+        // send the current force to the currently contacted object, if any
+        if (sound_meshes[i] == sound_mesh)
+          sound_mesh->getSound()->setContactForce(normalForce, tangentialForce);
+        else
+          sound_meshes[i]->getSound()->setContactForce(cVector3d(0,0,0), cVector3d(0,0,0));
+
+		    // if there is a new contact, reset and restart playing the sound
+        if ((sound_meshes[i]->getSound()->getNormalForce().lengthsq() > 0.01) &&
+			      (sound_meshes[i]->getSound()->getPreviousForce().lengthsq() <= 0.01))
+		    {
+          // reset for the new contact
+          sound_meshes[i]->getSound()->reset();
+
+			    // restart playing this stream
+			    if (!(BASS_ChannelPlay(sound_meshes[i]->getSound()->stream,TRUE)))
+		        Application->MessageBox("Playback Error", "Error");
+		    }
+      }
+    }
+
+
     // render world in display
     if (viewport != NULL)
     {
@@ -240,46 +286,15 @@ void HapticLoop()
       // update tool position and rotation
       Form1->tool->updatePose();
 
-      // calculate forces
-      Form1->tool->computeForces();
-
-	    // see if there is a collision with a sound-enabled object (including
-      // objects who have a sound-enabled parent mesh)
-      cSoundMesh* sound_mesh = NULL;
       if (Form1->tool->getProxy()->getContactObject())
       {
-        cGenericObject* parent = Form1->tool->getProxy()->getContactObject();
-        sound_mesh = dynamic_cast<cSoundMesh*>(parent);
-        while ((parent) && (!sound_mesh))
-        {
-          parent = parent->getParent();
-          sound_mesh = dynamic_cast<cSoundMesh*>(parent);
-        }
+        contactObject = Form1->tool->getProxy()->getContactObject();
+        normalForce = Form1->tool->getProxy()->getNormalForce();
+        tangentialForce = Form1->tool->getProxy()->getTangentialForce();
       }
 
-      // call play methods for sound-enabled objects
-      for (unsigned int i=0; i<sound_meshes.size(); i++)
-      {
-
-        // send the current force to the currently contacted object, if any
-        if (sound_meshes[i] == sound_mesh)
-          sound_mesh->getSound()->setContactForce(Form1->tool->getProxy()->getNormalForce(),
-                                                  Form1->tool->getProxy()->getTangentialForce());
-        else
-          sound_meshes[i]->getSound()->setContactForce(cVector3d(0,0,0), cVector3d(0,0,0));
-
-		    // if there is a new contact, reset and restart playing the sound
-        if ((sound_meshes[i]->getSound()->getNormalForce().lengthsq() > 0.01) &&
-			      (sound_meshes[i]->getSound()->getPreviousForce().lengthsq() <= 0.01))
-		    {
-          // reset for the new contact
-          sound_meshes[i]->getSound()->reset();
-
-			    // restart playing this stream
-			    if (!(BASS_ChannelPlay(sound_meshes[i]->getSound()->stream,TRUE)))
-		        Application->MessageBox("Playback Error", "Error");
-		    }
-      }
+      // calculate forces
+      Form1->tool->computeForces();
 
       // apply forces
       Form1->tool->applyForces();
@@ -324,9 +339,6 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
 
         // open communication to the device
         tool->start();
-
-        // update initial orientation and position of device
-        tool->updatePose();
 
         // tell the tool to show his coordinate frame so you
         // can see tool rotation

@@ -24,8 +24,15 @@
 #define CColorH
 //---------------------------------------------------------------------------
 #include "CMaths.h"
+#ifdef _WIN32
 #include "windows.h"
-#include "gl/gl.h"
+#endif
+
+#include <GL/gl.h>
+
+/*!
+    \file CColor.h
+*/
 
 struct cColorb;
 struct cColorf;
@@ -130,7 +137,7 @@ struct cColorf
         Set color by copying four \e GLfloats from an external array, each
         describing one of the RGBA components.
 
-        \param    a_colorRGB  Pointer to an array of type \e float.
+        \param    a_colorRGBA  Pointer to an array of type \e float.
     */
     //-----------------------------------------------------------------------
     inline void setMem4(const GLfloat* a_colorRGBA)
@@ -389,7 +396,7 @@ struct cColorb
     //-----------------------------------------------------------------------
     /*!
         Set color by copying four floats from an external array, each
-        describing an RGBA components
+        describing an RGBA component
 
         \param    a_colorRGBA  Pointer to an array of type \e GLubyte
     */
@@ -573,7 +580,19 @@ extern cColorf CHAI_COLOR_YELLOW;
 extern cColorf CHAI_COLOR_AQUA;
 extern cColorf CHAI_COLOR_PURPLE;
 
-extern cColorf CHAI_BASIC_COLORS[8];
+extern cColorf CHAI_COLOR_PASTEL_RED;
+extern cColorf CHAI_COLOR_PASTEL_GREEN;
+extern cColorf CHAI_COLOR_PASTEL_BLUE;
+extern cColorf CHAI_COLOR_PASTEL_AQUA;
+extern cColorf CHAI_COLOR_PASTEL_VIOLET;
+extern cColorf CHAI_COLOR_PASTEL_YELLOW;
+extern cColorf CHAI_COLOR_PASTEL_GRAY;
+
+#define N_CHAI_BASIC_COLORS 8
+extern cColorf CHAI_BASIC_COLORS[N_CHAI_BASIC_COLORS];
+
+#define N_CHAI_PASTEL_COLORS 7
+extern cColorf CHAI_PASTEL_COLORS[N_CHAI_PASTEL_COLORS];
 
 //---------------------------------------------------------------------------
 #endif

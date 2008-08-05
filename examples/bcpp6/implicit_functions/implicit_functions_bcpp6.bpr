@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="..\..\..\bin\implicit_functions_bcpp6.exe"/>
+    <OBJFILES value="obj\implicit_functions_bcpp6.obj obj\main.obj obj\CImplicitShape.obj 
+      obj\CImplicitSphere.obj obj\CImplicitCylinder.obj obj\CImplicitTorus.obj 
+      obj\CImplicitCone.obj"/>
+    <RESFILES value="implicit_functions.res"/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) main.dfm"/>
+    <LIBFILES value="..\..\..\lib\bbcp6\chai_collisions.lib ..\..\..\lib\bbcp6\chai_devices.lib 
+      ..\..\..\lib\bbcp6\chai_displays.lib ..\..\..\lib\bbcp6\chai_files.lib 
+      ..\..\..\lib\bbcp6\chai_forces.lib ..\..\..\lib\bbcp6\chai_graphics.lib 
+      ..\..\..\lib\bbcp6\chai_math.lib ..\..\..\lib\bbcp6\chai_timers.lib 
+      ..\..\..\lib\bbcp6\chai_tools.lib ..\..\..\lib\bbcp6\chai_scenegraph.lib 
+      ..\..\..\lib\bbcp6\chai_widgets.lib"/>
+    <LIBRARIES value="rtl.lib vcl.lib"/>
+    <SPARELIBS value="vcl.lib rtl.lib"/>
+    <PACKAGES value="vcl.bpi rtl.bpi vclx.bpi bcbsmp.bpi dbrtl.bpi adortl.bpi vcldb.bpi 
+      qrpt.bpi bdertl.bpi vcldbx.bpi dsnap.bpi cds.bpi bdecds.bpi teeui.bpi 
+      teedb.bpi tee.bpi teeqr.bpi ibxpress.bpi visualclx.bpi visualdbclx.bpi 
+      vclie.bpi xmlrtl.bpi inet.bpi inetdbbde.bpi inetdbxpress.bpi inetdb.bpi 
+      nmfast.bpi bcbie.bpi soaprtl.bpi dclocx.bpi dbexpress.bpi dbxcds.bpi 
+      indy.bpi bcb2kaxserver.bpi"/>
+    <PATHCPP value=".;..\..\msvc6\implicit_functions"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="ilink32"/>
+    <USERDEFINES value="BBCP"/>
+    <SYSDEFINES value="NO_STRICT"/>
+    <MAINSOURCE value="implicit_functions_bcpp6.cpp"/>
+    <INCLUDEPATH value="..\..\msvc6\implicit_functions;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include;..\..\..\external\OpenGL\bbcp6"/>
+    <LIBPATH value="..\..\..\external\OpenGL\bbcp6;$(BCB)\lib;..\..\msvc6\implicit_functions;..;$(BCB)\lib\obj;$(BCB)\lib\Psdk"/>
+    <WARNINGS value="-w-par -w-8027 -w-hid"/>
+    <OTHERFILES value=""/>
+  </MACROS>
+  <OPTIONS>
+    <IDLCFLAGS value="-I.. -I$(BCB)\include -I$(BCB)\include\vcl -I..\..\..\include -src_suffix 
+      cpp -D_DEBUG -DBBCP -boa"/>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <PFLAGS value="-N2obj -N0obj -$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="-Iobj -D&quot;&quot; -aa -Tpe -x -Gn"/>
+    <OTHERFILES value=""/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib"/>
+    <OTHERFILES value=""/>
+  </LINKER>
+  <FILELIST>
+      <FILE FILENAME="implicit_functions_bcpp6.cpp" FORMNAME="" UNITNAME="implicit_functions_bcpp6" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="main.cpp" FORMNAME="Form1" UNITNAME="main" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_collisions.lib" FORMNAME="" UNITNAME="chai_collisions.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_devices.lib" FORMNAME="" UNITNAME="chai_devices.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_displays.lib" FORMNAME="" UNITNAME="chai_displays.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_files.lib" FORMNAME="" UNITNAME="chai_files.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_forces.lib" FORMNAME="" UNITNAME="chai_forces.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_graphics.lib" FORMNAME="" UNITNAME="chai_graphics.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_math.lib" FORMNAME="" UNITNAME="chai_math.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_timers.lib" FORMNAME="" UNITNAME="chai_timers.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_tools.lib" FORMNAME="" UNITNAME="chai_tools.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_scenegraph.lib" FORMNAME="" UNITNAME="chai_scenegraph.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\..\lib\bbcp6\chai_widgets.lib" FORMNAME="" UNITNAME="chai_widgets.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="implicit_functions.res" FORMNAME="" UNITNAME="implicit_functions.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\msvc6\implicit_functions\CImplicitShape.cpp" FORMNAME="" UNITNAME="CImplicitShape.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\msvc6\implicit_functions\CImplicitSphere.cpp" FORMNAME="" UNITNAME="CImplicitSphere.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\msvc6\implicit_functions\CImplicitCylinder.cpp" FORMNAME="" UNITNAME="CImplicitCylinder.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\msvc6\implicit_functions\CImplicitTorus.cpp" FORMNAME="" UNITNAME="CImplicitTorus.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\msvc6\implicit_functions\CImplicitCone.cpp" FORMNAME="" UNITNAME="CImplicitCone.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[Excluded Packages]
+c:\program files\borland\cbuilder6\Bin\dclite60.bpl=Borland Integrated Translation Environment
+
+[HistoryLists\hlIncludePath]
+Count=6
+Item0=..\..\msvc6\implicit_functions;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include;..\..\..\external\OpenGL\bbcp6
+Item1=..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include;..\..\..\external\OpenGL\bbcp6
+Item2=..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\include
+Item3=..;$(BCB)\include;$(BCB)\include\vcl
+Item4=..\;$(BCB)\include;$(BCB)\include\vcl
+Item5=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=8
+Item0=..\..\..\external\OpenGL\bbcp6;$(BCB)\lib;..\..\msvc6\implicit_functions;..;$(BCB)\lib\obj;$(BCB)\lib\Psdk
+Item1=$(BCB)\lib;..\..\msvc6\implicit_functions;..;$(BCB)\lib\obj;$(BCB)\lib\Psdk
+Item2=$(BCB)\lib\;..\..\msvc6\implicit_functions;..;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\Psdk
+Item3=..\..\msvc6\implicit_functions;..;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\Psdk
+Item4=..;$(BCB)\lib\obj;$(BCB)\lib;$(BCB)\lib\Psdk
+Item5=..;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\;$(BCB)\lib\obj;$(BCB)\lib
+Item7=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=4
+Item0=BBCP
+Item1=BBCP;_DEBUG
+Item2=_DEBUG;BBCP
+Item3=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=obj
+
+[HistoryLists\hlFinalOutputDir]
+Count=4
+Item0=..\..\..\bin\
+Item1=..\..\bin\
+Item2=bin\
+Item3=bin
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteLauncher=
+RemoteCWD=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+  </IDEOPTIONS>
+</PROJECT>

@@ -61,7 +61,7 @@ cVirtualDevice::cVirtualDevice()
       0,
       0);
 
-    // check is connection succedded
+    // check whether connection succeeded
     if (m_lpMapAddress == NULL)
     {
         m_systemReady = false;
@@ -129,13 +129,14 @@ int cVirtualDevice::close()
 
 //===========================================================================
 /*!
-    Initialize virtual device
+    Initialize virtual device.  a_resetEncoders is ignored
 
-    \fn     void cVirtualDevice::initialize()
+    \fn     void cVirtualDevice::initialize(const bool a_resetEncoders=false)
+    \param  a_resetEncoders ignored
     \return Return 0 is operation succeeds, -1 if an error occurs.
 */
 //===========================================================================
-int cVirtualDevice::initialize()
+int cVirtualDevice::initialize(const bool a_resetEncoders)
 {
     if (m_systemReady)
     {
@@ -213,9 +214,9 @@ int cVirtualDevice::command(int a_command, void* a_data)
             {
                 cVector3d* force = (cVector3d *) a_data;
 
-                (double)(*m_pDevice).ForceX = force->x;
-                (double)(*m_pDevice).ForceY = force->y;
-                (double)(*m_pDevice).ForceZ = force->z;
+                ((*m_pDevice).ForceX) = force->x;
+                ((*m_pDevice).ForceY) = force->y;
+                ((*m_pDevice).ForceZ) = force->z;
             }
             break;
 
@@ -226,10 +227,11 @@ int cVirtualDevice::command(int a_command, void* a_data)
             break;
 
             // read user switch from wrist
+            case CHAI_CMD_GET_SWITCH_MASK:
             case CHAI_CMD_GET_SWITCH_0:
             {
                 int* result = (int *) a_data;
-                *result = (bool)(*m_pDevice).Button0;
+                *result = ((bool)(*m_pDevice).Button0) ? 1 : 0;
             }
             break;
 

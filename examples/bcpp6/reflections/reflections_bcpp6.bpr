@@ -8,12 +8,11 @@
     <RESFILES value="reflections_bcpp6.res"/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES)"/>
-    <LIBFILES value="..\..\..\lib\bbcp6\DLPortIO.lib ..\..\..\lib\bbcp6\PhantomDriver.lib 
-      ..\..\..\lib\bbcp6\chai_tools.lib ..\..\..\lib\bbcp6\chai_timers.lib 
-      ..\..\..\lib\bbcp6\chai_math.lib ..\..\..\lib\bbcp6\chai_forces.lib 
-      ..\..\..\lib\bbcp6\chai_displays.lib ..\..\..\lib\bbcp6\chai_devices.lib 
-      ..\..\..\lib\bbcp6\chai_collisions.lib ..\..\..\lib\bbcp6\chai_files.lib 
-      ..\..\..\lib\bbcp6\chai_graphics.lib 
+    <LIBFILES value="..\..\..\lib\bbcp6\DLPortIO.lib ..\..\..\lib\bbcp6\chai_tools.lib 
+      ..\..\..\lib\bbcp6\chai_timers.lib ..\..\..\lib\bbcp6\chai_math.lib 
+      ..\..\..\lib\bbcp6\chai_forces.lib ..\..\..\lib\bbcp6\chai_displays.lib 
+      ..\..\..\lib\bbcp6\chai_devices.lib ..\..\..\lib\bbcp6\chai_collisions.lib 
+      ..\..\..\lib\bbcp6\chai_files.lib ..\..\..\lib\bbcp6\chai_graphics.lib 
       ..\..\..\lib\bbcp6\chai_scenegraph.lib ..\..\..\lib\bbcp6\chai_widgets.lib"/>
     <LIBRARIES value=""/>
     <SPARELIBS value=""/>
@@ -52,7 +51,6 @@
       <FILE FILENAME="reflections_bcpp6.bpf" FORMNAME="" UNITNAME="reflections_bcpp6" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="main.cpp" FORMNAME="" UNITNAME="main" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\DLPortIO.lib" FORMNAME="" UNITNAME="DLPortIO.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\..\..\lib\bbcp6\PhantomDriver.lib" FORMNAME="" UNITNAME="PhantomDriver.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_tools.lib" FORMNAME="" UNITNAME="chai_tools.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_timers.lib" FORMNAME="" UNITNAME="chai_timers.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_math.lib" FORMNAME="" UNITNAME="chai_math.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>

@@ -31,6 +31,7 @@ using std::string;
 
 //===========================================================================
 /*!
+    \file   CString.h
     \brief
     The following functions convert booleans, integers, float and doubles
     into strings.

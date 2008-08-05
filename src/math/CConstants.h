@@ -26,8 +26,9 @@
 
 //===========================================================================
 /*!
+    \file CConstants.h
     \brief
-    Definition for often used mathematical constants.
+    Definitions for often used mathematical constants.
 */
 //===========================================================================
 //! PI constant.

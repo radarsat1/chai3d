@@ -1,21 +1,21 @@
 //===========================================================================
 /*
-This file is part of the CHAI 3D visualization and haptics libraries.
-Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
 
-This library is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License("GPL") version 2
-as published by the Free Software Foundation.
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License("GPL") version 2
+    as published by the Free Software Foundation.
 
-For using the CHAI 3D libraries with software that can not be combined
-with the GNU GPL, and for taking advantage of the additional benefits
-of our support services, please contact CHAI 3D about acquiring a
-Professional Edition License.
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
 
-\author:    <http://www.chai3d.org>
-\author:    Dan Morris
-\version    1.0
-\date       12/2005
+    \author:    <http://www.chai3d.org>
+    \author:    Dan Morris
+    \version    1.0
+    \date       12/2005
 */
 //===========================================================================
 
@@ -26,8 +26,8 @@ Professional Edition License.
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
-#include <Windows.h>
+#if (defined(_WIN32) && !defined(_POSIX))
+#include <windows.h>
 #endif
 
 //---------------------------------------------------------------------------
@@ -37,14 +37,15 @@ Professional Edition License.
 
 //===========================================================================
 /*!
-\class      cFont
-\brief      cFont is a generic and pure virtual font interface, to be
-            subclassed by platform-specific implementations.  For the
-            simplest, most portable approach, use this class and the static
-            method createFont", which returns an actual font object.  You may
-            also create subclass font types directly (see below).
+    \file CFont.h
+    \class      cFont
+    \brief      cFont is a generic and pure virtual font interface, to be
+                subclassed by platform-specific implementations.  For the
+                simplest, most portable approach, use this class and the static
+                method createFont", which returns an actual font object.  You may
+                also create subclass font types directly (see below).
 
-            Specific implementations can be found later in this file.
+                Specific implementations can be found later in this file.
 */
 //===========================================================================
 class cFont
@@ -62,7 +63,7 @@ public:
     virtual int renderString(const char* a_str)=0;
 
     //! Change the font face; may require re-initializing the font
-    virtual void setFontFace(const char* a_faceName) { strncpy(m_fontFace,a_faceName,255); }
+    virtual void setFontFace(const char* a_faceName);
     //! Get the current font face
     virtual void getFontFace(char* a_faceName) const { strcpy(a_faceName,m_fontFace); }
 
@@ -90,7 +91,33 @@ public:
 };
 
 
-#ifdef _WIN32
+class cGLUTBitmapFont : public cFont
+{
+
+public:
+
+  //! Renders a string, should not contain any newlines
+  //!
+  //! Returns 0 for success, -1 for error
+  virtual int renderString(const char* a_str);
+
+  //! Constructor
+  cGLUTBitmapFont() { }
+
+  //! Destructor
+  virtual ~cGLUTBitmapFont() { }
+
+  //! Get the width of a particular character
+  virtual int getCharacterWidth(const unsigned char& a_char);
+
+protected:
+
+  // Return the index of the current font in the table of font names
+  int getBestFontMatch();
+};
+
+
+#if (defined(_WIN32) & !defined(_POSIX))
 
 //===========================================================================
 /*!

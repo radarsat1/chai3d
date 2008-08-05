@@ -23,11 +23,14 @@
 #ifndef CPrecisionClockH
 #define CPrecisionClockH
 //---------------------------------------------------------------------------
+#ifdef _WIN32
 #include "windows.h"
+#endif
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
+    \file   CPrecisionClock.h
 	\class	cPrecisionClock
 	\brief	cPrecisionClock provides a class to manage high precision
 			time measurments. Units are micro seconds.
@@ -78,8 +81,11 @@ class cPrecisionClock
     double getCPUtime();
 
   private:
+
+#ifndef _POSIX
     //! Stores information about CPU high precision clock.
     LARGE_INTEGER m_freq;
+#endif
 
     //! Current time of clock.
     long m_timeCurrent;

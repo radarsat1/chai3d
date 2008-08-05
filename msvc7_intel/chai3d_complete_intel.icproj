@@ -3,7 +3,7 @@
 	ProjectType="Intel C++ Project"
 	Version="9.0"
 	Name="chai3d_complete_intel"
-	ProjectGUID="{75757994-2674-427B-8E0E-DC3D0CCD69B1}"
+	ProjectGUID="{8E993108-5A24-4036-8474-4A8E611991E0}"
 	VCNestedProjectGUID="{A9F01342-5463-4634-B1F9-BF98CD5591B0}"
 	VCNestedProjectFileName="chai3d_complete_intel.vcproj">
 	<Configurations>
@@ -16,7 +16,8 @@
 				ConfigurationType="4"
 				UseOfMFC="0"
 				ATLMinimizesCRunTimeLibraryUsage="0"
-				CharacterSet="2"/>
+				CharacterSet="2"
+				CompilerName="1"/>
 			<Tool 
 				Name="DebugTool"/>
 			<Tool 
@@ -29,7 +30,7 @@
 				OmitFramePointers="1"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="1"
-				AdditionalIncludeDirectories="../src/graphics;../src/collisions;../src/files;../src/tools;../src/devices;../src/display;../src/forces;../src/math;../src/scenegraph;../src/timers;../src/widgets"
+				AdditionalIncludeDirectories="../src/graphics,../src/collisions,../src/files,../src/tools,../src/devices,../src/display,../src/forces,../src/math,../src/timers,../src/scenegraph"
 				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;_MSVC;WINVER=0X0500"
 				StringPooling="1"
 				RuntimeLibrary="2"
@@ -44,9 +45,7 @@
 				WarningLevel="3"
 				SuppressStartupBanner="1"
 				CompileAs="0"
-				AdditionalOptions="/Qvec-report0"
-				UseProcExt="4"
-				RequireProcExt="4"/>
+				AdditionalOptions="/Qvec-report0"/>
 			<Tool 
 				Name="LinkerTool"
 				DelayImpLib=""/>
@@ -75,24 +74,6 @@
 				Name="CustomTool"/>
 			<Tool 
 				Name="CustomNodeTool"/>
-			<Tool 
-				Name="VCCLCompilerTool">
-				<IntelOptions 
-					Optimization="3"
-					GlobalOptimizations="TRUE"
-					InlineFunctionExpansion="2"
-					EnableIntrinsicFunctions="TRUE"
-					FavorSizeOrSpeed="1"
-					OmitFramePointers="TRUE"
-					OptimizeForProcessor="3"
-					OptimizeForWindowsApplication="TRUE"
-					StringPooling="TRUE"
-					RuntimeLibrary="2"
-					BufferSecurityCheck="FALSE"
-					EnableFunctionLevelLinking="TRUE"
-					EnableEnhancedInstructionSet="1"
-					RuntimeTypeInfo="TRUE"/>
-			</Tool>
 		</Configuration>
 		<Configuration 
 			Name="Debug|Win32">
@@ -103,13 +84,14 @@
 				ConfigurationType="4"
 				UseOfMFC="0"
 				ATLMinimizesCRunTimeLibraryUsage="0"
-				CharacterSet="2"/>
+				CharacterSet="2"
+				CompilerName="1"/>
 			<Tool 
 				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../src/graphics;../src/collisions;../src/files;../src/tools;../src/devices;../src/display;../src/forces;../src/math;../src/scenegraph;../src/timers;../src/widgets"
+				AdditionalIncludeDirectories="../src/graphics,../src/collisions,../src/files,../src/tools,../src/devices,../src/display,../src/forces,../src/math,../src/timers,../src/scenegraph"
 				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;_MSVC"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -128,7 +110,7 @@
 				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
-				OutputFile="../lib/msvc7_intel/chai3d_complete_intel.lib"
+				OutputFile="../lib/msvc7/chai3d_complete_intel.lib"
 				SuppressStartupBanner="1"
 				IgnoreDefaultLibraryNames=""/>
 			<Tool 
@@ -150,14 +132,6 @@
 				Name="CustomTool"/>
 			<Tool 
 				Name="CustomNodeTool"/>
-			<Tool 
-				Name="VCCLCompilerTool">
-				<IntelOptions 
-					Optimization="0"
-					BasicRuntimeChecks="3"
-					RuntimeLibrary="3"
-					RuntimeTypeInfo="TRUE"/>
-			</Tool>
 		</Configuration>
 		<Configuration 
 			Name="Release with symbols|Win32">
@@ -181,7 +155,7 @@
 				OmitFramePointers="1"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="1"
-				AdditionalIncludeDirectories="../src/graphics,../src/collisions,../src/files,../src/tools,../src/devices,../src/display,../src/forces,../src/math,../src/timers"
+				AdditionalIncludeDirectories="../src/graphics,../src/collisions,../src/files,../src/tools,../src/devices,../src/display,../src/forces,../src/math,../src/timers,../src/scenegraph"
 				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;_MSVC"
 				StringPooling="1"
 				RuntimeLibrary="2"
@@ -203,7 +177,7 @@
 				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
-				OutputFile="../lib/msvc7/chai3d_complete.lib"
+				OutputFile="../lib/msvc7/chai3d_complete_intel.lib"
 				SuppressStartupBanner="1"
 				IgnoreDefaultLibraryNames="libmmd.lib libmmdd.lib"/>
 			<Tool 
@@ -225,24 +199,6 @@
 				Name="CustomTool"/>
 			<Tool 
 				Name="CustomNodeTool"/>
-			<Tool 
-				Name="VCCLCompilerTool">
-				<IntelOptions 
-					Optimization="2"
-					GlobalOptimizations="TRUE"
-					InlineFunctionExpansion="2"
-					EnableIntrinsicFunctions="TRUE"
-					FavorSizeOrSpeed="1"
-					OmitFramePointers="TRUE"
-					OptimizeForProcessor="3"
-					OptimizeForWindowsApplication="TRUE"
-					StringPooling="TRUE"
-					RuntimeLibrary="2"
-					BufferSecurityCheck="FALSE"
-					EnableFunctionLevelLinking="TRUE"
-					EnableEnhancedInstructionSet="2"
-					RuntimeTypeInfo="TRUE"/>
-			</Tool>
 		</Configuration>
 		<Configuration 
 			Name="Intel Release|Win32">
@@ -266,7 +222,7 @@
 				OmitFramePointers="1"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="1"
-				AdditionalIncludeDirectories="../src/graphics,../src/collisions,../src/files,../src/tools,../src/devices,../src/display,../src/forces,../src/math,../src/timers,../include"
+				AdditionalIncludeDirectories="../src/graphics,../src/collisions,../src/files,../src/tools,../src/devices,../src/display,../src/forces,../src/math,../src/timers,../src/scenegraph"
 				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;_MSVC;WINVER=0X0500"
 				StringPooling="1"
 				RuntimeLibrary="2"
@@ -281,13 +237,15 @@
 				WarningLevel="3"
 				SuppressStartupBanner="1"
 				CompileAs="0"
-				AdditionalOptions="/Qvec-report 0"/>
+				AdditionalOptions="/Qvec-report 0"
+				UseProcExt="4"
+				RequireProcExt="4"/>
 			<Tool 
 				Name="LinkerTool"
 				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
-				OutputFile="../lib/msvc7/chai3d_complete.lib"
+				OutputFile="../lib/msvc7/chai3d_complete_intel.lib"
 				SuppressStartupBanner="1"
 				IgnoreDefaultLibraryNames=""/>
 			<Tool 
@@ -309,29 +267,82 @@
 				Name="CustomTool"/>
 			<Tool 
 				Name="CustomNodeTool"/>
+		</Configuration>
+		<Configuration 
+			Name="Intel Release with Symbols|Win32">
 			<Tool 
-				Name="VCCLCompilerTool">
-				<IntelOptions 
-					Optimization="2"
-					GlobalOptimizations="TRUE"
-					InlineFunctionExpansion="2"
-					EnableIntrinsicFunctions="TRUE"
-					FavorSizeOrSpeed="1"
-					OmitFramePointers="TRUE"
-					OptimizeForProcessor="3"
-					OptimizeForWindowsApplication="TRUE"
-					StringPooling="TRUE"
-					RuntimeLibrary="2"
-					BufferSecurityCheck="FALSE"
-					EnableFunctionLevelLinking="TRUE"
-					EnableEnhancedInstructionSet="2"
-					RuntimeTypeInfo="TRUE"/>
-			</Tool>
+				Name="GeneralTool"
+				OutputDirectory="./IntelRelease"
+				IntermediateDirectory="./IntelRelease"
+				ConfigurationType="4"
+				UseOfMFC="0"
+				ATLMinimizesCRunTimeLibraryUsage="0"
+				CharacterSet="2"/>
+			<Tool 
+				Name="DebugTool"/>
+			<Tool 
+				Name="CppCmplrTool"
+				Optimization="3"
+				GlobalOptimizations="1"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="1"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="1"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="1"
+				AdditionalIncludeDirectories="../src/graphics,../src/collisions,../src/files,../src/tools,../src/devices,../src/display,../src/forces,../src/math,../src/timers,../src/scenegraph"
+				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;_MSVC;WINVER=0X0500"
+				StringPooling="1"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="0"
+				EnableFunctionLevelLinking="1"
+				EnableEnhancedInstructionSet="2"
+				RuntimeTypeInfo="1"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Release/chai3d_complete.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="1"
+				DebugInformationFormat="3"
+				CompileAs="0"
+				AdditionalOptions="/Qvec-report 0"
+				UseProcExt="4"
+				RequireProcExt="4"/>
+			<Tool 
+				Name="LinkerTool"
+				DelayImpLib=""/>
+			<Tool 
+				Name="LibrarianTool"
+				OutputFile="../lib/msvc7/chai3d_complete_intel.lib"
+				SuppressStartupBanner="1"
+				IgnoreDefaultLibraryNames=""/>
+			<Tool 
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool 
+				Name="MidlCmplrTool"/>
+			<Tool 
+				Name="BscMakeTool"/>
+			<Tool 
+				Name="PreBuildEventTool"/>
+			<Tool 
+				Name="PreLinkEventTool"/>
+			<Tool 
+				Name="PostBuildEventTool"
+				CommandLine="../scripts/copyHeaderFiles.bat"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
 		</Configuration>
 	</Configurations>
 	<Files>
 		<File 
 			RelativePath="..\src\widgets\CBitmap.cpp"/>
+		<File 
+			RelativePath="..\src\devices\CCallback.cpp"/>
 		<File 
 			RelativePath="..\src\scenegraph\CCamera.cpp"/>
 		<File 
@@ -349,15 +360,11 @@
 		<File 
 			RelativePath="..\src\graphics\CColor.cpp"/>
 		<File 
-			RelativePath="..\src\graphics\CColor.h"/>
-		<File 
 			RelativePath="..\src\tools\CDelta3dofPointer.cpp"/>
 		<File 
 			RelativePath="..\src\devices\CDeltaDevices.cpp"/>
 		<File 
 			RelativePath="..\src\graphics\CDraw3D.cpp"/>
-		<File 
-			RelativePath="..\src\graphics\CDraw3D.h"/>
 		<File 
 			RelativePath="..\src\devices\CDriverSensoray626.cpp"/>
 		<File 
@@ -391,8 +398,6 @@
 		<File 
 			RelativePath="..\src\tools\CGenericTool.cpp"/>
 		<File 
-			RelativePath="..\src\graphics\chai_globals.h"/>
-		<File 
 			RelativePath="..\src\files\CImageLoader.cpp"/>
 		<File 
 			RelativePath="..\src\widgets\CLabelPanel.cpp"/>
@@ -400,8 +405,6 @@
 			RelativePath="..\src\scenegraph\CLight.cpp"/>
 		<File 
 			RelativePath="..\src\graphics\CMacrosGL.cpp"/>
-		<File 
-			RelativePath="..\src\graphics\CMacrosGL.h"/>
 		<File 
 			RelativePath="..\src\graphics\CMaterial.cpp"/>
 		<File 
@@ -433,8 +436,6 @@
 		<File 
 			RelativePath="..\src\graphics\CShaders.cpp"/>
 		<File 
-			RelativePath="..\src\graphics\CShaders.h"/>
-		<File 
 			RelativePath="..\src\scenegraph\CShapeSphere.cpp"/>
 		<File 
 			RelativePath="..\src\scenegraph\CShapeTorus.cpp"/>
@@ -447,31 +448,27 @@
 		<File 
 			RelativePath="..\src\graphics\CTriangle.cpp"/>
 		<File 
-			RelativePath="..\src\graphics\CTriangle.h"/>
-		<File 
 			RelativePath="..\src\scenegraph\CVBOMesh.cpp"/>
 		<File 
 			RelativePath="..\src\math\CVector3d.cpp"/>
 		<File 
 			RelativePath="..\src\graphics\CVertex.cpp"/>
 		<File 
-			RelativePath="..\src\graphics\CVertex.h"/>
-		<File 
 			RelativePath="..\src\display\CViewport.cpp"/>
-		<File 
-			RelativePath="..\src\display\CViewport.h"/>
 		<File 
 			RelativePath="..\src\devices\CVirtualDevice.cpp"/>
 		<File 
 			RelativePath="..\src\scenegraph\CWorld.cpp"/>
 		<File 
-			RelativePath="..\src\graphics\glext.h"/>
+			RelativePath="..\src\devices\PhantomDriver.cpp"/>
 		<File 
 			RelativePath="..\src\devices\Win626.c"/>
 		<File 
 			RelativePath="..\src\devices\App626.h"/>
 		<File 
 			RelativePath="..\src\widgets\CBitmap.h"/>
+		<File 
+			RelativePath="..\src\devices\CCallback.h"/>
 		<File 
 			RelativePath="..\src\scenegraph\CCamera.h"/>
 		<File 
@@ -576,6 +573,24 @@
 			RelativePath="..\src\devices\PhantomDriver.h"/>
 		<File 
 			RelativePath="..\src\devices\Win626.h"/>
+		<File 
+			RelativePath="..\src\graphics\CShaders.h"/>
+		<File 
+			RelativePath="..\src\graphics\CTriangle.h"/>
+		<File 
+			RelativePath="..\src\graphics\CVertex.h"/>
+		<File 
+			RelativePath="..\src\display\CViewport.h"/>
+		<File 
+			RelativePath="..\src\graphics\glext.h"/>
+		<File 
+			RelativePath="..\src\graphics\CMacrosGL.h"/>
+		<File 
+			RelativePath="..\src\graphics\chai_globals.h"/>
+		<File 
+			RelativePath="..\src\graphics\CDraw3D.h"/>
+		<File 
+			RelativePath="..\src\graphics\CColor.h"/>
 	</Files>
 </VisualStudioProject>
 

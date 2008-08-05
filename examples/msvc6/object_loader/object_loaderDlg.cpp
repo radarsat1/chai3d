@@ -411,20 +411,29 @@ void Cobject_loaderDlg::OnMouseMove(UINT nFlags, CPoint point) {
 
   if (m_left_scrolling_gl_area) {
     CPoint delta = point - last_left_scroll_point;    
-    g_main_app->scroll(delta,MOUSE_BUTTON_LEFT);
+    // Look for the flag that says we _just_ started scrolling
+    if (m_left_scrolling_gl_area > 0)
+      g_main_app->scroll(delta,MOUSE_BUTTON_LEFT);
     last_left_scroll_point = point;
+    m_left_scrolling_gl_area = 1;
   }
 
   if (m_right_scrolling_gl_area) {
     CPoint delta = point - last_right_scroll_point;
-    g_main_app->scroll(delta,MOUSE_BUTTON_RIGHT);
+    // Look for the flag that says we _just_ started scrolling
+    if (m_right_scrolling_gl_area > 0)
+      g_main_app->scroll(delta,MOUSE_BUTTON_RIGHT);
     last_right_scroll_point = point;
+    m_right_scrolling_gl_area = 1;
   }
 
   if (m_middle_scrolling_gl_area) {
     CPoint delta = point - last_middle_scroll_point;
-    g_main_app->scroll(delta,MOUSE_BUTTON_MIDDLE);
+    // Look for the flag that says we _just_ started scrolling
+    if (m_middle_scrolling_gl_area > 0)
+      g_main_app->scroll(delta,MOUSE_BUTTON_MIDDLE);
     last_middle_scroll_point = point;
+    m_middle_scrolling_gl_area = 1;
   }
 
 }
@@ -436,7 +445,7 @@ void Cobject_loaderDlg::OnMButtonDown(UINT nFlags, CPoint point) {
 
   ::SetCapture(m_hWnd);
 
-  CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
+  CWnd* pWnd = GetDlgItem(IDC_GL_AREA); // m_gl_wnd
   RECT r;
   pWnd->GetWindowRect(&r);
   ScreenToClient(&r);
@@ -447,7 +456,7 @@ void Cobject_loaderDlg::OnMButtonDown(UINT nFlags, CPoint point) {
     point.x -= r.left;
     point.y -= r.top; 
 
-    m_middle_scrolling_gl_area = 1;
+    m_middle_scrolling_gl_area = -1;
     last_middle_scroll_point = point;
 
     // No need to select for the middle button...
@@ -473,7 +482,7 @@ void Cobject_loaderDlg::OnLButtonDown(UINT nFlags, CPoint point) {
 
   ::SetCapture(m_hWnd);
 
-  CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
+  CWnd* pWnd = GetDlgItem(IDC_GL_AREA); // m_gl_wnd
   RECT r;
   pWnd->GetWindowRect(&r);
   ScreenToClient(&r);
@@ -484,7 +493,7 @@ void Cobject_loaderDlg::OnLButtonDown(UINT nFlags, CPoint point) {
     point.x -= r.left;
     point.y -= r.top; 
   
-    m_left_scrolling_gl_area = 1;
+    m_left_scrolling_gl_area = -1;
     last_left_scroll_point = point;
     g_main_app->select(point);
   }	
@@ -508,7 +517,7 @@ void Cobject_loaderDlg::OnRButtonDown(UINT nFlags, CPoint point) {
 
   ::SetCapture(m_hWnd);
 
-  CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
+  CWnd* pWnd = GetDlgItem(IDC_GL_AREA); // m_gl_wnd
   RECT r;
   pWnd->GetWindowRect(&r);
   ScreenToClient(&r);
@@ -519,7 +528,7 @@ void Cobject_loaderDlg::OnRButtonDown(UINT nFlags, CPoint point) {
     point.x -= r.left;
     point.y -= r.top; 
 
-    m_right_scrolling_gl_area = 1;
+    m_right_scrolling_gl_area = -1;
     last_right_scroll_point = point;
     g_main_app->select(point);
   }

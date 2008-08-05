@@ -8,8 +8,6 @@
 
 ***********/
 
-#include <conio.h>
-
 #ifndef _C_ELAPSED_H_
 #define _C_ELAPSED_H_
 

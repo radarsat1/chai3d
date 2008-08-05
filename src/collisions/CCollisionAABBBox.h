@@ -18,7 +18,9 @@
     \date       01/2004
 */
 //===========================================================================
-
+/*!
+    \file     CCollisionAABBBox.h
+*/
 //---------------------------------------------------------------------------
 #ifndef CCollisionAABBBoxH
 #define CCollisionAABBBoxH
@@ -137,11 +139,11 @@ class cCollisionAABBBox
     //! Initialize a bounding box to center at origin and infinite extent.
     inline void setEmpty()
     {
-        const double INFINITY = 1.0e50;
+        const double CHAI_INFINITY = 1.0e50;
         m_center.zero();
-        m_extent = cVector3d(-INFINITY, -INFINITY, -INFINITY);
-        m_min.set(INFINITY, INFINITY, INFINITY);
-        m_max.set(-INFINITY, -INFINITY, -INFINITY);
+        m_extent = cVector3d(-CHAI_INFINITY, -CHAI_INFINITY, -CHAI_INFINITY);
+        m_min.set(CHAI_INFINITY, CHAI_INFINITY, CHAI_INFINITY);
+        m_max.set(-CHAI_INFINITY, -CHAI_INFINITY, -CHAI_INFINITY);
     }
 
     //! Return the smallest coordinate along X axis.

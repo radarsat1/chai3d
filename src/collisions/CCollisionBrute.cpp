@@ -27,19 +27,6 @@
 
 //===========================================================================
 /*!
-    Constructor of cCollisionBrute.
-
-    \fn       cCollisionBrute::cCollisionBrute(vector<cTriangle> *a_triangles)
-*/
-//===========================================================================
-cCollisionBrute::cCollisionBrute(vector<cTriangle> *a_triangles)
-{
-    m_triangles = a_triangles;
-}
-
-
-//===========================================================================
-/*!
     Check if the given line segment intersects any triangle of the mesh. This
     method is called "brute force" because all triangles are checked by
     invoking their collision-detection methods.  This method is simple but very

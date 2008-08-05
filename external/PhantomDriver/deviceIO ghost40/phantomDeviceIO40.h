@@ -31,6 +31,7 @@ extern "C" {
 
 #define FUNCTION __declspec(dllexport)
 
+const int PH_SUCCESS = 0;
 const int PH_ERR = -1;
 const int PH_INIT_ERR = -2;
 const int PH_RES_ENC_ERR = -3;

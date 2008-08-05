@@ -44,7 +44,11 @@ cPhantom3dofPointer::cPhantom3dofPointer(cWorld* a_world, unsigned int a_deviceN
     :cGeneric3dofPointer(a_world)
 {
     // open phantom driver
+#ifndef _DISABLE_PHANTOM_SUPPORT
     m_device = new cPhantomDevice(a_deviceNumber, dio_access);
+#else
+    m_device = new cGenericDevice();
+#endif
 }
 
 

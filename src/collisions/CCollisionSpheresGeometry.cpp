@@ -74,49 +74,98 @@ Destructor of cCollisionSpheresTri.
 //===========================================================================
 cCollisionSpheresTri::~cCollisionSpheresTri() { }
 
+
 //===========================================================================
 /*!
-    Constructor of cCollisionSpheresTri.
+    Constructor of cCollisionSpheresTri, to enclose a single triangle in 
+    a sphere.
 
     \fn       cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a,
               cVector3d b, cVector3d c);
-    \param    a_a     First vertex of the triangle.
-    \param    a_b     Second vertex of the triangle.
-    \param    a_c     Third vertex of the triangle.
+    \param    a     First vertex of the triangle.
+    \param    b     Second vertex of the triangle.
+    \param    c     Third vertex of the triangle.
     \return   Return a pointer to new cCollisionSpheresTri instance.
 */
 //===========================================================================
 cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a, cVector3d b, cVector3d c)
 {
+    // Calculate the center of the circumscribing sphere for this triangle:
+    // First compute the normal to the plane of this triangle
+    cVector3d plane_normal = cCross(a-b, a-c);
+    
+    // Compute the perpendicular bisector of the edge between points a and b
+    cVector3d bisector1_dir = cCross(a-b, plane_normal);
+    cVector3d bisector1_pt = (a + b) / 2.0;
+
+    // Compute the perpendicular bisector of the edge between points b and c
+    cVector3d bisector2_dir = cCross(b-c, plane_normal);
+    cVector3d bisector2_pt = (b + c) / 2.0;
+    
+    // Find the intersection of the perpendicular bisectors to find the center
+    // of the circumscribed sphere, using the formula for 3D line-line
+    // intersection given at 
+    // http://cglab.snu.ac.kr/research/seminar/data01-1/RealTimeRendering10_1.ppt 
+    cVector3d mat[3];
+    mat[0] = bisector2_pt - bisector1_pt;
+    mat[1] = bisector2_dir;
+    mat[2] = cCross(bisector1_dir, bisector2_dir);
+    float det = (float)(
+                mat[0].x*mat[1].y*mat[2].z + mat[1].x*mat[2].y*mat[0].z +
+                mat[2].x*mat[0].y*mat[1].z - mat[0].z*mat[1].y*mat[2].z -
+                mat[1].z*mat[2].y*mat[0].x - mat[2].z*mat[0].y*mat[1].x);
+    cVector3d cp = cCross(bisector1_dir, bisector2_dir);
+    if (cp.lengthsq() > CHAI_SMALL)
+    {
+      float s = (float)(det / cp.lengthsq());
+      m_center = bisector1_pt + s * bisector1_dir;
+    }
+    else
+    {
+        m_center = (a + b)/2.0;
+    }
+
     // set the vertices (corners) of the triangle
     m_corner[0].m_pos = a;
     m_corner[1].m_pos = b;
     m_corner[2].m_pos = c;
-    
-    // set the edges (sides) of the triangle
-    m_side[0].initialize(&m_corner[0],&m_corner[1]);
-    m_side[1].initialize(&m_corner[0],&m_corner[2]);
-    m_side[2].initialize(&m_corner[1],&m_corner[2]);
 
-    // calculate a center point for the bounding sphere halfway between the
-    // center of the first edge and the first vertex
-    double lambda = 0.5;
-    m_center.x = (m_side[0].getCenter()).x +
-            lambda*m_corner[0].m_pos.x - (m_side[0].getCenter().x);
-    m_center.y = (m_side[0].getCenter()).y +
-            lambda*m_corner[0].m_pos.y - (m_side[0].getCenter().y);
-    m_center.z = (m_side[0].getCenter()).z +
-            lambda*m_corner[0].m_pos.z - (m_side[0].getCenter().z);
-
-    // calculate a radius of the bounding sphere as the largest distance between
+    // Calculate a radius of the bounding sphere as the largest distance between
     // the sphere center calculated above and any vertex of the triangle
     m_radius = 0;
-    unsigned int i ;
+    unsigned int i, j, k;
     for (i = 0; i < 3; i++)
     {
         double curRadius = m_corner[i].m_pos.distance(m_center);
         if (curRadius > m_radius)
             m_radius = curRadius;
+    }
+
+    // See if we could get a smaller bounding sphere by just taking one of the edges
+    // of the triangle as a diameter (this may be better for long, skinny triangles)
+    for (i=0; i<3; i++)
+    {
+        for (j=i; j<3; j++)
+        {
+            // Calculate the center for this edge, and determine necessary sphere radius
+            cVector3d candidate_center;
+            candidate_center.x = (m_corner[i].m_pos.x + m_corner[j].m_pos.x) / 2.0;
+            candidate_center.y = (m_corner[i].m_pos.y + m_corner[j].m_pos.y) / 2.0;
+            candidate_center.z = (m_corner[i].m_pos.z + m_corner[j].m_pos.z) / 2.0;
+            double candidate_radius = 0.0;
+            for (k = 0; k < 3; k++)
+            {
+                double curRad = m_corner[k].m_pos.distance(candidate_center);
+                if (curRad > candidate_radius) candidate_radius = curRad;
+            }
+
+            // If this results in a smaller sphere, use it
+            if (candidate_radius < m_radius)
+            {
+                m_radius = candidate_radius;
+                m_center = candidate_center;
+            }
+        }
     }
 }
 

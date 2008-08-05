@@ -29,6 +29,7 @@
 
 //===========================================================================
 /*!
+      \file       CPhantom3dofPointer.h
       \class      cPhantom3dofPointer
       \brief      cPhantom3dofPointer connects the Phantom haptic device as
                   a simple pointer in space. The tool is visually graphically

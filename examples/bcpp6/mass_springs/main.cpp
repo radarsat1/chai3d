@@ -83,7 +83,6 @@ void __fastcall TForm1::MassSpringFormCreate(TObject *Sender)
     // create a tool
     tool = new cMeta3dofPointer(world, 0, true);
     tool->initialize();
-    tool->updatePose();
     tool->setRenderingMode(RENDER_DEVICE);
 
     // Rotate the tool so its axes align with our opengl-like axes

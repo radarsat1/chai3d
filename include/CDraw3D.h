@@ -23,13 +23,13 @@
 #ifndef CDraw3DH
 #define CDraw3DH
 //---------------------------------------------------------------------------
-#include "cMacrosGL.h"
-#include "windows.h"
-#include "gl/glu.h"
+#include "CMacrosGL.h"
+#include <GL/glu.h>
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
+    \file CDraw3D.h
     \brief
 
     The following functions provide useful macros to draw complex 3D objects.
@@ -54,6 +54,9 @@ void cDrawWireBox(const double a_xMin, const double a_xMax,
 //! Draw a sphere.
 void cDrawSphere(const double a_radius,
                  const unsigned int a_numSlices=10, const unsigned int a_numStacks=10);
+
+//! Draw a pretty arrow on the z-axis using a cone and a cylinder (using GLUT)
+void cDrawArrow(const cVector3d& a_arrowStart, const cVector3d& a_arrowTip, const double a_width=0.05);
 
 //---------------------------------------------------------------------------
 #endif

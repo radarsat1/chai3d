@@ -26,30 +26,6 @@
 #include "CMacrosGL.h"
 
 //---------------------------------------------------------------------------
-
-//===========================================================================
-/*!
-        Constructor of cMaterial
-
-        \fn     cMaterial::cMaterial()
-*/
-//===========================================================================
-cMaterial::cMaterial()
-{
-    // set default colors
-    m_ambient.set(0.3f, 0.3f, 0.3f, 1.0f);
-    m_diffuse.set(0.7f, 0.7f, 0.7f, 1.0f);
-    m_specular.set(1.0f, 1.0f, 1.0f, 1.0f);
-    m_emission.set(0.0f, 0.0f, 0.0f, 1.0f);
-    setShininess(64);
-
-    // set default haptic properties
-    setStiffness(100.0);
-    setStaticFriction(0.0);
-    setDynamicFriction(0.0);
-}
-
-
 //===========================================================================
 /*!
     Set the transparency level (by setting the alpha value for all color properties)

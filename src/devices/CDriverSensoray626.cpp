@@ -70,7 +70,7 @@ cDriverSensoray626::~cDriverSensoray626()
 //===========================================================================
 int cDriverSensoray626::open()
 {
-    // check if device is not allready opened
+    // check if device is not already opened
     if (m_systemReady) { return (0); }
 
     // number of encoders used.
@@ -155,7 +155,7 @@ int cDriverSensoray626::close()
 //===========================================================================
 void cDriverSensoray626::encoderInit()
 {
-    // Intialize all encoders at once
+    // Initialize all encoders at once
     for (int i = 0; i<6; i++)
     {
         S626_CounterModeSet(m_boardHandle, i,
@@ -182,12 +182,13 @@ void cDriverSensoray626::encoderInit()
       Initializes board. In this implementation there's really nothing to do
       that hasn't been done in the opening phase.
 
-      \fn     int cDriverSensoray626::initialize()
+      \fn     int cDriverSensoray626::initialize(const bool a_resetEncoders=false)
+      \param  a_resetEncoders  Ignored; reserved for forward compatibility
       \return Return 0 is operation succeeds, -1 if an error occurs.
 
 */
 //===========================================================================
-int cDriverSensoray626::initialize()
+int cDriverSensoray626::initialize(const bool a_resetEncoders)
 {
     if (m_systemReady)
     {

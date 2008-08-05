@@ -41,11 +41,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="atls.lib winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="atls.lib winmm.lib opengl32.lib chai3d_complete.lib glu32.lib odbc32.lib odbccp32.lib"
 				OutputFile="../../../bin/earth_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../../lib/msvc7"
+				AdditionalLibraryDirectories="../../../lib/msvc7;../../../external/OpenGL/msvc6"
 				ProgramDatabaseFile=".\Release/earth_msvc7.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -104,11 +104,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="atls.lib winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="atls.lib winmm.lib opengl32.lib chai3d_complete.lib glu32.lib odbc32.lib odbccp32.lib"
 				OutputFile="../../../bin/earth_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../../lib/msvc7"
+				AdditionalLibraryDirectories="../../../lib/msvc7;../../../external/OpenGL/msvc6"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\Debug/earth_msvc7.pdb"
 				SubSystem="1"

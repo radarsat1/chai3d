@@ -25,12 +25,17 @@
 #define CMaterialH
 //---------------------------------------------------------------------------
 #include "CColor.h"
-#include "windows.h"
-#include "gl/gl.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include "GL/gl.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
+      \file       CMaterial.h
       \class      cMaterial
       \brief      cMaterial describes the graphic and haptic properties of a
                   solid.
@@ -47,7 +52,9 @@ struct cMaterial
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cMaterial.
-    cMaterial();
+    cMaterial() : m_ambient(0.3f, 0.3f, 0.3f, 1.0f), m_diffuse(0.7f, 0.7f, 0.7f, 1.0f),
+        m_specular(1.0f, 1.0f, 1.0f, 1.0f), m_emission(0.0f, 0.0f, 0.0f, 1.0f), m_shininess(64),
+        m_stiffness(100.0), m_static_friction(0.0), m_dynamic_friction(0.0) { };
     //! Destructor of cMaterial.
     ~cMaterial() {};
 

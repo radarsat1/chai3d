@@ -21,9 +21,7 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "cTexture2D.h"
-//---------------------------------------------------------------------------
-#include "gl/glu.h"
+#include "CTexture2D.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -51,10 +49,10 @@ cTexture2D::cTexture2D()
 //===========================================================================
 cTexture2D::~cTexture2D()
 {
-    if (m_textureID != -1)
+    if (m_textureID != (unsigned int)-1)
     {
         glDeleteTextures(1,&m_textureID);
-        m_textureID = -1;
+        m_textureID = (unsigned int)-1;
     }
 }
 
@@ -70,7 +68,7 @@ void cTexture2D::reset()
 {
     // id number provided by OpenGL once texture is stored in graphics
     // card memory
-    m_textureID = -1;
+    m_textureID = (unsigned int)-1;
 
     // texture has not yet been rendered
     m_updateTextureFlag = true;
@@ -186,12 +184,12 @@ bool cTexture2D::loadFromFile(const char* a_fileName)
     if (m_image.loadFromFile(a_fileName) < 0)
     {
         // Failure
-        return 0;
+        return false;
     }
     else
     {
         // Success
-        return 1;
+        return true;
     }
 }
 
@@ -205,14 +203,14 @@ bool cTexture2D::loadFromFile(const char* a_fileName)
 //===========================================================================
 void cTexture2D::update()
 {
-    if (m_textureID != -1)
+    if (m_textureID != (unsigned int)-1)
     {
         // Deletion makes for all kinds of new hassles, particularly
         // when re-initializing a whole display context, since opengl
         // automatically starts re-assigning texture ID's.  Not worth it.
         // glDeleteTextures(1,&m_textureID);
 
-        m_textureID = -1;
+        m_textureID = (unsigned int)-1;
     }
 
     // Generate a texture ID and bind to it
@@ -284,7 +282,7 @@ void cTexture2D::setWrapMode(const GLint& a_wrapSmode, const GLint& a_wrapTmode)
     maps to an area less than or equal to one texture element.
     It sets the texture magnification function to either GL_NEAREST or GL_LINEAR.
 
-    \fn       void cTexture2D::setWrapMode(a_wrapSmode, a_wrapTmode)
+    \fn       void cTexture2D::setMagnificationFunction(GLint a_magnificationFunction)
     \param    a_magnificationFunction  value shall be either GL_NEAREST or GL_LINEAR.
 */
 //==========================================================================

@@ -45,21 +45,21 @@ unsigned int pos = 0;
 // Load an audio file in .wav format
 bool LoadWaveFile(LPSTR szFileName)
 {
-	// Load the data from the specified file
+  // Load the data from the specified file
   HSTREAM file_stream = BASS_StreamCreateFile(FALSE,szFileName,0,0,BASS_STREAM_DECODE);
 
-	// Get the length and header info from the loaded file
-	stream_length=BASS_StreamGetLength(file_stream); 
-	BASS_ChannelGetInfo(file_stream, &info);
+  // Get the length and header info from the loaded file
+  stream_length=BASS_StreamGetLength(file_stream);
+  BASS_ChannelGetInfo(file_stream, &info);
 
-	// Get the audio samples from the loaded file
-	data = new char[(unsigned int)stream_length];
-	BASS_ChannelGetData(file_stream, data, (unsigned int)stream_length);
+  // Get the audio samples from the loaded file
+  data = new char[(unsigned int)stream_length];
+  BASS_ChannelGetData(file_stream, data, (unsigned int)stream_length);
 	
-	// Set playing to begin at the beginning of the loaded data
-	pos = 0;
+  // Set playing to begin at the beginning of the loaded data
+  pos = 0;
 
-	return false;
+  return false;
 }
 
 
@@ -67,50 +67,49 @@ bool LoadWaveFile(LPSTR szFileName)
 DWORD CALLBACK MyStreamWriter(HSTREAM handle, void *buf, DWORD len, DWORD user)
 {
   // Cast the buffer to a character array
-	char *d=(char*)buf;
+  char *d=(char*)buf;
 
   // Loop the file when it reaches the beginning or end
   if ((pos >= stream_length) && (record_direction == 1))
-		pos = 0;
-	if ((pos <= 0) && (record_direction == -1))
-		pos = (unsigned int)stream_length;
+    pos = 0;
+  if ((pos <= 0) && (record_direction == -1))
+    pos = (unsigned int)stream_length;
 		
-	// If record is spinning in positive direction, write requested 
-	// amount of data from current position forwards
-	if (record_direction == 1)
-	{
-		int up = len + pos;
-		if (up > stream_length) 
-			up = (unsigned int)stream_length; 
+  // If record is spinning in positive direction, write requested
+  // amount of data from current position forwards
+  if (record_direction == 1)
+  {
+    int up = len + pos;
+    if (up > stream_length)
+      up = (unsigned int)stream_length;
 
     for (int i=pos; i<up; i+=1) 
-			d[(i-pos)] = data[i]; 
+      d[(i-pos)] = data[i];
 
-		int amt = (up-pos);
-		pos += amt;
-		return amt;
-	 }
+    int amt = (up-pos);
+    pos += amt;
+    return amt;
+  }
 
   // If record is spinning in negative direction, write requested 
-	// amount of data from current position backwards
-	if (record_direction == -1)
-	{
-		int up = pos - len;
+  // amount of data from current position backwards
+  if (record_direction == -1)
+  {
+    int up = pos - len;
 
-		if (up < 0)
-			up = 0;
+    if (up < 0)
+      up = 0;
 
-	  int cnt = 0;
+    int cnt = 0;
     for (int i=pos; i>up; i-=1) 
-			d[cnt++] = data[i]; 
+      d[cnt++] = data[i];
 
-		int amt = cnt;
-		pos -= amt;
+    int amt = cnt;
+    pos -= amt;
 
-		return amt;
-	 }
-
-	 return 0;
+    return amt;
+  }
+  return 0;
 }
 
 //---------------------------------------------------------------------------
@@ -185,6 +184,7 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 
     // Load a record onto the record player
     load_player();
+    object->translate(0,0,-0.3);
     load_record(0);
 
     RecordSelect->Items->Add("Italy");
@@ -308,9 +308,6 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
       // open communication to the device
       tool->start();
 
-      // update initial orientation and position of device
-      tool->updatePose();
-
       // I need to call this so the tool can update its internal
       // transformations before performing collision detection, etc.
       tool->computeGlobalPositions();
@@ -336,88 +333,158 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
 
 void TForm1::load_player()
 {
-  // create a new mesh
-  cMesh* newObject = new cMesh(world);
+    // create a new mesh
+  cMesh* new_object = new cMesh(world);
 
   // load 3d object file
-  newObject->loadFromFile("resources\\models\\turntable.obj");
+  int result = new_object->loadFromFile("resources\\models\\turntable.obj");
 
-  // compute size of object
-  newObject->computeBoundaryBox(true);
+  // I'm going to scale the object so his maximum axis has a
+  // size of MESH_SCALE_SIZE. This will make him fit nicely in
+  // our viewing area.
 
-  cVector3d min = newObject->getBoundaryMin();
-  cVector3d max = newObject->getBoundaryMax();
+  // Tell him to compute a bounding box...
+  new_object->computeBoundaryBox(true);
+
+  cVector3d min = new_object->getBoundaryMin();
+  cVector3d max = new_object->getBoundaryMax();
 
   // This is the "size" of the object
-  cVector3d span = cSub(max, min);
-  double size = cMax(span.x, cMax(span.y, span.z));
+  cVector3d span = max;
+  span.sub(min);
+
+  // Find his maximum dimension
+  float max_size = span.x;
+  if (span.y > max_size) max_size = span.y;
+  if (span.z > max_size) max_size = span.z;
 
   // We'll center all vertices, then multiply by this amount,
   // to scale to the desired size.
-  double scaleFactor = MESH_SCALE_SIZE / size;
-  newObject->scale(scaleFactor);
+  float scale_factor = MESH_SCALE_SIZE / max_size;
 
-  // compute size of object again
-  newObject->computeBoundaryBox(true);
+  // To center vertices, we add this amount (-1 times the
+  // center of the object's bounding box)
+  cVector3d offset = max;
+  offset.add(min);
+  offset.div(2.0);
+  offset.negate();
 
-  // Build a collision-detector for this object, so
+  // Now we need to actually scale all the vertices.  However, the
+  // vertices might not actually be in this object; they might
+  // be in children or grand-children of this mesh (depending on how the 
+  // model was defined in the file).
+  // 
+  // So we find all the sub-meshes we loaded from this file, by descending
+  // through all available children.
+
+  // This will hold all the meshes we need to operate on... we'll fill
+  // it up as we find more children.
+  std::list<cMesh*> meshes_to_scale;
+
+  // This will hold all the parents we're still searching...
+  std::list<cMesh*> meshes_to_descend;
+  meshes_to_descend.push_front(new_object);
+
+  // Keep track of how many meshes we've found, just to print
+  // it out for the user
+  int total_meshes = 0;
+
+  // While there are still parent meshes to process
+  while(meshes_to_descend.empty() == 0) {
+
+    total_meshes++;
+
+    // Grab the next parent
+    cMesh* cur_mesh = meshes_to_descend.front();
+    meshes_to_descend.pop_front();
+    meshes_to_scale.push_back(cur_mesh);
+
+    // Put all his children on the list of parents to process
+    for(unsigned int i=0; i<cur_mesh->getNumChildren(); i++) {
+
+      cGenericObject* cur_object = cur_mesh->getChild(i);
+
+      // Only process cMesh children
+      cMesh* cur_mesh = dynamic_cast<cMesh*>(cur_object);
+      if (cur_mesh) meshes_to_descend.push_back(cur_mesh);
+    }
+  }
+  
+  std::list<cMesh*>::iterator mesh_iter;
+
+  //_cprintf("Offset: %f %f %f\n", offset.x, offset.y, offset.z);
+
+  // Now loop over _all_ the meshes we found...
+  for(mesh_iter = meshes_to_scale.begin(); mesh_iter != meshes_to_scale.end(); mesh_iter++) {
+
+    cMesh* cur_mesh = *mesh_iter;
+    vector<cVertex>* vertices = cur_mesh->pVertices();
+    int num_vertices = cur_mesh->getNumVertices(false);
+    cVertex* cur_vertex = (cVertex*)(vertices);
+
+    // Move and scale each vertex in this mesh...
+    for(int i=0; i<num_vertices; i++) {
+      cur_vertex = cur_mesh->getVertex(i);
+      cVector3d pos = cur_vertex->getPos();      
+      pos.add(offset);
+      pos.mul(scale_factor);
+      cur_vertex->setPos(pos);
+      cur_vertex++;
+    }
+    cur_mesh->computeGlobalPositions(false);
+  }
+
+  int size = new_object->pTriangles()->size();
+
+  // Re-compute a bounding box
+  new_object->computeBoundaryBox(true);
+
+  // Build a nice collision-detector for this object, so
   // the proxy will work nicely when haptics are enabled.
-  newObject->createAABBCollisionDetector(true,false);
+  new_object->computeGlobalPositions(false);
+  // new_object->createSphereTreeCollisionDetector(true,true);
+  new_object->createAABBCollisionDetector(true,true);
 
-  // set size of frame
-  newObject->setFrameSize(0.2, true);
-
-  // set size of normals
-  newObject->setNormalsProperties(0.01, cColorf(1.0, 0.0, 0.0, 1.0), true);
-
-  // update global position
-  newObject->computeGlobalPositions();
-
-  // remove previous object from world and add new one
-  world->removeChild(object);
-  delete object;
-  object = newObject;
+  new_object->computeGlobalPositions();
+  object = new_object;
   world->addChild(object);
-
-  // This will set up default rendering options and haptic properties
-  updateWorldSettings();
 }
 //---------------------------------------------------------------------------
 
 // Load a record onto the record player
 void TForm1::load_record(int a_index)
 {
-	int restart_haptics = 0;
-	if (haptics_enabled) {
-		restart_haptics = 1;
-		ToggleHapticsButtonClick(this);
-	}
+  int restart_haptics = 0;
+  if (haptics_enabled) {
+    restart_haptics = 1;
+    ToggleHapticsButtonClick(this);
+  }
   if (stream) { BASS_ChannelStop(stream); Sleep(1000); }
-	pos = 0;
+  pos = 0;
 
-	switch (a_index) {
-		case 0 : LoadWaveFile("resources\\sounds\\italy.mp3"); break;
-		case 1 : LoadWaveFile("resources\\sounds\\switzerland.mp3"); break;
-		case 2 : LoadWaveFile("resources\\sounds\\usa.mp3"); break;
-		default : return;
-	}
+  switch (a_index) {
+    case 0 : LoadWaveFile("resources\\sounds\\italy.mp3"); break;
+    case 1 : LoadWaveFile("resources\\sounds\\switzerland.mp3"); break;
+    case 2 : LoadWaveFile("resources\\sounds\\usa.mp3"); break;
+    default : return;
+  }
 
-	stream=BASS_StreamCreate(info.freq,info.chans,0,&MyStreamWriter,0);
+  stream=BASS_StreamCreate(info.freq,info.chans,0,&MyStreamWriter,0);
         
-	// delete existing record
-	if (m_movingObject) { world->removeChild(m_movingObject); delete m_movingObject; }
+  // delete existing record
+  if (m_movingObject) { world->removeChild(m_movingObject); delete m_movingObject; }
 
-	// create new record
+  // create new record
   m_movingObject = new cMesh(world);
   createTexCoords(m_movingObject, 0.33);
   cTexture2D *record = new cTexture2D();
 
   switch (a_index) {
-		case 0 : record->loadFromFile("resources\\images\\italy.bmp"); break;
-		case 1 : record->loadFromFile("resources\\images\\switzerland.bmp"); break;
-		case 2 : record->loadFromFile("resources\\images\\usa.bmp"); break;
-		default : return;
-	}
+    case 0 : record->loadFromFile("resources\\images\\italy.bmp"); break;
+    case 1 : record->loadFromFile("resources\\images\\switzerland.bmp"); break;
+    case 2 : record->loadFromFile("resources\\images\\usa.bmp"); break;
+    default : return;
+  }
 
   m_movingObject->setTexture(record);
   m_movingObject->useTexture(true, true);
@@ -437,7 +504,7 @@ void TForm1::load_record(int a_index)
 
   // add object to world and translate
   world->addChild(m_movingObject);
-  m_movingObject->translate(0, 0, 0.04);
+  m_movingObject->translate(-0.1, 0, -0.21);
 
   // The stiffness will actualy be set by the GUI
   double stiffness = (double)0;
@@ -450,8 +517,8 @@ void TForm1::load_record(int a_index)
   if (m_movingObject)
     m_movingObject->setFriction(staticFriction, dynamicFriction, true);
 
-	m_rotVel = 0.0;
-	if (restart_haptics) ToggleHapticsButtonClick(this);
+  m_rotVel = 0.0;
+  if (restart_haptics) ToggleHapticsButtonClick(this);
 }
 //---------------------------------------------------------------------------
 
@@ -483,17 +550,17 @@ void TForm1::animateObject(cVector3d force)
 
     // set audio direction and frequency based on rotational velocity
     if (haptics_enabled && (fabs(m_rotVel)) > 0.0)
-	  {
-		  if (m_rotVel < 0.0) record_direction = 1;
-		  else record_direction = -1;
+    {
+      if (m_rotVel < 0.0) record_direction = 1;
+      else record_direction = -1;
       BASS_ChannelSetAttributes(stream, (int)(info.freq*fabs(m_rotVel)/6.5), -1, -1);
-		  if (!(BASS_ChannelPlay(stream,FALSE)))
-		    Application->MessageBox("Playback Error", "Error");
-	  }
-	  else
-	  {
-		  BASS_ChannelStop(stream);
-	  }
+      if (!(BASS_ChannelPlay(stream,FALSE)))
+        Application->MessageBox("Playback Error", "Error");
+    }
+    else
+    {
+      BASS_ChannelStop(stream);
+    }
 
     // rotate object
     m_movingObject->rotate(cVector3d(0,0,1), m_rotVel * time_step);

@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
@@ -21,6 +22,7 @@
 
 //---------------------------------------------------------------------------
 #include "CDraw3D.h"
+#include "CMaths.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -40,284 +42,164 @@ void cDrawFrame(const double a_scale, const bool a_modifyMaterialState)
   cDrawFrame(a_scale,a_scale,a_modifyMaterialState);
 }
 
+
 void cDrawFrame(const double a_axisLengthScale, const double a_axisThicknessScale,
                 const bool a_modifyMaterialState)
 {
 
-  // The vertices that make a nice frame are just hard-coded here...
-  static double Vertices[25][3] =
-  {{ 0.0, 0.010000, 0.0 },
-  { 0.007000, 0.007000, -0.007000 },
-  {  0.010000, 0.0, 0.0 },
-  {  0.007000, -0.007000, -0.007000 },
-  {  0.0, -0.010000, 0.0 },
-  {  -0.007000, -0.007000, 0.007000 },
-  {  -0.010000, 0.0, 0.0 },
-  {  -0.007000, 0.007000, -0.007000 },
-  {  0.0, 0.010000, -0.800000 },
-  {  0.007000, 0.007000, -0.800000 },
-  {  0.010000, 0.0, -0.800000 },
-  {  0.007000, -0.007000, -0.800000 },
-  {  0.0, -0.010000, -0.800000 },
-  {  -0.007000, -0.007000, -0.800000 },
-  {  -0.010000, 0.0, -0.800000 },
-  {  -0.007000, 0.007000, -0.800000 },
-  {  0.0, 0.040000, -0.800000 },
-  {  0.028284, 0.028284, -0.800000 },
-  {  0.040000, 0.0, -0.800000 },
-  {  0.028284, -0.028284, -0.800000 },
-  {  0.0, -0.040000, -0.800000 },
-  {  -0.028284, -0.028284, -0.800000 },
-  {  -0.040000, 0.0, -0.800000 },
-  {  -0.028284, 0.028284, -0.800000 },
-  {  0.0, 0.0, -1.0 } };
+  // Triangle vertices:
+  static int nTriangles = 8;
 
-  static double Normals[25][3] =
-  {{  -1.0, 0.0, 0.0 },
-  {  -0.980581, 0.0, -0.196116 },
-  { -0.862856, -0.357407, -0.357407 },
-  {  -0.862856, 0.357407, -0.357407 },
-  {  -0.707107, -0.707107, 0.0 },
-  {  -0.707107, 0.707107, 0.0 },
-  {   -0.693375, -0.693375, -0.196116 },
-  {   -0.693375, 0.693375, -0.196116 },
-  {   -0.357407, -0.862856, -0.357407 },
-  {   -0.357407, 0.862856, -0.357407 },
-  {   0.0, 0.980581, -0.196116 },
-  {   0.0, -1.0, 0.0 },
-  {   0.0, 0.0, 1.0 },
-  {   0.0, 1.0, 0.0 },
-  {   0.0, -0.980581, -0.196116 },
-  {   0.357407, 0.862856, -0.357407 },
-  {   0.357407,-0.862856, -0.357407 },
-  {   0.693375, -0.693375, -0.196116 },
-  {   0.693375, 0.693375, -0.196116 },
-  {   0.707107, -0.707107, 0.0 },
-  {   0.707107, 0.707107, 0.0 },
-  {   0.862856, -0.357407, -0.357407 },
-  {   0.862856, 0.357407, -0.357407 },
-  {   0.980581, 0.0, -0.196116 },
-  {   1.0, 0.0, 0.0 }};
+  static float triangle_vertices[72] = {
+    0.000000f,0.040000f,-0.800000f,0.028284f,0.028284f,-0.800000f,
+      0.000000f,0.000000f,-1.000000f,0.028284f,0.028284f,-0.800000f,
+      0.040000f,0.000000f,-0.800000f,0.000000f,0.000000f,-1.000000f,
+      0.040000f,0.000000f,-0.800000f,0.028284f,-0.028284f,-0.800000f,
+      0.000000f,0.000000f,-1.000000f,0.028284f,-0.028284f,-0.800000f,
+      0.000000f,-0.040000f,-0.800000f,0.000000f,0.000000f,-1.000000f,
+      0.000000f,-0.040000f,-0.800000f,-0.028284f,-0.028284f,-0.800000f,
+      0.000000f,0.000000f,-1.000000f,-0.028284f,-0.028284f,-0.800000f,
+      -0.040000f,0.000000f,-0.800000f,0.000000f,0.000000f,-1.000000f,
+      -0.040000f,0.000000f,-0.800000f,-0.028284f,0.028284f,-0.800000f,
+      0.000000f,0.000000f,-1.000000f,-0.028284f,0.028284f,-0.800000f,
+      0.000000f,0.040000f,-0.800000f,0.000000f,0.000000f,-1.000000f
+  };
 
-  static int Face3[8][6] =
-  {{  16,10,17,18,24,15 },
-  {  17,18,18,23,24,22 },
-  {  18,23,19,17,24,21 },
-  {  19,17,20,14,24,16 },
-  {  20,14,21,6,24,8 },
-  {  21,6,22,1,24,2 },
-  {  22,1,23,7,24,3 },
-  {  23,7,16,10,24,9 }};
+  // Triangle normals:
+  static float triangle_normals[72] = {
+    0.000000f,0.980581f,-0.196116f,0.693375f,0.693375f,-0.196116f,
+      0.357407f,0.862856f,-0.357407f,0.693375f,0.693375f,-0.196116f,
+      0.980581f,0.000000f,-0.196116f,0.862856f,0.357407f,-0.357407f,
+      0.980581f,0.000000f,-0.196116f,0.693375f,-0.693375f,-0.196116f,
+      0.862856f,-0.357407f,-0.357407f,0.693375f,-0.693375f,-0.196116f,
+      0.000000f,-0.980581f,-0.196116f,0.357407f,-0.862856f,-0.357407f,
+      0.000000f,-0.980581f,-0.196116f,-0.693375f,-0.693375f,-0.196116f,
+      -0.357407f,-0.862856f,-0.357407f,-0.693375f,-0.693375f,-0.196116f,
+      -0.980581f,0.000000f,-0.196116f,-0.862856f,-0.357407f,-0.357407f,
+      -0.980581f,0.000000f,-0.196116f,-0.693375f,0.693375f,-0.196116f,
+      -0.862856f,0.357407f,-0.357407f,-0.693375f,0.693375f,-0.196116f,
+      0.000000f,0.980581f,-0.196116f,-0.357407f,0.862856f,-0.357407f
+  };
 
-  static int Face4[16][8] =
-  {{ 0,13,1,20,9,20,8,13 },
-  {  4,11,5,4,13,4,12,11 },
-  {  5,4,6,0,14,0,13,4 },
-  {  6,0,7,5,15,5,14,0 },
-  {  7,5,0,13,8,13,15,5},
-  {  1,20,2,24,10,24,9,20 },
-  {  2,24,3,19,11,19,10,24 },
-  {  3,19,4,11,12,11,11,19 },
-  {  15,12,23,12,22,12,14,12 },
-  {  14,12,22,12,21,12,13,12 },
-  {  13,12,21,12,20,12,12,12 },
-  {  12,12,20,12,19,12,11,12 },
-  {  19,12,18,12,10,12,11,12 },
-  {  18,12,17,12,9,12,10,12 },
-  {  9,12,17,12,16,12,8,12 },
-  {  8,12,16,12,23,12,15,12 }};
+  // Quad vertices:
+  static int nQuads = 16;
 
-  int i;
+  static float quad_vertices[192] = {
+    0.000000f,0.010000f,0.000000f,0.007000f,0.007000f,0.000000f,
+      0.007000f,0.007000f,-0.800000f,0.000000f,0.010000f,-0.800000f,
+      0.000000f,-0.010000f,0.000000f,-0.007000f,-0.007000f,0.000000f,
+      -0.007000f,-0.007000f,-0.800000f,0.000000f,-0.010000f,-0.800000f,
+      -0.007000f,-0.007000f,0.000000f,-0.010000f,0.000000f,0.000000f,
+      -0.010000f,0.000000f,-0.800000f,-0.007000f,-0.007000f,-0.800000f,
+      -0.010000f,0.000000f,0.000000f,-0.007000f,0.007000f,0.000000f,
+      -0.007000f,0.007000f,-0.800000f,-0.010000f,0.000000f,-0.800000f,
+      -0.007000f,0.007000f,0.000000f,0.000000f,0.010000f,0.000000f,
+      0.000000f,0.010000f,-0.800000f,-0.007000f,0.007000f,-0.800000f,
+      0.007000f,0.007000f,0.000000f,0.010000f,0.000000f,0.000000f,
+      0.010000f,0.000000f,-0.800000f,0.007000f,0.007000f,-0.800000f,
+      0.010000f,0.000000f,0.000000f,0.007000f,-0.007000f,0.000000f,
+      0.007000f,-0.007000f,-0.800000f,0.010000f,0.000000f,-0.800000f,
+      0.007000f,-0.007000f,0.000000f,0.000000f,-0.010000f,0.000000f,
+      0.000000f,-0.010000f,-0.800000f,0.007000f,-0.007000f,-0.800000f,
+      -0.007000f,0.007000f,-0.800000f,-0.028284f,0.028284f,-0.800000f,
+      -0.040000f,0.000000f,-0.800000f,-0.010000f,0.000000f,-0.800000f,
+      -0.010000f,0.000000f,-0.800000f,-0.040000f,0.000000f,-0.800000f,
+      -0.028284f,-0.028284f,-0.800000f,-0.007000f,-0.007000f,-0.800000f,
+      -0.007000f,-0.007000f,-0.800000f,-0.028284f,-0.028284f,-0.800000f,
+      0.000000f,-0.040000f,-0.800000f,0.000000f,-0.010000f,-0.800000f,
+      0.000000f,-0.010000f,-0.800000f,0.000000f,-0.040000f,-0.800000f,
+      0.028284f,-0.028284f,-0.800000f,0.007000f,-0.007000f,-0.800000f,
+      0.028284f,-0.028284f,-0.800000f,0.040000f,0.000000f,-0.800000f,
+      0.010000f,0.000000f,-0.800000f,0.007000f,-0.007000f,-0.800000f,
+      0.040000f,0.000000f,-0.800000f,0.028284f,0.028284f,-0.800000f,
+      0.007000f,0.007000f,-0.800000f,0.010000f,0.000000f,-0.800000f,
+      0.007000f,0.007000f,-0.800000f,0.028284f,0.028284f,-0.800000f,
+      0.000000f,0.040000f,-0.800000f,0.000000f,0.010000f,-0.800000f,
+      0.000000f,0.010000f,-0.800000f,0.000000f,0.040000f,-0.800000f,
+      -0.028284f,0.028284f,-0.800000f,-0.007000f,0.007000f,-0.800000f
+  };
 
-  // Create rotation matrices for the X, Y and Z arrows
+  // Quad normals:
+  static float quad_normals[192] = {
+    0.000000f,1.000000f,0.000000f,0.707107f,0.707107f,0.000000f,
+      0.707107f,0.707107f,0.000000f,0.000000f,1.000000f,0.000000f,
+      0.000000f,-1.000000f,0.000000f,-0.707107f,-0.707107f,0.000000f,
+      -0.707107f,-0.707107f,0.000000f,0.000000f,-1.000000f,0.000000f,
+      -0.707107f,-0.707107f,0.000000f,-1.000000f,0.000000f,0.000000f,
+      -1.000000f,0.000000f,0.000000f,-0.707107f,-0.707107f,0.000000f,
+      -1.000000f,0.000000f,0.000000f,-0.707107f,0.707107f,0.000000f,
+      -0.707107f,0.707107f,0.000000f,-1.000000f,0.000000f,0.000000f,
+      -0.707107f,0.707107f,0.000000f,0.000000f,1.000000f,0.000000f,
+      0.000000f,1.000000f,0.000000f,-0.707107f,0.707107f,0.000000f,
+      0.707107f,0.707107f,0.000000f,1.000000f,0.000000f,0.000000f,
+      1.000000f,0.000000f,0.000000f,0.707107f,0.707107f,0.000000f,
+      1.000000f,0.000000f,0.000000f,0.707107f,-0.707107f,0.000000f,
+      0.707107f,-0.707107f,0.000000f,1.000000f,0.000000f,0.000000f,
+      0.707107f,-0.707107f,0.000000f,0.000000f,-1.000000f,0.000000f,
+      0.000000f,-1.000000f,0.000000f,0.707107f,-0.707107f,0.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f,
+      0.000000f,0.000000f,1.000000f,0.000000f,0.000000f,1.000000f
+  };
 
-  cMatrix3d rotationX;
-  rotationX.identity();
-  rotationX.rotate( cVector3d(0, 1, 0), -CHAI_PI / 2.0);
-
-  cMatrix3d rotationY;
-  rotationY.identity();
-  rotationY.rotate( cVector3d(1, 0, 0), CHAI_PI / 2.0);
-
-  cMatrix3d rotationZ;
-  rotationZ.identity();
-  rotationZ.rotate( cVector3d(1, 0, 0), CHAI_PI);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_VERTEX_ARRAY);
 
   // Set up nice color-tracking
   if (a_modifyMaterialState)
   {
-      glEnable(GL_COLOR_MATERIAL);
-      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
-  // DRAW AXIS X:
-  // Set pose
-  cMatrixGL matAxis;
-  matAxis.set(rotationX);
-  matAxis.glMatrixPushMultiply();
+  for(int k=0; k<3; k++) {
 
-  // Set color (red)
-  glColor3f(1.0, 0.0, 0.0);
+    glPushMatrix();
+  
+    // Rotate to the appropriate axis
+    if (k==0) {
+      glRotatef(-90.0,0,1,0);
+      glColor3f(1.0f,0.0f,0.0f);
+    }
+    else if (k==1) {
+      glRotatef(90.0,1,0,0);
+      glColor3f(0.0f,1.0f,0.0f);
+    }
+    else {
+      glRotatef(180.0,1,0,0);
+      glColor3f(0.0f,0.0f,1.0f);
+    }
 
-  // render polygons
-  for (i=0; i<8; i++)
-  {
-    glBegin(GL_TRIANGLES);
-      //glNormal3dv((const double *)&Normals[Face3[i][1]][0]);
-      glNormal3d( Normals[Face3[i][1]][0],
-                  Normals[Face3[i][1]][1],
-                  Normals[Face3[i][1]][2]);
+    glScaled(a_axisThicknessScale,a_axisThicknessScale,a_axisLengthScale);
 
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][0]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][0]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][0]][2]));
-      //glNormal3dv((const double *)&Normals[Face3[i][3]][0]);
-      glNormal3d( Normals[Face3[i][3]][0],
-                  Normals[Face3[i][3]][1],
-                  Normals[Face3[i][3]][2]);
+    glVertexPointer(3, GL_FLOAT, 0, triangle_vertices);
+    glNormalPointer(GL_FLOAT, 0, triangle_normals);
+    glDrawArrays(GL_TRIANGLES, 0, nTriangles*3);
+        
+    glVertexPointer(3, GL_FLOAT, 0, quad_vertices);
+    glNormalPointer(GL_FLOAT, 0, quad_normals);
+    glDrawArrays(GL_QUADS, 0, nQuads*4);    
 
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][2]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][2]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][2]][2]));
-      //glNormal3dv((const double *)&Normals[Face3[i][5]][0]);
-      glNormal3d( Normals[Face3[i][5]][0],
-                  Normals[Face3[i][5]][1],
-                  Normals[Face3[i][5]][2]);
-
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][4]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][4]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][4]][2]));
-    glEnd();
+    glPopMatrix();
   }
 
-  for (i=0; i<16; i++)
-  {
-    glBegin(GL_POLYGON);
-      glNormal3dv((const double *)&(Normals[Face4[i][1]][0]));
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][0]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][0]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][0]][2]));
-      glNormal3dv((const double *)&(Normals[Face4[i][3]][0]));
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][2]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][2]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][2]][2]));
-      glNormal3dv((const double *)&(Normals[Face4[i][5]][0]));
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][4]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][4]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][4]][2]));
-      glNormal3dv((const double *)&(Normals[Face4[i][7]][0]));
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][6]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][6]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][6]][2]));
-    glEnd();
-  }
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_VERTEX_ARRAY);
 
-  matAxis.glMatrixPop(); // Rotation X.
-
-
-  // DRAW AXIS Y:
-  // Set pose
-  matAxis.set(rotationY);
-  matAxis.glMatrixPushMultiply();
-
-  // Set color (green)
-  glColor3f(0.0, 1.0, 0.0);
-
-  // render polygons
-  for (i=0; i<8; i++)
-  {
-    glBegin(GL_TRIANGLES);
-      glNormal3dv((const double *)&Normals[Face3[i][1]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][0]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][0]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][0]][2]));
-      glNormal3dv((const double *)&Normals[Face3[i][3]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][2]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][2]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][2]][2]));
-      glNormal3dv((const double *)&Normals[Face3[i][5]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][4]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][4]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][4]][2]));
-    glEnd();
-  }
-
-  for (i=0; i<16; i++)
-  {
-    glBegin(GL_POLYGON);
-      glNormal3dv((const double *)&Normals[Face4[i][1]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][0]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][0]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][0]][2]));
-      glNormal3dv((const double *)&Normals[Face4[i][3]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][2]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][2]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][2]][2]));
-      glNormal3dv((const double *)&Normals[Face4[i][5]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][4]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][4]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][4]][2]));
-      glNormal3dv((const double *)&Normals[Face4[i][7]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][6]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][6]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][6]][2]));
-    glEnd();
-  }
-
-  matAxis.glMatrixPop(); // Rotation Y.
-
-
-  // DRAW AXIS Z:
-  // set pose
-  matAxis.set(rotationZ);
-  matAxis.glMatrixPushMultiply();
-
-  // set color (blue)
-  glColor3f(0.0, 0.0, 1.0);
-
-  // render polygons
-  for (i=0; i<8; i++)
-  {
-    glBegin(GL_TRIANGLES);
-      glNormal3dv((const double *)&Normals[Face3[i][1]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][0]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][0]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][0]][2]));
-      glNormal3dv((const double *)&Normals[Face3[i][3]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][2]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][2]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][2]][2]));
-      glNormal3dv((const double *)&Normals[Face3[i][5]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][4]][0]),
-                 (a_axisThicknessScale * Vertices[Face3[i][4]][1]),
-                 (a_axisLengthScale * Vertices[Face3[i][4]][2]));
-    glEnd();
-  }
-
-  for (i=0; i<16; i++)
-  {
-    glBegin(GL_POLYGON);
-      glNormal3dv((const double *)&Normals[Face4[i][1]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][0]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][0]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][0]][2]));
-      glNormal3dv((const double *)&Normals[Face4[i][3]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][2]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][2]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][2]][2]));
-      glNormal3dv((const double *)&Normals[Face4[i][5]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][4]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][4]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][4]][2]));
-      glNormal3dv((const double *)&Normals[Face4[i][7]]);
-      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][6]][0]),
-                 (a_axisThicknessScale * Vertices[Face4[i][6]][1]),
-                 (a_axisLengthScale * Vertices[Face4[i][6]][2]));
-    glEnd();
-  }
-
-  matAxis.glMatrixPop();
 }
 
 
@@ -330,9 +212,9 @@ void cDrawFrame(const double a_axisLengthScale, const double a_axisThicknessScal
                 const double a_zMin, const double a_zMax)
       \param    a_xMin  Box side x min position.
       \param    a_xMax  Box side x max position.
-      \param    a_yMax  Box side y min position.
+      \param    a_yMin  Box side y min position.
       \param    a_yMax  Box side y max position.
-      \param    a_zMax  Box side z min position.
+      \param    a_zMin  Box side z min position.
       \param    a_zMax  Box side z max position.
 */
 //===========================================================================
@@ -406,3 +288,70 @@ void cDrawSphere(const double a_radius,
 }
 
 
+
+//===========================================================================
+/*!
+  
+  Draw a pretty arrow on the z-axis using a cone and a cylinder (using GLUT)
+
+  \fn       void cDrawArrow(const cVector3d& a_arrowStart, const cVector3d& a_arrowTip, const double a_width);
+  \param    a_arrowStart  The location of the back of the arrow
+  \param    a_arrowTip    The location of the tip of the arrow
+  \param    a_width       The width (in GL units) of the arrow shaft
+
+*/
+//===========================================================================
+void cDrawArrow(const cVector3d& a_arrowStart, const cVector3d& a_arrowTip, const double a_width) {
+
+  glPushMatrix();
+
+  // We don't really care about the up vector, but it can't
+  // be parallel to the arrow...
+  cVector3d up = cVector3d(0,1,0);  
+  cVector3d arrow = a_arrowTip-a_arrowStart;
+  arrow.normalize();
+  double d = fabs(cDot(up,arrow));
+  if (d > .9)
+  {
+   up = cVector3d(1,0,0);
+  }
+
+  cLookAt(a_arrowStart,a_arrowTip,up);
+
+  // This flips the z axis around
+  glRotatef(180,1,0,0);
+
+  GLUquadricObj *quadObj;
+  quadObj = gluNewQuadric();
+
+  double distance = cDistance(a_arrowTip,a_arrowStart);
+
+#define ARROW_CYLINDER_PORTION 0.75
+#define ARRROW_CONE_PORTION (1.0 - 0.75)
+
+  // set rendering style
+  gluQuadricDrawStyle(quadObj, GLU_FILL);
+
+  // set normal-rendering mode
+  gluQuadricNormals(quadObj, GLU_SMOOTH);
+
+  // render a cylinder and a cone
+  glRotatef(180,1,0,0);
+  gluDisk(quadObj,0,a_width,10,10);
+  glRotatef(180,1,0,0);
+  
+  gluCylinder(quadObj,a_width,a_width,distance*ARROW_CYLINDER_PORTION,10,10);
+  glTranslated(0,0,ARROW_CYLINDER_PORTION*distance);
+  
+  glRotatef(180,1,0,0);
+  gluDisk(quadObj,0,a_width*2.0,10,10);
+  glRotatef(180,1,0,0);
+  
+  gluCylinder(quadObj,a_width*2.0,0.0,distance*ARRROW_CONE_PORTION,10,10);
+
+  // delete our quadric object
+  gluDeleteQuadric(quadObj);
+
+  glPopMatrix();
+
+}

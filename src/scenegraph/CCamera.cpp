@@ -219,6 +219,7 @@ void cCamera::setClippingPlanes(const double a_distanceNear, const double a_dist
      \param     a_selectedTriangle  Returns a pointer to selected triangle (if any)
      \param     a_selectedPoint     Returns the point is space where a collision was found (if any)
      \param     a_selectedDistance  Returns the distance between the camera and the collision point (if any)
+     \param     a_visibleObjectsOnly Should we ignore invisible objects?
 
      \return    Returns \b true if an object has been hit, else false
 */
@@ -453,7 +454,8 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
       that is, if you have an object that doesn't care about multipass
       transparency, start your render() function with:
       
-      if (a_renderMode != CHAI_RENDER_NON_TRANSPARENT) return;
+      if (a_renderMode != CHAI_RENDER_MODE_RENDER_ALL &&
+          a_renderMode != CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY) return;
 
       We will hopefully find a cleaner way to do this in the future, but
       for now be careful when you enable this feature...
@@ -497,8 +499,10 @@ void cCamera::adjustClippingPlanes()
 /*!
     Render a 2d scene within the viewport.
 
-    \fn     void cCamera::render2dSceneGraph(cGenericObject* graph, int a_width, int a_height)
+    \fn     void cCamera::render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_height)
     \param  a_graph  The root of the 2d scenegraph to be rendered.
+    \param  a_width  The size of the rendering window
+    \param  a_height The size of the rendering window
 */
 //===========================================================================
 void cCamera::render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_height)

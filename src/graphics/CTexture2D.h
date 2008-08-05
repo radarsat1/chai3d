@@ -26,13 +26,20 @@
 //---------------------------------------------------------------------------
 #include "CImageLoader.h"
 #include "CColor.h"
-#include "gl/glu.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <GL/glu.h>
+#include <GL/gl.h>
 #include <string>
 #include <stdio.h>
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
+      \file       CTexture2D.h
       \class      cTexture2D
       \brief      cTexture2D describes a 2D bitmap texture used for OpenGL
                   texture-mapping

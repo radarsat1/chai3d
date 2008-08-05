@@ -87,6 +87,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "force_shading"=.\force_shading\force_shading.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "implicit_functions"=.\implicit_functions\implicit_functions.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "mass_springs"=.\mass_springs\mass_springs.dsp - Package Owner=<4>
 
 Package=<5>
@@ -100,6 +124,18 @@ Package=<4>
 ###############################################################################
 
 Project: "math"=.\math\math.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "mesh_mesh_collisions"=.\mesh_mesh_collisions\mesh_mesh_collisions.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

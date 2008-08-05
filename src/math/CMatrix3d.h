@@ -36,6 +36,7 @@
 
 //===========================================================================
 /*!
+      \file     CMatrix3d.h
       \struct   cMatrix3d
       \brief    cMatrix3d represents a 3x3 matrix. Each cell of the matrix
                 is composed of a double.
@@ -729,123 +730,122 @@ struct cMatrix3d
 
   //-----------------------------------------------------------------------
   /*!
-    Rotate current matrix around an axis an angle defined as parameters.
-    Result is stored in result matrix.
+      Rotate current matrix around an axis an angle defined as parameters.
+      Result is stored in result matrix.
 
-    \param  a_axis  Axis of rotation.
-    \param  a_angleRad  Rotation angle in Radian.
-    \param  a_result  Result is stored here.
-    \return Return \b true if operation succeeded. Otherwise 
-        return \b false.
+      \param  a_axis  Axis of rotation.
+      \param  a_angleRad  Rotation angle in Radian.
+      \param  a_result  Result is stored here.
+      \return Return \b true if operation succeeded. Otherwise 
+          return \b false.
   */
   //-----------------------------------------------------------------------
   inline bool rotater(const cVector3d& a_axis, const double& a_angleRad, cMatrix3d& a_result) const
   {
-    // compute length of axis vector
-    double length = a_axis.length();
+      // compute length of axis vector
+      double length = a_axis.length();
 
-    // check length of axis vector
-    if (length < CHAI_TINY)
-    {
-      // rotation matrix could not be computed because axis vector is not defined
-      return (false);
-    }
+      // check length of axis vector
+      if (length < CHAI_TINY)
+      {
+        // rotation matrix could not be computed because axis vector is not defined
+        return (false);
+      }
 
-    // normalize axis vector
-    double x = a_axis.x / length;
-    double y = a_axis.y / length;
-    double z = a_axis.z / length;
+      // normalize axis vector
+      double x = a_axis.x / length;
+      double y = a_axis.y / length;
+      double z = a_axis.z / length;
 
-    // compute rotation matrix
-    double c = cos(a_angleRad);
-    double s = sin(a_angleRad);
-    double v = 1-c;
+      // compute rotation matrix
+      double c = cos(a_angleRad);
+      double s = sin(a_angleRad);
+      double v = 1-c;
 
-    double m00 = x*x*v+c;     double m01 = x*y*v-z*s;  double m02 = x*z*v+y*s;
-    double m10 = x*y*v+z*s;   double m11 = y*y*v+c;    double m12 = y*z*v-x*s;
-    double m20 = x*z*v-y*s;   double m21 = y*z*v+x*s;  double m22 = z*z*v+c;
+      double m00 = x*x*v+c;     double m01 = x*y*v-z*s;  double m02 = x*z*v+y*s;
+      double m10 = x*y*v+z*s;   double m11 = y*y*v+c;    double m12 = y*z*v-x*s;
+      double m20 = x*z*v-y*s;   double m21 = y*z*v+x*s;  double m22 = z*z*v+c;
 
-    // compute multiplication between both matrices
-    a_result.m[0][0] = m00 * m[0][0] + m01 * m[1][0] + m02 * m[2][0];
-    a_result.m[0][1] = m00 * m[0][1] + m01 * m[1][1] + m02 * m[2][1];
-    a_result.m[0][2] = m00 * m[0][2] + m01 * m[1][2] + m02 * m[2][2];
-    a_result.m[1][0] = m10 * m[0][0] + m11 * m[1][0] + m12 * m[2][0];
-    a_result.m[1][1] = m10 * m[0][1] + m11 * m[1][1] + m12 * m[2][1];
-    a_result.m[1][2] = m10 * m[0][2] + m11 * m[1][2] + m12 * m[2][2];
-    a_result.m[2][0] = m20 * m[0][0] + m21 * m[1][0] + m22 * m[2][0];
-    a_result.m[2][1] = m20 * m[0][1] + m21 * m[1][1] + m22 * m[2][1];
-    a_result.m[2][2] = m20 * m[0][2] + m21 * m[1][2] + m22 * m[2][2];
+      // compute multiplication between both matrices
+      a_result.m[0][0] = m00 * m[0][0] + m01 * m[1][0] + m02 * m[2][0];
+      a_result.m[0][1] = m00 * m[0][1] + m01 * m[1][1] + m02 * m[2][1];
+      a_result.m[0][2] = m00 * m[0][2] + m01 * m[1][2] + m02 * m[2][2];
+      a_result.m[1][0] = m10 * m[0][0] + m11 * m[1][0] + m12 * m[2][0];
+      a_result.m[1][1] = m10 * m[0][1] + m11 * m[1][1] + m12 * m[2][1];
+      a_result.m[1][2] = m10 * m[0][2] + m11 * m[1][2] + m12 * m[2][2];
+      a_result.m[2][0] = m20 * m[0][0] + m21 * m[1][0] + m22 * m[2][0];
+      a_result.m[2][1] = m20 * m[0][1] + m21 * m[1][1] + m22 * m[2][1];
+      a_result.m[2][2] = m20 * m[0][2] + m21 * m[1][2] + m22 * m[2][2];
 
-    // return success
+      // return success
     return (true);
   }
 
 
   //-----------------------------------------------------------------------
   /*!
-    Convert current matrix into a string.
+      Convert current matrix into a string.
 
-    \param    a_string   String where conversion is stored
-    \param    a_precision  Number of digits.
+      \param    a_string   String where conversion is stored
+      \param    a_precision  Number of digits.
   */
   //-----------------------------------------------------------------------
   inline void str(string& a_string, const unsigned int a_precision=2) const
   {
-    a_string.append("[ ");
-    for (int i=0; i<3; i++)
-    {
-      a_string.append("( ");
-      for (int j=0; j<3; j++)
+      a_string.append("[ ");
+      for (int i=0; i<3; i++)
       {
-        cStr(a_string, m[j][i], a_precision);
-        if (j<2)
+        a_string.append("( ");
+        for (int j=0; j<3; j++)
         {
-          a_string.append(", ");
+          cStr(a_string, m[j][i], a_precision);
+          if (j<2)
+          {
+            a_string.append(", ");
+          }
         }
+        a_string.append(" ) ");
       }
-      a_string.append(" ) ");
-    }
-    a_string.append("]");
+      a_string.append("]");
   }
 
   //-----------------------------------------------------------------------
   /*!
-  Convert current matrix into a string, which is returned on the stack.
-  \param    a_precision  Number of digits.
+      Convert current matrix into a string, which is returned on the stack.
+      \param    a_precision  Number of digits.
   */
   //-----------------------------------------------------------------------
   inline string str(const unsigned int a_precision=2) const
   {
-    string a_string;
-    str(a_string,a_precision);
-    return a_string;
+      string a_string;
+      str(a_string,a_precision);
+      return a_string;
   }
 
   //-----------------------------------------------------------------------
   /*!
-  Print the current matrix using the CHAI_DEBUG_PRINT macro.
+      Print the current matrix using the CHAI_DEBUG_PRINT macro.
 
-  \param    a_string   String where conversion is stored
-  \param    a_precision  Number of digits.
+      \param    a_precision  Number of digits.
   */
   //-----------------------------------------------------------------------  
   inline void print(const unsigned int a_precision=2) const
   {
-    string s;
-    str(s,a_precision);
-    CHAI_DEBUG_PRINT("%s\n",s.c_str());
+      string s;
+      str(s,a_precision);
+      CHAI_DEBUG_PRINT("%s\n",s.c_str());
   }  
   
 
-  //-----------------------------------------------------------------------
-  /*!
-    Compare two matrices. Return \b true if both matrices are equal,
-        otherwise return \b false.
+    //-----------------------------------------------------------------------
+    /*!
+        Compare two matrices. Return \b true if both matrices are equal,
+            otherwise return \b false.
 
-    \param    a_matrix   Matrix to compare with.
-    \return   Return \b true if matrices are equal, otherwise \b false.
-  */
-  //-----------------------------------------------------------------------
+        \param    a_matrix   Matrix to compare with.
+        \return   Return \b true if matrices are equal, otherwise \b false.
+    */
+    //-----------------------------------------------------------------------
     inline bool equals(cMatrix3d& a_matrix) const
     {
          for(int i=0; i<3; i++)
@@ -855,7 +855,7 @@ struct cMatrix3d
                 if (a_matrix.m[i][j] != m[i][j]) return (false);
             }
         }
-      return (true);
+        return (true);
     }
 };
 

@@ -34,6 +34,7 @@ using std::vector;
 
 //===========================================================================
 /*!
+      \file     CCollisionBrute.h
       \class    cCollisionBrute
       \brief    cCollisionBrute provides methods to check for the intersection
                 of a line segment with a mesh by checking all triangles in the
@@ -45,7 +46,7 @@ class cCollisionBrute : public cGenericCollision
   public:
     // CONSTRUCTOR & DESTRUCTOR
     //! Constructor of cCollisionBrute.
-    cCollisionBrute(vector<cTriangle> *a_triangles);
+    cCollisionBrute(vector<cTriangle> *a_triangles) : m_triangles(a_triangles) {}
     //! Destructor of cCollisionBrute.
     virtual ~cCollisionBrute() { }
 

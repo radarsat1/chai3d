@@ -9,8 +9,7 @@
     <RESFILES value="ActiveFormProj.res ActiveFormProj.tlb"/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) ActiveFormImpl.dfm"/>
-    <LIBFILES value="..\..\..\lib\bbcp6\PhantomDriver.lib 
-      ..\..\..\lib\bbcp6\chai_collisions.lib ..\..\..\lib\bbcp6\chai_devices.lib 
+    <LIBFILES value="..\..\..\lib\bbcp6\chai_collisions.lib ..\..\..\lib\bbcp6\chai_devices.lib 
       ..\..\..\lib\bbcp6\chai_displays.lib ..\..\..\lib\bbcp6\chai_files.lib 
       ..\..\..\lib\bbcp6\chai_forces.lib ..\..\..\lib\bbcp6\chai_graphics.lib 
       ..\..\..\lib\bbcp6\chai_math.lib ..\..\..\lib\bbcp6\chai_timers.lib 
@@ -60,7 +59,6 @@
       <FILE FILENAME="ActiveFormProj_TLB.cpp" FORMNAME="" UNITNAME="ActiveFormProj_TLB" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ActiveFormProj_ATL.cpp" FORMNAME="" UNITNAME="ActiveFormProj_ATL" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ActiveFormImpl.cpp" FORMNAME="ActiveFormX" UNITNAME="ActiveFormImpl" COCLASSES="ChaiX" CONTAINERID="CCompiler" DESIGNCLASS="TActiveForm" LOCALCOMMAND=""/>
-      <FILE FILENAME="..\..\..\lib\bbcp6\PhantomDriver.lib" FORMNAME="" UNITNAME="PhantomDriver.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_collisions.lib" FORMNAME="" UNITNAME="chai_collisions.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_devices.lib" FORMNAME="" UNITNAME="chai_devices.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\..\lib\bbcp6\chai_displays.lib" FORMNAME="" UNITNAME="chai_displays.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>

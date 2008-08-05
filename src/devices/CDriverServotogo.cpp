@@ -131,7 +131,7 @@
 #define CNTRL1_IEN_T2    0x02
 
 #define BRDTST_EOC       0x08
-#define  IRQSL           0x84
+#define IRQSL            0x84
 
 //---------------------------------------------------------------------------
 // Input Output redefinitions
@@ -298,7 +298,7 @@ void cDriverServotogo::setDac(int a_num, double a_volts)
       Checks if board is present and what is its model number
 
       \fn       unsigned short cDriverServotogo::brdtstOK(unsigned short a_baseAddress)
-      \param    unsigned short BaseAddress is the address of the board in I/O space
+      \param    a_baseAddress  The address of the board in I/O space
 
 */
 //===========================================================================
@@ -344,7 +344,7 @@ unsigned short cDriverServotogo::brdtstOK(unsigned short a_baseAddress)
       Initializes various aspects of the board
 
       \fn       void cDriverServotogo::stg_Init(unsigned short a_wAdd)
-      \param    unsigned short a_wAdd Address of the board in I/O space.
+      \param    a_wAdd Address of the board in I/O space.
 
 */
 //===========================================================================
@@ -393,7 +393,7 @@ void cDriverServotogo::encoderInit()
     // It is possible that the encoder counts are being held by battery
     // backup, so we'll read the encoders, and save the values
     // Then we'll initialize the encoder chips, since it's more likely that
-    // the ecoders were not kept alive by battery and need to be initialized
+    // the encoders were not kept alive by battery and need to be initialized
 
     LONGBYTE enc[8];
     encReadAll(enc);
@@ -486,7 +486,7 @@ void cDriverServotogo::encoderInit()
       Latches and reads all encoders at once
 
       \fn       void cDriverServotogo::encReadAll(LONGBYTE * a_lbEnc)
-      \param    LONGBYTE* a_lbEnc  array of the encoder values
+      \param    a_lbEnc  array of the encoder values
 */
 //===========================================================================
 void cDriverServotogo::encReadAll(LONGBYTE* a_lbEnc)
@@ -629,9 +629,9 @@ int cDriverServotogo::getBaseAddress()
 /*!
       Read the value of encoder iNum. Returns -1 if the encoder doesn't exist, 1 if read was OK
 
-      \fn       int cDriverServotogo::getEncoder(int iNum, long *iValue)
-      \param    iNum, number of encoder to be read
-      \param long *iValue, pointer to value read
+      \fn       int cDriverServotogo::getEncoder(int a_num, long *a_value)
+      \param    a_num number of encoder to be read
+      \param    a_value pointer to value read
 
 */
 //===========================================================================
@@ -658,8 +658,8 @@ int cDriverServotogo::getEncoder(int a_num, long *a_value)
       Writes to DAC nAxis value lCounts
 
       \fn       void cDriverServotogo::rawDAC(unsigned short nAxis, long lCounts)
-      \param    unsigned short nAxis, value of DAC to which to write
-      \param    long lCounts, value to be written to the DAC
+      \param    nAxis    value of DAC to which to write
+      \param    lCounts  value to be written to the DAC
 
 */
 //===========================================================================
@@ -882,12 +882,12 @@ int cDriverServotogo::command(int a_command, void* a_data)
     Initializes board. In this implementation there's really nothing to do
     that hasn't been done in the opening phase.
 
-    \fn     void cDriverServotogo::initialize()
+    \fn     void cDriverServotogo::initialize(const bool a_resetEncoders=false)
     \return Return 0 is operation succeeds, -1 if an error occurs.
 
 */
 //===========================================================================
-int cDriverServotogo::initialize()
+int cDriverServotogo::initialize(const bool a_resetEncoders)
 {
     if (m_systemReady)
     {

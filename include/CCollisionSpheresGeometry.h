@@ -35,6 +35,9 @@
 using std::map;
 using std::less;
 using std::list;
+/*!
+    \file CCollisionSpheresGeometry.h
+*/
 //---------------------------------------------------------------------------
 // FORWARD DECLARATIONS:
 class cCollisionSpheresPoint;
@@ -125,7 +128,7 @@ class cCollisionSpheresGenericShape
   public:
     // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresGenericShape.
-    cCollisionSpheresGenericShape() { m_sphere = NULL; }
+    cCollisionSpheresGenericShape() : m_sphere(NULL) { }
     virtual ~cCollisionSpheresGenericShape() {}
 
     // METHODS:

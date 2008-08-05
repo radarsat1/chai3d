@@ -1,21 +1,21 @@
 //===========================================================================
 /*
-This file is part of the CHAI 3D visualization and haptics libraries.
-Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
 
-This library is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License("GPL") version 2
-as published by the Free Software Foundation.
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License("GPL") version 2
+    as published by the Free Software Foundation.
 
-For using the CHAI 3D libraries with software that can not be combined
-with the GNU GPL, and for taking advantage of the additional benefits
-of our support services, please contact CHAI 3D about acquiring a
-Professional Edition License.
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
 
-\author:    <http://www.chai3d.org>
-\author:    Dan Morris
-\version    1.0
-\date       3/2005
+    \author:    <http://www.chai3d.org>
+    \author:    Dan Morris
+    \version    1.0
+    \date       3/2005
 */
 //===========================================================================
 
@@ -39,6 +39,7 @@ typedef enum {
 
 //===========================================================================
 /*!
+\file       CLabelPanel.h
 \class      cLabelPanel
 \brief      This class represents a 2D panel with at least one piece of text
             on it, optionally including several pieces of text with colored
@@ -60,6 +61,8 @@ public:
 
     //! Add a label (an additional line of text) to the panel
     void addLabel(const char* a_label, const cMaterial* a_mat=0);
+    //! Set an existing label to a new line of text
+    void setLabel(const unsigned int& a_index, const char* a_label);
     //! How many labels are currently displayed?
     unsigned int getNumLabels() const;
     //! Read out a particular label

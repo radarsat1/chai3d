@@ -30,6 +30,7 @@
 
 //===========================================================================
 /*!
+      \file       CShapeSphere.h
       \class      cShapeSphere
       \brief      cShapeSphere describes a simple spherical potential field
 */

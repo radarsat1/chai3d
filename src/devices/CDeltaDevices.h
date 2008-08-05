@@ -25,14 +25,20 @@
 //---------------------------------------------------------------------------
 #include "CGenericDevice.h"
 //---------------------------------------------------------------------------
-
+/*!
+    \file CDeltaDevices.h
+*/
 // Constants defining the available ForceDimension device types
 #define DHD_DEVICE_UNINITIALIZED  -1
 #define DHD_DEVICE_3DOF           31
 #define DHD_DEVICE_6DOF           61
 #define DHD_DEVICE_6DOF_500       62
 #define DHD_DEVICE_OMEGA          32
-
+/*!
+    \class cDeltaDevice
+    \brief
+    Interface to delta device
+*/
 class cDeltaDevice : public cGenericDevice
 {
   public:
@@ -48,7 +54,7 @@ class cDeltaDevice : public cGenericDevice
     //! Close connection to delta device
     virtual int close();
     //! Calibrate delta device.
-    virtual int initialize();
+    virtual int initialize(const bool a_resetEncoders=false);
     //! Set a command to the delta device
     virtual int command(int a_command, void* a_data);
     //! Which ForceDimension device is actually connected to this object?
@@ -65,7 +71,7 @@ class cDeltaDevice : public cGenericDevice
     //! Which FD device is actually instantiated here?
     int m_deviceType;
 
-    //! Half size of the workspace
+    //! Half size of the workspace (in meters)
     double m_halfSizeWorkspace;
 
     //! Maximum forces
