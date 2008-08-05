@@ -82,7 +82,7 @@ cGenericObject::cGenericObject()
     // custom user information
     m_tag = 0;
     m_userData = 0;
-    
+    m_objectName[0] = '\0';
 };
 
 
@@ -128,6 +128,30 @@ void cGenericObject::addChild(cGenericObject* a_object)
 
 //===========================================================================
 /*!
+Does this object have the specified object as a child?
+
+\fn       bool cGenericObject::containsChild(cGenericObject* a_object,
+            bool a_includeChildren=false)
+\param    a_object  Object to search for
+*/
+//===========================================================================
+bool cGenericObject::containsChild(cGenericObject* a_object, bool a_includeChildren)
+{
+  for (unsigned int i=0; i<m_children.size(); i++)
+  {
+    cGenericObject* nextObject = m_children[i];
+    if (nextObject == a_object) return true;
+    if (a_includeChildren) {
+      bool result = nextObject->containsChild(a_object,true);
+      if (result) return true;
+    }
+  }
+  return false;
+}
+
+
+//===========================================================================
+/*!
     Removes an object from my list of children, without deleting the
     child object from memory.
 
@@ -164,7 +188,7 @@ bool cGenericObject::removeChild(cGenericObject* a_object)
 
     }
 
-    // opertation failed
+    // operation failed
     return false;
 }
 
@@ -227,6 +251,30 @@ void cGenericObject::deleteAllChildren()
 
     // clear my list of children
     m_children.clear();
+}
+
+
+//===========================================================================
+/*!
+  Fill this list with all of my descendants.  The current object is optionally
+  included in this list.  Does not clear the list before appending to it.
+
+  \fn     void cGenericObject::enumerateChildren(std::list<cGenericObject*>& a_childList);
+  \param  a_includeCurrentObject Should I include myself on the list?
+*/
+//===========================================================================
+void cGenericObject::enumerateChildren(std::list<cGenericObject*>& a_childList,
+                                       bool a_includeCurrentObject) 
+{
+  
+  if (a_includeCurrentObject) a_childList.push_back(this);
+
+  for (unsigned int i=0; i<m_children.size(); i++)
+  {
+    cGenericObject* nextObject = m_children[i];
+    nextObject->enumerateChildren(a_childList,true);
+  }
+  
 }
 
 
@@ -960,10 +1008,10 @@ void cGenericObject::computeBoundaryBox(const bool a_includeChildren)
     collision point, it is stored in the corresponding parameters \e a_colObject,
     \e a_colTriangle, \e a_colPoint, and \e a_colSquareDistance.
 
-    \param  a_segmentPointA      Start point of segment.
-    \param  a_segmentPointB      End point of segment.
+    \param  a_segmentPointA      Start point of segment (in parent reference frame).
+    \param  a_segmentPointB      End point of segment (in parent reference frame).
     \param  a_colObject          Pointer to nearest collided object.
-    \param  a_colTriangle        Pointer to nearest colided triangle.
+    \param  a_colTriangle        Pointer to nearest collided triangle.
     \param  a_colPoint           Position to the nearest collision
     \param  a_colSquareDistance  Squared distance between ray origin and nearest
                                  collision point
@@ -979,6 +1027,7 @@ bool cGenericObject::computeCollisionDetection(
         double& a_colSquareDistance, const bool a_visibleObjectsOnly, int a_proxyCall,
         cGenericPointForceAlgo* force_algo)
 {
+    
 		// no collision found yet
     bool hit = false;
     cVector3d a_bck_segmentPointA,bcklocalSegmentPointA;
@@ -1007,10 +1056,11 @@ bool cGenericObject::computeCollisionDetection(
 		// check collision with current object
     if ((m_collisionDetector != NULL) && (!a_visibleObjectsOnly || m_show) && (m_hapticEnabled))
     {
-
+        
         if (m_collisionDetector->computeCollision(localSegmentPointA, localSegmentPointB,
             t_colObject, t_colTriangle, t_colPoint, t_colSquareDistance, a_proxyCall))
-        {
+        {            
+
             // object was hit
             hit = true;
 
@@ -1023,7 +1073,7 @@ bool cGenericObject::computeCollisionDetection(
             m_localRot.mul(a_colPoint);
             a_colPoint.add(m_localPos);
 
-        }
+        }        
     }
 
     for (unsigned int i=0; i<m_children.size(); i++)

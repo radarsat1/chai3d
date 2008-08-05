@@ -26,9 +26,6 @@
 #pragma once
 #endif
 
-#define MAX_GL_WINDOW_WIDTH  1280
-#define MAX_GL_WINDOW_HEIGHT 1024
-
 class Cobject_loaderDlg : public CDialog {
 
 public:
@@ -78,6 +75,7 @@ public:
 protected:
 	HICON m_hIcon;
   int m_left_scrolling_gl_area;
+  int m_middle_scrolling_gl_area;
   int m_right_scrolling_gl_area;
 
   // The last point scrolled through by each mouse button,
@@ -85,6 +83,7 @@ protected:
   // corner of the viewport area)
   CPoint last_left_scroll_point;
   CPoint last_right_scroll_point;
+  CPoint last_middle_scroll_point;
   
   // Updates the text associated with the haptic property sliders
   void update_slider_text();
@@ -106,6 +105,8 @@ protected:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+  afx_msg void OnMButtonDown(UINT nFlags, CPoint point);
+  afx_msg void OnMButtonUp(UINT nFlags, CPoint point);
   afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnToggleHapticsButton();

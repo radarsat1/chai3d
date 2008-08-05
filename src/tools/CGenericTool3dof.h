@@ -40,9 +40,9 @@ class cGenericTool3dof : public cGenericTool
 {
   public:
     // CONSTRUCTOR & DESTRUCTOR:
-    //! Constructor of CVirtualTool3dof.
+    //! Constructor of cGenericTool3dof.
     cGenericTool3dof();
-    //! Destructor of CVirtualTool3dof.
+    //! Destructor of cGenericTool3dof.
     virtual ~cGenericTool3dof() {};
 
     // METHODS:

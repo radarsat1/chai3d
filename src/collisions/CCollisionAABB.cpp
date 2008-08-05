@@ -58,16 +58,17 @@ cCollisionAABB::cCollisionAABB(vector<cTriangle> *a_triangles, bool a_useNeighbo
 //===========================================================================
 cCollisionAABB::~cCollisionAABB()
 {
+
     // clear collision tree
     if (m_root != NULL) delete [] m_root;
-    
+
     // Delete the allocated array of leaf nodes
     //
     // If there's only one triangle, m_root = m_leaves
     // and we've already deleted the leaves...
     if (m_numTriangles > 1) 
       if (m_leaves) delete [] m_leaves;    
-}
+}    
 
 
 //===========================================================================
@@ -121,7 +122,7 @@ void cCollisionAABB::initialize()
       cTriangle* nextTriangle = &(*m_triangles)[i];
       if (nextTriangle->allocated())
       {        
-        new(&m_leaves[i]) cCollisionAABBLeaf(nextTriangle);
+        new(&(m_leaves[i])) cCollisionAABBLeaf(nextTriangle);
       }
     }
 
@@ -164,7 +165,7 @@ void cCollisionAABB::initialize()
     \param    a_segmentPointA  Initial point of segment.
     \param    a_segmentPointB  End point of segment.
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle Returns pointer to nearest colided triangle.
+    \param    a_colTriangle Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.

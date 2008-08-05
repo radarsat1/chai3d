@@ -281,9 +281,9 @@ void cProxyPointForceAlgo::computeNextBestProxyPosition()
         m_touchingObject = 0;
         m_slipping = 0;
         return;
-    }    
+    }
 
-		m_touchingPoint = colPoint;
+    m_touchingPoint = colPoint;
 
     //-----------------------------------------------------------------------
     // FIRST COLLISION:

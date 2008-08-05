@@ -81,6 +81,12 @@ class cImageLoader
     //! Load image file by passing image path and name as argument
     int loadFromFile(const char* filename);
 
+    //! For windows systems we can use the OLE loader if we don't have a native loaders
+    int loadFromFileOLE(const char* szPathName);
+
+    //! Get the filename from which this image was loaded
+    const char* getFilename() const { return (const char*)(m_filename); }
+    
   protected:
 
     //! Initialize member variables

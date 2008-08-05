@@ -27,6 +27,7 @@
 #include "CPhantomDevices.h"
 #include "CDeltaDevices.h"
 #include "CVirtualDevice.h"
+#include "CFreedom6S3dofPointer.h"
 //---------------------------------------------------------------------------
 
 #define DHD_VIRTUAL_EXE_NAME "dhdVirtual.exe"
@@ -37,9 +38,9 @@
       \brief      cMeta3dofPointer connects a generic haptic device as
                   a simple pointer in space. The tool is visually graphically
                   rendered by a small sphere illustrating the tip of the
-                  device. The tool tries to connect to a Delta, an Omega,
-                  a Phantom, or a delta and if neither are available then
-                  loads a virtual haptic device.
+                  device. The tool tries to connect to a ForceDimension device
+                  (delta/omega), a SensAble device, and a Freedom-6 (in that
+                  order); if none are available it loads a virtual haptic device.
 */
 //===========================================================================
 class cMeta3dofPointer : public cGeneric3dofPointer

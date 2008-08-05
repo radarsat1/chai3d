@@ -403,7 +403,7 @@ CActive_xCtrl::CActive_xCtrl()
     double size = 1.0;
 
     // Create a nice little cube
-    createCube(object,size);
+    createCube(object,(float)size);
 
     // Move the object over some so the Phantom will not initially be
     // inside the object.
@@ -632,7 +632,7 @@ void createCube(cMesh *mesh, float edge)
 {
 
     // I define the cube's "radius" to be half the edge size
-    float radius = edge / 2.0;
+    float radius = edge / 2.0f;
     int n;
     int cur_index = 0;
     int start_index = 0;

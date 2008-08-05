@@ -69,7 +69,13 @@ class cCamera : public cGenericObject
     //! Destructor of cCamera
     virtual ~cCamera() {};
 
+
     // METHODS:
+
+    //! Get the look/up/right vectors for this camera according to the CHAI conventions
+    cVector3d getLookVector()  const { return m_localRot.getCol0(); }
+    cVector3d getUpVector()    const { return m_localRot.getCol2(); }
+    cVector3d getRightVector() const { return m_localRot.getCol1(); }
 
     //! Set the position and orientation of the camera
     virtual bool set(const cVector3d& a_localPosition, const cVector3d& a_localLookAt,

@@ -122,6 +122,8 @@ class cViewport
     void setRenderArea(RECT& r);
     void getRenderArea(RECT& r) { r = this->m_forceRenderArea; }
 
+    static cViewport* getLastActiveViewport() { return lastActiveViewport; }
+
   protected:
 
     // PROPERTIES:
@@ -166,6 +168,10 @@ class cViewport
     //! before the GL buffer is swapped out, after all other
     cGenericObject* m_postRenderCallback;
 
+    //! The most recent viewport to initiate rendering; useful
+    //! for finding global opengl state information
+    static cViewport* lastActiveViewport;
+
 
     // METHODS:
 
@@ -174,7 +180,7 @@ class cViewport
     //! Clean up the current rendering context
     bool cleanup();
     //! Render the scene in OpenGL.  Nukes the contents of the GL buffers.
-    bool renderView(const int a_imageIndex);
+    virtual bool renderView(const int a_imageIndex);
     
 };
 

@@ -429,7 +429,7 @@ void Cmass_springsApp::compute_spring_forces() {
   double elapsed = curtime - g_last_iteration_time;
   g_last_iteration_time = curtime;
   
-  int i;
+  unsigned int i;
 
   // Clear the force that's applied to each ball
   for(i=0; i<m_active_balls.size(); i++) {
@@ -721,8 +721,8 @@ void CSpring::render(const int a_renderMode) {
   glBegin(GL_LINES);
   cVector3d v1 = m_endpoint_1->getPos();
   cVector3d v2 = m_endpoint_2->getPos();
-  glVertex3f(v1.x,v1.y,v1.z);
-  glVertex3f(v2.x,v2.y,v2.z);
+  glVertex3d(v1.x,v1.y,v1.z);
+  glVertex3d(v2.x,v2.y,v2.z);
   glEnd();
 
 }

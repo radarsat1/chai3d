@@ -82,7 +82,7 @@ void __fastcall TForm1::MassSpringFormCreate(TObject *Sender)
     tool->initialize();
     tool->updatePose();
     tool->setRenderingMode(RENDER_DEVICE);
-    
+
     // Rotate the tool so its axes align with our opengl-like axes
     tool->rotate(cVector3d(0,0,1),-90.0*M_PI/180.0);
     tool->rotate(cVector3d(1,0,0),-90.0*M_PI/180.0);
@@ -95,47 +95,45 @@ void __fastcall TForm1::MassSpringFormCreate(TObject *Sender)
     world->addChild(tool);
 
     // Create a mesh to represent the floor
-  m_floor = new cMesh(world);
-  world->addChild(m_floor);
+    m_floor = new cMesh(world);
+    world->addChild(m_floor);
 
-  // Fill in meaningful vertex positions
-  m_floor->newVertex(-FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION, -FLOOR_Z_SIZE/2.0);
-  m_floor->newVertex(-FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION,  FLOOR_Z_SIZE/2.0);
-  m_floor->newVertex( FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION,  FLOOR_Z_SIZE/2.0);
-  m_floor->newTriangle(0,1,2);
-  
-  m_floor->newVertex( FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION, -FLOOR_Z_SIZE/2.0);
-  m_floor->newVertex(-FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION, -FLOOR_Z_SIZE/2.0);
-  m_floor->newVertex( FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION,  FLOOR_Z_SIZE/2.0);
-  m_floor->newTriangle(3,4,5);
+    // Fill in meaningful vertex positions
+    m_floor->newVertex(-FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION, -FLOOR_Z_SIZE/2.0);
+    m_floor->newVertex(-FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION,  FLOOR_Z_SIZE/2.0);
+    m_floor->newVertex( FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION,  FLOOR_Z_SIZE/2.0);
+    m_floor->newTriangle(0,1,2);
 
-  for(int n=0; n<6; n++) {
-    cVertex* curVertex = m_floor->getVertex(n);
-    curVertex->setNormal(0,1,0);
-  }
+    m_floor->newVertex( FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION, -FLOOR_Z_SIZE/2.0);
+    m_floor->newVertex(-FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION, -FLOOR_Z_SIZE/2.0);
+    m_floor->newVertex( FLOOR_X_SIZE/2.0,  FLOOR_Y_POSITION,  FLOOR_Z_SIZE/2.0);
+    m_floor->newTriangle(3,4,5);
 
-  // Give him some material properties...
-  cMaterial material;  
-  material.m_ambient.set( 0.4, 0.2, 0.2, 1.0 );
-  material.m_diffuse.set( 0.8, 0.6, 0.6, 1.0 );
-  material.m_specular.set( 0.9, 0.9, 0.9, 1.0 );
-  material.setShininess(100);
-  m_floor->m_material = material;
+    for(int n=0; n<6; n++) {
+      cVertex* curVertex = m_floor->getVertex(n);
+      curVertex->setNormal(0,1,0);
+    }
 
-  // Create an initial ball
-  CBall* b = new CBall();
-  m_active_balls.push_back(b);
-  cVector3d pos(-1.0,0,1.0);
-  b->setPos(pos);
-  world->addChild(b);
+    // Give him some material properties...
+    cMaterial material;
+    material.m_ambient.set( 0.4, 0.2, 0.2, 1.0 );
+    material.m_diffuse.set( 0.8, 0.6, 0.6, 1.0 );
+    material.m_specular.set( 0.9, 0.9, 0.9, 1.0 );
+    material.setShininess(100);
+    m_floor->m_material = material;
 
-  // Create a series of masses connected by springs
-  for(int i=1; i<INITIAL_NUM_BALLS; i++) {
-    add_ball();
-  }
+    // Create an initial ball
+    CBall* b = new CBall();
+    m_active_balls.push_back(b);
+    cVector3d pos(-1.0,0,1.0);
+    b->setPos(pos);
+    world->addChild(b);
 
+    // Create a series of masses connected by springs
+    for(int i=1; i<INITIAL_NUM_BALLS; i++) {
+      add_ball();
+    }
     simulationOn = false;
-
 }
 //---------------------------------------------------------------------------
 
@@ -171,7 +169,6 @@ void TForm1::add_ball() {
   double d = cDistance(s->m_endpoint_1->getPos(),s->m_endpoint_2->getPos());
   s->m_rest_length = d;
   world->addChild(s);
-
 }
 
 
@@ -311,12 +308,6 @@ void CBall::render (const int a_renderMode) {
   if (sphereObj == 0) sphereObj = gluNewQuadric();
 
   // Render a sphere at the location of this ball
-  glPushMatrix();
-  glLoadIdentity();
-  glTranslatef(m_localPos.x,m_localPos.y,m_localPos.z);
-
-  //float ball_mat[] = { 0.2, 0.8, 0.2, 1.0 };
-  //glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ball_mat);
   glEnable(GL_COLOR_MATERIAL);
   glColor3f(0.2,0.8,0.2);
 
@@ -324,9 +315,8 @@ void CBall::render (const int a_renderMode) {
   #define BALL_STACKS 10
   
   gluSphere(sphereObj, m_radius, BALL_SLICES, BALL_STACKS);
-  glPopMatrix();
-
 }
+
 
 CElapsed g_timer;
 double g_last_iteration_time = -1.0;
@@ -338,7 +328,7 @@ double g_last_iteration_time = -1.0;
 void TForm1::compute_spring_forces() {
 
   double curtime = g_timer.GetTime();
-  
+
   if (g_last_iteration_time < 0) {
     g_last_iteration_time = curtime;
     return;

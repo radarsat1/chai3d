@@ -113,6 +113,8 @@ BEGIN_MESSAGE_MAP(Cobject_loaderDlg, CDialog)
 	ON_WM_LBUTTONUP()
   ON_WM_RBUTTONDOWN()
 	ON_WM_RBUTTONUP()
+  ON_WM_MBUTTONDOWN()
+  ON_WM_MBUTTONUP()
 	ON_BN_CLICKED(IDC_TOGGLEHAPTICS_BUTTON, OnToggleHapticsButton)
 	ON_BN_CLICKED(IDC_TOGGLE_STEREO_BUTTON, OnToggleStereoButton)
 	ON_WM_PAINT()
@@ -131,6 +133,7 @@ BOOL Cobject_loaderDlg::OnInitDialog() {
   m_gl_wnd = 0;
   m_left_scrolling_gl_area = 0;
   m_right_scrolling_gl_area = 0;
+  m_middle_scrolling_gl_area = 0;
 
 	CDialog::OnInitDialog();
 
@@ -283,7 +286,7 @@ void Cobject_loaderDlg::OnLoadTextureButton() {
     char filename[_MAX_PATH];
 
   int result = FileBrowse(filename, _MAX_PATH, 0, 0,
-    "image files (*.bmp, *.tga)|*.bmp;*.tga|All Files (*.*)|*.*||",
+    "image files (*.bmp, *.tga, *.jpg, *.jpeg, *.gif)|*.bmp;*.tga;*.jpg;*.jpeg;*.gif|All Files (*.*)|*.*||",
     "Choose an image file...");
 
   if (result < 0) {
@@ -338,20 +341,60 @@ void Cobject_loaderDlg::OnMouseMove(UINT nFlags, CPoint point) {
 
   if (m_left_scrolling_gl_area) {
     CPoint delta = point - last_left_scroll_point;    
-    g_main_app->scroll(delta,1);
+    g_main_app->scroll(delta,MOUSE_BUTTON_LEFT);
     last_left_scroll_point = point;
   }
 
   if (m_right_scrolling_gl_area) {
     CPoint delta = point - last_right_scroll_point;
-    g_main_app->scroll(delta,0);
+    g_main_app->scroll(delta,MOUSE_BUTTON_RIGHT);
     last_right_scroll_point = point;
+  }
+
+  if (m_middle_scrolling_gl_area) {
+    CPoint delta = point - last_middle_scroll_point;
+    g_main_app->scroll(delta,MOUSE_BUTTON_MIDDLE);
+    last_middle_scroll_point = point;
   }
 
 }
 
+
+void Cobject_loaderDlg::OnMButtonDown(UINT nFlags, CPoint point) {
+
+  CDialog::OnMButtonDown(nFlags,point);
+  CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
+  RECT r;
+  pWnd->GetWindowRect(&r);
+  ScreenToClient(&r);
+
+  if (PtInRect(&r,point)) {
+
+    // convert to viewport coordinates
+    point.x -= r.left;
+    point.y -= r.top; 
+
+    m_middle_scrolling_gl_area = 1;
+    last_middle_scroll_point = point;
+
+    // No need to select for the middle button...
+    // g_main_app->select(point);
+  }	
+
+}
+
+
+void Cobject_loaderDlg::OnMButtonUp(UINT nFlags, CPoint point) {
+
+  CDialog::OnMButtonUp(nFlags, point);  
+  m_middle_scrolling_gl_area = 0;
+
+}
+
+
 void Cobject_loaderDlg::OnLButtonDown(UINT nFlags, CPoint point) {
 
+  CDialog::OnLButtonDown(nFlags, point);
   CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
   RECT r;
   pWnd->GetWindowRect(&r);
@@ -370,6 +413,7 @@ void Cobject_loaderDlg::OnLButtonDown(UINT nFlags, CPoint point) {
   
 }
 
+
 void Cobject_loaderDlg::OnLButtonUp(UINT nFlags, CPoint point) {
 	
   CDialog::OnLButtonUp(nFlags, point);  
@@ -378,9 +422,9 @@ void Cobject_loaderDlg::OnLButtonUp(UINT nFlags, CPoint point) {
 }
 
 
-
 void Cobject_loaderDlg::OnRButtonDown(UINT nFlags, CPoint point) {
 
+  CDialog::OnRButtonDown(nFlags, point);
   CWnd* pWnd = m_gl_wnd; // GetDlgItem(IDC_GL_AREA);
   RECT r;
   pWnd->GetWindowRect(&r);
@@ -447,23 +491,34 @@ void Cobject_loaderDlg::OnToggleStereoButton() {
 
 BOOL Cobject_loaderDlg::PreTranslateMessage(MSG* pMsg) {
 	
+  //_cprintf("message\n");
+
   // Handle mouse messages explicitly...
   if (pMsg->message == WM_LBUTTONDOWN ||
       pMsg->message == WM_RBUTTONDOWN ||
+      pMsg->message == WM_MBUTTONDOWN ||
       pMsg->message == WM_LBUTTONUP   ||
       pMsg->message == WM_RBUTTONUP   ||
+      pMsg->message == WM_MBUTTONUP   ||
       pMsg->message == WM_MOUSEMOVE) {
+
+    //_cprintf("mouse msg\n");
 
     int x = LOWORD(pMsg->lParam);
     int y = HIWORD(pMsg->lParam);
     CPoint p(x,y);
 
     if (pMsg->hwnd == m_gl_area_hwnd) {
+
       if (pMsg->message == WM_LBUTTONDOWN)      OnLButtonDown(pMsg->wParam,p);
       else if (pMsg->message == WM_RBUTTONDOWN) OnRButtonDown(pMsg->wParam,p);
+      else if (pMsg->message == WM_MBUTTONDOWN) OnMButtonDown(pMsg->wParam,p);
       else if (pMsg->message == WM_LBUTTONUP)   OnLButtonUp(pMsg->wParam,p);
       else if (pMsg->message == WM_RBUTTONUP)   OnRButtonUp(pMsg->wParam,p);
+      else if (pMsg->message == WM_MBUTTONUP)   OnMButtonUp(pMsg->wParam,p);
       else if (pMsg->message == WM_MOUSEMOVE)   OnMouseMove(pMsg->wParam,p); 
+
+      return true;
 		}
     
   }

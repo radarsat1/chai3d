@@ -34,7 +34,7 @@
     \param    a_nextDevicePos  Next position of haptic device or virtual finger.
 */
 //===========================================================================
-cVector3d cPotentialFieldForceAlgo::computeForces(cVector3d& a_nextDevicePos)
+cVector3d cPotentialFieldForceAlgo::computeForces(const cVector3d& a_nextDevicePos)
 {
     // initialize force
     cVector3d force;
@@ -43,19 +43,19 @@ cVector3d cPotentialFieldForceAlgo::computeForces(cVector3d& a_nextDevicePos)
     // compute force feedback for all potential field based objects
     if (m_world != NULL)
     {
+			
         int numObjects = m_world->getNumChildren();
         for (int i=0; i<numObjects; i++)
         {
-            cGenericObject *nextObject = m_world->getChild(i);
+					  cGenericPotentialField *nextField = dynamic_cast<cGenericPotentialField*>(m_world->getChild(i));
 
             // if this object is a cGenericPotentialField, calculate the force
             // by calling the object's computeForces method, and add this to
             // the cumulative total
-            if (typeid(*nextObject) == typeid(cGenericPotentialField))
+						if (nextField)
             {
-                cGenericPotentialField* nextField = (cGenericPotentialField*)nextObject;
                 cVector3d nextForce = nextField->computeForces(a_nextDevicePos);
-                force.add(force);
+                force.add(nextForce);
             }
         }
     }

@@ -67,6 +67,20 @@ class cTriangle
         m_neighbors = 0;
     }
 
+    //-----------------------------------------------------------------------
+    /*!
+        Default constructor of cTriangle.
+    */
+    //-----------------------------------------------------------------------
+    cTriangle()
+    {
+      m_indexVertex0 = m_indexVertex1 = m_indexVertex2 = m_index = 0;
+      m_parent = 0;
+      m_allocated = false;
+      m_tag = 0;
+      m_neighbors = 0;
+    }
+
 
     //-----------------------------------------------------------------------
     /*!
@@ -105,7 +119,10 @@ class cTriangle
     //-----------------------------------------------------------------------
     inline cVertex* getVertex0() const
     {
-        return (&m_parent->m_vertices[m_indexVertex0]);
+        // Where does the vertex array live?
+        vector<cVertex>* vertex_vector = m_parent->pVertices();
+        cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+        return vertex_array+m_indexVertex0;
     };
 
 
@@ -118,7 +135,10 @@ class cTriangle
     //-----------------------------------------------------------------------
     inline cVertex* getVertex1() const
     {
-        return (&m_parent->m_vertices[m_indexVertex1]);
+        // Where does the vertex array live?
+        vector<cVertex>* vertex_vector = m_parent->pVertices();
+        cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+        return vertex_array+m_indexVertex1;
     };
 
 
@@ -131,7 +151,10 @@ class cTriangle
     //-----------------------------------------------------------------------
     inline cVertex* getVertex2() const
     {
-        return (&m_parent->m_vertices[m_indexVertex2]);
+        // Where does the vertex array live?
+        vector<cVertex>* vertex_vector = m_parent->pVertices();
+        cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+        return vertex_array+m_indexVertex2;
     };
 
 
@@ -146,16 +169,40 @@ class cTriangle
     //-----------------------------------------------------------------------
     inline cVertex* getVertex(int vi) const
     {
+
+        // Where does the vertex array live?
+        vector<cVertex>* vertex_vector = m_parent->pVertices();
+        cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+
         switch (vi)
         {
-          case 0 : return (&m_parent->m_vertices[m_indexVertex0]);
-          case 1 : return (&m_parent->m_vertices[m_indexVertex1]);
-          case 2 : return (&m_parent->m_vertices[m_indexVertex2]);
+          case 0 : return vertex_array+m_indexVertex0;
+          case 1 : return vertex_array+m_indexVertex1;
+          case 2 : return vertex_array+m_indexVertex2;          
         }
         return NULL;
     }
 
 
+    //-----------------------------------------------------------------------
+    /*!
+    Access the index of the specified vertex of this triangle
+
+    \param      int vi  The triangle (0, 1, or 2) to access
+    \return     Returns the index of the specified triangle
+    */
+    //-----------------------------------------------------------------------
+    inline unsigned int getVertexIndex(int vi) const
+    {
+
+      switch (vi)
+      {
+      case 0 : return m_indexVertex0;
+      case 1 : return m_indexVertex1;
+      case 2 : return m_indexVertex2;          
+      }
+      return 0;
+    }
 
     //-----------------------------------------------------------------------
     /*!
@@ -265,91 +312,164 @@ class cTriangle
         collision point, it is stored in the corresponding parameters \e a_colObject,
         \e a_colTriangle, \e a_colPoint, and \e a_colSquareDistance.
 
-        \param  a_rayOrigin  Point from where collision ray starts.
-        \param  a_rayDir  Direction vector of collision ray.
-        \param  a_colObject  Pointer to nearest collided object.
+        \param  a_rayOrigin   Point from where collision ray starts (in local frame).
+        \param  a_rayDir      Direction vector of collision ray (in local frame).
+        \param  a_colObject   Pointer to nearest collided object.
         \param  a_colTriangle Pointer to nearest collided triangle.
-        \param  a_colPoint  Position of nearest collision.
-        \param  a_colSquareDistance  Distance between ray origin and nearest
+        \param  a_colPoint    Position of nearest collision.
+        \param  a_colSquareDistance Distance between ray origin and nearest
                 collision point.
+
+        Code adapted from:
+        http://www.cs.lth.se/home/Tomas_Akenine_Moller/raytri/raytri.c
+
+        This is one of the most performance-critical routines in CHAI,
+        so we have code here for a couple different approaches that may
+        become useful in different scenarios.
     */
     //-----------------------------------------------------------------------
     inline bool computeCollision(
                 const cVector3d& a_rayOrigin, const cVector3d& a_rayDir,
                 cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-                cVector3d& a_colPoint, double& a_colSquareDistance)
+                cVector3d& a_colPoint, double& a_colSquareDistance) const
     {
+
+// Determines which version of this function we'll use
+// #define USE_MOLLER_1_TRIANGLE_INTERSECT_TEST
 
 // This value controls how close rays can be to parallel to the triangle
 // surface before we discard them
-#define INTERSECT_EPSILON 10e-10f
+#define INTERSECT_EPSILON 10e-14f
 
- 
+      // Where does the vertex array live?
+      vector<cVertex>* vertex_vector = m_parent->pVertices();
+      cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+
+#ifdef USE_MOLLER_1_TRIANGLE_INTERSECT_TEST
+        cVector3d t_vertex0, t_vertex1, t_vertex2, edge1, edge2, pvec, tvec, qvec;
+        double u, v, t, t_squared, det, inv_det;
+
         // Get the position of the triangle's vertices
-        cVector3d t_vertex0 = m_parent->m_vertices[m_indexVertex0].getPos();
-        cVector3d t_vertex1 = m_parent->m_vertices[m_indexVertex1].getPos();
-        cVector3d t_vertex2 = m_parent->m_vertices[m_indexVertex2].getPos();
+        t_vertex0 = vertex_array[m_indexVertex0].getPos();
+        t_vertex1 = vertex_array[m_indexVertex1].getPos();
+        t_vertex2 = vertex_array[m_indexVertex2].getPos();
+                
+        // Compute the two edges of the triangle and his normal
+        t_vertex1.subr(t_vertex0, edge1);
+        t_vertex2.subr(t_vertex0, edge2);
+        a_rayDir.crossr(edge2, pvec);
+
+        // If the ray is parallel to the triangle, there's no collision
+        det = edge1.dot(pvec);
+
+        if ( (det < INTERSECT_EPSILON) && (det > -INTERSECT_EPSILON) )
+          return false;
         
-        cVector3d t_E0, t_E1, t_N;
+        // We're going to use the inverse more than once, so compute it
+        // here...
+        inv_det = 1.0 / det;
 
-        // Compute the triangle's normal
-        t_vertex1.subr(t_vertex0, t_E0);
-        t_vertex2.subr(t_vertex0, t_E1);
-        t_E0.crossr(t_E1, t_N);
+        // A vector from vertex 0 to the ray origin
+        a_rayOrigin.subr(t_vertex0,tvec);
 
-        // If the ray is parallel to the triangle (perpendicular to the
-        // normal), there's no collision
-        if (fabs(t_N.dot(a_rayDir))<10E-15f) return (false);
-        
-        double t_T = cDot(t_N, cSub(t_vertex0,a_rayOrigin)) / cDot(t_N, a_rayDir);
+        // Calculate U parameter and test bounds
+        u = cDot(tvec, pvec) * inv_det;
+        if (u < 0.0 || u > 1.0)
+          return false;
 
-        //
-        if (t_T + INTERSECT_EPSILON < 0) return (false);
-        
-        cVector3d t_Q = cSub(cAdd(a_rayOrigin, cMul(t_T, a_rayDir)), t_vertex0);
-        double t_Q0 = cDot(t_E0,t_Q);
-        double t_Q1 = cDot(t_E1,t_Q);
-        double t_E00 = cDot(t_E0,t_E0);
-        double t_E01 = cDot(t_E0,t_E1);
-        double t_E11 = cDot(t_E1,t_E1);
-        double t_D = (t_E00 * t_E11) - (t_E01 * t_E01);
+        // Prepare to test V parameter
+        tvec.crossr(edge1,qvec);
 
-        //
-        if ((t_D > -10E-40f) && (t_D < 10E-40f)) return(false);        
+        // Calculate V parameter and test bounds
+        v = cDot(a_rayDir, qvec) * inv_det;
 
-        double t_S0 = ((t_E11 * t_Q0) - (t_E01 * t_Q1)) / t_D;
-        double t_S1 = ((t_E00 * t_Q1) - (t_E01 * t_Q0)) / t_D;
+        if ((v < 0.0) || (u + v > 1.0))
+          return false;
 
-        // 
-        if (
-          (t_S0 >= 0.0 - INTERSECT_EPSILON) &&
-          (t_S1 >= 0.0 - INTERSECT_EPSILON) &&
-          ((t_S0 + t_S1) <= 1.0 + INTERSECT_EPSILON)
-          )
-        {
-            cVector3d t_I = cAdd(t_vertex0, cMul(t_S0,t_E0), cMul(t_S1, t_E1));
-            double t_squareDistance = a_rayOrigin.distancesq(t_I);
+        // Ray does intersect triangle...
+        t = cDot(edge2, qvec) * inv_det;        
+        t_squared = t*t;
 
-            // Collision has occurred
+        // Collision has occurred
 
-            // If we've already seen a closer collision, don't report
-            // this one
-            if (t_squareDistance >= a_colSquareDistance) return(false);
+        // If we've already seen a closer collision, don't report
+        // this one...
+        if (t_squared >= a_colSquareDistance) return(false);
 
-            // Okay, we want to report this collision
-            a_colObject = m_parent;
-            a_colTriangle = this;
-            a_colPoint = cAdd(a_rayOrigin, cMul(t_T, a_rayDir));
-            a_colSquareDistance = t_squareDistance;
+        // Okay, we want to report this collision
+        a_colObject = m_parent;
+        a_colTriangle = (cTriangle*)this;
+        a_colPoint = cAdd(a_rayOrigin, cMul(t, a_rayDir));
+        a_colSquareDistance = t_squared;
 
-            // Tell the caller that we found a new collision
-            return(true);            
-            
-        }
-        else return(false);               
-        
+        // Tell the caller that we found a new collision
+        return(true);
+
+#else
+
+      // Get the position of the triangle's vertices
+      cVector3d t_vertex0 = vertex_array[m_indexVertex0].getPos();
+      cVector3d t_vertex1 = vertex_array[m_indexVertex1].getPos();
+      cVector3d t_vertex2 = vertex_array[m_indexVertex2].getPos();
+      cVector3d t_E0, t_E1, t_N;
+
+      // Compute the triangle's normal
+      t_vertex1.subr(t_vertex0, t_E0);
+      t_vertex2.subr(t_vertex0, t_E1);
+      t_E0.crossr(t_E1, t_N);
+
+      // If the ray is parallel to the triangle (perpendicular to the
+      // normal), there's no collision
+      if (fabs(t_N.dot(a_rayDir))<10E-15f) return (false);
+
+      double t_T = cDot(t_N, cSub(t_vertex0,a_rayOrigin)) / cDot(t_N, a_rayDir);
+
+      //
+      if (t_T + INTERSECT_EPSILON < 0) return (false);
+
+      cVector3d t_Q = cSub(cAdd(a_rayOrigin, cMul(t_T, a_rayDir)), t_vertex0);
+      double t_Q0 = cDot(t_E0,t_Q);
+      double t_Q1 = cDot(t_E1,t_Q);
+      double t_E00 = cDot(t_E0,t_E0);
+      double t_E01 = cDot(t_E0,t_E1);
+      double t_E11 = cDot(t_E1,t_E1);
+      double t_D = (t_E00 * t_E11) - (t_E01 * t_E01);
+
+      //
+      if ((t_D > -10E-40f) && (t_D < 10E-40f)) return(false);        
+
+      double t_S0 = ((t_E11 * t_Q0) - (t_E01 * t_Q1)) / t_D;
+      double t_S1 = ((t_E00 * t_Q1) - (t_E01 * t_Q0)) / t_D;
+
+      // 
+      if (
+        (t_S0 >= 0.0 - INTERSECT_EPSILON) &&
+        (t_S1 >= 0.0 - INTERSECT_EPSILON) &&
+        ((t_S0 + t_S1) <= 1.0 + INTERSECT_EPSILON)
+        )
+      {
+        cVector3d t_I = cAdd(t_vertex0, cMul(t_S0,t_E0), cMul(t_S1, t_E1));
+        double t_squareDistance = a_rayOrigin.distancesq(t_I);
+
+        // Collision has occurred
+
+        // If we've already seen a closer collision, don't report
+        // this one
+        if (t_squareDistance >= a_colSquareDistance) return(false);
+
+        // Okay, we want to report this collision
+        a_colObject = m_parent;
+        a_colTriangle = (cTriangle*)this;
+        a_colPoint = cAdd(a_rayOrigin, cMul(t_T, a_rayDir));
+        a_colSquareDistance = t_squareDistance;
+
+        // Tell the caller that we found a new collision
+        return(true);            
+
+      }
+      else return(false);
+#endif
     }
-
 
     //-----------------------------------------------------------------------
     /*!

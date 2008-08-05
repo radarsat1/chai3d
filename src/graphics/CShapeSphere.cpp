@@ -36,10 +36,6 @@ cShapeSphere::cShapeSphere(double a_radius)
 {
     // initialize radius of sphere
     m_radius = cAbs(a_radius);
-    if (m_radius == 0)
-    {
-        m_radius = 0.1;
-    }
 
     // set material properties
     m_material.setShininess(100);
@@ -77,7 +73,7 @@ void cShapeSphere::render(const int a_renderMode)
 //===========================================================================
 cVector3d cShapeSphere::computeLocalForce(const cVector3d& a_localPosition)
 {
-
+	
     // In the following we compute the reaction forces between the tool and the
     // sphere.
     cVector3d localForce;

@@ -40,7 +40,6 @@ class cVertex
 {
 
   public:
-    // CONSTRUCTOR & DESTRUCTOR:
     //-----------------------------------------------------------------------
     /*!
         Constructor of cVertex.

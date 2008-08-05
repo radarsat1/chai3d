@@ -25,7 +25,17 @@
 
 //---------------------------------------------------------------------------
 #include "CFileLoader3DS.h"
+
+#ifdef _MSVC
 #include <conio.h>
+#endif
+
+#include <map>
+
+typedef std::map<unsigned int, unsigned int> uint_uint_map;
+
+bool g_3dsLoaderShouldGenerateExtraVertices = true;
+
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -72,6 +82,12 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
     // This CHAI mesh corresponds to the 3ds submesh
     cMesh* sub_mesh = a_mesh->createMesh();
 
+    // Assign a name to this mesh
+    strncpy(sub_mesh->m_objectName,(const char*)(cur_mesh.GetName().c_str()),CHAI_MAX_OBJECT_NAME_LENGTH);
+
+    // Create a vertex map for each submesh
+    sub_mesh->m_userData = new uint_uint_map;
+
     a_mesh->addChild(sub_mesh);
 
     // For each mesh in the file, we're going to create an additional mesh for
@@ -93,6 +109,16 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 
         newMeshes[i] = a_mesh->createMesh();
         cMesh* newMesh = newMeshes[i];
+
+        // Assign a name to this mesh
+        if (num_materials > 1)
+          _snprintf(newMesh->m_objectName,CHAI_MAX_OBJECT_NAME_LENGTH,"%s (mat %d)",
+            (const char*)(cur_mesh.GetName().c_str()),i);
+        else
+          _snprintf(newMesh->m_objectName,CHAI_MAX_OBJECT_NAME_LENGTH,"%s",
+          (const char*)(cur_mesh.GetName().c_str()));
+
+        newMesh->m_userData = new uint_uint_map;
         sub_mesh->addChild(newMesh);
 
         // Set up material properties for each mesh
@@ -128,9 +154,16 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
             newMeshes[i]->setTexture(newTexture,1);
           }
 
+          // We really failed to load a texture...
+          else {
+#ifdef _WIN32
+            CHAI_DEBUG_PRINT("Could not load texture map %s\n",curmap.mapName);
+#endif
+          }
+
         }
 
-        // get transparency
+        // Get transparency
         double transparency = cur_material.GetTransparency();
         float alpha = 1.0f - (float)(transparency);
         if (alpha < 1.0) {
@@ -179,7 +212,10 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
     for(unsigned int cur_tri_index=0; cur_tri_index<num_triangles; cur_tri_index++) {
 
       // Get all the information about this triangle
-      LTriangle2& cur_tri = cur_mesh.GetTriangle2(cur_tri_index);
+      // LTriangle2& cur_tri = cur_mesh.GetTriangle2(cur_tri_index);
+
+      // Get the vertex indices for this triangle...
+      const LTriangle& cur_indexed_tri = cur_mesh.GetTriangle(cur_tri_index);
 
       // Which CHAI mesh are we going to insert this triangle into?
       cMesh* cur_chai_mesh;
@@ -190,9 +226,11 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
       // Look for a material-specific submesh for this triangle if there is one...
       if (num_materials > 0) {
 
+        int curMaterialId = cur_mesh.m_tris[cur_tri_index].materialId;
+
         // This material id is in terms of the global material id, but we need the
         // local material id to find the right CHAI mesh...
-        int global_mat_id = cur_tri.materialId;
+        int global_mat_id = curMaterialId;
 
         int local_mat_id = -1;
 
@@ -218,20 +256,67 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 
       }
 
-      cVector3d v0(cur_tri.vertices[0].x,cur_tri.vertices[0].y,cur_tri.vertices[0].z);
-      cVector3d v1(cur_tri.vertices[1].x,cur_tri.vertices[1].y,cur_tri.vertices[1].z);
-      cVector3d v2(cur_tri.vertices[2].x,cur_tri.vertices[2].y,cur_tri.vertices[2].z);
+      unsigned int indexTriangle = -1;
+      bool foundTriangle = false;
 
-      unsigned int indexTriangle = cur_chai_mesh->newTriangle(v0,v1,v2);
+      if (g_3dsLoaderShouldGenerateExtraVertices == false) {
+
+        uint_uint_map* vertex_map = (uint_uint_map*)cur_chai_mesh->m_userData;
+        unsigned short indices[3];
+        unsigned short* pindex = (unsigned short*)(&cur_indexed_tri);
+        uint_uint_map::iterator viter; 
+
+        // For each vertex indexed by this triangle...
+        for(int k=0; k<3; k++) {
+
+          indices[k] = pindex[k];
+          viter = vertex_map->find(indices[k]);
+
+          LVector4 v = cur_mesh.GetVertex(indices[k]);
+          // If we've never seen this vertex before...
+          if (viter == vertex_map->end()) {
+            // Create a new vertex and put him in this map
+            int newVertexIndex = cur_chai_mesh->newVertex(v.x,v.y,v.z);
+            (*vertex_map)[(indices[k])] = newVertexIndex;
+            indices[k] = newVertexIndex;
+          }
+          else {
+            // Otherwise just grab his index...
+            indices[k] = (*viter).second;
+          }
+        }        
+
+        // Create the new triangle...
+        indexTriangle = cur_chai_mesh->newTriangle(indices[0],indices[1],indices[2]);
+      }      
+
+      if (g_3dsLoaderShouldGenerateExtraVertices == true) {
+      
+        LVector4 v0 = cur_mesh.GetVertex(cur_indexed_tri.a);
+        LVector4 v1 = cur_mesh.GetVertex(cur_indexed_tri.b);
+        LVector4 v2 = cur_mesh.GetVertex(cur_indexed_tri.c);
+
+        cVector3d vert0(v0.x,v0.y,v0.z);
+        cVector3d vert1(v1.x,v1.y,v1.z);
+        cVector3d vert2(v2.x,v2.y,v2.z);
+
+        indexTriangle = cur_chai_mesh->newTriangle(vert0,vert1,vert2);
+      }
+
       cTriangle* curTriangle = cur_chai_mesh->getTriangle(indexTriangle);
 
       double transparency = cur_chai_mesh->m_material.m_diffuse.getA();
 
       // Give properties to each vertex of this triangle
+      unsigned short* pindex = (unsigned short*)(&cur_indexed_tri);
+
       for(k=0; k<3; k++) {
-        LVector3 norm = cur_tri.vertexNormals[k];
-        LVector2 uv = cur_tri.textureCoords[k];
-        LColor3 color = cur_tri.color[k];
+
+        unsigned short curindex = pindex[k];
+
+        LVector3 norm = cur_mesh.GetNormal(curindex);
+        LVector2 uv = cur_mesh.GetUV(curindex);
+        LColor3 color = cur_mesh.GetColor(curindex);
 
         cVertex* vertex = curTriangle->getVertex(k);
         vertex->setNormal(norm.x,norm.y,norm.z);
@@ -241,8 +326,18 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 
     } // For every triangle in this 3ds mesh
 
+    // We're now done with all the vertex maps for this mesh...
+    for(int i=0; i<num_materials; i++) {
+      cMesh* curMesh = newMeshes[i];
+      uint_uint_map* pmap = (uint_uint_map*)curMesh->m_userData;
+      delete pmap;
+    }
+
     if (newMeshes) delete [] newMeshes;
 
+    uint_uint_map* pmap = (uint_uint_map*)sub_mesh->m_userData;
+    delete pmap;
+    
   } // For every mesh in the 3ds file
 
   // Copy relevant rendering state as generally useful flags in the main mesh.

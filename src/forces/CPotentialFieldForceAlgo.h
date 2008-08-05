@@ -44,10 +44,10 @@ class cPotentialFieldForceAlgo : public cGenericPointForceAlgo
     virtual ~cPotentialFieldForceAlgo() {};
 
     // METHODS:
-    //! Initialize the algorithm by passing the inital position of the device.
-    virtual void initialize(cWorld* a_world, const cVector3d& a_initialPos) {};
+    //! Initialize the algorithm by passing the initial position of the device.
+    virtual void initialize(cWorld* a_world, const cVector3d& a_initialPos) { m_world = a_world; };
     //! Compute the next force given the updated position of the device.
-    virtual cVector3d computeForces(cVector3d& a_nextDevicePos);
+    virtual cVector3d computeForces(const cVector3d& a_nextDevicePos);
 };
 
 //---------------------------------------------------------------------------

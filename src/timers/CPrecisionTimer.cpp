@@ -29,9 +29,17 @@ long cPrecisionTimer::m_currentMinimumTimerInterval = 0;
 
 // This was omitted from the VC6 SDK; it ensures that timers
 // don't tick once you've called timeKillTimer()
+
+// This flag appears to only work on XP, so we'll skip it for now...
+// #define USE_TIME_KILL_SYNCHRONOUS
+
+#ifdef USE_TIME_KILL_SYNCHRONOUS
 #ifndef TIME_KILL_SYNCHRONOUS
 #define TIME_KILL_SYNCHRONOUS 0x0100
 #endif
+#endif
+
+
 
 
 //===========================================================================
@@ -180,7 +188,11 @@ int cPrecisionTimer::set(int a_interval,  PRECISION_TIMER_CALLBACK* a_fpCallback
                            0,
                            internal_timer_callback,
                            (unsigned long)(this),
-                           TIME_PERIODIC | TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+                           TIME_PERIODIC | TIME_CALLBACK_FUNCTION
+#ifdef USE_TIME_KILL_SYNCHRONOUS
+                           | TIME_KILL_SYNCHRONOUS
+#endif
+                           );
 
     if (m_timer == 0)
     {

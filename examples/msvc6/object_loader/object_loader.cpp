@@ -165,6 +165,10 @@ BOOL Cobject_loaderApp::InitInstance() {
 
   // Create a camera
   camera = new cCamera(world);
+
+  // This is not strictly necessary; it enables rendering the camera
+  // (and children of the camera) as a visible object...
+  world->addChild(camera);
   
   // set camera position and orientation
   // 
@@ -188,7 +192,11 @@ BOOL Cobject_loaderApp::InitInstance() {
   // Create a light source
   light = new cLight(world);
   
+  // This would cause the light to follow the camera...
   // camera->addChild(light);
+
+  // This is not strictly necessary; it enables rendering the light
+  // (and children of the light) as a visible object
   world->addChild(light);
   light->setEnabled(true);
 
@@ -214,7 +222,7 @@ BOOL Cobject_loaderApp::InitInstance() {
   object->translate(g_initial_object_pos);
   object->rotate(cVector3d(0,1,0),45.0 * 3.14159 / 180.0);
 
-  object->computeGlobalPositions();
+  object->computeGlobalPositions(true);
   object->computeBoundaryBox(true);
 
   // Note that I don't bother to build a fancy collision detector
@@ -238,9 +246,11 @@ BOOL Cobject_loaderApp::InitInstance() {
   // going to gratuitously render
   object->setFrameSize(1.0, false);
 
-  // Compute normals for each triangle
-  // object->computeAllNormals();
-
+  // Compute normals for each triangle; generally you would want
+  // to do this only if you think your model doesn't already
+  // have normals in it...
+  //object->computeAllNormals();
+  
   world->computeGlobalPositions(false);
 
   // This will set rendering and haptic options as they're defined in
@@ -516,7 +526,7 @@ int Cobject_loaderApp::LoadModel(char* filename) {
     meshes_to_scale.push_back(cur_mesh);
 
     // Put all his children on the list of parents to process
-    for(int i=0; i<cur_mesh->getNumChildren(); i++) {
+    for(unsigned int i=0; i<cur_mesh->getNumChildren(); i++) {
 
       cGenericObject* cur_object = cur_mesh->getChild(i);
 
@@ -577,6 +587,30 @@ int Cobject_loaderApp::LoadModel(char* filename) {
   object = new_object;
   world->addChild(object);
 
+  /*
+  // Optional things that help make some models look good...
+
+  // Fix normals if they're broken in the file...
+  object->computeAllNormals();
+  object->reverseAllNormals();
+
+  // Set a transparency level for each vertex (for vertex-color mode) and
+  // for the current material (for material-color mode)
+  object->setTransparencyLevel(0.5);
+
+  // Enable multi-pass transparency
+  object->setTransparencyRenderMode(true,true);
+  object->enableTransparency(true,true);
+  camera->enableMultipassTransparency(true);
+  
+  // Add a nice material if the default material for this object doesn't
+  // look good...
+  cMaterial m = object->m_material;
+  m.m_ambient.set(1.0,0.8,0.8,0.5);
+  m.m_diffuse.set(1.0,0.8,0.8,0.5);
+  object->setMaterial(m,true);
+  */
+
   // Copy relevant rendering variables back to the GUI
   copy_rendering_options_to_gui();
 
@@ -622,7 +656,61 @@ void Cobject_loaderApp::zoom(int zoom_level) {
 
 // Called when the user moves the mouse in the main window
 // while a button is held down
-void Cobject_loaderApp::scroll(CPoint p, int left_button) {
+void Cobject_loaderApp::scroll(CPoint p, int button) {
+
+  int shift_pressed = GetKeyState(VK_SHIFT) & (1<<15);
+
+  // Get the current camera vectors
+  cVector3d up = camera->getUpVector();
+  cVector3d right = camera->getRightVector();
+  cVector3d look = camera->getLookVector();
+
+  if (button == MOUSE_BUTTON_RIGHT) {
+
+    cVector3d motion;
+
+    if (shift_pressed) {
+      // In/out motion based on vertical mouse movement
+      motion = ((double)p.y)/50.0 * look +
+        ((double)p.x)/-50.0 * right;        
+    }
+    else {
+      // Up/down motion based on vertical mouse movement
+      motion = ((double)p.y)/50.0 * up +
+        ((double)p.x)/-50.0 * right;        
+    }
+    camera->translate(motion);
+    world->computeGlobalPositions(true);
+    return;
+  }
+
+  // Middle button
+  if (button == MOUSE_BUTTON_MIDDLE) {
+    
+    cMatrix3d rot;
+    rot.identity();
+
+    // Map horizontal mouse motion to motion around the up vector
+    rot.rotate(up,(float)p.x / 300.0);
+
+    // Map vertical mouse motion to motion around the right vector
+    rot.rotate(right,(float)p.y / 300.0);    
+
+    // Build a new rotation matrix for the camera
+    cVector3d new_look = rot * look;
+    cVector3d new_up = rot * up;
+    new_look.normalize();
+    new_up.normalize();
+    cVector3d new_right = cCross(new_up,new_look);
+
+    rot.setCol0(new_look);
+    rot.setCol1(new_right);
+    rot.setCol2(new_up);
+
+    camera->setRot(rot);
+    world->computeGlobalPositions(true);
+    return;
+  }
 
   if (selected_object == 0) return;
 
@@ -659,26 +747,39 @@ void Cobject_loaderApp::scroll(CPoint p, int left_button) {
 
   }
 
-  if (left_button) {
+  if (button == MOUSE_BUTTON_LEFT) {
 
-    cVector3d axis1(-1,0,0);
-    object_to_move->rotate(axis1,-1.0*(float)p.y / 50.0);
+    if (shift_pressed) {
+      cVector3d translation_vector = 
+        (-1.0*(float)p.y / 100.0) * camera->getUpVector() +
+        ( 1.0*(float)p.x / 100.0) * camera->getRightVector();
+      object_to_move->translate(translation_vector);      
+    }
+
+    else {    
+
+      // These vectors come from the (unusual) definition of the CHAI
+      // camera's rotation matrix:
+      //
+      // column 0: look
+      // column 2: up
+      // column 1: look x up
+
+      // Rotation around the horizontal camera axis
+      cVector3d axis1(0,1,0);
+      camera->getRot().mul(axis1);
+      object_to_move->rotate(axis1,1.0*(float)p.y / 50.0);
   
-    cVector3d axis2(0,1,0);
-    object_to_move->rotate(axis2,(float)p.x / 50.0);
+      // Rotation around the vertical camera axis
+      cVector3d axis2(0,0,1);
+      camera->getRot().mul(axis2);
+      object_to_move->rotate(axis2,(float)p.x / 50.0);
+    }
 
-  }
-
-  else {
-
-    object_to_move->translate((float)p.x / 100.0, 0, 0);
-    object_to_move->translate(0, -1.0*(float)p.y / 100.0, 0);
-
-  }
-
-  object->computeGlobalPositions(1);
-  // object->computeBoundaryBox(true);
-  
+    // The object has moved/rotated, so update his global position/rotation
+    object->computeGlobalPositions(true);
+    //object->computeBoundaryBox(true);    
+  }  
 }
 
 
@@ -716,10 +817,9 @@ void object_loader_haptic_iteration(void* param) {
 
 
 // We use this in our "animation" routine...
-double sgn(double a) {
-  if (a>0) return 1.0;
-  else if (a<0) return -1.0;
-  else return 0.0;
+inline double sgn(const double& a) {
+  if (a>=0) return 1.0;
+  return -1.0;  
 }       
 
 
@@ -787,7 +887,7 @@ void Cobject_loaderApp::toggle_animation() {
   if (moving_object) {
     moving_object = 0;
     object->setPos(g_initial_object_pos);
-    object->computeGlobalPositions(1);
+    object->computeGlobalPositions(true);
   }
 
   // Enable animation
@@ -876,22 +976,20 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
       //
       // This has the nice property of always aligning the Phantom's
       // axes with the camera's axes.
+      camera->addChild(tool);
+      tool->setPos(-4.0, 0.0, 0.0);
 
-      // camera ->addChild(tool);
-
-      // Actually, that doesn't work well... need to sort out why cd 
-      // doesn't operate in the right frame if the tool is somebody's
-      // child.
-      world->addChild(tool);
-    
+      // This is what we would do if we _didn't_ want the tool to
+      // move around as a child of the camera
+      //world->addChild(tool);
+      // Rotate the tool so its axes align with our opengl-like axes
+      //tool->rotate(cVector3d(0,0,1),-90.0*M_PI/180.0);
+      //tool->rotate(cVector3d(1,0,0),-90.0*M_PI/180.0);
+      
       // set up a nice-looking workspace for the phantom so 
       // it fits nicely with our models
-      tool->setWorkspace(2.0,2.0,2.0);
-    
-      // Rotate the tool so its axes align with our opengl-like axes
-      tool->rotate(cVector3d(0,0,1),-90.0*M_PI/180.0);
-      tool->rotate(cVector3d(1,0,0),-90.0*M_PI/180.0);
-      tool->setRadius(0.05);
+      tool->setWorkspace(2.0,2.0,2.0);         
+      tool->setRadius(0.05);      
          
     }
     
@@ -915,7 +1013,10 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
     
     // Enable the "dynamic proxy", which will handle moving objects
     cProxyPointForceAlgo* proxy = tool->getProxy();
-    proxy->enableDynamicProxy(1);
+    proxy->enableDynamicProxy(true);
+
+    // Make sure the haptic device knows where he is in the camera frame
+    world->computeGlobalPositions(true);
 
 #ifdef USE_MM_TIMER_FOR_HAPTICS
 

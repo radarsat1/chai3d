@@ -73,9 +73,9 @@ void cStr(string& a_string, const int& a_value)
 	\param		a_precision  Number of digits displayed.
 */
 //===========================================================================
-void cStr(string& a_string, const float& a_value, const unsigned int& a_precision)
+void cStr(string& a_string, const float& a_value, const unsigned int a_precision)
 {
-	// make sure number of digits ranges between 0 and 20
+    // make sure number of digits ranges between 0 and 20
     unsigned int numDigits = a_precision;
     if (numDigits > 20)
     {
@@ -106,7 +106,7 @@ void cStr(string& a_string, const float& a_value, const unsigned int& a_precisio
 	\param		a_precision  Number of digits displayed.
 */
 //===========================================================================
-void cStr(string& a_string, const double& a_value, const unsigned int& a_precision)
+void cStr(string& a_string, const double& a_value, const unsigned int a_precision)
 {
 	// make sure number of digits ranges between 0 and 20
     unsigned int numDigits = a_precision;

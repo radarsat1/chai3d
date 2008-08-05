@@ -45,14 +45,18 @@ class cGenericPotentialField : public cGenericObject
 
     // METHODS:
     //! Compute interaction forces between a probe and this object, descending through child objects
-    cVector3d computeForces(cVector3d& a_probePosition);
+    virtual cVector3d computeForces(const cVector3d& a_probePosition);
 
   protected:
 
     // VIRTUAL METHODS:
 
     //! Compute the interaction force for this object in its local frame
-    virtual cVector3d computeLocalForce(const cVector3d& a_localProbePosition) const { return (cVector3d(0,0,0)); };
+    virtual cVector3d computeLocalForce(const cVector3d& a_localProbePosition)  { return (cVector3d(0,0,0)); };
+
+		// PROPERTIES:
+		//! Force
+		cVector3d m_globalForce;
 };
 
 //---------------------------------------------------------------------------

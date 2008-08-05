@@ -45,7 +45,7 @@ cWorld::cWorld()
     // set background properties
     m_backgroundColor.set(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_renderLightSources = 1;
+    m_renderLightSources = 1;    
 }
 
 

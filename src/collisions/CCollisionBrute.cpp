@@ -52,7 +52,7 @@ cCollisionBrute::cCollisionBrute(vector<cTriangle> *a_triangles)
     \param    a_segmentPointA  Initial point of segment.
     \param    a_segmentPointB  End point of segment.
     \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle Returns pointer to nearest colided triangle.
+    \param    a_colTriangle Returns pointer to nearest collided triangle.
     \param    a_colPoint  Returns position of nearest collision.
     \param    a_colSquareDistance  Returns distance between ray origin and
                                    collision point.
@@ -88,7 +88,8 @@ bool cCollisionBrute::computeCollision(cVector3d& a_segmentPointA,
     double colSquareDistance = dir.lengthsq();
 
     // check all triangles for collision and return the nearest one
-    for (unsigned int i=0; i<m_triangles->size(); i++)
+    unsigned int ntriangles = m_triangles->size();
+    for (unsigned int i=0; i<ntriangles; i++)
     {
 
         // check for a collision between this triangle and the segment by

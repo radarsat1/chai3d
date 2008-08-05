@@ -293,6 +293,7 @@ bool cCamera::select(const int a_windowPosX, const int a_windowPosY,
 void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
                          const int a_imageIndex)
 {
+  
     // compute global pose
     computeGlobalCurrentObjectOnly(true);
 
@@ -407,9 +408,7 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
 
     else {
       m_parentWorld->renderSceneGraph(CHAI_RENDER_MODE_RENDER_ALL);
-    }
-    
-    
+    }        
 
     // render the 'front' 2d object layer; it will set up its own
     // projection matrix
@@ -485,8 +484,14 @@ Render a 2d scene within the viewport.
 //===========================================================================
 void cCamera::render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_height)
 {
+
+  glPushAttrib(GL_ENABLE_BIT);
+
   // render widgets over the 3d scene
   glDisable(GL_LIGHTING);
+
+  // disable 3d clipping planes
+  for(int i=0; i<6; i++) glDisable(GL_CLIP_PLANE0+i);  
 
   // set up an orthographic projection matrix
   glMatrixMode(GL_PROJECTION);
@@ -515,6 +520,7 @@ void cCamera::render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_hei
   glDepthMask(GL_TRUE);
   glEnable(GL_DEPTH_TEST);
 
+  glPopAttrib();
 }
 
 //===========================================================================

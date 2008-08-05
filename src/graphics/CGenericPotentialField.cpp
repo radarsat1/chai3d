@@ -34,7 +34,7 @@
       \return   Returns the computed force in my parent's coordinate frame
 */
 //===========================================================================
-cVector3d cGenericPotentialField::computeForces(cVector3d& a_probePosition)
+cVector3d cGenericPotentialField::computeForces(const cVector3d& a_probePosition)
 {
     // compute the position of the probe in local coordinates.
     cVector3d probePositionLocal;
@@ -42,7 +42,7 @@ cVector3d cGenericPotentialField::computeForces(cVector3d& a_probePosition)
 
     // compute interaction forces with this object
     cVector3d localForce;
-    localForce = computeForces(probePositionLocal);
+    localForce = computeLocalForce(probePositionLocal);
 
     // compute interaction forces with children
     for (unsigned int i=0; i<m_children.size(); i++)
@@ -59,8 +59,8 @@ cVector3d cGenericPotentialField::computeForces(cVector3d& a_probePosition)
         }
     }
 
-    // convert the reaction force into my parent coodinates
-    cVector3d parentForce;
-    parentForce = cMul(m_localRot, localForce);
-    return parentForce;
+    // convert the reaction force into my parent coordinates
+    m_globalForce = cMul(m_localRot, localForce);
+
+    return m_globalForce;
 }

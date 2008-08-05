@@ -151,12 +151,12 @@ struct cColorf
     //-----------------------------------------------------------------------
     inline GLfloat operator[](const unsigned int n) const
     {
-        if (n>=0 && n<4) return m_color[n];
+        if (n<4) return m_color[n];
         else return 0.0f;
     }
     inline GLfloat& operator[](const unsigned int n)
     {
-        if (n>=0 && n<4) return m_color[n];
+        if (n<4) return m_color[n];
         else return m_color[0];
     }
 

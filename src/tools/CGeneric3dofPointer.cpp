@@ -214,7 +214,7 @@ void cGeneric3dofPointer::computeForces()
     cVector3d force;
     force.zero();
 
-    // compute forces in world coodinates
+    // compute forces in world coordinates
     force.add(m_proxyPointForceAlgo.computeForces(m_deviceGlobalPos));
     force.add(m_potentialFieldForceAlgo.computeForces(m_deviceGlobalPos));
 

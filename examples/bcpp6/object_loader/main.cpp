@@ -139,7 +139,7 @@ void TForm1::updateCameraPosition()
     // compute lookat position
     cVector3d lookat = cameraPosition;
 
-    // define role orientation of camera
+    // define roll orientation of camera
     cVector3d up(0.0, 0.0, 1.0);
 
     // set new position to camera
@@ -162,6 +162,7 @@ void TForm1::updateWorldSettings()
     object->useTexture(UseTextureMappingBox->Checked, true);
     object->useColors(UseVertexColorsBox->Checked, true);
     object->useMaterial(UseMaterialPropertiesBox->Checked, true);
+    object->enableTransparency(EnableTransparencyBox->Checked, true);
 
     // set transparency
     float transparency = (float)TransparencyLevelSlider->Position / 10.0f;
@@ -335,7 +336,6 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
             // it fits nicely with our models
             tool->setWorkspace(2.0,2.0,2.0);
 
-            // Rotate the tool so its axes align with our opengl-like axes
             tool->setRadius(0.02);
             tool->setFrameSize(0.04);
         }

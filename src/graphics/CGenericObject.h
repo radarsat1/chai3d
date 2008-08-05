@@ -30,6 +30,8 @@
 #include "CMacrosGL.h"
 #include <typeinfo>
 #include <vector>
+#include <list>
+
 //---------------------------------------------------------------------------
 using std::vector;
 //---------------------------------------------------------------------------
@@ -48,6 +50,9 @@ typedef enum {
 } chai_render_modes;
 //---------------------------------------------------------------------------
 
+//! Using filenames to define object names is not unusual, so _MAX_PATH
+//! is a good maximum name length...
+#define CHAI_MAX_OBJECT_NAME_LENGTH _MAX_PATH
 
 //===========================================================================
 /*!
@@ -244,7 +249,7 @@ class __rtti cGenericObject
     void setCollisionDetector(cGenericCollision* a_collisionDetector)
          { m_collisionDetector = a_collisionDetector; }
     //! Get pointer to this object's current collision detector.
-    cGenericCollision* getCollisionDetector() { return (m_collisionDetector); }
+    inline cGenericCollision* getCollisionDetector() const { return (m_collisionDetector); }
     //! Set collision rendering properties
     void setCollisionDetectorProperties(unsigned int a_displayDepth, cColorf& a_color, const bool a_affectChildren = false);
     //! Delete any existing collision detector and set the current cd to null (no collisions)
@@ -259,6 +264,8 @@ class __rtti cGenericObject
     void addChild(cGenericObject* a_object);
     //! Remove an object from my list of children, without deleting it
     bool removeChild(cGenericObject* a_object);
+    //! Does this object have the specified object as a child?
+    bool containsChild(cGenericObject* a_object, bool a_includeChildren=false);
     //! Remove an object from my list of children and delete it
     bool deleteChild(cGenericObject *a_object);
     //! Clear all objects from my list of children, without deleting them
@@ -266,10 +273,11 @@ class __rtti cGenericObject
     //! Clear and delete all objects from my list of children
     void deleteAllChildren();
     //! Return the number of children on my list of children
-    int getNumChildren() { return m_children.size(); }
-
+    unsigned int getNumChildren() { return m_children.size(); }
+    //! Fill this list with all of my descendants.
+    void enumerateChildren(std::list<cGenericObject*>& a_childList, bool a_includeCurrentObject=true);
     //! Remove me from my parent's CHAI scene graph
-    bool removeFromGraph()
+    inline bool removeFromGraph()
     {
       if (m_parent) return m_parent->removeChild(this);
       else return false;
@@ -293,6 +301,9 @@ class __rtti cGenericObject
 
     //! An arbitrary data pointer, not used by CHAI
     void* m_userData;
+
+    //! A name for this object, automatically assigned by mesh loaders (for example)
+    char m_objectName[CHAI_MAX_OBJECT_NAME_LENGTH];
 
     //! Set the m_userData pointer for this mesh and - optionally - for my children    
     virtual void setUserData(void* a_data, const bool a_affectChildren=0);
@@ -342,7 +353,7 @@ class __rtti cGenericObject
 		bool m_hapticEnabled;
     //! If \b true, this object's reference frame is rendered as a set of arrows
     bool m_showFrame;
-    //! If \b true, this object's boudary box is displayed as a set of lines
+    //! If \b true, this object's boundary box is displayed as a set of lines
     bool m_showBox;
     //! If \b true, the skeleton of the scene graph is rendered at this node
     bool m_showTree;

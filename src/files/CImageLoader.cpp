@@ -24,6 +24,23 @@
 #include "CImageLoader.h"
 #include "CFileLoaderBMP.h"
 #include "CFileLoaderTGA.h"
+#include "cMacrosGL.h"
+
+#ifdef _WIN32
+
+// Don't let the ATL headers decide for themselves which lib file to
+// link against; let us link here or in client applications...
+#define _ATL_NO_DEFAULT_LIBS
+
+// Borland and MSVC put the atl headers in different places
+#ifdef _MSVC
+#include <atlbase.h>
+#else
+#include <atl/atlbase.h>
+#endif
+
+#endif
+
 //---------------------------------------------------------------------------
 
 // For gl image formats...
@@ -128,6 +145,11 @@ void cImageLoader::cleanup()
 //===========================================================================
 int cImageLoader::loadFromFile(const char* filename)
 {
+    // Sometimes we'll make a one-level recursive call into this
+    // function; this is an extra safety check to avoid extra
+    // recursion...
+    static int recursive_call = 0;
+
     // cleanup previous image
     cleanup();
 
@@ -157,7 +179,9 @@ int cImageLoader::loadFromFile(const char* filename)
         if (result == 0)
         {
             cleanup();
-            return -1;
+
+            // Try again using the windows native loader...
+            return loadFromFileOLE(filename);
         }
 
         m_width = targa_image.GetImageWidth();
@@ -182,7 +206,9 @@ int cImageLoader::loadFromFile(const char* filename)
         {
             // Unrecognized format...
             cleanup();
-            return -1;
+
+            // Try again using the windows native loader...
+            return loadFromFileOLE(filename);
         }
 
         m_data = new unsigned char[m_width*m_height*(m_bits_per_pixel/8)];
@@ -202,7 +228,9 @@ int cImageLoader::loadFromFile(const char* filename)
         if (result == 0)
         {
             cleanup();
-            return -1;
+
+            // Try again using the windows native loader...
+            return loadFromFileOLE(filename);
         }
 
         m_width = bmp_image.getWidth();
@@ -218,14 +246,60 @@ int cImageLoader::loadFromFile(const char* filename)
         memcpy(m_data,bmp_image.pBitmap(),(m_bits_per_pixel/8)*m_width*m_height);
     }
 
+#ifdef _WIN32
+
+    //--------------------------------------------------------------------
+    // Unrecognized file format - use win32 loader
+    //--------------------------------------------------------------------
+    else {
+
+      return loadFromFileOLE(filename);
+
+    }
+      
+#else
+
+    //--------------------------------------------------------------------
+    // Unrecognized file format an win32 not available - try again as a .bmp
+    //--------------------------------------------------------------------
+    else if (recursive_call == 0)
+    {
+        // We don't handle any other file formats, but as a helpful
+        // extra, we'll try to open filename.bmp - regardless of the
+        // original extension.  This allows users to convert image
+        // files in batch, without having to manipulate filenames
+        // that might be stored within model files.
+
+        // Make sure we can actually build a replacement extension...
+        if (extension == 0) {
+            m_initialized = 0;
+            return -1;
+        }
+        // Extra sanity check to avoid deep recursion
+        recursive_call = 1;
+
+        char new_filename[MAX_PATH];
+
+        // Replace the extension
+        strcpy(new_filename,filename);
+        strcpy(new_filename+(extension-filename),"bmp");
+
+        // Try again...
+        int result = loadFromFile(new_filename);
+
+        recursive_call = 0;
+        return result;
+    }
+
     //--------------------------------------------------------------------
     // Unrecognized file format
     //--------------------------------------------------------------------
-    else
-    {
-        m_initialized = 0;
-        return -1;
+    else {
+      m_initialized = 0;
+      return -1;
     }
+
+#endif
 
     //--------------------------------------------------------------------
     // Finalize
@@ -260,7 +334,10 @@ char* find_extension(const char* a_input)
     curpos--;
 
     // Look for the last '.'
-    while( (curpos > a_input) && (*curpos != '.')) curpos--;
+    while( (curpos > a_input) && (*curpos != '.')) {
+      if (*curpos == '\\') return 0;
+      curpos--;
+    }
 
     // No '.' found
     if (curpos == a_input) return 0;
@@ -354,3 +431,129 @@ void string_tolower(char* a_dest, const char* a_source)
     a_dest[len] = '\0';
 }
 
+
+
+int cImageLoader::loadFromFileOLE(const char* szPathName) {
+
+#ifndef _WIN32
+  
+    return -1;
+
+#else
+
+    // From: http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=41
+
+    HDC       hdcTemp;              // The DC To Hold Our Bitmap
+    HBITMAP   hbmpTemp;             // Holds The Bitmap Temporarily
+    IPicture  *pPicture;            // IPicture Interface
+    OLECHAR   wszPath[MAX_PATH+1];  // Full Path To Picture (WCHAR)
+    char      szPath[MAX_PATH+1];   // Full Path To Picture
+    long      lWidth;               // Width In Logical Units
+    long      lHeight;              // Height In Logical Units
+    
+    // Perform any pre-processing necessary for dealing with the
+    // path...
+    strcpy(szPath, szPathName);
+
+    // Convert From ASCII To Unicode
+    MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, MAX_PATH);
+
+    // Load the picture
+    HRESULT hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
+
+    if(FAILED(hr)) {
+
+      // Try again using .bmp and jpeg extensions, as a nice helpful extra
+      // for folks with binary model formats...
+
+      char* extension = find_extension(szPath);
+      if (extension == 0) return -1;
+      strcpy(extension,"jpg");
+      MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, MAX_PATH);
+      hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
+
+      if(FAILED(hr)) {
+        char* extension = find_extension(szPath);
+        if (extension == 0) return -1;
+        strcpy(extension,"bmp");
+        MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, MAX_PATH);
+        hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
+      }
+
+      if(FAILED(hr)) {
+        return -1;
+      }
+    }
+
+    // Create The Windows Compatible Device Context
+    hdcTemp = CreateCompatibleDC(GetDC(0));
+
+    if(!hdcTemp)														
+    {
+      pPicture->Release();
+      return -1;
+    }
+
+    pPicture->get_Width(&lWidth);
+    pPicture->get_Height(&lHeight);
+    
+    // Convert from annoying Windows "logical units" to pixels
+    m_width = MulDiv(lWidth, GetDeviceCaps(hdcTemp, LOGPIXELSX), 2540);
+    m_height = MulDiv(lHeight, GetDeviceCaps(hdcTemp, LOGPIXELSY), 2540);
+
+    //	Create A Temporary Bitmap
+    BITMAPINFO	bi = {0};
+    DWORD		*pBits = 0;
+
+    bi.bmiHeader.biSize	= sizeof(BITMAPINFOHEADER);
+    bi.bmiHeader.biBitCount = 32;
+    bi.bmiHeader.biWidth = m_width;
+    bi.bmiHeader.biHeight = m_height;
+    bi.bmiHeader.biCompression	= BI_RGB;
+    bi.bmiHeader.biPlanes = 1;
+
+    //	Create a bitmap
+    hbmpTemp = CreateDIBSection(hdcTemp, &bi, DIB_RGB_COLORS, (void**)&pBits, 0, 0);
+
+    if(!hbmpTemp)
+    {
+      DeleteDC(hdcTemp);
+      pPicture->Release();
+      return -1;
+    }
+
+    // Get ready to render to memory
+    SelectObject(hdcTemp, hbmpTemp);
+
+    // Render The IPicture onto the bitmap
+    pPicture->Render(hdcTemp, 0, 0, m_width, m_height, 0, 0, lWidth, lHeight, 0);
+
+    m_data = new unsigned char[m_width*m_height*4];
+
+    unsigned char* original_image_pos = (unsigned char*)(pBits);
+    unsigned char* new_image_pos = m_data;
+
+    // Convert From BGR To RGBA into our output array
+    for(long i = 0; i < m_width* m_height; i++)
+    {
+        new_image_pos[0] = original_image_pos[2];
+        new_image_pos[1] = original_image_pos[1];
+        new_image_pos[2] = original_image_pos[0];
+        new_image_pos[3] = 255;
+
+        new_image_pos += 4;
+        original_image_pos += 4;
+    }
+
+    // Clean up
+    DeleteObject(hbmpTemp);
+    DeleteDC(hdcTemp);
+    pPicture->Release();
+
+    m_format = GL_RGBA;
+    m_initialized = 1;    
+
+    return 0;
+#endif
+
+}

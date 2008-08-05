@@ -73,7 +73,7 @@ IDR_MAINFRAME           ICON                    "res\\object_loader.ico"
 // Dialog
 //
 
-IDD_object_loader_DIALOG DIALOGEX 0, 0, 543, 374
+IDD_object_loader_DIALOG DIALOGEX 0, 0, 543, 383
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | 
     WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
@@ -87,8 +87,8 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,443,19,81,10
     CONTROL         "Show coordinate frame",IDC_CHECK_SHOWFRAME,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,443,32,89,10
-    CONTROL         "Show boundary box",IDC_CHECK_SHOWBOX,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,443,45,79,10
+    CONTROL         "Show boundary box",IDC_CHECK_SHOWBOX,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,443,45,79,10
     CONTROL         "Show vertex normals",IDC_CHECK_SHOWNORMALS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,443,58,81,10
     CONTROL         "Enable texture-mapping",IDC_CHECK_USETEXTURE,"Button",
@@ -102,21 +102,21 @@ BEGIN
     CONTROL         "Slider1",IDC_CAMZOOM_SLIDER,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,437,197,97,15
     LTEXT           "Camera zoom",IDC_STATIC,442,184,44,8
-    LTEXT           "Left-click and drag on an object to rotate it, right-click and drag on an object to move it...",
-                    IDC_STATIC,7,289,301,9
-    PUSHBUTTON      "Enable haptics",IDC_TOGGLEHAPTICS_BUTTON,7,353,95,14
-    LTEXT           "Haptic object properties :",IDC_STATIC,7,306,80,8
+    LTEXT           "Left-click on an object to rotate it, shift-left-click on an object to move it...",
+                    IDC_STATIC,7,289,235,9
+    PUSHBUTTON      "Enable haptics",IDC_TOGGLEHAPTICS_BUTTON,7,362,95,14
+    LTEXT           "Haptic object properties :",IDC_STATIC,7,319,80,8
     CONTROL         "Slider1",IDC_STIFFNESS_SLIDER,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,7,331,97,15
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,7,344,97,15
     CONTROL         "Slider1",IDC_STATICFRICTION_SLIDER,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,108,331,97,15
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,108,344,97,15
     CONTROL         "Slider1",IDC_DYNAMIC_FRICTION_SLIDER,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,209,331,97,15
-    LTEXT           "Stiffness: xx",IDC_STIFFNESS_TEXT,11,322,95,8
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,209,344,97,15
+    LTEXT           "Stiffness: xx",IDC_STIFFNESS_TEXT,11,335,95,8
     LTEXT           "Static Friction Radius: xx",IDC_STATICFRICTION_TEXT,113,
-                    320,94,8
+                    333,94,8
     LTEXT           "Dynamic Friction Radius: xx",
-                    IDC_DYNAMIC_FRICTION_RADIUS_TEXT,213,320,95,8
+                    IDC_DYNAMIC_FRICTION_RADIUS_TEXT,213,333,95,8
     PUSHBUTTON      "Toggle Stereo",IDC_TOGGLE_STEREO_BUTTON,443,220,94,14
     CONTROL         "Slider1",IDC_STEREOFOCUS_SLIDER,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,437,289,97,15
@@ -125,11 +125,13 @@ BEGIN
     CONTROL         "Slider1",IDC_STEREOSEP_SLIDER,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,437,254,97,15
     LTEXT           "Stereo separation: xx",IDC_STEREOSEP_TEXT,441,243,95,8
-    PUSHBUTTON      "Animate Object",IDC_ANIMATION_BUTTON,114,353,88,14
+    PUSHBUTTON      "Animate Object",IDC_ANIMATION_BUTTON,114,362,88,14
     CONTROL         "Enable face culling",IDC_CHECK_CULLING,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,443,110,81,10
     CONTROL         "Enable transparency",IDC_CHECK_TRANSPARENCY,"Button",
                     BS_3STATE | WS_TABSTOP,443,123,81,10
+    LTEXT           "Right-click or shift-right-click the canvas to pan the camera, middle-click the canvas to rotate the camera...",
+                    IDC_STATIC,7,301,335,9
 END
 
 
@@ -184,7 +186,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 536
         TOPMARGIN, 7
-        BOTTOMMARGIN, 367
+        BOTTOMMARGIN, 376
     END
 END
 #endif    // APSTUDIO_INVOKED

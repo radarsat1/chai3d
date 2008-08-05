@@ -58,9 +58,6 @@ class cVertex;
 class cMesh : public cGenericObject
 {
 
-  // cTriangle accesses cMesh's vertex arrays directly
-  friend cTriangle;
-
   public:
     // CONSTRUCTOR & DESTRUCTOR:
 
@@ -72,6 +69,8 @@ class cMesh : public cGenericObject
     // METHODS - GENERAL
     //! Get parent world
     cWorld* getParentWorld() { return (m_parentWorld); }
+    //! Set parent world
+    void setParentWorld(cWorld* a_world) { m_parentWorld = a_world; }
 
     //! Load a 3D object file (CHAI currently supports .obj and .3ds files)
     virtual bool loadFromFile(const string& a_fileName);
@@ -88,13 +87,13 @@ class cMesh : public cGenericObject
     bool removeVertex(const unsigned int a_index);
     
     //! Access the vertex at the specified position in my vertex array (and maybe my childrens' arrays)
-    inline cVertex* getVertex(unsigned int a_index, bool a_includeChildren = false);
+    cVertex* getVertex(unsigned int a_index, bool a_includeChildren = false);
 
     //! Read the number of stored vertices, optionally including those of my children
     unsigned int getNumVertices(bool a_includeChildren = false) const;
     
     //! Access my vertex list directly (use carefully)
-    vector<cVertex>* pVertices() { return (&m_vertices); }
+    inline virtual vector<cVertex>* pVertices() { return (&m_vertices); }
 
 
     // METHODS - TRIANGLES
@@ -120,21 +119,19 @@ class cMesh : public cGenericObject
     void clear();
 
     //! Access my triangle array directly (use carefully)
-    vector<cTriangle>* pTriangles() { return (&m_triangles); }
+    inline vector<cTriangle>* pTriangles() { return (&m_triangles); }
 
 
     // METHODS - GRAPHIC RENDERING
 
     //! Set the material for this mesh, and optionally pass it on to my children
-    void setMaterial(cMaterial& a_mat, const bool a_affectChildren=false);
-    
-    //! Compute all triangle normals, optionally propagating the operation to my children
-    void computeAllNormals(const bool a_affectChildren=0);
-
+    void setMaterial(cMaterial& a_mat, const bool a_affectChildren=false);   
     //! Set the alpha value at each vertex and in all of my material colors
     void setTransparencyLevel(const float a_level, const bool a_applyToTextures=false, const bool a_affectChildren=true);    
     //! Specify whether this mesh should use multipass transparency (see cCamera)
     void setTransparencyRenderMode(const bool a_useMultipassTransparency, const bool a_affectChildren=true);      
+    //! Is multipass transparency used for this mesh?
+    bool getMultipassTransparencyEnabled() const { return m_useMultipassTransparency; }
     //! Enable or disable transparency (also see setTransparencyRenderMode)... turns the depth mask _off_!
     void enableTransparency(const bool a_useTransparency, const bool a_affectChildren=true);
     // ! Is transparency enabled for this mesh?
@@ -205,15 +202,24 @@ class cMesh : public cGenericObject
 
     // METHODS - MESH MANIPULATION:
 
+    //! Compute all triangle normals, optionally propagating the operation to my children
+    void computeAllNormals(const bool a_affectChildren=0);
+    
     //! Extrude each vertex of the mesh by some amount along its normal
     void extrude(const double a_extrudeDistance, const bool a_affectChildren=0,
       const bool a_updateCollisionDetector=0);
 
-    //! Simple method used to create new meshes "just like me".
-    virtual cMesh* createMesh() { return new cMesh(m_parentWorld); }
+    //! Simple method used to create a new (empty) mesh of my type
+    inline virtual cMesh* createMesh() const { return new cMesh(m_parentWorld); }
 
     //! Render triangles, material and texture properties.
     virtual void renderMesh(const int a_renderMode=0);
+
+    //! Compute the center of mass of this mesh, based on vertex positions
+    virtual cVector3d getCenterOfMass(const bool a_includeChildren=0);      
+
+    //! Reverse all normals on this model
+    virtual void reverseAllNormals(const bool a_affectChildren=0);
 
 		// MEMBERS:
     // material property of mesh

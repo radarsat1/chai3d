@@ -49,7 +49,7 @@ class cGenericPointForceAlgo
     // METHODS:
     //! Get a pointer to the world in which the force algorithm is operating.
     cWorld* getWorld() { return (m_world); }
-    //! Initialize the algorithm by passing the inital position of the device.
+    //! Initialize the algorithm by passing the initial position of the device.
     virtual void initialize(cWorld* a_world, const cVector3d& a_initialPos) {};
     //! Compute the next force given the updated position of the device.
     virtual cVector3d computeForces(const cVector3d& a_nextDevicePos)

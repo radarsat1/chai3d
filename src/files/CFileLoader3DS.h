@@ -44,6 +44,13 @@ using std::string;
 using std::vector;
 //---------------------------------------------------------------------------
 
+// Clients can use this to tell the 3ds loader how to behave in terms
+// of vertex merging.
+//
+// If 'true' (default), loaded 3ds files will have three _distinct_ vertices
+// per triangle, with no vertex re-use.
+extern bool g_3dsLoaderShouldGenerateExtraVertices;
+
 //===========================================================================
 /*!
       \brief    The following file provides a parser to load 3d images

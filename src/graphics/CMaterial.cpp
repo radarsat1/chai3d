@@ -141,7 +141,7 @@ void cMaterial::render()
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (const float *)&m_diffuse);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (const float *)&m_specular);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, (const float *)&m_emission);
-    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, m_shininess);    
+    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, m_shininess);
 }
 
 

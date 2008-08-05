@@ -50,7 +50,7 @@ class cCollisionAABBNode
     //! Constructor of cCollisionAABBNode.
     cCollisionAABBNode() { m_parent = 0; m_nodeType = AABB_NODE_GENERIC; }
     //! Destructor of cCollisionAABBNode.
-    virtual ~cCollisionAABBNode() { }
+    virtual ~cCollisionAABBNode() {}
 
     // METHODS:
     //! Create a bounding box for the portion of the model at or below the node.
@@ -167,6 +167,8 @@ class cCollisionAABBInternal : public cCollisionAABBNode
     cCollisionAABBNode *m_leftSubTree;
     //! The root of this node's right subtree.
     cCollisionAABBNode *m_rightSubTree;
+    //! Test box for collision with ray itself (as compared to line's box)?
+    bool m_testLineBox;
 };
 
 //---------------------------------------------------------------------------

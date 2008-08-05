@@ -19,9 +19,9 @@
 
 */
 
-#define WIN32
+// #define WIN32
 
-#ifdef WIN32
+#ifdef _WIN32
 #ifndef __DHDC_EXPORT
 #define __API  _declspec(dllimport) __stdcall
 #else

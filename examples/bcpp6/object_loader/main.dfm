@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 290
-  Top = 313
+  Left = 306
+  Top = 152
   Width = 933
   Height = 842
   Caption = 'CHAI 3D - Object Loader'
@@ -20,7 +20,7 @@ object Form1: TForm1
     Left = 724
     Top = 0
     Width = 0
-    Height = 808
+    Height = 815
     Cursor = crHSplit
     Align = alRight
   end
@@ -28,7 +28,7 @@ object Form1: TForm1
     Left = 0
     Top = 0
     Width = 724
-    Height = 808
+    Height = 815
     Align = alClient
     Color = clNone
     TabOrder = 0
@@ -37,7 +37,7 @@ object Form1: TForm1
     OnMouseUp = Panel1MouseUp
     object StatusBar1: TStatusBar
       Left = 1
-      Top = 788
+      Top = 795
       Width = 722
       Height = 19
       Panels = <>
@@ -48,7 +48,7 @@ object Form1: TForm1
     Left = 724
     Top = 0
     Width = 201
-    Height = 808
+    Height = 815
     Align = alRight
     TabOrder = 1
     object GroupBox2: TGroupBox
@@ -86,7 +86,7 @@ object Form1: TForm1
       TabOrder = 1
       object Label16: TLabel
         Left = 20
-        Top = 196
+        Top = 208
         Width = 36
         Height = 13
         Caption = 'Opacity'
@@ -99,7 +99,7 @@ object Form1: TForm1
       end
       object WireFrameBox: TCheckBox
         Left = 16
-        Top = 24
+        Top = 16
         Width = 97
         Height = 17
         Caption = 'Wire Frame'
@@ -113,7 +113,7 @@ object Form1: TForm1
       end
       object ShowFrameBox: TCheckBox
         Left = 16
-        Top = 48
+        Top = 40
         Width = 97
         Height = 17
         Caption = 'Show Frame'
@@ -127,7 +127,7 @@ object Form1: TForm1
       end
       object ShowBoundaryBoxBox: TCheckBox
         Left = 16
-        Top = 72
+        Top = 64
         Width = 121
         Height = 17
         Caption = 'Show Boundary Box'
@@ -143,7 +143,7 @@ object Form1: TForm1
       end
       object ShowNormalsBox: TCheckBox
         Left = 16
-        Top = 96
+        Top = 88
         Width = 97
         Height = 17
         Caption = 'Show Normals'
@@ -157,7 +157,7 @@ object Form1: TForm1
       end
       object UseTextureMappingBox: TCheckBox
         Left = 16
-        Top = 120
+        Top = 112
         Width = 121
         Height = 17
         Caption = 'Use Texture Mapping'
@@ -173,7 +173,7 @@ object Form1: TForm1
       end
       object UseVertexColorsBox: TCheckBox
         Left = 16
-        Top = 144
+        Top = 136
         Width = 113
         Height = 17
         Caption = 'Use Vertex Colors'
@@ -187,7 +187,7 @@ object Form1: TForm1
       end
       object UseMaterialPropertiesBox: TCheckBox
         Left = 16
-        Top = 168
+        Top = 160
         Width = 129
         Height = 17
         Caption = 'Use Material Properties'
@@ -203,7 +203,7 @@ object Form1: TForm1
       end
       object TransparencyLevelSlider: TTrackBar
         Left = 72
-        Top = 192
+        Top = 204
         Width = 97
         Height = 25
         Orientation = trHorizontal
@@ -215,6 +215,14 @@ object Form1: TForm1
         ThumbLength = 15
         TickMarks = tmBottomRight
         TickStyle = tsAuto
+      end
+      object EnableTransparencyBox: TCheckBox
+        Left = 16
+        Top = 184
+        Width = 121
+        Height = 17
+        Caption = 'Use Transparency'
+        TabOrder = 8
       end
     end
     object GroupBox5: TGroupBox

@@ -113,6 +113,7 @@ __published:
     TLabel *Label17;
     TTrackBar *CollisionDepthSlider;
     TStatusBar *StatusBar1;
+  TCheckBox *EnableTransparencyBox;
     void __fastcall FormCreate(TObject *Sender);
     void __fastcall Timer1Timer(TObject *Sender);
     void __fastcall ToggleHapticsButtonClick(TObject *Sender);

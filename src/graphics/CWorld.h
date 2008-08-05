@@ -97,7 +97,7 @@ class cWorld : public cGenericObject
     
     //! It's useful to store the world's modelview matrix, for rendering stuff in "global" coordinates
     double m_worldModelView[16];
-
+    
 protected:
     // METHODS:
     //! Add a light source to this world

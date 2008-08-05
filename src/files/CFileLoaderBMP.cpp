@@ -32,7 +32,7 @@
 //===========================================================================
 cFileLoaderBMP::cFileLoaderBMP()
 {
-    // initialisation
+    // initialization
     reset();
 }
 
@@ -47,7 +47,7 @@ cFileLoaderBMP::cFileLoaderBMP()
 //===========================================================================
 cFileLoaderBMP::cFileLoaderBMP(char* a_fileName)
 {
-    // initialisation
+    // initialization
     reset();
 
     // load BMP file
@@ -138,7 +138,7 @@ bool cFileLoaderBMP::loadBMP(char* a_fileName)
     // calculate the size of the image data with padding
     m_dataSize = (m_width * m_height * (unsigned int)(m_bmih.biBitCount / 8.0));
 
-    // calculate the number of available colours
+    // calculate the number of available colors
     numColors = 1 << m_bmih.biBitCount;
 
     // if the bitmap is not 8 bits per pixel or more return in error

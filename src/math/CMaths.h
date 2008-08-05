@@ -50,10 +50,10 @@ inline bool cZero(const double& a_value)
     \param    a_boundMax  Positive bound.
     \return   Return \b true if \e value is greater than 0 and either
               \e maxBound is negative, or \e value is less than\e maxBound.
-              Otherwize return \b false.
+              Otherwise return \b false.
 */
 //===========================================================================
-inline bool cPositiveBound(const double a_value, const double a_boundMax)
+inline bool cPositiveBound(const double& a_value, const double& a_boundMax)
 {
     return ((a_value > CHAI_TINY) && ((a_boundMax < 0) || (a_value < a_boundMax)));
 }
@@ -80,6 +80,9 @@ template<class T> inline T cAbs(const T a_value)
     \param    a_value1  First value.
     \param    a_value2  Second value.
     \return   Return maximum of a_value1 and a_value2.
+
+    Note that this function should _not_ be modified to take inputs by
+    reference.
 */
 //===========================================================================
 template<class T> inline T cMax(const T a_value1, const T a_value2)
@@ -95,6 +98,9 @@ template<class T> inline T cMax(const T a_value1, const T a_value2)
     \param    a_value1  First value.
     \param    a_value2  Second value.
     \return   Return maximum of a_value1 and a_value2.
+
+    Note that this function should _not_ be modified to take inputs by
+    reference.
 */
 //===========================================================================
 template<class T> inline T cMin(const T a_value1, const T a_value2)
@@ -113,7 +119,7 @@ template<class T> inline T cMin(const T a_value1, const T a_value2)
     \return   Return maximum of a_value1, a_value2 and a_value3.
 */
 //===========================================================================
-template<class T> inline T cMax3(const T a_value1, const T a_value2, const T a_value3)
+template<class T> inline T cMax3(const T& a_value1, const T& a_value2, const T& a_value3)
 {
     return (cMax(a_value1, cMax(a_value2, a_value3)));
 }
@@ -129,7 +135,7 @@ template<class T> inline T cMax3(const T a_value1, const T a_value2, const T a_v
     \return   Return minimum of a_value1, a_value2 and a_value3.
 */
 //===========================================================================
-template<class T> inline T cMin3(const T a_value1, const T a_value2, const T a_value3)
+template<class T> inline T cMin3(const T& a_value1, const T& a_value2, const T& a_value3)
 {
     return (cMin(a_value1, cMin(a_value2, a_value3)));
 }
@@ -142,6 +148,9 @@ template<class T> inline T cMin3(const T a_value1, const T a_value2, const T a_v
     \param    a_value1  First value.
     \param    a_value2  Second value.
     \return   Return max(abs(p), abs(q)).
+
+    Note that this function should _not_ be modified to take inputs by
+    reference.
 */
 //===========================================================================
 template<class T> inline T cMaxAbs(const T a_value1, const T a_value2)
@@ -157,6 +166,9 @@ template<class T> inline T cMaxAbs(const T a_value1, const T a_value2)
     \param    a_value1  First value.
     \param    a_value2  Second value.
     \return   Return min(abs(p), abs(q)).
+
+    Note that this function should _not_ be modified to take inputs by
+    reference.
 */
 //===========================================================================
 template<class T> inline T cMinAbs(const T a_value1, const T a_value2)
@@ -175,7 +187,7 @@ template<class T> inline T cMinAbs(const T a_value1, const T a_value2)
     \return   Return max(abs(p), abs(q), abs(r)).
 */
 //===========================================================================
-template<class T> inline T cMax3Abs(const T a_value1, const T a_value2, const T a_value3)
+template<class T> inline T cMax3Abs(const T& a_value1, const T& a_value2, const T& a_value3)
 {
     return cMaxAbs(a_value1, cMaxAbs(a_value2, a_value3));
 }
@@ -191,9 +203,9 @@ template<class T> inline T cMax3Abs(const T a_value1, const T a_value2, const T 
     \return   Return min(abs(p), abs(q), abs(r)).
 */
 //===========================================================================
-template<class T> inline T cMin3Abs(const T a_value1, const T a_value2, const T a_value3)
+template<class T> inline T cMin3Abs(const T& a_value1, const T& a_value2, const T& a_value3)
 {
-    return cMinAbs(a_value1, cMinAbsS(a_value2, a_value3));
+    return cMinAbs(a_value1, cMinAbs(a_value2, a_value3));
 }
 
 
@@ -223,7 +235,7 @@ template<class T> inline void cSwap(T &a_value1, T &a_value2)
     \return   Return an interpolated result: (1-level) * lo + level * hi.
 */
 //===========================================================================
-template<class T> inline T cLerp(const double a_level, const T& a_value1, const T& a_value2)
+template<class T> inline T cLerp(const double& a_level, const T& a_value1, const T& a_value2)
 {
     return (a_value2 * a_level + a_value1 * (1 - a_level));
 }
@@ -237,6 +249,9 @@ template<class T> inline T cLerp(const double a_level, const T& a_value1, const 
     \param    a_low  Low boundary.
     \param    a_high  High boundary.
     \return   Return clamped value.
+
+    Note that this function should _not_ be modified to take inputs by
+    reference.
 */
 //===========================================================================
 template<class T> inline T cClamp(const T a_value, const T a_low, const T a_high)
@@ -253,7 +268,7 @@ template<class T> inline T cClamp(const T a_value, const T a_low, const T a_high
     \return   Return clamped value.
 */
 //===========================================================================
-template<class T> inline T cClamp0(T a_value)
+template<class T> inline T cClamp0(T& a_value)
 {
     return cMax<T>(0, a_value);
 }
@@ -267,7 +282,7 @@ template<class T> inline T cClamp0(T a_value)
     \return   Return clamped value.
 */
 //===========================================================================
-inline double cClamp01(double a_value)
+inline double cClamp01(double& a_value)
 {
     return (cClamp(a_value, 0.0, 1.0));
 }
@@ -284,7 +299,7 @@ inline double cClamp01(double a_value)
 				and \b false otherwise.
 */
 //===========================================================================
-template<class T, class V> inline bool cContains(T a_value, V a_low, V a_high)
+template<class T, class V> inline bool cContains(const T& a_value, const V& a_low, const V& a_high)
 {
     return ((a_value >= a_low) && (a_value <= a_high));
 }
@@ -298,7 +313,7 @@ template<class T, class V> inline bool cContains(T a_value, V a_low, V a_high)
     \return   Return (/e value * /e value).
 */
 //===========================================================================
-inline double cSqr(double iValue)
+inline double cSqr(const double& iValue)
 {
     return(iValue*iValue);
 }
@@ -312,7 +327,7 @@ inline double cSqr(double iValue)
     \return   Return the cosine of angle.
 */
 //===========================================================================
-inline double cCosDeg(double a_angleDeg)
+inline double cCosDeg(const double& a_angleDeg)
 {
     return (cos(a_angleDeg * CHAI_DEG2RAD));
 }
@@ -326,7 +341,7 @@ inline double cCosDeg(double a_angleDeg)
     \return   Return the sine of angle.
 */
 //===========================================================================
-inline double cSinDeg(double a_angleDeg)
+inline double cSinDeg(const double& a_angleDeg)
 {
     return (sin(a_angleDeg * CHAI_DEG2RAD));
 }
@@ -340,7 +355,7 @@ inline double cSinDeg(double a_angleDeg)
     \return   Return the tangent of angle.
 */
 //===========================================================================
-inline double cTanDeg(double a_angleDeg)
+inline double cTanDeg(const double& a_angleDeg)
 {
     return (tan(a_angleDeg * CHAI_DEG2RAD));
 }
@@ -354,7 +369,7 @@ inline double cTanDeg(double a_angleDeg)
     \return   Return the cosine of angle.
 */
 //===========================================================================
-inline double cCosRad(double a_angleRad)
+inline double cCosRad(const double& a_angleRad)
 {
     return (cos(a_angleRad));
 }
@@ -368,7 +383,7 @@ inline double cCosRad(double a_angleRad)
     \return   Return the sine of angle.
 */
 //===========================================================================
-inline double cSinRad(double iValue)
+inline double cSinRad(const double& iValue)
 {
     return (sin(iValue));
 }
@@ -382,7 +397,7 @@ inline double cSinRad(double iValue)
     \return   Return the tangent of angle.
 */
 //===========================================================================
-inline double cTanRad(double iValue)
+inline double cTanRad(const double& iValue)
 {
     return (tan(iValue));
 }
@@ -396,7 +411,7 @@ inline double cTanRad(double iValue)
     \return   Return angle in radians.
 */
 //===========================================================================
-inline double cDegToRad(double a_angleDeg)
+inline double cDegToRad(const double& a_angleDeg)
 {
     return (a_angleDeg * CHAI_DEG2RAD);
 }
@@ -410,7 +425,7 @@ inline double cDegToRad(double a_angleDeg)
     \return   Return angle in degrees.
 */
 //===========================================================================
-inline double cRadToDeg(double a_angleRad)
+inline double cRadToDeg(const double& a_angleRad)
 {
     return (a_angleRad * CHAI_RAD2DEG);
 }
@@ -427,15 +442,16 @@ inline double cRadToDeg(double a_angleRad)
 //===========================================================================
 inline cVector3d cAdd(const cVector3d& a_vector1, const cVector3d& a_vector2)
 {
-    cVector3d result;
-    a_vector1.addr(a_vector2, result);
-    return (result);
+    return cVector3d(
+      a_vector1.x+a_vector2.x,
+      a_vector1.y+a_vector2.y,
+      a_vector1.z+a_vector2.z);    
 }
 
 
 //===========================================================================
 /*!
-    Compute the addition between two vectors.
+    Compute the addition between three vectors.
     Result = Vector1 + Vector2 + Vector3.
 
     \param    a_vector1  First vector.
@@ -446,10 +462,10 @@ inline cVector3d cAdd(const cVector3d& a_vector1, const cVector3d& a_vector2)
 //===========================================================================
 inline cVector3d cAdd(const cVector3d& a_vector1, const cVector3d& a_vector2, const cVector3d& a_vector3)
 {
-    cVector3d result;
-    a_vector1.addr(a_vector2, result);
-    result.add(a_vector3);
-    return (result);
+    return cVector3d(
+      a_vector1.x+a_vector2.x+a_vector3.x,
+      a_vector1.y+a_vector2.y+a_vector3.y,
+      a_vector1.z+a_vector2.z+a_vector3.z); 
 }
 
 
@@ -464,9 +480,10 @@ inline cVector3d cAdd(const cVector3d& a_vector1, const cVector3d& a_vector2, co
 //===========================================================================
 inline cVector3d cSub(const cVector3d& a_vector1, const cVector3d& a_vector2)
 {
-    cVector3d result;
-    a_vector1.subr(a_vector2, result);
-    return (result);
+  return cVector3d(
+    a_vector1.x-a_vector2.x,
+    a_vector1.y-a_vector2.y,
+    a_vector1.z-a_vector2.z); 
 }
 
 
@@ -480,9 +497,7 @@ inline cVector3d cSub(const cVector3d& a_vector1, const cVector3d& a_vector2)
 //===========================================================================
 inline cVector3d cNegate(const cVector3d& a_vector)
 {
-    cVector3d result = a_vector;
-    result.negate();
-    return (result);
+    return cVector3d(a_vector.x*-1.0,a_vector.y*-1.0,a_vector.z*-1.0);    
 }
 
 
@@ -497,9 +512,7 @@ inline cVector3d cNegate(const cVector3d& a_vector)
 //===========================================================================
 inline cVector3d cMul(const double& a_value, const cVector3d& a_vector)
 {
-    cVector3d result;
-    a_vector.mulr(a_value, result);
-    return (result);
+    return cVector3d(a_vector.x*a_value,a_vector.y*a_value,a_vector.z*a_value);
 }
 
 
@@ -514,9 +527,7 @@ inline cVector3d cMul(const double& a_value, const cVector3d& a_vector)
 //===========================================================================
 inline cVector3d cDiv(const double& a_value, const cVector3d& a_vector)
 {
-    cVector3d result;
-    a_vector.divr(a_value, result);
-    return (result);
+    return cVector3d(a_vector.x/a_value,a_vector.y/a_value,a_vector.z/a_value);
 }
 
 
@@ -531,11 +542,9 @@ inline cVector3d cDiv(const double& a_value, const cVector3d& a_vector)
 //===========================================================================
 inline cVector3d cDivVect(const double& a_value, const cVector3d& a_vector)
 {
-    cVector3d result;
-    result.x = a_value / a_vector.x;
-    result.y = a_value / a_vector.y;
-    result.z = a_value / a_vector.z;
-    return (result);
+    return cVector3d(
+      a_value / a_vector.x,a_value / a_vector.y,a_value / a_vector.z
+      );    
 }
 
 
@@ -612,7 +621,7 @@ inline double cDistance(const cVector3d& a_point1, const cVector3d& a_point2)
      \return   Return whether the two vectors represent the same point.
 */
 //===========================================================================
-bool inline cEqualPoints(cVector3d v1, cVector3d v2)
+bool inline cEqualPoints(const cVector3d& v1, const cVector3d& v2)
 {
     if ((fabs(v1.x-v2.x) < CHAI_SMALL) &&
         (fabs(v1.y-v2.y) < CHAI_SMALL) &&
@@ -665,7 +674,7 @@ inline cMatrix3d cMul(const cMatrix3d& a_matrix1, const cMatrix3d& a_matrix2)
 
     \param    a_matrix  Input matrix.
     \param    a_vector  Input vector.
-    \return   Returns the multimplication of the matrix and vector.
+    \return   Returns the multiplication of the matrix and vector.
 */
 //===========================================================================
 inline cVector3d cMul(const cMatrix3d& a_matrix, const cVector3d& a_vector)
@@ -754,7 +763,7 @@ inline cMatrix3d cRotMatrix(const cVector3d& a_axis, const double& a_angleRad)
     \return   Returns input matrix after rotation.
 */
 //===========================================================================
-inline cMatrix3d cRotate(const cMatrix3d a_matrix, const cVector3d& a_axis,
+inline cMatrix3d cRotate(const cMatrix3d& a_matrix, const cVector3d& a_axis,
 						 const double& a_angleRad)
 {
     cMatrix3d result;

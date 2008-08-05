@@ -28,6 +28,8 @@
 #include <conio.h>
 #endif
 
+bool g_objLoaderShouldGenerateExtraVertices = true;
+
 //===========================================================================
 /*!
     Load a Wavefront OBJ file format image into a mesh.
@@ -35,7 +37,7 @@
     \fn         bool cLoadFileOBJ(const cMesh* a_mesh, const string& a_fileName)
     \param      a_mesh         Mesh in which image file is loaded
     \param      a_fileName     Name of image file.
-    \return     Return \b true if image was loaded successfully, otherwize
+    \return     Return \b true if image was loaded successfully, otherwise
                 return \b false.
 */
 //===========================================================================
@@ -113,6 +115,13 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
                 }
 
                 if (result) newMesh->setTexture(newTexture);
+
+                // We really failed to load a texture...
+                else {
+#ifdef _WIN32
+                  CHAI_DEBUG_PRINT("Could not load texture map %s\n",material.m_texture);
+#endif
+                }
             }
 
             float alpha = material.m_alpha;
@@ -139,7 +148,7 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
             newMesh->m_material.m_specular.setB(material.m_specular[2]);
             newMesh->m_material.m_specular.setA(alpha);
 
-            // get emmissive component:
+            // get emissive component:
             newMesh->m_material.m_emission.setR(material.m_emmissive[0]);
             newMesh->m_material.m_emission.setG(material.m_emmissive[1]);
             newMesh->m_material.m_emission.setB(material.m_emmissive[2]);
@@ -161,6 +170,12 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
         
     }
 
+    // Keep track of vertex mapping in each mesh; maps "old" vertices
+    // to new vertices
+    int nMeshes = a_mesh->getNumChildren();
+    vertexIndexSet_uint_map* vertexMaps = new vertexIndexSet_uint_map[nMeshes];
+    vertexIndexSet_uint_map::iterator vertexMapIter;
+
     // build object
     {
         int i = 0;
@@ -176,16 +191,45 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
             // get material index attributed to the face
             int objIndex = face.m_materialIndex;
 
+            // the mesh that we're reading this triangle into
+            cMesh* curMesh = (cMesh*)a_mesh->getChild(objIndex);
+
+            // create a name for this mesh if necessary (over-writing a previous
+            // name if one has been written)
+            if ( (face.m_groupIndex >= 0) && (fileObj.m_groupNames.size() > 0) )
+              strncmp(curMesh->m_objectName,fileObj.m_groupNames[face.m_groupIndex],CHAI_MAX_OBJECT_NAME_LENGTH);
+
+            // get the vertex map for this mesh
+            vertexIndexSet_uint_map* curVertexMap = &(vertexMaps[objIndex]);
+
             // number of vertices on face
             int vertCount = face.m_numVertices;
 
             if (vertCount >= 3) {
+
        	        int indexV1 = face.m_pVertexIndices[0];
+
+                if (g_objLoaderShouldGenerateExtraVertices==false) {
+                  vertexIndexSet vis(indexV1);
+                  if (numNormals  > 0) vis.nIndex = face.m_pNormalIndices[0];
+                  if (numTexCoord > 0) vis.tIndex = face.m_pTextureIndices[0];
+                  indexV1 = getVertexIndex(curMesh, &fileObj, curVertexMap, vis);
+                }                
 
                 for (int triangleVert = 2; triangleVert < vertCount; triangleVert++)
                 {
                     int indexV2 = face.m_pVertexIndices[triangleVert-1];
                     int indexV3 = face.m_pVertexIndices[triangleVert];
+                    if (g_objLoaderShouldGenerateExtraVertices==false) {
+                      vertexIndexSet vis(indexV2);
+                      if (numNormals  > 0) vis.nIndex = face.m_pNormalIndices[triangleVert-1];
+                      if (numTexCoord > 0) vis.tIndex = face.m_pTextureIndices[triangleVert-1];
+                      indexV2 = getVertexIndex(curMesh, &fileObj, curVertexMap, vis);
+                      vis.vIndex = indexV3;
+                      if (numNormals  > 0) vis.nIndex = face.m_pNormalIndices[triangleVert];
+                      if (numTexCoord > 0) vis.tIndex = face.m_pTextureIndices[triangleVert];
+                      indexV3 = getVertexIndex(curMesh, &fileObj, curVertexMap, vis);
+                    }                      
 
                     // For debugging, I want to look for degenerate triangles, but
                     // I don't want to assert here.
@@ -193,13 +237,23 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
                       
                     }
 
+                    unsigned int indexTriangle;
+
                     // create triangle:
-                    cMesh* curMesh = (cMesh*)a_mesh->getChild(objIndex);
-                    unsigned int indexTriangle = curMesh->newTriangle(
-                    fileObj.m_pVertices[indexV1],
-                    fileObj.m_pVertices[indexV2],
-                    fileObj.m_pVertices[indexV3]);
-                    cTriangle* curTriangle = curMesh->getTriangle(indexTriangle);
+                    if (g_objLoaderShouldGenerateExtraVertices==false) {                    
+                      indexTriangle =
+                        curMesh->newTriangle(indexV1,indexV2,indexV3);
+                    }
+                    else {
+                      indexTriangle =
+                        curMesh->newTriangle(
+                          fileObj.m_pVertices[indexV1],
+                          fileObj.m_pVertices[indexV2],
+                          fileObj.m_pVertices[indexV3]
+                        );
+                    }
+                    
+                    cTriangle* curTriangle = curMesh->getTriangle(indexTriangle,false);
 
                     // assign normals:
                     if (numNormals > 0)
@@ -230,6 +284,14 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
             j++;
         }
         i++;
+    }
+
+    delete [] vertexMaps;
+
+    // if no normals were specified in the file, compute them
+    // based on triangle faces
+    if (numNormals == 0) {
+      a_mesh->computeAllNormals(true);
     }
 
     // compute boundary boxes
@@ -267,10 +329,16 @@ cOBJModel::~cOBJModel()
         {
             // Delete every pointer in the face structure
             if (m_pFaces[i].m_pNormals) delete [] m_pFaces[i].m_pNormals;
+            if (m_pFaces[i].m_pNormalIndices) delete [] m_pFaces[i].m_pNormalIndices;
             if (m_pFaces[i].m_pTexCoords)  delete [] m_pFaces[i].m_pTexCoords;
+            if (m_pFaces[i].m_pTextureIndices) delete [] m_pFaces[i].m_pTextureIndices;
             if (m_pFaces[i].m_pVertices)  delete [] m_pFaces[i].m_pVertices;
             if (m_pFaces[i].m_pVertexIndices)  delete [] m_pFaces[i].m_pVertexIndices;
         }
+        delete [] m_pFaces;
+    }
+    for(unsigned int i=0; i<m_groupNames.size(); i++) {
+      delete [] m_groupNames[i];
     }
 }
 
@@ -398,6 +466,18 @@ bool cOBJModel::LoadModel(const char a_fileName[])
 			currentIndex.m_faceCount++;
 		}
 
+    // Rest of the line contains face information
+    if (!strncmp(str, CHAI_OBJ_NAME_ID, sizeof(CHAI_OBJ_NAME_ID)))
+    {
+      // Read the rest of the line (the complete face)
+      getTokenParameter(str, sizeof(str) ,hFile);
+
+      char* name = new char[strlen(str)+1];
+      strcpy(name,str);
+      m_groupNames.push_back(name);
+
+    }
+
 		// Process material information only if needed
 		if (m_pMaterials)
 		{
@@ -476,6 +556,9 @@ void cOBJModel::parseFaceString(char a_faceString[], cFace *a_faceOut,
   a_faceOut->m_numVertices = 1;
   iCurTriplet++;
 	
+  if (m_groupNames.size() > 0) a_faceOut->m_groupIndex = m_groupNames.size() - 1;
+  else a_faceOut->m_groupIndex = -1;
+
   //----------------------------------------------------------------------
   // Get number of vertices in the face
   //----------------------------------------------------------------------
@@ -495,22 +578,35 @@ void cOBJModel::parseFaceString(char a_faceString[], cFace *a_faceOut,
 		}
 	}
 
-	// Face has more vertices than spaces that separate them
-      //	FaceOut->iNumVertices++;
+  // Face has more vertices than spaces that separate them
+  // FaceOut->iNumVertices++;
 
-    //----------------------------------------------------------------------
-	// Allocate space for structures that hold the face data
-    //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  // Allocate space for structures that hold the face data
+  //----------------------------------------------------------------------
 
 	// Vertices
 	a_faceOut->m_pVertices = new cVector3d[a_faceOut->m_numVertices];
 	a_faceOut->m_pVertexIndices = new int[a_faceOut->m_numVertices];
 
 	// Allocate space for normals and texture coordinates only if present
-	if (m_pNormals)
-		a_faceOut->m_pNormals	= new cVector3d[a_faceOut->m_numVertices];
-	if (m_pTexCoords)
+  if (m_pNormals) {
+    a_faceOut->m_pNormals	= new cVector3d[a_faceOut->m_numVertices];
+    a_faceOut->m_pNormalIndices = new int[a_faceOut->m_numVertices];
+  }
+  else {
+    a_faceOut->m_pNormals = 0;
+    a_faceOut->m_pNormalIndices = 0;
+  }
+		
+  if (m_pTexCoords) {  
 		a_faceOut->m_pTexCoords = new cVector3d[a_faceOut->m_numVertices];
+    a_faceOut->m_pTextureIndices = new int[a_faceOut->m_numVertices];
+  }
+  else {
+    a_faceOut->m_pTexCoords = 0;
+    a_faceOut->m_pTextureIndices = 0;
+  }
 
     //----------------------------------------------------------------------
 	// Copy vertex, normal, material and texture data into the structure
@@ -545,13 +641,16 @@ void cOBJModel::parseFaceString(char a_faceString[], cFace *a_faceOut,
 			sizeof(cVector3d));
 		a_faceOut->m_pVertexIndices[i] = iVertex-1;
 
-		if (m_pTexCoords)
+    if (m_pTexCoords) {    
 			memcpy(&a_faceOut->m_pTexCoords[i],
 			&m_pTexCoords[iTextureCoord - 1], sizeof(cVector3d));
+      a_faceOut->m_pTextureIndices[i] = iTextureCoord-1;
+    }
     if (m_pNormals) {
 			memcpy(&a_faceOut->m_pNormals[i],
 			&m_pNormals[iNormal - 1], sizeof(cVector3d));
       a_faceOut->m_pNormals[i].normalize();
+      a_faceOut->m_pNormalIndices[i] = iNormal-1;
     }
 
 		// Set string pointer to the next triplet
@@ -835,3 +934,25 @@ void cOBJModel::getTokenParameter(char a_str[],
 
 
 
+unsigned int getVertexIndex(cMesh* a_mesh, cOBJModel* a_model,
+                            vertexIndexSet_uint_map* a_vertexMap, vertexIndexSet& vis) {
+
+  unsigned int index;
+
+  // Have we seen this vertex before?
+  vertexIndexSet_uint_map::iterator vertexMapIter = a_vertexMap->find(vis);
+
+  // If we have, just grab the new index for this vertex
+  if (vertexMapIter != a_vertexMap->end()) {
+    index = (*vertexMapIter).second;
+    return index;
+  }
+
+  // Otherwise create a new vertex and put the mapping in our map
+  else {
+    index = a_mesh->newVertex(a_model->m_pVertices[vis.vIndex]);
+    (*a_vertexMap)[vis] = index;
+    return index;
+  }
+  
+}

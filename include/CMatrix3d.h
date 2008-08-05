@@ -195,6 +195,115 @@ struct cMatrix3d
 
   //-----------------------------------------------------------------------
   /*!
+  Read a row of this matrix.
+
+  \return  Return a row of this matrix... not a valid l-value; this
+           does not return a reference into this matrix.
+  */
+  //-----------------------------------------------------------------------
+  inline cVector3d getRow(const unsigned int& index) const
+  {
+    cVector3d result;
+    result.x = m[index][0];   result.y = m[index][1];     result.z = m[index][2];
+    return (result);
+  }
+  inline cVector3d operator[](const unsigned int& index) const
+  {
+    return getRow(index);
+  }
+
+
+  /*!
+  An overloaded /= operator for matrix/scalar division
+  */
+  inline void operator/= (const double& a_val)
+  {
+    m[0][0] /= a_val; m[0][1] /= a_val; m[0][2] /= a_val;
+    m[1][0] /= a_val; m[1][1] /= a_val; m[1][2] /= a_val;
+    m[2][0] /= a_val; m[2][1] /= a_val; m[2][2] /= a_val;
+  }
+
+  /*!
+  An overloaded *= operator for matrix/scalar multiplication
+  */
+  inline void operator*= (const double& a_val)
+  {
+    m[0][0] *= a_val; m[0][1] *= a_val; m[0][2] *= a_val;
+    m[1][0] *= a_val; m[1][1] *= a_val; m[1][2] *= a_val;
+    m[2][0] *= a_val; m[2][1] *= a_val; m[2][2] *= a_val;
+  }
+
+
+  /*!
+  An overloaded * operator for matrix/vector multiplication
+  */
+  inline cVector3d operator* (const cVector3d& a_val)
+  {
+    cVector3d result;
+    mulr(a_val,result);
+    return result;
+  }
+
+
+  /*!
+  An overloaded * operator for matrix/matrix multiplication
+  */
+  inline cMatrix3d operator* (const cMatrix3d& a_val)
+  {
+    cMatrix3d result;
+    mulr(a_val,result);
+    return result;
+  }
+
+
+  /*!
+  An overloaded *= operator for matrix/matrix multiplication
+  */
+  inline void operator*= (const cMatrix3d& a_val)
+  {
+    mul(a_val);    
+  }
+
+
+  /*!
+  An overloaded += operator for matrix/matrix addition
+  */
+  inline void operator+= (const cMatrix3d& a_input)
+  {
+    m[0][0] += a_input.m[0][0];
+    m[0][1] += a_input.m[0][1];
+    m[0][2] += a_input.m[0][2];
+
+    m[1][0] += a_input.m[1][0];
+    m[1][1] += a_input.m[1][1];
+    m[1][2] += a_input.m[1][2];
+
+    m[2][0] += a_input.m[2][0];
+    m[2][1] += a_input.m[2][1];
+    m[2][2] += a_input.m[2][2];    
+  }
+
+  /*!
+  An overloaded -= operator for matrix/matrix subtraction
+  */
+  inline void operator-= (const cMatrix3d& a_input)
+  {
+    m[0][0] -= a_input.m[0][0];
+    m[0][1] -= a_input.m[0][1];
+    m[0][2] -= a_input.m[0][2];
+
+    m[1][0] -= a_input.m[1][0];
+    m[1][1] -= a_input.m[1][1];
+    m[1][2] -= a_input.m[1][2];
+
+    m[2][0] -= a_input.m[2][0];
+    m[2][1] -= a_input.m[2][1];
+    m[2][2] -= a_input.m[2][2];     
+  }
+
+
+  //-----------------------------------------------------------------------
+  /*!
     Copy current matrix values to an external matrix passed as parameter.
 
     \param    a_destination  Destination matrix.
@@ -441,6 +550,24 @@ struct cMatrix3d
 
   //-----------------------------------------------------------------------
   /*!
+  Compute the inverse of current matrix.
+
+  If the operation succeeds, result is returned.
+
+  \param  a_result  (optional) true if the operation succeeds
+  \return the inverted matrix
+  */
+  //-----------------------------------------------------------------------
+  cMatrix3d inv(bool* a_result=0) const
+  {
+      cMatrix3d result;
+      bool status = invertr(result);
+      if (a_result) *a_result = status;
+      return result;
+  }
+
+  //-----------------------------------------------------------------------
+  /*!
     Compute the inverse of current matrix.
     If the operation succeeds, result is stored in result matrix passed
     as parameter.
@@ -649,7 +776,7 @@ struct cMatrix3d
     \param    a_precision  Number of digits.
   */
   //-----------------------------------------------------------------------
-  inline void str(string& a_string, int a_precision) const
+  inline void str(string& a_string, const unsigned int a_precision=2) const
   {
     a_string.append("[ ");
     for (int i=0; i<3; i++)

@@ -43,10 +43,10 @@ void cStr(string& a_string, const bool& a_value);
 void cStr(string& a_string, const int& a_value);
 
 //! Convert a float into a string.
-void cStr(string& a_string, const float& a_value, const unsigned int& a_precision);
+void cStr(string& a_string, const float& a_value, const unsigned int a_precision=2);
 
 //! Convert a double into a string.
-void cStr(string& a_string, const double& a_value, const unsigned int& a_precision);
+void cStr(string& a_string, const double& a_value, const unsigned int a_precision=2);
 
 
 //---------------------------------------------------------------------------

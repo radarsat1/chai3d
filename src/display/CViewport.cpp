@@ -26,6 +26,8 @@
 
 //---------------------------------------------------------------------------
 
+cViewport* cViewport::lastActiveViewport = 0;
+
 //===========================================================================
 /*!
     Constructor of cViewport.
@@ -179,7 +181,7 @@ bool cViewport::cleanup()
         to update the OpenGL display context.
 
         \fn         bool cViewport::update()
-        \return     Return true if operation succeded.
+        \return     Return true if operation succeeded.
 */
 //===========================================================================
 bool cViewport::update()
@@ -229,7 +231,7 @@ bool cViewport::update()
     }
     
     // retrieve handle of the display device context
-    m_glDC = GetDC(m_winHandle);
+    m_glDC = ::GetDC(m_winHandle);
 
     if (m_glDC == 0)
     {
@@ -264,9 +266,13 @@ bool cViewport::update()
     // create display context
     m_glContext = wglCreateContext(m_glDC);
     if (m_glContext == 0)
-    {
+    {        
         return(false);
-    }
+    }    
+
+    wglMakeCurrent(m_glDC, m_glContext);
+
+    lastActiveViewport = this;
 
     // enable viewport
     m_enabled = true;
@@ -299,12 +305,14 @@ bool cViewport::update()
 
     \fn         bool cViewport::render()
     \param      int imageIndex Either CHAI_STEREO_DEFAULT, CHAI_MONO, CHAI_STEREO_LEFT, or CHAI_STEREO_RIGHT
-    \return     Return \b true if operation succeded.
+    \return     Return \b true if operation succeeded.
 */
 //===========================================================================
 bool cViewport::render(int imageIndex)
 {
     bool result;
+
+    lastActiveViewport = this;
 
     // The default rendering option tells the viewport to decide
     // whether it's rendering in stereo, and - if so - to render
@@ -462,8 +470,8 @@ bool cViewport::renderView(const int a_imageIndex)
 
      \fn        bool cViewport::select(const unsigned int& a_windowPosX,
                 const unsigned int& a_windowPosY, const bool a_selectVisibleObjectsOnly)
-     \param     a_windowPosX  X coodinate position of mouse click.
-     \param     a_windowPosY  Y coodinate position of mouse click.
+     \param     a_windowPosX  X coordinate position of mouse click.
+     \param     a_windowPosY  Y coordinate position of mouse click.
      \return    Return \b true if an object has been hit.
 */
 //===========================================================================

@@ -6,7 +6,7 @@
     <PROJECT value="..\lib\bbcp6\chai_tools.lib"/>
     <OBJFILES value="obj\CGenericTool.obj obj\CGeneric3dofPointer.obj obj\CGenericTool3dof.obj 
       obj\CDelta3dofPointer.obj obj\CPhantom3dofPointer.obj 
-      obj\CMeta3dofPointer.obj"/>
+      obj\CMeta3dofPointer.obj obj\CFreedom6S3dofPointer.obj"/>
     <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -49,6 +49,7 @@
       <FILE FILENAME="..\src\tools\CDelta3dofPointer.cpp" FORMNAME="" UNITNAME="CDelta3dofPointer" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\tools\CPhantom3dofPointer.cpp" FORMNAME="" UNITNAME="CPhantom3dofPointer" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\src\tools\CMeta3dofPointer.cpp" FORMNAME="" UNITNAME="CMeta3dofPointer" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\src\tools\CFreedom6S3dofPointer.cpp" FORMNAME="" UNITNAME="CFreedom6S3dofPointer" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>

@@ -39,6 +39,9 @@
 #include "CPrecisionTimer.h"
 #include "CLight.h"
 
+typedef enum {
+  MOUSE_BUTTON_RIGHT=0,MOUSE_BUTTON_LEFT,MOUSE_BUTTON_MIDDLE
+} mouse_buttons;
 
 // A global function for sticking a cube in the given mesh
 // 
@@ -91,8 +94,8 @@ public:
   // Sets the camera zoom level
   void zoom(int zoom_level);
 
-  // Handles mouse-scroll events (moves or rotates the selected object)
-  void scroll(CPoint p, int left_button = 1);
+  // Handles mouse-scroll events (moves or rotates the selected object)  
+  void scroll(CPoint p, int button = MOUSE_BUTTON_LEFT);
 
   // Handles mouse clicks (marks the front-most clicked object as 'selected')
   void select(CPoint p);

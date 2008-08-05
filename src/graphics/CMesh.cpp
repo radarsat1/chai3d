@@ -199,6 +199,69 @@ cTriangle* cMesh::getTriangle(unsigned int a_index, bool a_includeChildren)
 
 //===========================================================================
 /*!
+  Compute the center of mass of this mesh, based on vertex positions.
+
+  \fn        cVector3d cMesh::getCenterOfMass(const bool a_includeChildren=0);
+  \param     a_includeChildren  If \b true, then childrens' COM's are reflected.
+*/
+//===========================================================================
+cVector3d cMesh::getCenterOfMass(const bool a_includeChildren)
+{
+
+  cVector3d com(0,0,0);
+  unsigned long n_vertices = m_vertices.size();
+
+  if (n_vertices != 0) {
+    for(unsigned int curVertex = 0; curVertex<n_vertices; curVertex++)
+    {
+      cVector3d p = m_vertices[curVertex].getPos();
+      com += p;
+    }
+    com /= ((double)(n_vertices));
+  }
+
+  if (a_includeChildren == 0) {    
+    return com;
+  }
+
+  unsigned long total_vertices = getNumVertices(true);
+
+  double contribution;
+  if (n_vertices == 0) contribution = 0.0;
+  else contribution = ((double)n_vertices) / ((double)total_vertices);
+  
+  com *= contribution;
+
+  unsigned int i, numChildren;
+  numChildren = m_children.size();
+  for (i=0; i<numChildren; i++)
+  {
+    cGenericObject *nextObject = m_children[i];
+
+    // check if nextObject is a mesh.
+    cMesh* nextMesh = dynamic_cast<cMesh*>(nextObject);            
+    if (nextMesh)
+    {
+      // How many vertices does he have?
+      long n_local_vertices = nextMesh->getNumVertices(true);
+
+      // What's his contribution to the com?
+      cVector3d local_center = nextMesh->getCenterOfMass(1);
+      double local_contribution;
+      if (n_local_vertices == 0) local_contribution = 0;
+      else local_contribution = (((double)n_local_vertices) / ((double)total_vertices));
+      com = com + (local_center * local_contribution);
+
+    } // ...if this child was a mesh
+  } // ...for each child
+ 
+  return com;
+}
+
+
+
+//===========================================================================
+/*!
      Returns the specified vertex... if a_includeChildren is false, I just
      index into my vertex array (no boundary checking, since this is called
      often).
@@ -461,7 +524,7 @@ unsigned int cMesh::newVertex(const double a_x, const double a_y, const double a
 
     \fn       bool cMesh::removeVertex(const unsigned int a_index)
     \param    a_index  Index number of vertex.
-    \return   Return \b true if operation succeded.
+    \return   Return \b true if operation succeeded.
 */
 //===========================================================================
 bool cMesh::removeVertex(const unsigned int a_index)
@@ -472,7 +535,7 @@ bool cMesh::removeVertex(const unsigned int a_index)
     // check if it has not already been removed
     if (vertex->m_allocated == false) { return (false); }
 
-    // desactivate vertex
+    // deactivate vertex
     vertex->m_allocated = false;
 
     // add vertex to free list
@@ -561,7 +624,7 @@ unsigned int cMesh::newTriangle(const cVector3d& a_vertex0, const cVector3d& a_v
 
      \fn       bool cMesh::removeTriangle(const unsigned int a_index)
      \param    a_index  Index number of vertex.
-     \return   Return \b true if operation succeded.
+     \return   Return \b true if operation succeeded.
 */
 //===========================================================================
 bool cMesh::removeTriangle(const unsigned int a_index)
@@ -572,7 +635,7 @@ bool cMesh::removeTriangle(const unsigned int a_index)
     // check if it has not already been removed
     if (triangle->m_allocated == false) { return (false); }
 
-    // desactivate triangle
+    // deactivate triangle
     triangle->m_allocated = false;
 
     // add triangle to free list
@@ -610,7 +673,7 @@ void cMesh::clear()
 
      \fn       bool cMesh::loadFromFile(const string& a_fileName)
      \param    a_fileName  Filename of 3d image.
-     \return   Return \b true is file loaded correctly. Otherwize return FALSE.
+     \return   Return \b true is file loaded correctly. Otherwise return FALSE.
 */
 //===========================================================================
 bool cMesh::loadFromFile(const string& a_fileName)
@@ -635,7 +698,7 @@ void cMesh::computeAllNormals(const bool a_affectChildren)
     // set all normals to zero
     for(i=0; i<m_vertices.size(); i++)
     {
-        cVertex *nextVertex = getVertex(i);
+        cVertex *nextVertex = getVertex(i,false);
         nextVertex->m_normal.zero();
     }
 
@@ -646,9 +709,12 @@ void cMesh::computeAllNormals(const bool a_affectChildren)
         cTriangle* nextriangle = &m_triangles[i];
 
         // extract positions of vertices
-        cVector3d vertex0 = m_vertices[nextriangle->m_indexVertex0].getPos();
-        cVector3d vertex1 = m_vertices[nextriangle->m_indexVertex1].getPos();
-        cVector3d vertex2 = m_vertices[nextriangle->m_indexVertex2].getPos();
+        vector<cVertex>* vertex_vector = pVertices();
+        cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+
+        cVector3d vertex0 = vertex_array[nextriangle->m_indexVertex0].getPos();
+        cVector3d vertex1 = vertex_array[nextriangle->m_indexVertex1].getPos();
+        cVector3d vertex2 = vertex_array[nextriangle->m_indexVertex2].getPos();
 
         // compute normal vector
         cVector3d normal, v01, v02;
@@ -659,19 +725,9 @@ void cMesh::computeAllNormals(const bool a_affectChildren)
         if (length > 0.0000001)
         {
             normal.div(length);
-            m_vertices[nextriangle->m_indexVertex0].m_normal.add(normal);
-            m_vertices[nextriangle->m_indexVertex1].m_normal.add(normal);
-            m_vertices[nextriangle->m_indexVertex2].m_normal.add(normal);
-        }
-    }
-
-    // normalize all normals
-    for(i=0; i<m_vertices.size(); i++)
-    {
-        cVertex *nextVertex = getVertex(i);
-        if (nextVertex->m_normal.lengthsq() > 0.00000001)
-        {
-            nextVertex->m_normal.normalize();
+            vertex_array[nextriangle->m_indexVertex0].m_normal.add(normal);
+            vertex_array[nextriangle->m_indexVertex1].m_normal.add(normal);
+            vertex_array[nextriangle->m_indexVertex2].m_normal.add(normal);
         }
     }
 
@@ -692,6 +748,17 @@ void cMesh::computeAllNormals(const bool a_affectChildren)
             }
         }
     }
+
+    // normalize all normals (_after_ doing child-normal computations, in case
+    // I share vertices with my children)
+    for(i=0; i<m_vertices.size(); i++)
+    {
+      cVertex *nextVertex = getVertex(i,false);
+      if (nextVertex->m_normal.lengthsq() > 0.00000001)
+      {
+        nextVertex->m_normal.normalize();
+      }
+    }
 }
 
 
@@ -708,7 +775,7 @@ void cMesh::updateGlobalPositions(const bool a_frameOnly)
 {
     if (a_frameOnly) return;
 
-    unsigned int i,numVertices;
+    register unsigned int i,numVertices;
     numVertices = m_vertices.size();
     for (i=0; i<numVertices; i++)
     {
@@ -1034,6 +1101,43 @@ void cMesh::extrude(const double a_extrudeDistance, const bool a_affectChildren,
 }
 
 
+//===========================================================================
+/*!
+  Reverse the normal for every vertex on this model.  Useful for models
+  that started with inverted faces and thus gave inward-pointing normals.
+
+  \fn        void cMesh::reverseAllNormals(bool a_affectChildren=0);
+  \param     a_affectChildren  If \b true, children are also modified.
+*/
+//===========================================================================
+void cMesh::reverseAllNormals(const bool a_affectChildren)
+{
+  // reverse normals for this object
+  vector<cVertex>* vertex_vector = pVertices();
+  cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+  int vertexcount = vertex_vector->size();
+
+  for(int i=0; i<vertexcount; i++)
+  {
+    vertex_array[i].m_normal.mul(-1.0);
+  }  
+
+  // propagate changes to my children
+  if (a_affectChildren)
+  {
+    for (unsigned int i=0; i<m_children.size(); i++)
+    {
+      cGenericObject *nextObject = m_children[i];
+
+      cMesh *nextMesh = dynamic_cast<cMesh*>(nextObject);
+      if (nextMesh)
+      {                
+        nextMesh->reverseAllNormals(true);
+      }
+    }
+  }  
+}
+
 
 //===========================================================================
 /*!
@@ -1285,6 +1389,10 @@ void cMesh::updateBoundaryBox()
     double yMax = -CHAI_LARGE;
     double zMax = -CHAI_LARGE;;
 
+    // Where does our vertex array live?
+    vector<cVertex>* vertex_vector = pVertices();
+    cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+    
     // loop over all my triangles
     for(unsigned int i=0; i<m_triangles.size(); i++)
     {
@@ -1293,7 +1401,7 @@ void cMesh::updateBoundaryBox()
 
         if (nextTriangle->m_allocated)
         {
-            cVector3d tVertex0 = m_vertices[nextTriangle->m_indexVertex0].m_localPos;
+            cVector3d tVertex0 = vertex_array[nextTriangle->m_indexVertex0].m_localPos;
             xMin = cMin(tVertex0.x, xMin);
             yMin = cMin(tVertex0.y, yMin);
             zMin = cMin(tVertex0.z, zMin);
@@ -1301,7 +1409,7 @@ void cMesh::updateBoundaryBox()
             yMax = cMax(tVertex0.y, yMax);
             zMax = cMax(tVertex0.z, zMax);
 
-            cVector3d tVertex1 = m_vertices[nextTriangle->m_indexVertex1].m_localPos;
+            cVector3d tVertex1 = vertex_array[nextTriangle->m_indexVertex1].m_localPos;
             xMin = cMin(tVertex1.x, xMin);
             yMin = cMin(tVertex1.y, yMin);
             zMin = cMin(tVertex1.z, zMin);
@@ -1309,7 +1417,7 @@ void cMesh::updateBoundaryBox()
             yMax = cMax(tVertex1.y, yMax);
             zMax = cMax(tVertex1.z, zMax);
 
-            cVector3d tVertex2 = m_vertices[nextTriangle->m_indexVertex2].m_localPos;
+            cVector3d tVertex2 = vertex_array[nextTriangle->m_indexVertex2].m_localPos;
             xMin = cMin(tVertex2.x, xMin);
             yMin = cMin(tVertex2.y, yMin);
             zMin = cMin(tVertex2.z, zMin);
@@ -1745,16 +1853,20 @@ void cMesh::renderNormals()
     // set color
     glColor4fv( (const float *)&m_showNormalsColor);
 
+    // Where does our vertex array live?
+    vector<cVertex>* vertex_vector = pVertices();
+    cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+
     // render vertex normals
     for (unsigned int i=0; i<m_triangles.size(); i++)
     {
         cTriangle* nextTriangle = &m_triangles[i];
-        cVector3d* vertex0 = &m_vertices[nextTriangle->m_indexVertex0].m_localPos;
-        cVector3d* vertex1 = &m_vertices[nextTriangle->m_indexVertex1].m_localPos;
-        cVector3d* vertex2 = &m_vertices[nextTriangle->m_indexVertex2].m_localPos;
-        cVector3d* normal0 = &m_vertices[nextTriangle->m_indexVertex0].m_normal;
-        cVector3d* normal1 = &m_vertices[nextTriangle->m_indexVertex1].m_normal;
-        cVector3d* normal2 = &m_vertices[nextTriangle->m_indexVertex2].m_normal;
+        cVector3d* vertex0 = &vertex_array[nextTriangle->m_indexVertex0].m_localPos;
+        cVector3d* vertex1 = &vertex_array[nextTriangle->m_indexVertex1].m_localPos;
+        cVector3d* vertex2 = &vertex_array[nextTriangle->m_indexVertex2].m_localPos;
+        cVector3d* normal0 = &vertex_array[nextTriangle->m_indexVertex0].m_normal;
+        cVector3d* normal1 = &vertex_array[nextTriangle->m_indexVertex1].m_normal;
+        cVector3d* normal2 = &vertex_array[nextTriangle->m_indexVertex2].m_normal;
         cVector3d normalPos, normal;
 
         // render normal 0 of triangle
@@ -1921,18 +2033,22 @@ void cMesh::renderMesh(const int a_renderMode)
         m_texture->render();
     }
 
+    // Where does our vertex array live?
+    vector<cVertex>* vertex_vector = pVertices();
+    cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+
     if (USE_ARRAYS_INSIDE_DISPLAY_LISTS || m_useDisplayList == 0) {
       // specify pointers to rendering arrays
-      glVertexPointer(3, GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_localPos);
-      glNormalPointer(GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_normal);
-      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(cVertex), m_vertices[0].m_color.pColor());
-      glTexCoordPointer(2, GL_DOUBLE, sizeof(cVertex), &m_vertices[0].m_texCoord);
+      glVertexPointer(3, GL_DOUBLE, sizeof(cVertex), &(vertex_array[0].m_localPos));
+      glNormalPointer(GL_DOUBLE, sizeof(cVertex), &(vertex_array[0].m_normal));
+      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(cVertex), vertex_array[0].m_color.pColor());
+      glTexCoordPointer(2, GL_DOUBLE, sizeof(cVertex), &(vertex_array[0].m_texCoord));
     }
 
     // render all active triangles
     glBegin(GL_TRIANGLES);
-    unsigned int i;
-    unsigned int numItems = m_triangles.size();
+    register unsigned int i;
+    const unsigned int numItems = m_triangles.size();
     
     for(i=0; i<numItems; i++)
     {
@@ -1954,7 +2070,7 @@ void cMesh::renderMesh(const int a_renderMode)
         // I'm still looking at the performance impacts of display lists and the generality of
         // vertex arrays inside display lists...
         else {
-          for(int j=0; j<3; j++) {
+          for(register unsigned int j=0; j<3; j++) {
 // Suppress warnings here because we're consciously casting everything down...            
 #pragma warning(push)
 #pragma warning(disable:4244)  
@@ -2012,7 +2128,7 @@ void cMesh::onDisplayReset(const bool a_affectChildren)
 {
     invalidateDisplayList();
     if (m_texture != NULL) m_texture->markForUpdate();
-
+    
     // Use the superclass method to call the same function on the rest of the
     // scene graph...
     cGenericObject::onDisplayReset();

@@ -36,7 +36,7 @@ extern cCollisionAABBInternal* g_nextFreeNode;
     \return   Return whether there is any overlap of the two boxes.
 */
 //===========================================================================
-inline bool intersect(cCollisionAABBBox a_0, cCollisionAABBBox a_1)
+inline bool intersect(const cCollisionAABBBox& a_0, const cCollisionAABBBox& a_1)
 {
     // check for overlap along each axis
     if (a_0.getLowerX() > a_1.getUpperX()) return false;
@@ -47,7 +47,7 @@ inline bool intersect(cCollisionAABBBox a_0, cCollisionAABBBox a_1)
     if (a_1.getLowerZ() > a_0.getUpperZ()) return false;
 
     // if the boxes are not separated along any axis, a collision has occurred
-    return (true);
+    return true;
 }
 
 
@@ -145,18 +145,6 @@ cCollisionAABBInternal::~cCollisionAABBInternal()
 
     // Note that we don't delete leaf nodes here; they're stored in one big
     // array and can't be deleted individually...
-
-    // Don't do recursive deletion; everything is allocated in one
-    // giant array when the root node is allocated...
-    /*
-    // delete left tree
-    if (m_leftSubTree && (m_leftSubTree->m_nodeType == AABB_NODE_INTERNAL) )
-      delete m_leftSubTree;          
-    
-    // delete right tree
-    if (m_rightSubTree &&  (m_rightSubTree->m_nodeType == AABB_NODE_INTERNAL) )
-      delete m_rightSubTree;
-    */
 }
 
 
@@ -208,6 +196,7 @@ cCollisionAABBInternal::cCollisionAABBInternal(unsigned int a_numLeaves,
     m_depth = a_depth;
     m_leftSubTree = NULL;
     m_rightSubTree = NULL;
+    m_testLineBox = true;
 
     // create a box to enclose all the leafs below this internal node
     m_bbox.setEmpty();
@@ -278,6 +267,82 @@ cCollisionAABBInternal::cCollisionAABBInternal(unsigned int a_numLeaves,
 
 //===========================================================================
 /*!
+    Determine whether the given ray intersects the bounding box.  Based on code
+    by Andrew Woo from "Graphics Gems", Academic Press, 1990.
+
+    \fn       bool hitBoundingBox(double a_minB[3], double a_maxB[3],
+                                  double a_origin[3], double a_dir[3])
+    \param    a_minB[3]   Minimum coordinates (along each axis) of bounding box.
+    \param    a_maxB[3]   Maximum coordinates (along each axis) of bounding box.
+    \param    a_origin[3] Origin of the ray.
+    \param    a_dir[3]    Direction of the ray.
+    \return   Return true if line segment intersects the bounding box.
+*/
+//===========================================================================
+bool hitBoundingBox(double a_minB[3], double a_maxB[3], double a_origin[3], double a_dir[3])
+{
+    const int RIGHT	= 0;
+    const int LEFT = 1;
+    const int MIDDLE = 2;
+
+    double coord[3];
+    char inside = true;
+    char quadrant[3];
+    register int i;
+    int whichPlane;
+    double maxT[3];
+    double candidatePlane[3];
+
+    /* Find candidate planes; this loop can be avoided if
+    rays cast all from the eye(assume perpsective view) */
+    for (i=0; i<3; i++)
+      if(a_origin[i] < a_minB[i]) {
+        quadrant[i] = LEFT;
+        candidatePlane[i] = a_minB[i];
+        inside = false;
+      }else if (a_origin[i] > a_maxB[i]) {
+        quadrant[i] = RIGHT;
+        candidatePlane[i] = a_maxB[i];
+        inside = false;
+      }else	{
+        quadrant[i] = MIDDLE;
+      }
+
+    /* Ray origin inside bounding box */
+    if(inside)	{
+      //coord = origin;
+      return (true);
+    }
+
+    /* Calculate T distances to candidate planes */
+    for (i = 0; i < 3; i++)
+      if (quadrant[i] != MIDDLE && a_dir[i] !=0.)
+        maxT[i] = (candidatePlane[i]-a_origin[i]) / a_dir[i];
+      else
+        maxT[i] = -1.;
+
+    /* Get largest of the maxT's for final choice of intersection */
+    whichPlane = 0;
+    for (i = 1; i < 3; i++)
+      if (maxT[whichPlane] < maxT[i])
+        whichPlane = i;
+
+    /* Check final candidate actually inside box */
+    if (maxT[whichPlane] < 0.) return (false);
+    for (i = 0; i < 3; i++)
+      if (whichPlane != i) {
+        coord[i] = a_origin[i] + maxT[whichPlane] * a_dir[i];
+        if (coord[i] < a_minB[i] || coord[i] > a_maxB[i])
+          return (false);
+      } else {
+        coord[i] = candidatePlane[i];
+    }
+    return (true);				/* ray hits box */
+}
+
+
+//===========================================================================
+/*!
     Determine whether the given line intersects the mesh covered by the
     AABB Tree rooted at this internal node.  If so, return (in the output
     parameters) information about the intersected triangle of the mesh closest
@@ -309,6 +374,20 @@ bool cCollisionAABBInternal::computeCollision(cVector3d& a_segmentPointA,
     // there can be no intersection
     if (!intersect(m_bbox, a_lineBox))
     {
+        return (false);
+    }
+
+    if (m_testLineBox)
+    {
+      double minB[3];
+      double maxB[3];
+      double origin[3];
+      double dir[3];
+      minB[0] = m_bbox.getLowerX(); minB[1] = m_bbox.getLowerY(); minB[2] = m_bbox.getLowerZ();
+      maxB[0] = m_bbox.getUpperX(); maxB[1] = m_bbox.getUpperY(); maxB[2] = m_bbox.getUpperZ();
+      origin[0] = a_segmentPointA.x; origin[1] = a_segmentPointA.y; origin[2] = a_segmentPointA.z;
+      dir[0] = a_segmentDirection.x; dir[1] = a_segmentDirection.y; dir[2] = a_segmentDirection.z;
+      if (!hitBoundingBox(minB, maxB, origin, dir))
         return (false);
     }
 
