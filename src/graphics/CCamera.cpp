@@ -393,6 +393,19 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
 
     }
 
+    for(unsigned int i=0; i<CHAI_MAX_CLIP_PLANES; i++) {
+      if (m_clipPlanes[i].enabled==1) {
+        glEnable(GL_CLIP_PLANE0+i);
+        glClipPlane(GL_CLIP_PLANE0+i,m_clipPlanes[i].peqn);        
+      }
+      else if (m_clipPlanes[i].enabled==0) {
+        glDisable(GL_CLIP_PLANE0+i);
+      }
+      else if (m_clipPlanes[i].enabled==-1) {
+        // Don't touch
+      }
+    }
+
     // Set up reasonable default OpenGL state
     glEnable(GL_LIGHTING);
     glDisable(GL_BLEND);
@@ -414,6 +427,7 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
     // projection matrix
     if (m_front_2Dscene.getNumChildren())
       render2dSceneGraph(&m_front_2Dscene,a_windowWidth,a_windowHeight);    
+    
 }
 
 
@@ -491,10 +505,11 @@ void cCamera::render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_hei
   glDisable(GL_LIGHTING);
 
   // disable 3d clipping planes
-  for(int i=0; i<6; i++) glDisable(GL_CLIP_PLANE0+i);  
+  for(int i=0; i<CHAI_MAX_CLIP_PLANES; i++) glDisable(GL_CLIP_PLANE0+i);  
 
   // set up an orthographic projection matrix
   glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
   glLoadIdentity();
 
   // No real depth clipping...
@@ -502,6 +517,7 @@ void cCamera::render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_hei
 
   // Now actually render the 2d scene graph with the mv matrix active...
   glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
   glLoadIdentity();
 
   // Disable lighting and depth-testing
@@ -519,6 +535,12 @@ void cCamera::render2dSceneGraph(cGenericObject* a_graph, int a_width, int a_hei
   glDisable(GL_BLEND);
   glDepthMask(GL_TRUE);
   glEnable(GL_DEPTH_TEST);
+
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
 
   glPopAttrib();
 }
@@ -547,4 +569,29 @@ void cCamera::onDisplayReset(const bool a_affectChildren) {
   cGenericObject::onDisplayReset(a_affectChildren);
 
   m_performingDisplayReset = 0;
+}
+
+
+//===========================================================================
+/*!
+  Enable or disable one of the (six) arbitrary clipping planes.
+
+  \fn     void enableClipPlane(unsigned int index, bool enable, double* peqn=0);
+  \param  index  Which clip plane (0 -> CHAI_MAX_CLIP_PLANES-1) does this refer to?
+  \param  enable Should I turn this clip plane on or off, or should I leave it alone?
+          //  0 : disabled
+          //  1 : enabled
+          // -1 : don't touch
+  \param  peqn   What is the plane equation for this clipping plane?
+*/
+//===========================================================================
+void cCamera::enableClipPlane(const unsigned int& index, const int& enable, const double* peqn) {
+
+  // Verify valid arguments
+  if (index >= CHAI_MAX_CLIP_PLANES) return;  
+
+  m_clipPlanes[index].enabled = enable;
+
+  if (peqn) memcpy(m_clipPlanes[index].peqn,peqn,4*sizeof(double));
+  
 }

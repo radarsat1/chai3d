@@ -30,7 +30,8 @@ class Cbasic_shapesDlg : public CDialog {
 
 public:
 	Cbasic_shapesDlg(CWnd* pParent = NULL);
-  HWND m_gl_area_hwnd;  
+  HWND m_gl_area_hwnd; 
+  int initialized;
 
 // Dialog Data
 	//{{AFX_DATA(Cbasic_shapesDlg)
@@ -73,6 +74,9 @@ protected:
 	afx_msg void OnToggleHapticsButton();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+  afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
+  afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 //{{AFX_INSERT_LOCATION}}

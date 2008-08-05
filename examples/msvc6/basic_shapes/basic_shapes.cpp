@@ -457,7 +457,7 @@ void Cbasic_shapesApp::toggle_haptics(int enable) {
     tool->start();      
 
     // Enable forces
-    tool->ForcesON();
+    tool->setForcesON();
 
     // Tell the proxy algorithm associated with this tool to enable its
     // "dynamic mode", which allows interaction with moving objects
@@ -504,7 +504,7 @@ void Cbasic_shapesApp::toggle_haptics(int enable) {
 #endif
     
     // Stop the haptic device...
-    tool->ForcesOFF();
+    tool->setForcesOFF();
     tool->stop();
     
     // SetPriorityClass(GetCurrentProcess(),NORMAL_PRIORITY_CLASS);    

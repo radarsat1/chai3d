@@ -112,10 +112,10 @@ int cPhantomDevice::open()
     {
         StartCommunicationPhantom(m_phantomHandle);
         m_systemReady = true;
-        return (0);
+        return 0;
     }
 
-    return (-1);
+    return -1;
 }
 
 
@@ -132,10 +132,10 @@ int cPhantomDevice::close()
     if (m_systemReady)
     {
         StopCommunicationPhantom(m_phantomHandle);
-        return (0);
+        return 0;
     }
 
-    return (-1);
+    return -1;
 }
 
 
@@ -154,10 +154,10 @@ int cPhantomDevice::initialize()
     if (m_systemReady)
     {
         ResetPhantomEncoders(m_phantomHandle);
-        return (0);
+        return 0;
     }
 
-    return (-1);
+    return -1;
 }
 
 
@@ -259,7 +259,7 @@ int cPhantomDevice::command(int a_command, void* a_data)
         result = CHAI_MSG_SYSTEM_NOT_READY;
     }
 
-    return (result);
+    return result;
 }
 
 

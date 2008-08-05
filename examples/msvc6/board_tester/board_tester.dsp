@@ -25,7 +25,7 @@ CFG=board_tester - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=cl.exe
+CPP=xicl6.exe
 MTL=midl.exe
 RSC=rc.exe
 
@@ -51,9 +51,9 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=link.exe
+LINK32=xilink6.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 chai3d_complete.lib DLPORTIO.lib /nologo /subsystem:windows /machine:I386 /out:"bin/board_tester.exe" /libpath:"../../../lib/msvc6/"
+# ADD LINK32 chai3d_complete.lib DLPORTIO.lib /nologo /subsystem:windows /machine:I386 /out:"../../../bin/board_tester_msvc6.exe" /libpath:"../../../lib/msvc6/"
 
 !ELSEIF  "$(CFG)" == "board_tester - Win32 Debug"
 
@@ -77,9 +77,9 @@ LINK32=link.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=link.exe
+LINK32=xilink6.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 chai3d_complete.lib DLPORTIO.lib /nologo /subsystem:windows /debug /machine:I386 /out:"bin/board_tester.exe" /pdbtype:sept /libpath:"../../../lib/msvc6/"
+# ADD LINK32 chai3d_complete.lib DLPORTIO.lib /nologo /subsystem:windows /debug /machine:I386 /out:"../../../bin/board_tester_msvc6.exe" /pdbtype:sept /libpath:"../../../lib/msvc6/"
 
 !ENDIF 
 

@@ -40,7 +40,7 @@
 /*!
       \struct   cMatrixGL
       \brief    CHAI describes rotations using 3x3 rotation matrices (cMatrix3d)
-                and 3D vectors (cMatrix3d) to express position or translation.
+                and 3D vectors (cVector3d) to express position or translation.
                 On the OpenGL side 4x4 matrices are required to perform all
                 geometrical transformations. cMatrixGL provides a structure
                 which encapsulates all the necessary functionaly to generate 4x4
@@ -412,7 +412,7 @@ struct cMatrixGL
     /*!
         Invert this matrix.
 
-        \return     Return \b true if operation succeeds. Otherwize \b false.
+        \return     Return \b true if operation succeeds. Otherwise \b false.
     */
     //-----------------------------------------------------------------------
     bool inline invert()

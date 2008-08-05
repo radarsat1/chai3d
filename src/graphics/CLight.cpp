@@ -49,7 +49,7 @@ cLight::cLight(cWorld* a_world)
     // set default color parameters
     m_ambient.set(0.4f, 0.4f, 0.4f, 1.0f);
     m_diffuse.set(0.7f, 0.7f, 0.7f, 1.0f);
-    m_specular.set(0.1f, 0.1f, 0.1f, 1.0f);
+    m_specular.set(0.2f, 0.2f, 0.2f, 1.0f);
 
     // set default cutoff angle (no cutoff by default)
     m_cutOffAngle   = 180.0;

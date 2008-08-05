@@ -124,6 +124,9 @@ class cViewport
 
     static cViewport* getLastActiveViewport() { return lastActiveViewport; }
 
+    //! Reconfigures the display context.
+    bool update(bool resizeOnly=false);
+
   protected:
 
     // PROPERTIES:
@@ -175,8 +178,6 @@ class cViewport
 
     // METHODS:
 
-    //! Update display context.
-    bool update();
     //! Clean up the current rendering context
     bool cleanup();
     //! Render the scene in OpenGL.  Nukes the contents of the GL buffers.

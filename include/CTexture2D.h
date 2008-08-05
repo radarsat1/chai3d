@@ -57,8 +57,12 @@ class cTexture2D
     //! Call this to force texture re-initialization
     void markForUpdate() { m_update_texture_flag = 1; }
 
-    //! OpenGL texture mode (GL_MODULATE, GL_DECAL, GL_BLEND, or GL_REPLACE)
-    GLint texture_environment_mode;
+    //! OpenGL texture mode (GL_MODULATE, GL_DECAL, GL_BLEND, GL_REPLACE, or -1 for "don't set")
+    GLint m_texture_environment_mode;
+
+    //! OpenGL texture quality, or -1 (default) to use the current quality level
+    GLint m_min_filter;
+    GLint m_mag_filter;
 
     //! Image loader (use this to get data about the texture itself)
     cImageLoader m_image_loader;

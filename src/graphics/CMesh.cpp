@@ -29,6 +29,7 @@
 #include "CCollisionAABB.h"
 #include "CCollisionSpheres.h"
 #include <algorithm>
+#include <set>
 
 #ifdef _MSVC
 #include <conio.h>
@@ -92,6 +93,10 @@ cMesh::cMesh(cWorld* a_world)
 
     // by default, if transparency is enabled, use the multi-pass approach
     m_useMultipassTransparency = true;
+
+    // by default, only triangle vertices have their normals rendered
+    // if normal-rendering is enabled
+    m_showNormalsForTriangleVerticesOnly = true;
 
     // Display lists disabled by default
     m_useDisplayList = false;
@@ -844,7 +849,15 @@ void cMesh::setWireMode(const bool a_showWireMode, const bool a_affectChildren)
 void cMesh::setTransparencyLevel(const float a_level, const bool a_applyToTextures,
                                  const bool a_affectChildren)
 {
-    
+    // if the transparency level is equal to 1.0, then do not apply transparency
+    // otherwise enable it.
+    if (a_level < 1.0) {
+        enableTransparency(true);
+    } else {
+        enableTransparency(false);
+    }
+
+
     // apply new value to material
     m_material.setTransparencyLevel(a_level);
 
@@ -1139,6 +1152,107 @@ void cMesh::reverseAllNormals(const bool a_affectChildren)
 }
 
 
+// A function to put a triangle in vertex-sorted order, used for removing
+// redundant triangles
+inline void sort_triangle(cTriangle& t) {
+  register unsigned int tmp;
+  if (t.m_indexVertex0 > t.m_indexVertex1)
+    { tmp = t.m_indexVertex1; t.m_indexVertex1 = t.m_indexVertex0; t.m_indexVertex0 = tmp; }
+  if (t.m_indexVertex1 > t.m_indexVertex2)
+    { tmp = t.m_indexVertex2; t.m_indexVertex2 = t.m_indexVertex1; t.m_indexVertex1 = tmp; }
+  else return;
+  if (t.m_indexVertex0 > t.m_indexVertex1) 
+    { tmp = t.m_indexVertex1; t.m_indexVertex1 = t.m_indexVertex0; t.m_indexVertex0 = tmp; }
+}
+
+
+// A comparator for sorting triangles, used for removing
+// redundant triangles
+struct lt_ctriangle {
+  inline bool operator()(const cTriangle& in_t1, const cTriangle& in_t2)
+  {
+    // Sort both triangles so we're comparing them in vertex-sorted order
+    cTriangle t1 = in_t1;
+    sort_triangle(t1);
+
+    cTriangle t2 = in_t2;
+    sort_triangle(t2);
+
+    // Do the comparison
+    if      (t1.m_indexVertex0 < t2.m_indexVertex0) return true;
+    else if (t1.m_indexVertex0 > t2.m_indexVertex0) return false;
+    else if (t1.m_indexVertex1 < t2.m_indexVertex1) return true;
+    else if (t1.m_indexVertex1 > t2.m_indexVertex1) return false;
+    else if (t1.m_indexVertex2 < t2.m_indexVertex2) return true;
+    return false;
+  }
+};
+
+
+//===========================================================================
+/*!
+Remove redundant triangles from this model.  Does not use vertex positions
+at all, just removed triangles with redundant indices and obviously-
+degenerate triangles.
+
+\fn        void cMesh::removeRedundantTriangles(bool a_affectChildren=0);
+\param     a_affectChildren  If \b true, children are also modified.
+*/
+//===========================================================================
+void cMesh::removeRedundantTriangles(const bool a_affectChildren)
+{
+  
+  // remove redundant triangles from this mesh
+
+  // move everything from a vector into a set, sorted by triangles,
+  // and remove degenerate triangles.
+  std::set<cTriangle,lt_ctriangle> sorted_tris;
+  unsigned int ntris = m_triangles.size();
+	unsigned int i;
+  for(i=0; i<ntris; i++) {
+    cTriangle t = m_triangles[i];
+
+    // Remove degenerate triangles
+    if (
+      t.m_indexVertex0 == t.m_indexVertex1 ||
+      t.m_indexVertex0 == t.m_indexVertex2 ||
+      t.m_indexVertex1 == t.m_indexVertex2)
+      continue;
+      
+    // Put this triangle in the sorted list
+    sorted_tris.insert(t);
+  }
+
+  // clear the vector
+  m_triangles.clear();
+
+  // move everything back from the set to the vector
+  ntris = sorted_tris.size();
+
+  std::set<cTriangle,lt_ctriangle>::iterator iter = sorted_tris.begin();
+  std::set<cTriangle,lt_ctriangle>::iterator end = sorted_tris.end();
+  while(iter != end) {
+    m_triangles.push_back(*iter);
+    iter++;
+  }
+  
+  // clear the set before recursing
+  sorted_tris.clear();
+
+  // propagate changes to my children
+  if (a_affectChildren==false) return;
+  
+  for (i=0; i<m_children.size(); i++)
+  {
+    cGenericObject *nextObject = m_children[i];
+    cMesh *nextMesh = dynamic_cast<cMesh*>(nextObject);
+    if (nextMesh)
+    {                
+      nextMesh->removeRedundantTriangles(true);
+    }
+  }  
+}
+
 //===========================================================================
 /*!
      Set the static and dynamic friction for this mesh, possibly recursively affecting children
@@ -1346,15 +1460,17 @@ void cMesh::setNormalsProperties(const double a_length, const cColorf& a_color,
      Enable or disable the graphic rendering of normal vectors at each vertex,
      optionally propagating the operation to my children
 
-     \fn        void cMesh::showNormals(const bool a_showNormals,
-                const bool a_affectChildren)
+     \fn        void cMesh::showNormals(const bool& a_showNormals,
+                const bool a_affectChildren, const bool a_trianglesOnly)
      \param     a_showNormals If \b true, normal vectors are rendered graphically
      \param     a_affectChildren  If \b true, then children also modified
 */
 //===========================================================================
-void cMesh::showNormals(const bool a_showNormals, const bool a_affectChildren)
+void cMesh::showNormals(const bool& a_showNormals, const bool a_affectChildren,
+                        const bool a_trianglesOnly)
 {
     m_showNormals = a_showNormals;
+    m_showNormalsForTriangleVerticesOnly = a_trianglesOnly;
 
     // propagate changes to children
     if (a_affectChildren)
@@ -1443,20 +1559,25 @@ void cMesh::updateBoundaryBox()
 
 //===========================================================================
 /*!
-     Resize the current mesh by scaling all my vertex positions
+     Resize the current mesh by scaling all my vertex positions.  If you want
+     to move vertices along their normals, use the extrude() function.
 
      \fn        void scaleObject(double a_scaleFactor)
      \param     a_scaleFactor   Scale factor.
 */
 //===========================================================================
-void cMesh::scaleObject(double a_scaleFactor)
+void cMesh::scaleObject(const cVector3d& a_scaleFactor, const bool a_includeChildren)
 {
     unsigned int i, numItems;
     numItems = m_vertices.size();
     for(i=0; i<numItems; i++)
     {
-        m_vertices[i].m_localPos.mul(a_scaleFactor);
+        m_vertices[i].m_localPos.elementMul(a_scaleFactor);
+        m_vertices[i].m_normal.elementMul(a_scaleFactor);
+        m_vertices[i].m_normal.normalize();
     }
+
+    if (a_includeChildren) cGenericObject::scaleObject(a_scaleFactor,true);
 }
 
 
@@ -1792,7 +1913,7 @@ void cMesh::render(const int a_renderMode)
     if ( (a_renderMode == CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY) || (a_renderMode == CHAI_RENDER_MODE_RENDER_ALL) )
     {
         // render normals
-        if (m_showNormals) renderNormals();        
+        if (m_showNormals) renderNormals(m_showNormalsForTriangleVerticesOnly);        
     }
 }
 
@@ -1839,10 +1960,10 @@ void cMesh::invalidateDisplayList(bool a_affectChildren)
 /*!
      Render a graphic representation of each normal of the mesh.
 
-     \fn       void cMesh::renderNormals()
+     \fn       void cMesh::renderNormals(bool a_trianglesOnly)
 */
 //===========================================================================
-void cMesh::renderNormals()
+void cMesh::renderNormals(const bool a_trianglesOnly)
 {
     // disable lighting
     glDisable(GL_LIGHTING);
@@ -1857,42 +1978,63 @@ void cMesh::renderNormals()
     vector<cVertex>* vertex_vector = pVertices();
     cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
 
-    // render vertex normals
-    for (unsigned int i=0; i<m_triangles.size(); i++)
-    {
-        cTriangle* nextTriangle = &m_triangles[i];
-        cVector3d* vertex0 = &vertex_array[nextTriangle->m_indexVertex0].m_localPos;
-        cVector3d* vertex1 = &vertex_array[nextTriangle->m_indexVertex1].m_localPos;
-        cVector3d* vertex2 = &vertex_array[nextTriangle->m_indexVertex2].m_localPos;
-        cVector3d* normal0 = &vertex_array[nextTriangle->m_indexVertex0].m_normal;
-        cVector3d* normal1 = &vertex_array[nextTriangle->m_indexVertex1].m_normal;
-        cVector3d* normal2 = &vertex_array[nextTriangle->m_indexVertex2].m_normal;
-        cVector3d normalPos, normal;
+    if (a_trianglesOnly) {
+    
+      // render vertex normals
+      for (unsigned int i=0; i<m_triangles.size(); i++)
+      {
+          cTriangle* nextTriangle = &m_triangles[i];
+          cVector3d* vertex0 = &vertex_array[nextTriangle->m_indexVertex0].m_localPos;
+          cVector3d* vertex1 = &vertex_array[nextTriangle->m_indexVertex1].m_localPos;
+          cVector3d* vertex2 = &vertex_array[nextTriangle->m_indexVertex2].m_localPos;
+          cVector3d* normal0 = &vertex_array[nextTriangle->m_indexVertex0].m_normal;
+          cVector3d* normal1 = &vertex_array[nextTriangle->m_indexVertex1].m_normal;
+          cVector3d* normal2 = &vertex_array[nextTriangle->m_indexVertex2].m_normal;
+          cVector3d normalPos, normal;
 
-        // render normal 0 of triangle
-        glBegin(GL_LINES);
-            glVertex3dv((const double *)vertex0);
-            normal0->mulr(m_showNormalsLength, normal);
-            vertex0->addr(normal, normalPos);
-            glVertex3dv((const double *)&normalPos);
-        glEnd();
+          // render normal 0 of triangle
+          glBegin(GL_LINES);
+              glVertex3dv((const double *)vertex0);
+              normal0->mulr(m_showNormalsLength, normal);
+              vertex0->addr(normal, normalPos);
+              glVertex3dv((const double *)&normalPos);
+          glEnd();
 
-        // render normal 1 of triangle
-        glBegin(GL_LINES);
-            glVertex3dv((const double *)vertex1);
-            normal1->mulr(m_showNormalsLength, normal);
-            vertex1->addr(normal, normalPos);
-            glVertex3dv((const double *)&normalPos);
-        glEnd();
+          // render normal 1 of triangle
+          glBegin(GL_LINES);
+              glVertex3dv((const double *)vertex1);
+              normal1->mulr(m_showNormalsLength, normal);
+              vertex1->addr(normal, normalPos);
+              glVertex3dv((const double *)&normalPos);
+          glEnd();
 
-        // render normal 2 of triangle
-        glBegin(GL_LINES);
-            glVertex3dv((const double *)vertex2);
-            normal2->mulr(m_showNormalsLength, normal);
-            vertex2->addr(normal, normalPos);
-            glVertex3dv((const double *)&normalPos);
-        glEnd();
+          // render normal 2 of triangle
+          glBegin(GL_LINES);
+              glVertex3dv((const double *)vertex2);
+              normal2->mulr(m_showNormalsLength, normal);
+              vertex2->addr(normal, normalPos);
+              glVertex3dv((const double *)&normalPos);
+          glEnd();
+      }
     }
+
+    else {
+
+      unsigned int nvertices = m_vertices.size();
+      glBegin(GL_LINES);
+      for(unsigned int i=0; i<nvertices; i++) {
+
+        cVector3d v = m_vertices[i].m_localPos;
+        cVector3d n = m_vertices[i].m_normal;
+        
+        // render normal 0 of triangle
+        glVertex3d(v.x,v.y,v.z);
+        n.mul(m_showNormalsLength);
+        n.add(v);
+        glVertex3d(n.x,n.y,n.z);
+      }
+    }
+    glEnd();
 
     // enable lighting
     glEnable(GL_LIGHTING);

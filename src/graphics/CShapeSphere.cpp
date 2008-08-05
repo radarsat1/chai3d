@@ -129,7 +129,7 @@ void cShapeSphere::updateBoundaryBox()
     \param    a_scaleFactor Scale factor
 */
 //===========================================================================
-void cShapeSphere::scaleObject(double a_scaleFactor)
+void cShapeSphere::scaleObject(const double& a_scaleFactor)
 {
     m_radius = a_scaleFactor * m_radius;
 }

@@ -14,7 +14,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib"
-				OutputFile="bin/mass_springs.exe"
+				OutputFile="../../../bin/mass_springs_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="../../../lib/msvc7"
@@ -83,7 +83,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -112,7 +112,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib"
-				OutputFile="bin/mass_springs.exe"
+				OutputFile="../../../bin/mass_springs_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="../../../lib/msvc7"
@@ -188,6 +188,9 @@
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			<File
+				RelativePath="..\..\msvc6\mass_springs\res\mass_springs.ico">
+			</File>
 			<File
 				RelativePath="..\..\msvc6\mass_springs\mass_springs.rc">
 			</File>

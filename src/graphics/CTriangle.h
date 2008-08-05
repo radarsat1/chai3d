@@ -436,7 +436,7 @@ class cTriangle
       double t_D = (t_E00 * t_E11) - (t_E01 * t_E01);
 
       //
-      if ((t_D > -10E-40f) && (t_D < 10E-40f)) return(false);        
+      if ((t_D > -INTERSECT_EPSILON) && (t_D < INTERSECT_EPSILON)) return(false);        
 
       double t_S0 = ((t_E11 * t_Q0) - (t_E01 * t_Q1)) / t_D;
       double t_S1 = ((t_E00 * t_Q1) - (t_E01 * t_Q0)) / t_D;

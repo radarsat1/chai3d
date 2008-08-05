@@ -15,7 +15,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -39,16 +39,17 @@
 				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
+				CompileAs="0"
+				DisableSpecificWarnings="4244,4018"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib"
-				OutputFile="bin/dynamic_ode.exe"
+				OutputFile="../../../bin/dynamic_ode_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../../lib/msvc7,../../../external\PhantomDriver\lib\MSVC,,../../msvc6/dynamic_ode/lib/ode"
+				AdditionalLibraryDirectories="../../../lib/msvc7,../../msvc6/dynamic_ode/lib/ode"
 				IgnoreDefaultLibraryNames="msvcprt.lib libc.lib msvcp60.lib"
 				ProgramDatabaseFile=".\Release/dynamic_ode.pdb"
 				SubSystem="2"
@@ -84,7 +85,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -94,7 +95,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../../include,include,../../msvc6/dynamic_ode/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MSVC"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MSVC;WINVER=0X0500"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
@@ -107,16 +108,17 @@
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
-				CompileAs="0"/>
+				CompileAs="0"
+				DisableSpecificWarnings="4244,4018"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib ode.lib"
-				OutputFile="bin/dynamic_ode.exe"
+				OutputFile="../../../bin/dynamic_ode_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../../lib/msvc7,../../../external\PhantomDriver\lib\MSVC,../../msvc6/dynamic_ode/lib/ode"
+				AdditionalLibraryDirectories="../../../lib/msvc7,../../msvc6/dynamic_ode/lib/ode"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\Debug/dynamic_ode.pdb"
 				SubSystem="2"
@@ -195,6 +197,9 @@
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			<File
+				RelativePath="..\..\msvc6\dynamic_ode\res\dynamic_ode.ico">
+			</File>
 			<File
 				RelativePath="..\..\msvc6\dynamic_ode\dynamic_ode.rc">
 			</File>

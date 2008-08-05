@@ -56,45 +56,33 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     // Create a light source and attach it to camera
     light = new cLight(world);
     light->setEnabled(true);
-    light->setPos(cVector3d(2,1,1));
+    light->setPos(cVector3d(0.0,0.5,0.7));
+    camera->addChild(light);
 
-    // define camera position
-    cameraAngleH = 10;
-    cameraAngleV = 20;
-    cameraDistance = 2.0;
-    flagCameraInMotion = false;
-    updateCameraPosition();
+    // define the default position of the camera
+    camera->set( cVector3d (2.0, 0.0, 0.0),  // camera position
+                 cVector3d (0.0, 0.0, 0.0),  // lookat position
+                 cVector3d (0.0, 0.0, 1.0)); // camera up vector
+
+    // flag used when the operator rotates the camera with the mouse
+    flagObjectInMotion = false;
+
+    // set the near and far clipping planes of the camera
     camera->setClippingPlanes(0.01, 10.0);
 
     // create a display for graphic rendering
     viewport = new cViewport(Panel1->Handle, camera, true);
     viewport->setStereoOn(false);
 
-    // create a mesh - we will build a simple cube, and later let the
-    // user load 3d models
+    // create a mesh
     object = new cMesh(world);
     world->addChild(object);
 
-    // create a nice little cube
-    createCube(object, 0.05);
-
-    // display information about object
-    NumVerticesLabel->Caption = object->getNumVertices(true);
-    NumTrianglesLabel->Caption = object->getNumTriangles(true);
-
-    // define a material property for this object
-    cMaterial material;
-    material.m_ambient.set( 0.4, 0.2, 0.2, 1.0 );
-    material.m_diffuse.set( 0.8, 0.6, 0.6, 1.0 );
-    material.m_specular.set( 0.9, 0.9, 0.9, 1.0 );
-    material.setShininess(100);
-    object->m_material = material;
+    // set the size of the visual frame for this object
+    object->setFrameSize(0.2, 0.2);
 
     // initialise
     updateWorldSettings();
-
-    // update camera position
-    updateCameraPosition();
 
     // don't start the haptics loop yet
     flagSimulationOn = false;
@@ -115,38 +103,6 @@ void __fastcall TForm1::FormDestroy(TObject *Sender)
     // cleanup memory
     delete world;
     delete viewport;
-}
-
-//---------------------------------------------------------------------------
-
-void TForm1::updateCameraPosition()
-{
-    // check values
-    if (cameraDistance < 0.1) { cameraDistance = 0.1; }
-    if (cameraAngleV > 89) { cameraAngleV = 89; }
-    if (cameraAngleV < -89) { cameraAngleV = -89; }
-
-    // compute position of camera in space
-    cVector3d pos = cAdd(
-                        cameraPosition,
-                        cVector3d(
-                            cameraDistance * cCosDeg(cameraAngleH) * cCosDeg(cameraAngleV),
-                            cameraDistance * cSinDeg(cameraAngleH) * cCosDeg(cameraAngleV),
-                            cameraDistance * cSinDeg(cameraAngleV)
-                        )
-                    );
-
-    // compute lookat position
-    cVector3d lookat = cameraPosition;
-
-    // define roll orientation of camera
-    cVector3d up(0.0, 0.0, 1.0);
-
-    // set new position to camera
-    camera->set(pos, lookat, up);
-
-    // recompute global positions
-    world->computeGlobalPositions(true);
 }
 
 //---------------------------------------------------------------------------
@@ -204,9 +160,6 @@ void __fastcall TForm1::Timer1Timer(TObject *Sender)
     // update options
     updateWorldSettings();
 
-    // update camera position
-    updateCameraPosition();
-
     // render world in display
     if (viewport != NULL)
     {
@@ -228,7 +181,10 @@ void HapticLoop()
         Form1->tool->updatePose();
 
         // compute forces
-        Form1->tool->computeForces();
+        if (!Form1->flagBusy)
+        {
+            Form1->tool->computeForces();
+        }
 
         // send forces to haptic device
         Form1->tool->applyForces();
@@ -257,6 +213,8 @@ void __fastcall TForm1::LoadModelButtonClick(TObject *Sender)
     {
         // create a new mesh
         cMesh* newObject = new cMesh(world);
+        newObject->setPos(0,0,0);
+        objectToCameraDistance = 0.0;
 
         // load 3d object file
         newObject->loadFromFile(OpenDialog1->FileName.c_str());
@@ -284,11 +242,11 @@ void __fastcall TForm1::LoadModelButtonClick(TObject *Sender)
 
         if (AABBTreeButton->Checked)
         {
-            newObject->createAABBCollisionDetector(true,true);
+            newObject->createAABBCollisionDetector(true, false);
         }
         else
         {
-            newObject->createSphereTreeCollisionDetector(true,true);
+            newObject->createSphereTreeCollisionDetector(true, false);
         }
 
         // set size of frame
@@ -308,7 +266,6 @@ void __fastcall TForm1::LoadModelButtonClick(TObject *Sender)
 
         // This will set up default rendering options and haptic properties
         updateWorldSettings();
-        updateCameraPosition();
 
         // display information about object
         NumVerticesLabel->Caption = object->getNumVertices(true);
@@ -351,7 +308,7 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
 
         // tell the tool to show his coordinate frame so you
         // can see tool rotation
-        tool->visualizeFrames(true);
+        tool->setToolFrame(true, 0.1);
 
         // I need to call this so the tool can update its internal
         // transformations before performing collision detection, etc.
@@ -361,6 +318,9 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
         // Enable the "dynamic proxy", which will handle moving objects
         cProxyPointForceAlgo* proxy = tool->getProxy();
         proxy->enableDynamicProxy(true);
+
+        // update the global position of all objects in the world
+        world->computeGlobalPositions(true);
 
         DWORD thread_id;
         ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(HapticLoop), this, 0, &thread_id);
@@ -432,32 +392,32 @@ void __fastcall TForm1::CollisionDepthSliderChange(TObject *Sender)
 
 void __fastcall TForm1::AABBTreeButtonClick(TObject *Sender)
 {
-    // stop current simulation
-    flagSimulationOn = false;
-    while (!flagHasExitedSimulation)
-    {
-        Sleep(1);
-    }
+    // inform the haptic thread not to compute any more collisions
+    flagBusy = true;
+    Sleep(10);
+    tool->setForcesOFF();
+
     if (AABBTreeButton->Checked)
     {
-        object->createAABBCollisionDetector(true, true);
+        object->createAABBCollisionDetector(true, false);
     }
     else
     {
-        object->createSphereTreeCollisionDetector(true, true);
+        object->createSphereTreeCollisionDetector(true, false);
     }
+
+    // collision tree has been updated
+    tool->setForcesON();
+    flagBusy = false;
+
 }
 
 //---------------------------------------------------------------------------
 
-
-
-
-
 void __fastcall TForm1::Panel1MouseDown(TObject *Sender,
       TMouseButton Button, TShiftState Shift, int X, int Y)
 {
-    flagCameraInMotion = true;
+    flagObjectInMotion = true;
     mouseX = X;
     mouseY = Y;
 }
@@ -467,20 +427,25 @@ void __fastcall TForm1::Panel1MouseDown(TObject *Sender,
 void __fastcall TForm1::Panel1MouseMove(TObject *Sender, TShiftState Shift,
       int X, int Y)
 {
-    if (flagCameraInMotion)
+    double angleH, angleV;
+    double K = 0.01;
+
+    if (flagObjectInMotion)
     {
         if (Shift.Contains(ssLeft))
         {
-            cameraAngleH = cameraAngleH - (X - mouseX);
-            cameraAngleV = cameraAngleV + (Y - mouseY);
+            angleH =  K *(X - mouseX);
+            angleV =  K *(Y - mouseY);
+            object->rotate(cVector3d(0, angleV, angleH), sqrt(cSqr(angleV)+cSqr(angleH)));
+            world->computeGlobalPositions(true);
         }
         else if (Shift.Contains(ssRight))
         {
-            cameraDistance = cameraDistance - 0.01 * (Y - mouseY);
+            objectToCameraDistance = objectToCameraDistance - 0.01 * (Y - mouseY);
+            object->setPos(objectToCameraDistance, 0, 0);
+            world->computeGlobalPositions(true);
         }
     }
-
-    updateCameraPosition();
 
     mouseX = X;
     mouseY = Y;
@@ -491,9 +456,13 @@ void __fastcall TForm1::Panel1MouseMove(TObject *Sender, TShiftState Shift,
 void __fastcall TForm1::Panel1MouseUp(TObject *Sender, TMouseButton Button,
       TShiftState Shift, int X, int Y)
 {
-    flagCameraInMotion = false;
+    flagObjectInMotion = false;
 }
 
 //---------------------------------------------------------------------------
+
+
+
+
 
 

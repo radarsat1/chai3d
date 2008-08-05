@@ -46,7 +46,6 @@ void TForm1::CreateObject(std::string fileName, cVector3d loc, cColorf color, in
 
     // compute size of object
     new_mesh->computeBoundaryBox(true);
-
     cVector3d min = new_mesh->getBoundaryMin();
     cVector3d max = new_mesh->getBoundaryMax();
 
@@ -76,9 +75,9 @@ void TForm1::CreateObject(std::string fileName, cVector3d loc, cColorf color, in
     new_mesh->computeGlobalPositions();
 
     cMaterial material;
-    material.m_ambient.set( color.getR(), color.getG(), color.getB(), color.getA() );
+    material.m_ambient.set( 0.3 * color.getR(), 0.3 * color.getG(), 0.3 * color.getB(), color.getA() );
     material.m_diffuse.set( color.getR(), color.getG(), color.getB(), color.getA() );
-    material.m_specular.set( color.getR(), color.getG(), color.getB(), color.getA() );
+    material.m_specular.set( 1.0, 1.0, 1.0, color.getA() );
     material.setShininess(100);
     new_mesh->setMaterial(material, true);
     new_mesh->useMaterial(true, true);
@@ -95,6 +94,7 @@ void TForm1::CreateObject(std::string fileName, cVector3d loc, cColorf color, in
 
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
+
     // create a new world
     world = new cWorld();
 
@@ -108,7 +108,8 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     // Create a light source and attach it to camera
     light = new cLight(world);
     light->setEnabled(true);
-    light->setPos(cVector3d(2,1,1));
+    light->setPos(cVector3d(0,0.5,1));
+    camera->addChild(light);
 
     // define camera position
     cameraAngleH = 10;
@@ -122,8 +123,11 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     viewport = new cViewport(Panel1->Handle, camera, true);
     viewport->setStereoOn(false);
 
-    CreateObject("..//handbell.3ds", cVector3d(0,-0.5,0), cColorf(0.82, 0.7, 0.0, 1.0), BELL);
-    CreateObject("..//teapot.3ds", cVector3d(0,0.5,0), cColorf(0.5, 0.5, 0.5, 1.0), TEAPOT);
+    // create a sound-enabled bell
+    CreateObject("resources\\models\\handbell.3ds", cVector3d(0,-0.5,0), cColorf(0.82, 0.7, 0.0, 1.0), BELL);
+
+    // create a sound-enabled teapot
+    CreateObject("resources\\models\\teapot.3ds", cVector3d(0,0.5,0), cColorf(0.5, 0.5, 0.5, 1.0), TEAPOT);
 
     // update camera position
     updateCameraPosition();
@@ -213,7 +217,8 @@ void HapticLoop()
         // compute forces
         Form1->tool->computeForces();
 
-        // see if there is a collision with a sound-enabled object
+        // see if there is a collision with a sound-enabled object (including
+        // objects who have a sound-enabled parent mesh)
         cSoundMesh* sound_mesh = NULL;
         if (Form1->tool->getProxy()->getContactObject())
         {
@@ -226,19 +231,14 @@ void HapticLoop()
           }
         }
 
-        // calculate velocity
-        previous_pos.sub(Form1->tool->m_deviceGlobalPos);
-        double velocity = previous_pos.length();
-        previous_pos = Form1->tool->m_deviceGlobalPos;
-
         // call play methods for sound-enabled objects
         for (int i=0; i<Form1->sound_meshes.size(); i++)
         {
           // send the current force to the currently contacted object, if any
           if (Form1->sound_meshes[i] == sound_mesh)
-            sound_mesh->getSound()->play(Form1->tool->m_lastComputedGlobalForce, velocity);
+            sound_mesh->getSound()->play(Form1->tool->m_lastComputedGlobalForce);
           else
-            Form1->sound_meshes[i]->getSound()->play(cVector3d(0,0,0), velocity);
+            Form1->sound_meshes[i]->getSound()->play(cVector3d(0,0,0));
         }
 
         // send forces to haptic device
@@ -356,5 +356,14 @@ void __fastcall TForm1::Panel1MouseUp(TObject *Sender, TMouseButton Button,
 }
 
 //---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button3Click(TObject *Sender)
+{
+    exit(0);
+}
+
+//---------------------------------------------------------------------------
+
+
 
 

@@ -14,7 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
-    \version    1.1
+    \version    1.2
     \date       06/2004
 */
 //===========================================================================
@@ -30,8 +30,6 @@
 TForm1 *Form1;
 void HapticLoop();
 //---------------------------------------------------------------------------
-
-const double MESH_SCALE_SIZE = 1.0;
 
 __fastcall TForm1::TForm1(TComponent* Owner)
     : TForm(Owner)
@@ -49,49 +47,95 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
     // set background color
     world->setBackgroundColor(0.0f,0.0f,0.0f);
 
-    // Create a camera
+    // create a camera
     camera = new cCamera(world);
     world->addChild(camera);
 
-    // Create a light source and attach it to camera
-    light = new cLight(world);
-    light->setEnabled(true);
-    light->setPos(cVector3d(2,1,1));
-
-    // define camera position
+    // define the default position of the camera (spherical coordinates)
     cameraAngleH = 10;
     cameraAngleV = 20;
     cameraDistance = 2.0;
-    flagCameraInMotion = false;
     updateCameraPosition();
+
+    // flag used when the operator rotates the camera with the mouse
+    flagCameraInMotion = false;
+
+    // set the near and far clipping planes of the camera
     camera->setClippingPlanes(0.01, 10.0);
+
+    // enable higher quality rendering for transparent objects
+    camera->enableMultipassTransparency(true);
+
+    // Create a light source and attach it to the camera
+    light = new cLight(world);
+    light->setEnabled(true);
+    light->setPos(cVector3d(-2,0.5,1));
+    camera->addChild(light);
 
     // create a display for graphic rendering
     viewport = new cViewport(Panel1->Handle, camera, true);
     viewport->setStereoOn(false);
 
-    // create a mesh - we will build a simple cube, and later let the
-    // user load 3d models
-    object = new cMesh(world);
-    world->addChild(object);
+    // create a tool and add it to the world.
+    tool = new cMeta3dofPointer(world, 0);
+    world->addChild(tool);
+    tool->setPos(0.0, 0.0, 0.0);
 
-    // create a nice little cube
-    createCube(object, 0.05);
+    // set up a nice-looking workspace for the tool so it fits nicely with our
+    // cube models we will be builing
+    tool->setWorkspace(1.0,1.0,1.0);
 
-    // display information about object
-    NumVerticesLabel->Caption = object->getNumVertices(true);
-    NumTrianglesLabel->Caption = object->getNumTriangles(true);
+    // tell the tool to show his coordinate frame so you can see tool position and rotation
+    // define the size of the frame as well
+    tool->setToolFrame(true, 0.1);
 
-    // define a material property for this object
-    cMaterial material;
-    material.m_ambient.set( 0.4, 0.2, 0.2, 1.0 );
-    material.m_diffuse.set( 0.8, 0.6, 0.6, 1.0 );
-    material.m_specular.set( 0.9, 0.9, 0.9, 1.0 );
-    material.setShininess(100);
-    object->m_material = material;
+    // set the diameter of the ball representing the tool
+    tool->setRadius(0.01);
 
-    // update camera position
-    updateCameraPosition();
+    // we create 2 type of material properties. a gray and a red one
+    // we also define a level of transparency: 0.0 = 100% transparent  1.0 = 100% opaque.
+    float transparency_level = 0.7;
+
+    materialGray.m_ambient.set(0.3, 0.5, 0.35, transparency_level);
+    materialGray.m_diffuse.set(0.6, 0.8, 0.65, transparency_level);
+    materialGray.m_specular.set(0.9, 1.0, 0.9, transparency_level);
+    materialGray.setShininess(100);
+
+    materialRed.m_ambient.set(0.6, 0.3, 0.3, transparency_level);
+    materialRed.m_diffuse.set(0.9, 0.6, 0.6, transparency_level);
+    materialRed.m_specular.set(1.0, 0.9, 0.9, transparency_level);
+    materialRed.setShininess(100);
+
+    // we now build 9 little cubes
+    int i,j,k;
+    for (i=-1; i<2; i++)
+    {
+        for (j=-1; j<2; j++)
+        {
+            for (k=-1; k<2; k++)
+            {
+                // create a new mesh instance
+                cMesh* newCube = new cMesh(world);
+
+                // add this mesh to the world
+                world->addChild(newCube);
+
+                // create a list of triangles which will contitute a mesh
+                createCube(newCube, 0.1);
+
+                // we setup the default material propety to be gray as defined above
+                newCube->useMaterial(true);
+                newCube->m_material = materialGray;
+
+                // because we are going to use transparent material properties, we inform
+                // OpenGL to use transparency when rendering this object.
+                newCube->enableTransparency(true);
+
+                // we set the position of the cube in the world
+                newCube->setPos(0.3 * (double)i, 0.3 * (double)j, 0.3 * (double)k);
+            }
+        }
+    }
 
     // don't start the haptics loop yet
     flagSimulationOn = false;
@@ -177,6 +221,22 @@ void HapticLoop()
         // compute forces
         Form1->tool->computeForces();
 
+        // detect which cubes that is being touched by the tool and modify its material property
+        cMesh* object = (cMesh*)Form1->tool->m_proxyPointForceAlgo.getContactObject();
+        if (object != Form1->lastObject)
+        {
+            if (Form1->lastObject != NULL)
+            {
+                Form1->lastObject->m_material = Form1->materialGray;
+                Form1->lastObject = NULL;
+            }
+            if (object != NULL)
+            {
+                object->m_material = Form1->materialRed;
+                Form1->lastObject = object;
+            }
+        }
+
         // send forces to haptic device
         Form1->tool->applyForces();
     }
@@ -199,22 +259,6 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
     // create a thread for the haptic loop
     if (!flagSimulationOn)
     {
-        // create tool
-        if (tool == NULL)
-        {
-            tool = new cMeta3dofPointer(world, 0);
-            camera->addChild(tool);
-            tool->setPos(-2.0, 0.0, 0.0);
-
-            // set up a nice-looking workspace for the phantom so
-            // it fits nicely with our models
-            tool->setWorkspace(2.0,2.0,2.0);
-
-            // Rotate the tool so its axes align with our opengl-like axes
-            tool->setRadius(0.02);
-            tool->setFrameSize(0.04);
-        }
-
         // set up the device
         tool->initialize();
 
@@ -224,18 +268,10 @@ void __fastcall TForm1::ToggleHapticsButtonClick(TObject *Sender)
         // update initial orientation and position of device
         tool->updatePose();
 
-        // tell the tool to show his coordinate frame so you
-        // can see tool rotation
-        tool->visualizeFrames(true);
-
         // I need to call this so the tool can update its internal
         // transformations before performing collision detection, etc.
         tool->computeGlobalPositions();
         tool->setForcesON();
-
-        // Enable the "dynamic proxy", which will handle moving objects
-        cProxyPointForceAlgo* proxy = tool->getProxy();
-        proxy->enableDynamicProxy(true);
 
         DWORD thread_id;
         ::CreateThread(0, 0, (LPTHREAD_START_ROUTINE)(HapticLoop), this, 0, &thread_id);
@@ -297,12 +333,6 @@ void createCube(cMesh *a_mesh, double a_halfSize)
 }
 //---------------------------------------------------------------------------
 
-
-
-
-
-
-
 void __fastcall TForm1::Panel1MouseDown(TObject *Sender,
       TMouseButton Button, TShiftState Shift, int X, int Y)
 {
@@ -343,6 +373,12 @@ void __fastcall TForm1::Panel1MouseUp(TObject *Sender, TMouseButton Button,
     flagCameraInMotion = false;
 }
 
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button1Click(TObject *Sender)
+{
+    exit(0);
+}
 //---------------------------------------------------------------------------
 
 

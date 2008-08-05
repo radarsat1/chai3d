@@ -12,6 +12,13 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
+    The sound card output is based on a tutorial by David Overton, at
+    http://www.planet-source-code.com/vb/scripts/ShowCode.asp?txtCodeId=4422&lngWId=3.
+    Sound generation is based on the algorithm by Kies Van den Doel K and
+    Dinesh Pai in "The sounds of physical shapes". Presence 1998, 7(4): 382-395,
+    and "The AHI: An Audio and Haptic Interface For Contact Interactions" by
+    DiFilippo and Pai.
+
     \author:    <http://www.chai3d.org>
     \author:    Chris Sewell
     \version    1.1
@@ -21,13 +28,51 @@
 
 //---------------------------------------------------------------------------
 #include <vcl.h>
+#include <windows.h>
+#include <mmsystem.h>
+#include <stdio.h>
 #pragma hdrstop
 #include "CSound.h"
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 
-bool cSound::inCallBack = false;
+// Change these values if your computer is slow and the sound is jerky:
+
+// Sample rate; decrease (perhaps to 22000 or so) if sound is jerky
+#define SAMPLE_RATE 44100
+
+// Buffer size; decrease (perhaps to 128 or so) if there is a perceptable pause
+// between impact and initiation of sound
+#define BUFFER_SIZE 1024
+
+// Number of samples generated per impact; decrease in proportion to SAMPLE_RATE
+// if you decrease that; increase (decrease) if sound fades too quickly (too slowly)
+#define MAX_SAMPLES_PER_IMPACT 200000
+
+
+#define BLOCK_SIZE 8192
+#define BLOCK_COUNT 20
+
+// audio function prototypes
+static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);
+static WAVEHDR* allocateBlocks(int size, int count);
+static void freeBlocks(WAVEHDR* blockArray);
+static void writeAudio(HWAVEOUT hWaveOut, LPSTR data, int size);
+
+// global variables
+// counter incremented each time sound object is created to give each unique id
+int g_ids = 0;
+// the id of the object currently generating sound (only one is active at a time
+// in this implementation)
+int g_active = 0;
+
+// module level variables for sound card output
+static CRITICAL_SECTION waveCriticalSection;
+static WAVEHDR* waveBlocks;
+static volatile int waveFreeBlockCount;
+static int waveCurrentBlock;
 //---------------------------------------------------------------------------
+
 
 //===========================================================================
 //  - PUBLIC METHOD -
@@ -40,42 +85,7 @@ bool cSound::inCallBack = false;
 //===========================================================================
 cSound::cSound()
 {
-  started = false;
-  active = 0;
-  running = false;
-  ready = 0;
-
-  // setup wave header struct
-  numBuffers = 8;
-  lpWaveHdrs = NULL;
-  lpData = NULL;
-  dwFmtSize = sizeof(WAVEFORMATEX);
-  hFormat = LocalAlloc(LMEM_MOVEABLE, LOWORD(dwFmtSize));
-  pFormat = (WAVEFORMATEX*) LocalLock(hFormat);
-  pFormat->wFormatTag = WAVE_FORMAT_PCM;
-  pFormat->nChannels = 0x0001;
-  pFormat->nSamplesPerSec = 44000;
-  pFormat->wBitsPerSample = 0x0008;
-  pFormat->nBlockAlign = (pFormat->nChannels)*(pFormat->wBitsPerSample)/8;
-  pFormat->nAvgBytesPerSec = (pFormat->nSamplesPerSec)*(pFormat->nBlockAlign);
-  pFormat->cbSize = 0;
-  hWaveHdr = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, (DWORD) sizeof(WAVEHDR));
-  lpWaveHdrs = new LPWAVEHDR[numBuffers];
-  valid = new bool[numBuffers];
-  reset = new bool[numBuffers];
-  for (int i=0; i<numBuffers; i++)
-  {
-    lpWaveHdrs[i] = (LPWAVEHDR)GlobalLock(hWaveHdr);
-    lpWaveHdrs[i]->dwFlags = 0L;
-    lpWaveHdrs[i]->dwLoops = 0L;
-    lpWaveHdrs[i]->dwFlags = lpWaveHdrs[i]->dwFlags | WHDR_DONE;
-  }
-
-  // make sure there is a device available to play sounds; if so, open it
-  if (waveOutOpen(&hWaveOut, WAVE_MAPPER, pFormat, 0, 0L, WAVE_FORMAT_QUERY))
-    Application->MessageBox("Error in Format Query", "Error");
-  if (waveOutOpen(&hWaveOut, WAVE_MAPPER, pFormat, (DWORD)(writeCallback), (DWORD)this, CALLBACK_FUNCTION))
-    Application->MessageBox("Error in Opening Device", "Error");
+  id = g_ids++;
 }
 
 
@@ -85,28 +95,22 @@ cSound::cSound()
       Destructor of cSound.
 
       \fn         void cSound::~cSound()
-      \return     nothing
 */
 //===========================================================================
 cSound::~cSound()
 {
-  // reset sound device, unprepare wave header, and close device
-  if (waveOutReset(hWaveOut))
-    Application->MessageBox("Error in Resetting Device", "Error");
+  int i;
+  while(waveFreeBlockCount < BLOCK_COUNT)
+  Sleep(10);
 
-  for (int i=0; i<numBuffers; i++)
-    if (waveOutUnprepareHeader(hWaveOut, lpWaveHdrs[i], sizeof(WAVEHDR)))
-      Application->MessageBox("Error in Unpreparing Handle", "Error");
-
-  if (waveOutClose(hWaveOut))
-    Application->MessageBox("Error in Closing Device", "Error");
-
-  // free wave header and data
-  for (int i=0; i<numBuffers; i++)
-  {
-    GlobalFreePtr(lpWaveHdrs[i]->lpData);
-    GlobalFreePtr(lpWaveHdrs[i]);
-  }
+  // unprepare any blocks that are still prepared
+  for(i = 0; i < waveFreeBlockCount; i++)
+  if(waveBlocks[i].dwFlags & WHDR_PREPARED)
+  waveOutUnprepareHeader(hWaveOut, &waveBlocks[i], sizeof(WAVEHDR));
+  DeleteCriticalSection(&waveCriticalSection);
+  freeBlocks(waveBlocks);
+  waveOutClose(hWaveOut);
+  return;
 }
 
 
@@ -123,97 +127,108 @@ cSound::~cSound()
       \fn         void cSound::setParams(sounds choice)
 */
 //===========================================================================
-void cSound::setParams(sounds choice)
+void cSound::setParams(sounds a_choice)
 {
-  char buffer[32];
-  prevMag = 0.0;
-  soundSize = 100000;
-  scale = 1.0;
-  m = 100;
-  dwDataSize = 1000000;
-  FILE*  dfile;
+  // initialise the module variables
+  waveBlocks = allocateBlocks(BLOCK_SIZE, BLOCK_COUNT);
+  waveFreeBlockCount = BLOCK_COUNT;
+  waveCurrentBlock= 0;
+  InitializeCriticalSection(&waveCriticalSection);
+
+  // set up the WAVEFORMATEX structure.
+  wfx.nSamplesPerSec = SAMPLE_RATE; // sample rate
+  wfx.wBitsPerSample = 8; // sample size
+  wfx.nChannels = 1; // channels
+  wfx.cbSize = 0; // size of _extra_ info
+  wfx.wFormatTag = WAVE_FORMAT_PCM;
+  wfx.nBlockAlign = (wfx.wBitsPerSample * wfx.nChannels) >> 3;
+  wfx.nAvgBytesPerSec = wfx.nBlockAlign * wfx.nSamplesPerSec;
+
+  // try to open the default wave device.
+  if(waveOutOpen(&hWaveOut, WAVE_MAPPER, &wfx, (DWORD_PTR)waveOutProc,
+     (DWORD_PTR)&waveFreeBlockCount, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+  {
+    ExitProcess(1);
+  }
+
+  // initialize buffer for writing to sound card
+  dwDataSize = BUFFER_SIZE;
+  buffer = new char[dwDataSize];
+  for (int i=0; i<dwDataSize; i++)
+    buffer[i] = 128;
+
+  // initialize duration of impact sound
+  soundSize = MAX_SAMPLES_PER_IMPACT;
 
   // select .sy data file based on input sound option
-  switch (choice)
+  FILE*  dfile;
+  switch (a_choice)
   {
     case BELL:
-      dfile = fopen("..//handbell.sy", "r");
+      dfile = fopen("resources\\sounds\\handbell.sy", "r");
       scale = 1.0;
       break;
     case TEAPOT:
-      dfile = fopen("..//teapot.sy", "r");
+      dfile = fopen("resources\\sounds\\teapot.sy", "r");
       scale = 6.0;
       break;
   }
 
-  // allocate space for data for all buffers
-  for (int i=0; i<numBuffers; i++)
-  {
-    lpWaveHdrs[i]->lpData = (char*)GlobalAllocPtr(GMEM_MOVEABLE | GMEM_SHARE, 5*dwDataSize);
-    for (unsigned int j=0; j<5*dwDataSize; j++)
-      lpWaveHdrs[i]->lpData[j] = 128.0;
-  }
+  // read in the number of modes, amplitudes, and decay coefficients
+  char file_buffer[32];
+  fgets(file_buffer, 256, dfile);
+  fgets(file_buffer, 256, dfile);
+  n = atoi(file_buffer);
 
-  // read in the modes, amplitudes, and decay coefficients
-  fgets(buffer, 256, dfile);
-  fgets(buffer, 256, dfile);
-  n = atoi(buffer);
-  if (n < m)
-    m = n;
   a.clear();
   f.clear();
   d.clear();
+
+  // ignore header
   for (int i=0; i<11; i++)
-    fgets(buffer, 256, dfile);
+    fgets(file_buffer, 256, dfile);
+
+  // read in the modes
   for (int i=0; i<n; i++)
   {
-    fgets(buffer, 256, dfile);
-    if (i<m)
-      f.push_back(atof(buffer));
+    fgets(file_buffer, 256, dfile);
+    f.push_back(atof(file_buffer));
   }
-  fgets(buffer, 256, dfile);
+
+  // read in the decay coefficients
+  fgets(file_buffer, 256, dfile);
   for (int i=0; i<n; i++)
   {
-    fgets(buffer, 256, dfile);
-    if (i<m)
-      d.push_back(atof(buffer));
+    fgets(file_buffer, 256, dfile);
+    d.push_back(atof(file_buffer));
   }
-  fgets(buffer, 256, dfile);
+
+  // read in the amplitudes
+  fgets(file_buffer, 256, dfile);
   for (int i=0; i<n; i++)
   {
-    fgets(buffer, 256, dfile);
-    if (i<m)
-      a.push_back(atof(buffer));
+    fgets(file_buffer, 256, dfile);
+    a.push_back(atof(file_buffer));
   }
   fclose(dfile);
 
   // allocate space for sound calculations
-  treal = new double[m];
-  timag = new double[m];
-  yreal = new double[m];
-  yimag = new double[m];
-  tyreal = new double[m];
-  tyimag = new double[m];
+  treal = new double[n];
+  timag = new double[n];
+  yreal = new double[n];
+  yimag = new double[n];
+  tyreal = new double[n];
+  tyimag = new double[n];
 
   // precompute real and imaginary parts of e^(i*omegan/Fs)
-  for (int j=0; j<m; j++)
+  for (int j=0; j<n; j++)
   {
-    treal[j] = exp(-d[j]/pFormat->nSamplesPerSec)*cos(2*3.14159*f[j]/pFormat->nSamplesPerSec);
-    timag[j] = exp(-d[j]/pFormat->nSamplesPerSec)*sin(2*3.14159*f[j]/pFormat->nSamplesPerSec);
-  }
-
-  // set up array and header for sound wave data
-  for (int i=0; i<numBuffers; i++)
-  {
-    lpWaveHdrs[i]->dwBufferLength = dwDataSize;
-    lpWaveHdrs[i]->dwFlags = 0L;
-    lpWaveHdrs[i]->dwLoops = 0L;
-    valid[i] = false;
-    reset[i] = false;
+    treal[j] = exp(-d[j]/wfx.nSamplesPerSec)*cos(2*3.14159*f[j]/wfx.nSamplesPerSec);
+    timag[j] = exp(-d[j]/wfx.nSamplesPerSec)*sin(2*3.14159*f[j]/wfx.nSamplesPerSec);
   }
 
   // equation 2 from "Active Haptics Interfaces" paper: yn(0) = an
-  for (int j=0; j<m; j++)
+  for (int j=0; j<n; j++)
   {
     yreal[j] = 0.0;
     yimag[j] = 0.0;
@@ -221,21 +236,9 @@ void cSound::setParams(sounds choice)
 
   // initialize values
   pos = 0;
-  tog = 0;
   cnt = 0;
-  attMag = 0.0;
-  lastMoved = 0;
-  vSum = 0.0;
-  roll = false;
-
-  // reset sound device
-  if ((started) && (waveOutReset(hWaveOut)))
-    Application->MessageBox("Error in Resetting Device", "Error");
-
-  inCallBack = false;
-  active = 1;
-  firstHit = true;
-  running = false;
+  state = 0;
+  prevMag = 0.0;
 }
 
 
@@ -247,158 +250,181 @@ void cSound::setParams(sounds choice)
       device to be played.  The sound model is based on "The AHI: An Audio
       and Haptic Interface For Contact Interactions" by DiFilippo and Pai.
 
-      \fn         void cSound::play(xVector3d iforce, double velocity)
+      \fn         void cSound::play(cVector3d a_force)
 */
 //===========================================================================
-void cSound::play(cVector3d iforce, double velocity)
+void cSound::play(cVector3d a_force)
 {
-
-  if ((!active) || (pos > 5*dwDataSize))
-    return;
-
   // calculate magnitude of the normal force
-  normMag = iforce.length();
-
-  if (firstHit)
-  {
-    normMag = 0.1;
-    velocity = 0.01;
-  }
+  double normMag = a_force.length();
 
   // if there is a new contact, start generating a sound
   if ((normMag >= 0.0001) && (prevMag < 0.0001))
   {
 
-    // calculate a volume based on the velocity
-    vol = 20 + 20000.0*velocity;
-    if (vol > 250)
-      vol = 250;
-    waveOutSetVolume(hWaveOut, (vol << 8) + vol);
-
-    attMag = 1.0;
-    for (int j=0; j<m; j++)
+    // equation 2 from "Active Haptics Interfaces" paper: yn(0) = an
+    for (int j=0; j<n; j++)
     {
-      yreal[j] = attMag*a[j];
+      yreal[j] = a[j];
       yimag[j] = 0.0;
     }
-    reset[tog] = true;
-    running = false;
-    ready = 0;
-    while (inCallBack)
-      Sleep(1);
+
+    // reset the device
     if (waveOutReset(hWaveOut))
       Application->MessageBox("Error in Resetting Device", "Error");
 
-    ready = 1;
-    if (!firstHit)
-      writeSound();
+    // this sound object is now the active one
+    g_active = id;
 
-    firstHit = false;
+    // start writing at beginning of data buffer
+    pos = 0;
+
+    // this sound object is writing sound data
+    state = 1;
+
+    // zero samples have been written so far for this impact
     cnt = 0;
   }
 
-  // exponentially attenuate impact force over time
-  if (cnt > 0)
-    audioForce = attMag*pow(0.85,cnt/100);
-  else
-    audioForce = 0.0;
-
-  // convolve all modes of the sound profile with contact force
-  double lpTemp = 0.0;
-
-  prevMag = normMag;
-  for (int j=0; j<m; j++)
-  {
-    tyreal[j] = treal[j]*yreal[j] - timag[j]*yimag[j];
-    tyimag[j] = treal[j]*yimag[j] + timag[j]*yreal[j];
-    yreal[j] = tyreal[j];
-    yimag[j] = tyimag[j];
-    yreal[j] += audioForce*a[j];
-
-    if (j<n)
-      lpTemp += yreal[j];
-  }
-
-  // if contact force has stopped, stop generating sound
+  // if we have generated enough samples since the last impact, we can stop
   if ((normMag < 0.0001) && (cnt > soundSize))
   {
-    lpWaveHdrs[tog]->lpData[pos] = 128.0;
-    if (started)
+    if (waveOutReset(hWaveOut))
+      Application->MessageBox("Error in Resetting Device", "Error");
+    pos = 0;
+    state = 0;
+    cnt = 0;
+  }
+
+  // if this object is active, calculate sound data
+  if ((state == 1) && (g_active == id))
+  {
+
+    // convolve the haptic normal force with the sound modes; see the Pai papers
+    // for an explanation of this calculation
+    double lpTemp = 0.0;
+    for (int j=0; j<n; j++)
     {
-      vSum = 0.0;
-      ready = 0;
+      tyreal[j] = treal[j]*yreal[j] - timag[j]*yimag[j];
+      tyimag[j] = treal[j]*yimag[j] + timag[j]*yreal[j];
+      yreal[j] = tyreal[j];
+      yimag[j] = tyimag[j];
+      yreal[j] += normMag*a[j];
+      lpTemp += yreal[j];
+    }
+
+    // when the buffer is full, call writeAudio to write it to a data block
+    // for the sound card
+    buffer[pos++] = (int)(lpTemp/scale) + 128;
+    if (pos == dwDataSize-1)
+    {
       pos = 0;
-      if (running)
-      {
-        while (inCallBack)
-          Sleep(1);
-        if (waveOutReset(hWaveOut))
-          Application->MessageBox("Error in Resetting Device", "Error");
-      }
-      running = false;
-      started = false;
+      writeAudio(hWaveOut, buffer, dwDataSize);
     }
-  }
-  else
-  {
-    if (ready)
-    {
-      // otherwise write sound data to buffer
-      lpWaveHdrs[tog]->lpData[pos] = lpTemp/scale + 128.0;
-      valid[tog] = true;
-      cnt++;
-    }
+    cnt++;
   }
 
-  if (ready)
-    pos += 1;
+  // set the previous magnitude for the next iteration
+  prevMag = normMag;
 
-  if ((pos > dwDataSize) && (!running) && (ready))
+  return;
+}
+
+
+// This function writes data to data blocks and prepares them for the
+// sound card, handling a multiple-buffer scheme to provide continuous
+// sound data.  See the Overton tutorial referenced at the top of this
+// file.
+void writeAudio(HWAVEOUT hWaveOut, LPSTR data, int size)
+{
+  WAVEHDR* current;
+  int remain;
+  current = &waveBlocks[waveCurrentBlock];
+
+  while(size > 0)
   {
-    if ((cnt > soundSize) && (normMag > 0.00001))
+    // first make sure the header we're going to use is unprepared
+    if(current->dwFlags & WHDR_PREPARED)
+      waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
+
+    if(size < (int)(BLOCK_SIZE - current->dwUser))
     {
-      vol = 128;
-      waveOutSetVolume(hWaveOut, (vol << 8) + vol);
+      memcpy(current->lpData + current->dwUser, data, size);
+      current->dwUser += size;
+      break;
     }
-    vSum = 0.0;
-    writeSound();
+    remain = BLOCK_SIZE - current->dwUser;
+    memcpy(current->lpData + current->dwUser, data, remain);
+    size -= remain;
+    data += remain;
+    current->dwBufferLength = BLOCK_SIZE;
+    waveOutPrepareHeader(hWaveOut, current, sizeof(WAVEHDR));
+    waveOutWrite(hWaveOut, current, sizeof(WAVEHDR));
+    EnterCriticalSection(&waveCriticalSection);
+    waveFreeBlockCount--;
+    LeaveCriticalSection(&waveCriticalSection);
+
+    // wait for a block to become free
+    while(!waveFreeBlockCount)
+      Sleep(10);
+
+    // point to the next block
+    waveCurrentBlock++;
+    waveCurrentBlock %= BLOCK_COUNT;
+    current = &waveBlocks[waveCurrentBlock];
+    current->dwUser = 0;
   }
 }
 
 
-void CALLBACK cSound::writeCallback(HWAVEOUT hwo, UINT uMsg, cSound* dwInstance, DWORD param1, DWORD param2)
+// This function allocates data blocks to be used for sending data to the sound
+// card.
+WAVEHDR* allocateBlocks(int size, int count)
 {
-  inCallBack = true;
-  dwInstance->writeSound();
-  inCallBack = false;
+  char* buffer;
+  int i;
+  WAVEHDR* blocks;
+  DWORD totalBufferSize = (size + sizeof(WAVEHDR)) * count;
+
+  // allocate memory for the entire set in one go
+  buffer = (char*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, totalBufferSize);
+
+  // and set up the pointers to each bit
+  blocks = (WAVEHDR*)buffer;
+  buffer += sizeof(WAVEHDR) * count;
+
+  for(i = 0; i < count; i++)
+  {
+    blocks[i].dwBufferLength = size;
+    blocks[i].lpData = buffer;
+    buffer += size;
+  }
+  return blocks;
 }
 
 
-void cSound::writeSound()
+// This function frees the data blocks that were used for sendind data to the
+// sound card.
+void freeBlocks(WAVEHDR* blockArray)
 {
+  // and this is why allocateBlocks works the way it does
+  HeapFree(GetProcessHeap(), 0, blockArray);
+}
 
-  if ((!active) || (!ready) || (!valid[tog]))
-  {
-    running = false;
-    return;
-  }
-  running = true;
 
-  // if buffer is full and has sound data, send it to sound device
-  lpWaveHdrs[tog]->dwBufferLength = dwDataSize;
-  lpWaveHdrs[tog]->dwFlags = 0L;
-  lpWaveHdrs[tog]->dwLoops = 0L;
-  vSum = 0.0;
+// This is the callback function that the system calls each time the sound
+// card finishes playing a data block.
+static void CALLBACK waveOutProc(HWAVEOUT hWaveOut, UINT uMsg, DWORD dwInstance,
+    DWORD dwParam1, DWORD dwParam2)
+{
+  // pointer to free block counter
+  int* freeBlockCounter = (int*)dwInstance;
 
-  if (waveOutPrepareHeader(hWaveOut, lpWaveHdrs[tog], sizeof(WAVEHDR)))
-    Application->MessageBox("Error in Preparing Handle", "Error");
-  if (waveOutWrite(hWaveOut, lpWaveHdrs[tog], sizeof(WAVEHDR)))
-    Application->MessageBox("Error in Writing Output", "Error");
-  started = true;
-  valid[tog] = false;
-  tog = (tog + 1) % numBuffers;
-  reset[tog] = false;
-  pos = 0;
+  // ignore calls that occur due to openining and closing the device.
+  if(uMsg != WOM_DONE) return;
+  EnterCriticalSection(&waveCriticalSection);
+  (*freeBlockCounter)++;
+  LeaveCriticalSection(&waveCriticalSection);
 }
 
 

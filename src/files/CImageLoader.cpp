@@ -412,6 +412,38 @@ void find_directory(char* a_dest, const char* a_source)
 
 //===========================================================================
 /*!
+Discards the path component of a filename and returns the filename itself,
+optionally including the extension, in a_dest
+
+\fn     void find_filename(char* a_dest, const char* a_input, bool a_includeExtension);
+\param  a_dest    String which will contain the resulting filename
+\param  a_input   Input string containing path and filename
+\param  a_includeExtension Should the output include the extension?
+*/
+//===========================================================================
+void find_filename(char* a_dest, const char* a_input, bool a_includeExtension)
+{
+  // Find the last '/' or '\' in the filename
+  int len = strlen(a_input);
+  int last_separator_index = 0;
+
+  for(int i=0; i<len; i++) {
+    if (a_input[i] == '/' || a_input[i] == '\\') last_separator_index = i;
+  }
+
+  // Copy the whole filename (including extension)
+  strcpy(a_dest,a_input+last_separator_index+1);
+
+  // If we don't want the extension, trim it off
+  if (a_includeExtension == false) {
+    char* ext = find_extension(a_dest);
+    if (ext) *ext = 0;    
+  }
+}
+
+
+//===========================================================================
+/*!
     Convert a string into lower case.
 
     \fn    void string_tolower(char* dest,const char* source)

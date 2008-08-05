@@ -28,6 +28,13 @@
 #include <math.h>
 //---------------------------------------------------------------------------
 
+#ifdef _MSVC
+#include <conio.h>
+#define CHAI_DEBUG_PRINT _cprintf
+#else 
+#define CHAI_DEBUG_PRINT printf
+#endif
+
 //===========================================================================
 /*!
       \struct   cVector3d
@@ -505,6 +512,37 @@ struct cVector3d
       return((x * a_vector.x) + (y * a_vector.y) + (z * a_vector.z));
     }
 
+    //-----------------------------------------------------------------------
+    /*!
+    Compute the element-by-element product between current vector and an external
+    vector and store in the current vector.
+    
+    \param  a_vector  Vector with which product is computed.
+    */
+    //-----------------------------------------------------------------------
+    inline void elementMul(const cVector3d& a_vector)
+    {
+      x*=a_vector.x;
+      y*=a_vector.y;
+      z*=a_vector.z;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+    Compute the element-by-element product between current vector and an external
+    vector and store in the supplied output vector.
+
+    \param  a_vector  Vector with which product is computed.
+    */
+    //-----------------------------------------------------------------------
+    inline void elementMul(const cVector3d& a_vector, cVector3d& a_result) const
+    {
+      a_result.x = x*a_vector.x;
+      a_result.y = y*a_vector.y;
+      a_result.z = z*a_vector.z;
+    }
+
 
     //-----------------------------------------------------------------------
     /*!
@@ -622,7 +660,7 @@ struct cVector3d
       are equal.
 
       \param    a_vector  Vector with which equality is checked.
-      \return   Returns \c true if both vectors are equal, otherwize
+      \return   Returns \c true if both vectors are equal, otherwise
             returns \c false.
     */
     //-----------------------------------------------------------------------
@@ -657,6 +695,34 @@ struct cVector3d
       cStr(a_string, z, a_precision);
       a_string.append(" )");
     }
+
+    //-----------------------------------------------------------------------
+    /*!
+    Convert current vector into a string, which is returned on the stack.
+    \param    a_precision  Number of digits.
+    */
+    //-----------------------------------------------------------------------
+    inline string str(const unsigned int a_precision=2) const
+    {
+      string a_string;
+      str(a_string,a_precision);
+      return a_string;
+    }
+
+    //-----------------------------------------------------------------------
+    /*!
+    Print the current vector using the CHAI_DEBUG_PRINT macro.
+
+    \param    a_string   String where conversion is stored
+    \param    a_precision  Number of digits.
+    */
+    //-----------------------------------------------------------------------    
+    inline void print(const unsigned int a_precision=2) const
+    {
+      string s;
+      str(s,a_precision);
+      CHAI_DEBUG_PRINT("%s\n",s.c_str());
+    }    
 };
 
 /*!

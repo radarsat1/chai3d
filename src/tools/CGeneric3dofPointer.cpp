@@ -40,29 +40,31 @@
 //===========================================================================
 cGeneric3dofPointer::cGeneric3dofPointer(cWorld* a_world)
 {
+    m_waitForSmallForce = true;
+
     // set world
     m_world = a_world;
 
     // set a default device for the moment
     m_device = new cGenericDevice();
 
-    // set default values
+    // default tool rendering settings
     m_colorDevice.set(1.0f, 0.2f, 0.0);
     m_colorProxyButtonOn.set(1.0f, 0.4f, 0.0);
     m_colorProxy.set(0.8f, 0.6f, 0.0);
     m_colorLine.set(0.7f, 0.7f, 0.7f);
+    m_render_mode = RENDER_PROXY_AND_DEVICE;
 
     // This sets both the rendering radius and the actual proxy radius
     setRadius(0.05f);
     
-    // toggle frames off
-    m_visualizeFrames = false;
+    // tool frame settings
+    m_showToolFrame = false;   // toggle tool frame off
+    m_toolFrameSize = 0.2;      // default value for the tool frame size
 
-    // forces are ON at first
-    m_forceON = true;
+    // force settings
+    m_forceON = true;           // forces are ON at first
     m_forceStarted = false;
-
-    m_render_mode = RENDER_PROXY_AND_DEVICE;
 }
 
 
@@ -104,23 +106,25 @@ void cGeneric3dofPointer::setDevice(cGenericDevice *a_device)
     Initialize device
 
     \fn       void cGeneric3dofPointer::initialize()
-
+    \return   0 indicates success, non-zero indicates an error
 */
 //===========================================================================
-void cGeneric3dofPointer::initialize()
+int cGeneric3dofPointer::initialize()
 {
     // check if device is available
-    if (m_device == NULL) { return; }
+    if (m_device == NULL) { return -1; }
 
-    // initialize device
-    m_device->initialize();
-    m_device->open();
+    // initialize (calibrate) device
+    if (m_device->open() != 0) return -1;
+    if (m_device->initialize() != 0) return -1;
     updatePose();
-    m_device->close();
+    if (m_device->close() != 0) return -1;
 
     // initialize force algorithms
     m_proxyPointForceAlgo.initialize(m_world, m_deviceGlobalPos);
     m_potentialFieldForceAlgo.initialize(m_world, m_deviceGlobalPos);
+
+    return 0;
 }
 
 
@@ -129,15 +133,16 @@ void cGeneric3dofPointer::initialize()
       Reset the tool.
 
       \fn       void cGeneric3dofPointer::start()
+      \return   0 indicates success, non-zero indicates an error
 */
 //===========================================================================
-void cGeneric3dofPointer::start()
+int cGeneric3dofPointer::start()
 {
     // check if device is available
-    if (m_device == NULL) { return; }
+    if (m_device == NULL) { return -1; }
 
     // open connection to device
-    m_device->open();
+    return m_device->open();
 }
 
 
@@ -146,15 +151,16 @@ void cGeneric3dofPointer::start()
       Stop system. Apply zero force to device
 
       \fn       void cGeneric3dofPointer::stop()
+      \return   0 indicates success, non-zero indicates an error
 */
 //===========================================================================
-void cGeneric3dofPointer::stop()
+int cGeneric3dofPointer::stop()
 {
     // check if device is available
-    if (m_device == NULL) { return; }
+    if (m_device == NULL) { return -1; }
 
     // stop the device
-    m_device->close();
+    return m_device->close();
 }
 
 
@@ -196,7 +202,10 @@ void cGeneric3dofPointer::updatePose()
     m_device->command(CHAI_CMD_GET_SWITCH_0, &m_button);
 
     // read velocity of the device in global coordinates
-    m_device->command(CHAI_CMD_GET_VEL_3D, &m_deviceGlobalVel);
+    m_device->command(CHAI_CMD_GET_VEL_3D, &m_deviceLocalVel);
+
+    // update global velocity of tool
+    m_globalRot.mulr(m_deviceLocalVel, m_deviceGlobalVel);
 }
 
 
@@ -240,7 +249,11 @@ void cGeneric3dofPointer::applyForces()
     m_globalRot.transr(tRot);
     tRot.mulr(m_lastComputedGlobalForce, m_lastComputedLocalForce);
 
-    if ((!m_forceStarted) && (m_lastComputedLocalForce.lengthsq() <0.000001))
+    if (
+      (m_waitForSmallForce == false)
+      ||
+      ((!m_forceStarted) && (m_lastComputedLocalForce.lengthsq() <0.000001))
+      )
         m_forceStarted = true;
 
     // send force to device
@@ -303,21 +316,21 @@ void cGeneric3dofPointer::render(const int a_renderMode)
 
     if (m_render_mode != RENDER_PROXY)
     {
-      // render device position
-      glColor4fv(m_colorDevice.pColor());
-      frameGL.set(m_deviceLocalPos);
-      frameGL.glMatrixPushMultiply();
-          cDrawSphere(m_displayRadius, 16, 16);
-      frameGL.glMatrixPop();
+        // render device position
+        glColor4fv(m_colorDevice.pColor());
+        frameGL.set(m_deviceLocalPos);
+        frameGL.glMatrixPushMultiply();
+            cDrawSphere(m_displayRadius, 16, 16);
+        frameGL.glMatrixPop();
 
-      if (m_visualizeFrames)
-      {
-          // render device orientation
-          frameGL.set(m_deviceLocalPos, m_deviceLocalRot);
-          frameGL.glMatrixPushMultiply();
-              cDrawFrame(0.28);
-          frameGL.glMatrixPop();
-      }
+        if (m_showToolFrame)
+        {
+            // render device orientation
+            frameGL.set(m_deviceLocalPos, m_deviceLocalRot);
+            frameGL.glMatrixPushMultiply();
+                cDrawFrame(m_toolFrameSize);
+            frameGL.glMatrixPop();
+        }
     }
 
     if (m_render_mode == RENDER_PROXY_AND_DEVICE)
@@ -395,9 +408,6 @@ void cGeneric3dofPointer::render(const int a_renderMode)
     }
 #endif
 
-      
-
-
 }    
 
 
@@ -427,15 +437,16 @@ void cGeneric3dofPointer::setRadius(double a_radius)
       Toggles on and off the visualization of a reference frame
       located on the tool's point.
 
-      \fn       void cGeneric3dofPointer::visualizeFrames(bool val)
-      \param    val flag that turns frames on/off
+      \fn       void cGeneric3dofPointer::setToolFrame(bool a_showToolFrame, double a_toolFrameSize)
+      \param    a_showToolFrame Flag which controls the tool frame display.
+      \param    m_toolFrameSize Size of the tool frame.
 */
 //===========================================================================
-void cGeneric3dofPointer::visualizeFrames(bool val)
+void cGeneric3dofPointer::setToolFrame(bool a_showToolFrame, double a_toolFrameSize)
 {
-    m_visualizeFrames = val;
+    m_showToolFrame = a_showToolFrame;
+    m_toolFrameSize = a_toolFrameSize;
 }
-
 
 
 //==========================================================================
@@ -443,16 +454,18 @@ void cGeneric3dofPointer::visualizeFrames(bool val)
     Turns forces ON
 
     \fn     void cGeneric3dofPointer::setForcesON()
+    \return   0 indicates success, non-zero indicates an error
 
 */
 //===========================================================================
-void cGeneric3dofPointer::setForcesON()
+int cGeneric3dofPointer::setForcesON()
 {
     if (!m_forceON)
     {
           m_forceStarted = false;
           m_forceON = true;
     }
+    return 0;
 }
 
 
@@ -461,9 +474,11 @@ void cGeneric3dofPointer::setForcesON()
     Turns forces OFF
 
     \fn       void cGeneric3dofPointer::setForcesOFF()
+    \return   0 indicates success, non-zero indicates an error
 */
 //===========================================================================
-void cGeneric3dofPointer::setForcesOFF()
+int cGeneric3dofPointer::setForcesOFF()
 {
     m_forceON = false;
+    return 0;
 }

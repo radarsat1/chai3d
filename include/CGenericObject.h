@@ -97,7 +97,7 @@ class __rtti cGenericObject
     // METHODS - RENDERING:
 
     //! Render the entire scene graph, starting from this object
-    void renderSceneGraph(const int a_renderMode=CHAI_RENDER_MODE_RENDER_ALL);
+    virtual void renderSceneGraph(const int a_renderMode=CHAI_RENDER_MODE_RENDER_ALL);
 
   
     // METHODS - GENERAL:
@@ -226,7 +226,7 @@ class __rtti cGenericObject
     // METHODS - FRAME [X,Y,Z]
 
     //! Set the size of the rendered reference frame, optionally propagating the change to children
-    bool setFrameSize(const double a_size, const bool a_affectChildren = false);
+    bool setFrameSize(const double a_size=1.0, const double a_thickness=1.0, const bool a_affectChildren = false);
     //! Read the size of the rendered reference frame
     double getFrameSize() const { return (m_frameSize); }
     
@@ -273,7 +273,9 @@ class __rtti cGenericObject
     //! Clear and delete all objects from my list of children
     void deleteAllChildren();
     //! Return the number of children on my list of children
-    unsigned int getNumChildren() { return m_children.size(); }
+    inline unsigned int getNumChildren() { return m_children.size(); }
+    //! Return my total number of descendants, optionally including this object
+    unsigned int getNumDescendants(bool a_includeCurrentObject=false);
     //! Fill this list with all of my descendants.
     void enumerateChildren(std::list<cGenericObject*>& a_childList, bool a_includeCurrentObject=true);
     //! Remove me from my parent's CHAI scene graph
@@ -282,6 +284,17 @@ class __rtti cGenericObject
       if (m_parent) return m_parent->removeChild(this);
       else return false;
     }
+
+    // METHODS - MISCELLANEOUS
+    
+    //! Scale this object by a_scaleFactor (uniform scale)
+    virtual void scaleObject(const double& a_scaleFactor, const bool a_includeChildren=false) {
+      scaleObject(cVector3d(a_scaleFactor,a_scaleFactor,a_scaleFactor),a_includeChildren);
+    };
+
+    //! Non-uniform scale
+    virtual void scaleObject(const cVector3d& a_scaleFactor, const bool a_includeChildren);
+
 
 
 		// MEMBERS - DYNAMIC OBJECTS
@@ -299,15 +312,20 @@ class __rtti cGenericObject
     //! An arbitrary tag, not used by CHAI
     int m_tag;
 
+    //! Set the tag for this object and - optionally - for my children    
+    virtual void setTag(const int a_tag, const bool a_affectChildren=0);
+
     //! An arbitrary data pointer, not used by CHAI
     void* m_userData;
+
+    //! Set the m_userData pointer for this object and - optionally - for my children    
+    virtual void setUserData(void* a_data, const bool a_affectChildren=0);
 
     //! A name for this object, automatically assigned by mesh loaders (for example)
     char m_objectName[CHAI_MAX_OBJECT_NAME_LENGTH];
 
-    //! Set the m_userData pointer for this mesh and - optionally - for my children    
-    virtual void setUserData(void* a_data, const bool a_affectChildren=0);
-
+    //! Set the name for this object and - optionally - for my children
+    virtual void setName(const char* a_name, const bool a_affectChildren=0);
 
   protected:
 
@@ -343,6 +361,7 @@ class __rtti cGenericObject
 
     //! Size of graphical representation of frame (X-Y-Z).
     double m_frameSize;
+    double m_frameThicknesScale;
 
 
     // MEMBERS - GRAPHICS
@@ -380,9 +399,6 @@ class __rtti cGenericObject
 
     //! Update the bounding box of this object, based on object-specific data (e.g. triangle positions)
     virtual void updateBoundaryBox() {};
-
-    //! Scale this object by a_scaleFactor
-    virtual void scaleObject(double a_scaleFactor) {};
 
     // MEMBERS:
     //! OpenGL matrix describing my position and orientation transformation

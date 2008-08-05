@@ -1,3 +1,183 @@
+9/19/2005 - dmorris
+
+* Released version 1.3 (stable).
+
+* Added the examples web page to the examples directory.  It makes
+  CHAI look awesome.
+
+
+9/19/2005 - francois
+
+* All examples compile in the root BIN directory and not in the BIN directory
+  of the EXAMPLES directory. The reason for this move is that demos will run with
+  the correct DLL's located in the same directory.
+
+* The drivers for the delta and omega have been updated. I am working on loading and
+  freeing the DLL automatically like the Freedom6 implementation.  Will post this later
+  this week but was experiencing some issues.
+
+* Some of the Borland demos were cleaned up and "relooked"
+
+* Virtual device was not working any more. Fixed a small bug in tools following a recent
+  change someone posted.
+
+* A RESOURCES directory was added in the BIN directory to organize all data files our
+  demos may use (images, models, sounds, ...)
+
+
+9/14/2005 - dmorris
+
+* cImageLoader.h, BTW, has become the home of several filename-related
+  utility functions that I use all the time.  I occasionally add new
+  ones, even if they're not used by cImageLoader; sometime in the
+  future we may move these to something like a chaiFilenameUtils.h.
+
+
+9/13/2005 - dmorris
+
+* Created an msvc7 version of the sounds example
+
+* Modified all copies of the pointer/device/tool classes so that
+  methods like start() and initialize() return an int (instead of
+  void), and return 0 for success.  It was hard to tell where
+  something went wrong if a device failed to start; this will
+  help a lot.  Also deleted empty implementations from
+  cGenericTool3dof (it's still inheriting empty implentations
+  from cGenericTool)
+
+* Modified _all_ examples so they compile to the examples/bin
+  directory.  We've finally started to have some examples that
+  have data, and it was going to be a mess to either have 
+  three copies of every mp3/bmp/etc. file or to try to have a 
+  complex scheme for finding the CHAI data files.  So now
+  everyone lives in one nice bin directory, along with all
+  the data.
+
+  This is something we've been talking about doing for a long
+  time anyway; now folks can just open up that bin directory
+  and quickly see what CHAI can do.
+
+
+9/12/2005 - Chris
+
+* Changed record player example to use (much smaller) mp3's
+  instead of (very large) .wav's.
+
+
+9/8/2005 - Chris
+
+* Created new version of msvc6 sounds example using BASS audio
+  library.
+
+
+9/8/2005 - dmorris
+
+* Added conversion from local to global velocity in
+  cGeneric3dofPointer; it was previously grabbing the (local)
+  velocity from the device and calling it global.
+
+* Removed the forcesON and forcesOFF methods from cGenericTool
+  and cGenericTool3dof, and replaced them with setForcesON and
+  setForcesOff, which is what they were called in the only
+  subclass that actually implemented anything like them
+  (cGeneric3dofPointer).  This was quite confusing, since
+  there were two methods with nearly the same name, one of
+  which didn't do anything.
+
+  I apologize for this minor breaking change, but it was
+  really confusing and needed to be fixed.  I updated all the
+  examples (Borland and MSVC) accordingly.
+
+* Added a version of the str() function in the vector and 
+  matrix classes that takes no arguments, so you can do
+  this:
+
+  printf("My vector is %s\n",v.str(2).c_str());
+
+
+9/6/2005 - dmorris
+
+* Added msvc7 version of the record_player demo
+
+* Cleaned up warnings and gui things in the record_player demo,
+  moved binary files into the 'bin' directory for the msvc6 and
+  msvc7 versions.
+
+
+9/2/2005 - Chris
+
+* Added sound-enabled record_player demo in msvc6 examples.
+
+
+7/26/2005 - Chris
+
+* Made m_deviceGlobalRot in cGeneric3dofPointer publicly accessible.
+
+* Made renderSceneGraph in cGenericObject virtual.
+
+* Removed "#include "CMacrosGL.h" from CPrecisionClock.cpp, as it
+  was causing compile problems for Borland, and is not needed.
+ 
+
+7/12/2005 - dmorris
+
+* MSVC7-compiled CHAI wasn't working on pIII's, because SSE2 was turned on.
+  I turned it off.
+ 
+
+7/7/2005 - dmorris
+
+* Modified msvc examples to allow window resizing, because
+  Francois is passionate about window resizing.
+
+* Aesthetic improvements to MSVC object loader.  Disabled
+  mouse input, centered the camera in the room, backed
+  the camera up a little, etc.
+
+
+7/1/2005 - dmorris
+
+* Made renderSceneGraph virtual in cGenericObject
+
+
+7/4/2005 - Chris
+
+* Modified and added comments to Borland sound example, and added
+  MSVC6 version of the sound example.
+
+
+7/2/2005 - Chris
+
+* Rewrote Borland sound example; it now convolves the force with the
+  sound modes and also hopefully will now run on a wider variety of 
+  machines.
+
+
+6/29/2005 - dmorris
+
+* Added a 'getNumDescendants' function to cGenericObject, to 
+  recursively ask how many children an object has
+
+
+6/28/2005 - Chris
+
+* Made minor change in a variable declaration in cMesh (Visual Studio 6
+  didn't like the same variable declared in two for loops, causing CHAI
+  not to compile in MSVC6).
+
+
+6/13/2005 - dmorris
+
+* Added recursive setTag and setName functions to cGenericObject
+
+* Added project files for the intel compiler
+
+
+6/6/2005 - dmorris
+
+* Added arbitrary clip planes to cCamera
+
+
 6/1/2005 - dmorris
 
 * Released the 1.25 beta (preceded by the 1.23 and 1.24 betas)

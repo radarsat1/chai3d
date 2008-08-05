@@ -95,8 +95,6 @@ public:
   // If it's 1 haptics are turned on
   void toggle_haptics(int enable = TOGGLE_HAPTICS_TOGGLE);
 
-protected:
-
   // virtual world
   cWorld* world;
   cCamera* camera;

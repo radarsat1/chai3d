@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="basic_shapes"
 	ProjectGUID="{AE34383B-4823-4D29-9BDC-2648759C59E9}"
+	RootNamespace="basic_shapes"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">
@@ -14,7 +15,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -24,7 +25,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../../include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MSVC"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MSVC;WINVER=0x0500"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
@@ -41,7 +42,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib"
-				OutputFile="bin/basic_shapes.exe"
+				OutputFile="../../../bin/basic_shapes_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="../../../lib/msvc7"
@@ -80,7 +81,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -110,7 +111,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib"
-				OutputFile="bin/basic_shapes.exe"
+				OutputFile="../../../bin/basic_shapes_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="../../../lib/msvc7"
@@ -186,6 +187,9 @@
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			<File
+				RelativePath="..\..\msvc6\basic_shapes\res\basic_shapes.ico">
+			</File>
 			<File
 				RelativePath="..\..\msvc6\basic_shapes\basic_shapes.rc">
 			</File>

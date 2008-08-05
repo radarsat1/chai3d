@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by dynamic_ode.rc
 //
 #define IDD_dynamic_ode_DIALOG          102
@@ -28,10 +28,13 @@
 #define IDC_DYNAMIC_FRICTION_RADIUS_TEXT 1022
 #define IDC_TOGGLE_STEREO_BUTTON        1023
 #define IDC_SECOND_DEVICE_BUTTON        1025
+#define IDC_STATIC3                     1026
+#define IDC_STATIC4                     1027
 #define IDC_STEREOFOCUS_SLIDER          1028
 #define IDC_STEREOFOCUS_TEXT            1029
 #define IDC_STEREOSEP_SLIDER            1030
 #define IDC_STEREOSEP_TEXT              1031
+#define IDC_STATIC5                     1032
 
 // Next default values for new objects
 // 
@@ -39,7 +42,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1026
+#define _APS_NEXT_CONTROL_VALUE         1033
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

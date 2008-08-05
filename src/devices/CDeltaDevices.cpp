@@ -13,7 +13,7 @@
     Professional Edition License.
 
     \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
+    \author:    Force Dimension - www.forcedimension.com
     \version    1.1
     \date       01/2004
 */
@@ -31,15 +31,6 @@ const double OMEGA_DEVICE_WORKSPACE_HALF_SIZE  = 0.075; // [meters]
 const double OMEGA_DEVICE_MAXIMUM_FORCE        = 12.0;  // [newtons]
 //---------------------------------------------------------------------------
 
-// I am having serious problems linking to the delta libraries on some machines,
-// with the important consequence being that some machines don't run CHAI
-// binaries linked against dhdms.lib.  So I'm adding a #define to remove all
-// dhd references, so I can temporarily build binaries that run anywhere.
-//
-// This should be commented out by default, so delta support actually
-// works.
-// #define NUKE_REFERENCES_TO_DHDMS
-
 //===========================================================================
 /*!
     Constructor of cDeltaDevice.
@@ -49,21 +40,25 @@ const double OMEGA_DEVICE_MAXIMUM_FORCE        = 12.0;  // [newtons]
 //===========================================================================
 cDeltaDevice::cDeltaDevice(unsigned int a_deviceNumber)
 {
+    // device is not yet available or ready
+    m_systemAvailable = false;
     m_systemReady = false;
+
+    // get the number ID of the device we wish to communicate with
     m_deviceID = a_deviceNumber;
 
-    int numDevices = 0;
+    // get the number of Force Dimension devices connected to this computer
+    int numDevices = dhdGetDeviceCount();
 
-#ifndef NUKE_REFERENCES_TO_DHDMS
-    numDevices = dhdGetDeviceCount();
-#endif
-
+    // check if such device is available
     if ((a_deviceNumber + 1) > (unsigned int)numDevices)
     {
+        // no, such ID does not lead to an existing device
         m_systemAvailable = false;
     }
     else
     {
+        // yes, this ID leads to an existing device
         m_systemAvailable = true;
     }
 }
@@ -95,26 +90,49 @@ cDeltaDevice::~cDeltaDevice()
 //===========================================================================
 int cDeltaDevice::open()
 {
+    // check if the system is available
+    if (!m_systemAvailable) return (-1);
 
-   if (m_systemReady) return true;
+    // if system is already opened then return
+    if (m_systemReady) return (0);
 
-   int result = -1;
+    // try to open the device
+    int result = dhdOpenID(m_deviceID);
 
-#ifndef NUKE_REFERENCES_TO_DHDMS
-   result = dhdOpenID(m_deviceID);
-#endif
-
-   if (result == 0)
-   {
+    // update device status
+    if (result == 0)
+    {
         m_systemReady = true;
-        m_systemAvailable = true;
-   }
-   else
-   {
+    }
+    else
+    {
         m_systemReady = false;
-        m_systemAvailable = false;
-   }
-   return (result);
+        return (-1);
+    }
+
+    // read the device type
+    int deviceType = dhdGetSystemType(m_deviceID);
+
+    switch (deviceType)
+    {
+        case (DHD_DEVICE_3DOF):
+        case (DHD_DEVICE_6DOF):
+        case (DHD_DEVICE_6DOF_500):
+        {
+            m_halfSizeWorkspace = DELTA_DEVICE_WORKSPACE_HALF_SIZE;
+            m_maximumForces     = DELTA_DEVICE_MAXIMUM_FORCE;
+        }
+        break;
+
+        case (DHD_DEVICE_OMEGA):
+        {
+            m_halfSizeWorkspace = OMEGA_DEVICE_WORKSPACE_HALF_SIZE;
+            m_maximumForces     = OMEGA_DEVICE_MAXIMUM_FORCE;
+        }
+        break;
+    }
+
+    return (result);
 }
 
 
@@ -127,11 +145,14 @@ int cDeltaDevice::open()
 //===========================================================================
 int cDeltaDevice::close()
 {
-    int result = -1;
-    
-#ifndef NUKE_REFERENCES_TO_DHDMS
-    result = dhdClose(m_deviceID);
-#endif
+    // check if the system has been opened previously
+    if (!m_systemReady) return (-1);
+
+    // yes, the device is open so let's close it
+    int result = dhdClose(m_deviceID);
+
+    // update status
+    m_systemReady = false;
 
     return (result);
 }
@@ -146,14 +167,7 @@ int cDeltaDevice::close()
 //===========================================================================
 int cDeltaDevice::initialize()
 {
-
-    int result = -1;
-
-#ifndef NUKE_REFERENCES_TO_DHDMS
-    result = dhdReset(m_deviceID);
-#endif
-
-    return (result);
+    return (0);
 }
 
 
@@ -169,9 +183,11 @@ int cDeltaDevice::initialize()
 //===========================================================================
 int cDeltaDevice::command(int a_command, void* a_data)
 {
+    // temp variables
     int result = CHAI_MSG_OK;
     double x=0.0,y=0.0,z=0.0;
 
+    // check if device is open
     if (m_systemReady)
     {
         switch (a_command)
@@ -179,22 +195,21 @@ int cDeltaDevice::command(int a_command, void* a_data)
             // read position of delta device
             case CHAI_CMD_GET_POS_3D:
             {
-#ifndef NUKE_REFERENCES_TO_DHDMS
                 dhdGetPosition(&x, &y, &z, m_deviceID);
-#endif
+
                 cVector3d* position = (cVector3d *) a_data;
                 position->set(x, y, z);
             }
             break;
 
+            // read normalized position of the delta device
             case CHAI_CMD_GET_POS_NORM_3D:
             {
-#ifndef NUKE_REFERENCES_TO_DHDMS
                 dhdGetPosition(&x, &y, &z, m_deviceID);
-#endif
+
                 cVector3d* position = (cVector3d *) a_data;
                 position->set(x, y, z);
-                position->div(DELTA_DEVICE_WORKSPACE_HALF_SIZE);
+                position->div(m_halfSizeWorkspace);
             }
             break;
 
@@ -203,27 +218,34 @@ int cDeltaDevice::command(int a_command, void* a_data)
             {
                 cVector3d* angles = (cVector3d *) a_data;
                 angles->set(0, 0, 0);
-#ifndef NUKE_REFERENCES_TO_DHDMS
+
                 dhdGetOrientationRad(&angles->x, &angles->y, &angles->z, m_deviceID);
-#endif
             }
             break;
 
             // read orientation matrix of wrist
             case CHAI_CMD_GET_ROT_MATRIX:
             {
+                cVector3d angles;
+                angles.set(0,0,0);
+
+                dhdGetOrientationRad(&angles.x, &angles.y, &angles.z, m_deviceID);
+
+                angles.mul(1.5);
                 cMatrix3d* matrix = (cMatrix3d *) a_data;
                 matrix->identity();
+                matrix->rotate(cVector3d(1,0,0), angles.x);
+                matrix->rotate(cVector3d(0,1,0), angles.y);
+                matrix->rotate(cVector3d(0,0,1), angles.z);
             }
             break;
 
-            // set normalized force to delta device
+            // set force to delta device
             case CHAI_CMD_SET_FORCE_3D:
             {
                 cVector3d* force = (cVector3d *) a_data;
-#ifndef NUKE_REFERENCES_TO_DHDMS
+
                 dhdSetForce(force->x, force->y, force->z, m_deviceID);
-#endif
             }
             break;
 
@@ -231,9 +253,8 @@ int cDeltaDevice::command(int a_command, void* a_data)
             case CHAI_CMD_SET_TORQUE_3D:
             {
                 cVector3d* torque = (cVector3d *) a_data;
-#ifndef NUKE_REFERENCES_TO_DHDMS
+
                 dhdSetTorque(torque->x, torque->y, torque->z, m_deviceID);
-#endif
             }
             break;
 
@@ -241,9 +262,8 @@ int cDeltaDevice::command(int a_command, void* a_data)
             case CHAI_CMD_GET_SWITCH_0:
             {
                 int* result = (int *) a_data;
-#ifndef NUKE_REFERENCES_TO_DHDMS
+
                 *result = dhdGetButton(0, m_deviceID);
-#endif
             }
             break;
 

@@ -12,6 +12,13 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
+    The sound card output is based on a tutorial by David Overton, at
+    http://www.planet-source-code.com/vb/scripts/ShowCode.asp?txtCodeId=4422&lngWId=3.
+    Sound generation is based on the algorithm by Kies Van den Doel K and
+    Dinesh Pai in "The sounds of physical shapes". Presence 1998, 7(4): 382-395,
+    and "The AHI: An Audio and Haptic Interface For Contact Interactions" by
+    DiFilippo and Pai.
+
     \author:    <http://www.chai3d.org>
     \author:    Chris Sewell
     \version    1.1
@@ -60,89 +67,42 @@ class cSound
     //! Destructor of cSound.
     ~cSound();
 
-    // PROPERTIES:
-    //! Address of a WAVEFORMATEX structure
-    WAVEFORMATEX *pFormat;
-
     // METHODS:
     //! Set material sound parameters
-    void setParams(sounds choice);
+    void setParams(sounds a_choice);
     //! Render the sound
-    void play(cVector3d forcei, double velocity);
-    //! Callback function for writing to sound card
-    static void CALLBACK writeCallback(HWAVEOUT hwo, UINT uMsg, cSound* dwInstance,
-          DWORD param1, DWORD param2);
-    //! Write data to the sound card
-    void writeSound();
+    void play(cVector3d a_force);
 
   private:
     // PROPERTIES:
-    //! Size of wave format section
-    DWORD dwFmtSize;
     //! Size of wave data section
     DWORD dwDataSize;
-    //! Handle for wave format section
-    HANDLE hFormat;
-    //! Handle for wave header
-    HGLOBAL hWaveHdr;
     //! Handle for sound device
     HWAVEOUT hWaveOut;
-    //! Array of addresses of WAVEHDR structures
-    LPWAVEHDR *lpWaveHdrs;
-    //! Sound wave data
-    HPSTR lpData;
-    //! Number of buffers to use
-    int numBuffers;
-    //! Has the sound output device already been written to?
-    bool started;
-    //! Should continuous contact sound like rolling?
-    bool roll;
+    //! Wave format struct
+    WAVEFORMATEX wfx;
     //! Normal force magnitude from previous iteration
     double prevMag;
     //! Number of modes
-    int n, m;
+    int n;
     //! Maximum number of samples to play for an impact sound
     int soundSize;
     //! Frequency, amplitude, and decay coefficient material sound properties
-    vector<double> a, f, d, fs;
-    //! Arrays for calculation sound data
+    vector<double> a, f, d;
+    //! Arrays for calculating sound data
     double *yreal, *yimag, *treal, *timag, *tyreal, *tyimag;
-    //! Current buffer being written to
-    int tog;
     //! Number of samples generated since last impulse force
     long cnt;
-    //! Number of samples generated since last movement along object surface
-    long lastMoved;
-    //! Sound force attenuation magnitude
-    double attMag;
     //! Value to scale sound samples by to be in 0-256 range
     double scale;
-    //! Audio force
-    double audioForce;
-    //! Total distance moved since last reset
-    double vSum;
-    //! Highest frequency used for rolling sounds
-    double cutOff;
-    //! Does the buffer have sound data to be played?
-    bool *valid;
-    //! Should the sound device be reset to immediately start playing this buffer?
-    bool *reset;
     //! Index in the current buffer being written
     unsigned int pos;
-    //! Is sound playback running?
-    bool running;
-    //! Is sound playback ready?
-    int ready;
-    //! Is sound playback active?
-    int active;
-    //! Is this an initial contact?
-    bool firstHit;
-    //! Force magnitude
-    double normMag;
-    //! Volume level
-    int vol;
-    //! Is control in the callback function?
-    static bool inCallBack;
+    //! Should this object be writing sound now?
+    int state;
+    //! Sound data buffer
+    char* buffer;
+    //! Id of this sound object
+    int id;
 };
 
 #endif

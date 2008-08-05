@@ -97,8 +97,6 @@ SOURCE=..\src\graphics\CCamera.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -109,8 +107,6 @@ SOURCE=..\src\graphics\CCamera.cpp
 SOURCE=..\src\collisions\CCollisionAABB.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -123,8 +119,6 @@ SOURCE=..\src\collisions\CCollisionAABBBox.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -135,8 +129,6 @@ SOURCE=..\src\collisions\CCollisionAABBBox.cpp
 SOURCE=..\src\collisions\CCollisionAABBTree.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -149,8 +141,6 @@ SOURCE=..\src\collisions\CCollisionBrute.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -161,8 +151,6 @@ SOURCE=..\src\collisions\CCollisionBrute.cpp
 SOURCE=..\src\collisions\CCollisionSpheres.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -175,8 +163,6 @@ SOURCE=..\src\collisions\CCollisionSpheresGeometry.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -187,8 +173,6 @@ SOURCE=..\src\collisions\CCollisionSpheresGeometry.cpp
 SOURCE=..\src\graphics\CColor.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -201,8 +185,6 @@ SOURCE=..\src\tools\CDelta3dofPointer.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -213,8 +195,6 @@ SOURCE=..\src\tools\CDelta3dofPointer.cpp
 SOURCE=..\src\devices\CDeltaDevices.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -227,8 +207,6 @@ SOURCE=..\src\graphics\CDraw3D.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -239,8 +217,6 @@ SOURCE=..\src\graphics\CDraw3D.cpp
 SOURCE=..\src\devices\CDriverSensoray626.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -253,8 +229,6 @@ SOURCE=..\src\devices\CDriverServotogo.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -265,8 +239,6 @@ SOURCE=..\src\devices\CDriverServotogo.cpp
 SOURCE=..\src\files\CFileLoader3DS.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -279,8 +251,6 @@ SOURCE=..\src\files\CFileLoaderBMP.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -291,8 +261,6 @@ SOURCE=..\src\files\CFileLoaderBMP.cpp
 SOURCE=..\src\files\CFileLoaderOBJ.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -305,8 +273,6 @@ SOURCE=..\src\files\CFileLoaderTGA.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -317,8 +283,6 @@ SOURCE=..\src\files\CFileLoaderTGA.cpp
 SOURCE=..\src\tools\CFreedom6S3dofPointer.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -331,8 +295,6 @@ SOURCE=..\src\devices\CFreedom6SDevice.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -343,8 +305,6 @@ SOURCE=..\src\devices\CFreedom6SDevice.cpp
 SOURCE=..\src\tools\CGeneric3dofPointer.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -357,8 +317,6 @@ SOURCE=..\src\collisions\CGenericCollision.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -369,8 +327,6 @@ SOURCE=..\src\collisions\CGenericCollision.cpp
 SOURCE=..\src\devices\CGenericDevice.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -383,8 +339,6 @@ SOURCE=..\src\graphics\CGenericObject.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -395,8 +349,6 @@ SOURCE=..\src\graphics\CGenericObject.cpp
 SOURCE=..\src\forces\CGenericPointForceAlgo.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -409,8 +361,6 @@ SOURCE=..\src\graphics\CGenericPotentialField.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -421,8 +371,6 @@ SOURCE=..\src\graphics\CGenericPotentialField.cpp
 SOURCE=..\src\tools\CGenericTool.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -435,8 +383,6 @@ SOURCE=..\src\tools\CGenericTool3dof.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -447,8 +393,6 @@ SOURCE=..\src\tools\CGenericTool3dof.cpp
 SOURCE=..\src\files\CImageLoader.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -461,8 +405,6 @@ SOURCE=..\src\graphics\CLight.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -473,8 +415,6 @@ SOURCE=..\src\graphics\CLight.cpp
 SOURCE=..\src\graphics\CMacrosGL.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -487,8 +427,6 @@ SOURCE=..\src\graphics\CMaterial.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -499,8 +437,6 @@ SOURCE=..\src\graphics\CMaterial.cpp
 SOURCE=..\src\math\CMaths.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -513,8 +449,6 @@ SOURCE=..\src\graphics\CMesh.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -525,8 +459,6 @@ SOURCE=..\src\graphics\CMesh.cpp
 SOURCE=..\src\files\CMeshLoader.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -539,8 +471,6 @@ SOURCE=..\src\tools\CMeta3dofPointer.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -551,8 +481,6 @@ SOURCE=..\src\tools\CMeta3dofPointer.cpp
 SOURCE=..\src\tools\CPhantom3dofPointer.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -565,8 +493,6 @@ SOURCE=..\src\devices\CPhantomDevices.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -577,8 +503,6 @@ SOURCE=..\src\devices\CPhantomDevices.cpp
 SOURCE=..\src\forces\CPotentialFieldForceAlgo.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -591,8 +515,6 @@ SOURCE=..\src\timers\CPrecisionClock.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -603,8 +525,6 @@ SOURCE=..\src\timers\CPrecisionClock.cpp
 SOURCE=..\src\timers\CPrecisionTimer.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -617,8 +537,6 @@ SOURCE=..\src\forces\CProxyPointForceAlgo.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -629,8 +547,6 @@ SOURCE=..\src\forces\CProxyPointForceAlgo.cpp
 SOURCE=..\src\graphics\CShapeSphere.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -643,8 +559,6 @@ SOURCE=..\src\math\CString.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -655,8 +569,6 @@ SOURCE=..\src\math\CString.cpp
 SOURCE=..\src\graphics\CTexture2D.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -669,8 +581,6 @@ SOURCE=..\src\graphics\CTriangle.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -681,8 +591,6 @@ SOURCE=..\src\graphics\CTriangle.cpp
 SOURCE=..\src\graphics\CVertex.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -695,8 +603,6 @@ SOURCE=..\src\display\CViewport.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -707,8 +613,6 @@ SOURCE=..\src\display\CViewport.cpp
 SOURCE=..\src\devices\CVirtualDevice.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
@@ -721,8 +625,6 @@ SOURCE=..\src\graphics\CWorld.cpp
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
 
-# ADD CPP /D WINVER=0x0500
-
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 
 !ENDIF 
@@ -733,8 +635,6 @@ SOURCE=..\src\graphics\CWorld.cpp
 SOURCE=..\src\devices\WIN626.C
 
 !IF  "$(CFG)" == "chai3d_complete - Win32 Release"
-
-# ADD CPP /D WINVER=0x0500
 
 !ELSEIF  "$(CFG)" == "chai3d_complete - Win32 Debug"
 

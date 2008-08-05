@@ -38,7 +38,7 @@
 cTexture2D::cTexture2D()
 {
     // initialize internal variables
-    reset();
+    reset();    
 }
 
 
@@ -70,7 +70,9 @@ cTexture2D::~cTexture2D()
 void cTexture2D::reset()
 {
 
-    texture_environment_mode = GL_MODULATE;
+    m_texture_environment_mode = -1;
+    m_min_filter = -1;
+    m_mag_filter = -1;
 
     // id number provided by OpenGL once texture is stored in graphics
     // card memory
@@ -119,8 +121,14 @@ void cTexture2D::render()
     glBindTexture(GL_TEXTURE_2D, m_textureID);
 
     // set the texture environment mode
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texture_environment_mode);
+    if (m_texture_environment_mode != -1)
+      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, m_texture_environment_mode);
+
+    if (m_mag_filter != -1)
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,m_mag_filter);
     
+    if (m_min_filter != -1)
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,m_min_filter);
 }
 
 

@@ -147,7 +147,7 @@ const int   CHAI_MSG_SYSTEM_NOT_READY   =  -3;
 /*!
     \class  cGenericDevice
     \brief  cGenericDevice describes a virtual class from which all
-            devices and hardware interfaces are derivated from.
+            devices and hardware interfaces are derived.
 */
 //===========================================================================
 class cGenericDevice
@@ -160,23 +160,24 @@ class cGenericDevice
     virtual ~cGenericDevice() {};
 
     // METHODS:
-    //! Open connection to device.
-    virtual int open() { return (0); }
-    //! Close connection to device
-    virtual int close() { return (0);}
-    //! Initialize or calibrate device.
-    virtual int initialize() { return (0);}
-    //! Send a command to the device.
+    //! Open connection to device (0 indicates success)
+    virtual int open() { return -1; }
+    //! Close connection to device (0 indicates success)
+    virtual int close() { return -1; }
+    //! Initialize or calibrate device (0 indicates success)
+    virtual int initialize() { return -1; }
+    //! Send a command to the device (0 indicates success)
     virtual int command(int a_command, void* a_data) { return CHAI_MSG_NOT_IMPLEMENTED; }
-    //! Returns the status of system to know if it is available.
-    bool isSystemAvailable() { return (m_systemAvailable); };
-    //! Returns the status of system to know if it is ready for use.
-    bool isSystemReady() { return (m_systemReady); };
+
+    //! Returns true if the device is available for communication
+    bool isSystemAvailable() { return m_systemAvailable; }
+    //! Returns true if the device is ready for us
+    bool isSystemReady() { return m_systemReady; }
 
   protected:
     //! Flag that indicates is hardware device is available.
     bool m_systemAvailable;
-    //! Flag that indicates if connection to system was opened successfuly.
+    //! Flag that indicates if connection to system was opened successfully.
     bool m_systemReady;
 };
 

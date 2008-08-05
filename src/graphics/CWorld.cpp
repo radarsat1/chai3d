@@ -382,7 +382,7 @@ void cWorld::render(const int a_renderMode)
     Check if a ray intersects this current triangle. The segment is described
     by a start point /e a_segmentPointA and end point /e a_segmentPointB. \n
 
-    If a collision occures, the square distance between the segment start point
+    If a collision occurs, the square distance between the segment start point
     and collision point in measured and compared to any previous collision
     information stored in parameters \e a_colObject, \e a_colTriangle,
     \e a_colPoint, and \e a_colSquareDistance. If the new collision is located

@@ -1,26 +1,40 @@
-To release a version of chai:
+To release a version of chai (this usually takes about an hour) :
 
-* Make sure that the changelog is appropriately up-to-date
+* Make sure that the changelog is appropriately up-to-date, and
+  add a 'released version x.xx' to the top of it.
 
-* Open the msvc7 solution file and build.  Make sure that
-  you're building a release version.
+* Open the msvc7 solution file and rebuild.  Make sure that
+  you're building a release version.  Make the solution
+  window look pretty by closing all open documents and 
+  all open project folders.
 
-* Open the msvc6 workspace file and build.  Make sure that
-  you're building a release version.
+* Open the msvc6 workspace file and rebuild.  Make sure that
+  you're building a release version.  Make the solution
+  window look pretty by closing all open documents and 
+  all open project folders.
 
-* Open the msvc7 example solution file and do a batch build.
-  All the release versions should be selected.
+* Open the msvc7 example solution file and do a batch rebuild.
+  All the release versions should be selected.  Make the solution
+  window look pretty by closing all open documents and 
+  all open project folders.
 
-* Open the msvc6 example solution file and do a batch build.
-  All the release versions should be selected.
+* Open the msvc6 example solution file and do a batch rebuild.
+  All the release versions should be selected.  Make the solution
+  window look pretty by closing all open documents and 
+  all open project folders.
 
-* Open the Borland example file and do a 'build all' (not 'make
+* Open the Borland _example_ file.  Make sure all the projects
+  and libs are set to _release_ mode and do a 'build all' (not 'make
   all').  This includes all the CHAI lib files.
 
 * Close your IDE's.
 
+* Make sure that all the .exe and .ocx files in the bin 
+  directory are dated correctly; i.e. make sure they actually
+  got re-built since you started this process.
+
 * Test all the binaries if this is going to be a 'stable' release.
-  This step gets skipped for a 'beta' release.
+  This step gets skipped for a 'beta' release.  
 
 * Open doxygen and load the doc/doxyfile.  Run doxygen.  You can usually
   skip this for a 'beta' release also.
@@ -28,21 +42,36 @@ To release a version of chai:
 * Use windows search to find all files with these extensions and remove
   them:
 
-  *.pch;*.obj;*.idb;*.pdb;*.tds;
+  *.pch;*.obj;*.idb;*.pdb;*.tds;*.~*
+
+  ...except for turntable.obj!
+
+  [FYI you can paste the above string into Windows find...]
+
+  Also search for directories called VTune, Release and Debug, and remove them too.
 
   Also search for files greater than 50k and make sure there's nothing that
   doesn't belong.
 
 * Zip the top-level directory (should be called chai3d) up into
-  chai3d[vx.xx].zip
+  chai3d[vx.xx].zip .  The zipfile should be around 20MB.
 
 * Open the zipfile and remove 'chai_todo.txt' from the source directory; this
   contains internal todo's that the world doesn't need to see.
 
-* Ftp the zipfile to the CHAI 'builds' directory
+* ftp the zipfile to the CHAI 'builds' directory
 
-* Edit the main html file
+* Edit the chai3d.html file to include all the important notes in
+  the changelog since the last release.
+
+* Remove the entire doc/html directory online and upload the new doxygen docs.
 
 * Check everything into CVS so everyone else can access the current CHAI via
   CVS.
+
+* E-mail the rest of the team so we can go online and confirm that everything
+  works.  It's very likely that something will be wrong, which is why everyone
+  should check up on it ASAP.
+
+-Dan
 

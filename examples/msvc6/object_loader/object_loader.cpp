@@ -120,7 +120,7 @@ Cobject_loaderApp::Cobject_loaderApp() {
 
   HWND con_wnd = GetConsoleWindow();
 
-  // We want the console to pop up over any non-TG2 windows, although
+  // We want the console to pop up over any non-chai windows, although
   // we'll put the main dialog window above it.
   ::SetForegroundWindow(con_wnd);
   
@@ -1009,7 +1009,7 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
     // I need to call this so the tool can update its internal
     // transformations before performing collision detection, etc.
     tool->computeGlobalPositions();
-    tool->ForcesON();
+    tool->setForcesON();
     
     // Enable the "dynamic proxy", which will handle moving objects
     cProxyPointForceAlgo* proxy = tool->getProxy();
@@ -1059,7 +1059,7 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
 #endif
     
     // Stop the haptic device...
-    tool->ForcesOFF();
+    tool->setForcesOFF();
     tool->stop();
     
     // SetPriorityClass(GetCurrentProcess(),NORMAL_PRIORITY_CLASS);    

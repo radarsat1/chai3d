@@ -47,24 +47,26 @@ class cGenericTool : public cGenericObject
     virtual ~cGenericTool() {};
 
     // METHODS:
+    //! Render the object in OpenGL.
+    virtual void render(const int a_renderMode=0) {};
     //! Update Position, orientation, velocity and other degree of freedoms of tool.
+    
     virtual void updatePose() {};
     //! Compute interaction forces with environment.
     virtual void computeForces() {};
     //! Apply latest forces to device.
     virtual void applyForces() {};
-    //! Stop system. apply no forces to device.
-    virtual void stop() {};
-    //! Render the object in OpenGL.
-    virtual void render(const int a_renderMode=0) {};
-    //! Start the device connected to the tool
-    virtual void start() {};
-    //! Initializes encoders on device connected to the tool
-    virtual void initialize() {};
-    //! Toggles forces on
-    virtual void ForcesON() {};
-    //! Toggles forces off
-    virtual void ForcesOFF() {};
+    
+    //! Start communication with the device connected to the tool (0 indicates success)
+    virtual int start()        { return -1; }
+    //! Stop communication with the device connected to the tool (0 indicates success)
+    virtual int stop()         { return -1; }
+    //! Initialize encoders on device connected to the tool (0 indicates success)
+    virtual int initialize()   { return -1; }
+    //! Toggle forces on
+    virtual int setForcesON()  { return -1; }
+    //! Toggle forces off
+    virtual int setForcesOFF() { return -1; }
 };
 
 //---------------------------------------------------------------------------

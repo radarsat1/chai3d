@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 306
-  Top = 152
+  Left = 317
+  Top = 195
   Width = 933
   Height = 842
   Caption = 'CHAI 3D - Object Loader'
@@ -12,6 +12,7 @@ object Form1: TForm1
   Font.Style = []
   OldCreateOrder = False
   Position = poDesktopCenter
+  WindowState = wsMaximized
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -35,14 +36,6 @@ object Form1: TForm1
     OnMouseDown = Panel1MouseDown
     OnMouseMove = Panel1MouseMove
     OnMouseUp = Panel1MouseUp
-    object StatusBar1: TStatusBar
-      Left = 1
-      Top = 795
-      Width = 722
-      Height = 19
-      Panels = <>
-      SimplePanel = False
-    end
   end
   object Panel4: TPanel
     Left = 724
@@ -131,14 +124,12 @@ object Form1: TForm1
         Width = 121
         Height = 17
         Caption = 'Show Boundary Box'
-        Checked = True
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'MS Sans Serif'
         Font.Style = []
         ParentFont = False
-        State = cbChecked
         TabOrder = 2
       end
       object ShowNormalsBox: TCheckBox
@@ -556,8 +547,8 @@ object Form1: TForm1
     Top = 8
   end
   object OpenDialog1: TOpenDialog
-    Filter = '*.obj|*.obj|*.3ds|*.3ds'
-    Left = 72
+    Filter = '*.3ds *.obj|*.obj;*.3ds| | '
+    Left = 40
     Top = 8
   end
 end

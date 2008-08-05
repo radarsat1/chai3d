@@ -35,24 +35,24 @@ HINSTANCE hDLL = NULL;
 typedef enum
 {
   F6SRC_NOERROR     = 0,
-  F6SRC_ALREADYEXIST    = -1,   /* A Freedom6S device is already open in the system                                */
-  F6SRC_BADVALUE      = -2,   /* Value out of range                                                              */
-  F6SRC_BADPOINTER    = -3,   /* Bad pointer passed to function                                                  */
-  F6SRC_MEMORY      = -4,   /* Out of memory                                                                   */
-  F6SRC_REGISTRY      = -5,   /* Error reading registry values (will user defaults)                              */
-  F6SRC_INIFILE_READ    = -6,   /* Error reading ini file (settings)                                               */
-  F6SRC_INIFILE_WRITE   = -7,   /* Error writing ini file (settings)                                               */
-  F6SRC_NOTINITIALIZED  = -8,   /* Attempt to call a function before f6s_Initialize()                              */
-  F6SRC_BADHANDLE     = -9,   /* A function received a bad HF6S value                                            */
-  F6SRC_BADMOTORTEMP    = -10,  /* Motor temperatures were out of range or not read correctly (warning only)       */
-  F6SRC_JOINTVELINIT    = -11,  /* Attempt to read velocity without joint velocity computation enabled             */
-  F6SRC_CALIBRATION   = -12,  /* Unable to calibrate, require mechanical calibration                             */
-  F6SRC_ROLLANGLE     = -13,  /* Unable to calculate roll angle, sensors 4 & 5 require mechanical re-calibration */
-  F6SRC_DRIVERINIT    = -14,  /* Unable to initialize the drivers for ADC or DAC hardware                        */
-  F6SRC_IOERROR     = -15,  /* Error returned from ADC or DAC drivers                                          */
-  F6SRC_DAQCONFIG     = -16,  /* Unknown DAQ configuration                             */
-  F6SRC_HOTMOTOR      =   -17,    /* One or more motors have been flagged hot, causing the max current to decrease   */
-  F6SRC_FAILURE           =   -18     /* Operation failed                                                                */
+  F6SRC_ALREADYEXIST    = -1,      /* A Freedom6S device is already open in the system                                */
+  F6SRC_BADVALUE      = -2,        /* Value out of range                                                              */
+  F6SRC_BADPOINTER    = -3,        /* Bad pointer passed to function                                                  */
+  F6SRC_MEMORY      = -4,          /* Out of memory                                                                   */
+  F6SRC_REGISTRY      = -5,        /* Error reading registry values (will user defaults)                              */
+  F6SRC_INIFILE_READ    = -6,      /* Error reading ini file (settings)                                               */
+  F6SRC_INIFILE_WRITE   = -7,      /* Error writing ini file (settings)                                               */
+  F6SRC_NOTINITIALIZED  = -8,      /* Attempt to call a function before f6s_Initialize()                              */
+  F6SRC_BADHANDLE     = -9,        /* A function received a bad HF6S value                                            */
+  F6SRC_BADMOTORTEMP    = -10,     /* Motor temperatures were out of range or not read correctly (warning only)       */
+  F6SRC_JOINTVELINIT    = -11,     /* Attempt to read velocity without joint velocity computation enabled             */
+  F6SRC_CALIBRATION   = -12,       /* Unable to calibrate, require mechanical calibration                             */
+  F6SRC_ROLLANGLE     = -13,       /* Unable to calculate roll angle, sensors 4 & 5 require mechanical re-calibration */
+  F6SRC_DRIVERINIT    = -14,       /* Unable to initialize the drivers for ADC or DAC hardware                        */
+  F6SRC_IOERROR     = -15,         /* Error returned from ADC or DAC drivers                                          */
+  F6SRC_DAQCONFIG     = -16,       /* Unknown DAQ configuration                             */
+  F6SRC_HOTMOTOR      =   -17,     /* One or more motors have been flagged hot, causing the max current to decrease   */
+  F6SRC_FAILURE           =   -18  /* Operation failed                                                                */
 } F6SRC;
 
 typedef void* HF6S;

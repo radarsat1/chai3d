@@ -31,6 +31,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "object_loader", "object_loa
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "record_player", "record_player\record_player.vcproj", "{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sounds", "sounds\sounds.vcproj", "{C8AD877F-E188-455B-ADE2-3F98965C900E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -43,10 +51,10 @@ Global
 		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Debug.Build.0 = Debug|Win32
 		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Release.ActiveCfg = Release|Win32
 		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Release.Build.0 = Release|Win32
-		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Unicode Debug.ActiveCfg = Unicode Debug|Win32
-		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Unicode Debug.Build.0 = Unicode Debug|Win32
-		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Unicode Release.ActiveCfg = Unicode Release|Win32
-		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Unicode Release.Build.0 = Unicode Release|Win32
+		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Unicode Debug.ActiveCfg = Release|Win32
+		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Unicode Debug.Build.0 = Release|Win32
+		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Unicode Release.ActiveCfg = Release|Win32
+		{08BD0FCF-CB32-4816-A5E9-4985A6F57593}.Unicode Release.Build.0 = Release|Win32
 		{AE34383B-4823-4D29-9BDC-2648759C59E9}.Debug.ActiveCfg = Debug|Win32
 		{AE34383B-4823-4D29-9BDC-2648759C59E9}.Debug.Build.0 = Debug|Win32
 		{AE34383B-4823-4D29-9BDC-2648759C59E9}.Release.ActiveCfg = Release|Win32
@@ -103,6 +111,22 @@ Global
 		{34D319FF-195A-4202-AF28-FA9840C380CE}.Unicode Debug.Build.0 = Debug|Win32
 		{34D319FF-195A-4202-AF28-FA9840C380CE}.Unicode Release.ActiveCfg = Release|Win32
 		{34D319FF-195A-4202-AF28-FA9840C380CE}.Unicode Release.Build.0 = Release|Win32
+		{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}.Debug.ActiveCfg = Debug|Win32
+		{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}.Debug.Build.0 = Debug|Win32
+		{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}.Release.ActiveCfg = Release|Win32
+		{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}.Release.Build.0 = Release|Win32
+		{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}.Unicode Debug.ActiveCfg = Debug|Win32
+		{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}.Unicode Debug.Build.0 = Debug|Win32
+		{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}.Unicode Release.ActiveCfg = Release|Win32
+		{DD5E88B3-BDE7-447C-96D2-B7830EDCB36F}.Unicode Release.Build.0 = Release|Win32
+		{C8AD877F-E188-455B-ADE2-3F98965C900E}.Debug.ActiveCfg = Debug|Win32
+		{C8AD877F-E188-455B-ADE2-3F98965C900E}.Debug.Build.0 = Debug|Win32
+		{C8AD877F-E188-455B-ADE2-3F98965C900E}.Release.ActiveCfg = Release|Win32
+		{C8AD877F-E188-455B-ADE2-3F98965C900E}.Release.Build.0 = Release|Win32
+		{C8AD877F-E188-455B-ADE2-3F98965C900E}.Unicode Debug.ActiveCfg = Debug|Win32
+		{C8AD877F-E188-455B-ADE2-3F98965C900E}.Unicode Debug.Build.0 = Debug|Win32
+		{C8AD877F-E188-455B-ADE2-3F98965C900E}.Unicode Release.ActiveCfg = Release|Win32
+		{C8AD877F-E188-455B-ADE2-3F98965C900E}.Unicode Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

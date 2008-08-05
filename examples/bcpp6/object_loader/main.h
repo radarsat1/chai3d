@@ -112,7 +112,6 @@ __published:
     TCheckBox *ShowCollisionDetectorBox;
     TLabel *Label17;
     TTrackBar *CollisionDepthSlider;
-    TStatusBar *StatusBar1;
   TCheckBox *EnableTransparencyBox;
     void __fastcall FormCreate(TObject *Sender);
     void __fastcall Timer1Timer(TObject *Sender);
@@ -140,6 +139,8 @@ private:
 
     // object mesh
     cMesh* object;
+    double objectToCameraDistance;
+
 
     // viewport
     cViewport* viewport;
@@ -153,15 +154,8 @@ private:
     // update settings of world
     void updateWorldSettings();
 
-    // update camera settings
-    void updateCameraPosition();
-
-    // camera pose
-    double cameraAngleH;
-    double cameraAngleV;
-    double cameraDistance;
-    cVector3d cameraPosition;
-    bool flagCameraInMotion;
+    // mouse selection
+    bool flagObjectInMotion;
     int mouseX, mouseY;
 
 public:
@@ -169,6 +163,9 @@ public:
 
     // haptic tool
     cMeta3dofPointer* tool;
+
+    // flag
+    bool flagBusy;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

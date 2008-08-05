@@ -135,21 +135,23 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
 #define MAX_VIRTUAL_DEVICE_SLEEP_CYCLES 20
 
         // Wait for the virtual delta process to start up...
-        for(int i=0; i<MAX_VIRTUAL_DEVICE_SLEEP_CYCLES; i++) {
-          m_device = new cVirtualDevice();
-          systemAvailable = m_device->isSystemAvailable();
-          if (systemAvailable) break;
-          delete m_device;
-          m_device = 0;
-          Sleep(50);
-        }        
-        
+        for(int i=0; i<MAX_VIRTUAL_DEVICE_SLEEP_CYCLES; i++)
+        {
+            m_device = new cVirtualDevice();
+            systemAvailable = m_device->isSystemAvailable();
+            if (systemAvailable) break;
+            delete m_device;
+            m_device = 0;
+            Sleep(50);
+        }
+
         if (!systemAvailable)
         {
             CHAI_DEBUG_PRINT("Could not open virtual device...\n");
-            if (m_device) {
-              m_device->close();
-              delete m_device;
+            if (m_device)
+            {
+                m_device->close();
+                delete m_device;
             }
             m_device = NULL;
             return;
@@ -167,5 +169,4 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
 //===========================================================================
 cMeta3dofPointer::~cMeta3dofPointer()
 {
-
 }

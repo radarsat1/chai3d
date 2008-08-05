@@ -45,7 +45,7 @@ bool g_3dsLoaderShouldGenerateExtraVertices = true;
     \fn         bool cLoadFile3DS(const cMesh* a_mesh, const string& a_fileName)
     \param      a_mesh         Mesh in which image file is loaded
     \param      a_fileName     Name of image file.
-    \return     Return \b true if image was loaded successfully, otherwize
+    \return     Return \b true if image was loaded successfully, otherwise
                 return \b false.
 */
 //===========================================================================
@@ -1591,7 +1591,7 @@ bool L3DS::LoadFile(const char *filename) {
 
           uint mat_id = mesh.m_tris[j].materialId;
 
-          if (mat_id < 0 || mat_id >= this->GetMaterialCount()) {
+          if (mat_id >= this->GetMaterialCount()) {
             mat_id = last_mat;
           }
 

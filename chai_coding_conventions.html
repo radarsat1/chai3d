@@ -1,0 +1,240 @@
+<html>
+<head>
+<title>Coding conventions for CHAI 3D</title>
+<STYLE type="text/css">
+<!--
+A { text-decoration:none }
+p {text-align:justify}
+-->
+</STYLE>
+</head>
+<body bgcolor=#ffffff>
+<center><font size=+2><b>Coding conventions for CHAI 3D</b></font></center>
+<p>
+
+<p><hr>
+<font size=-1>
+<center>
+[<a href="#whitespace">Whitespace</a>]
+[<a href="#symbols">Symbol names</a>]
+[<a href="#comments">Comments</a>]
+[<a href="#headers">Header files</a>]
+[<a href="#tips">Tips</a>]
+</center>
+</font>
+<hr><p>
+
+Rather than enumerate the format of every possible line you might write in
+C++, I'll try to point out specific aspects of the CHAI coding conventions
+that might not be considered 'standard' C++ style.  And of course, the best reference is the code itself; if you start from an existing CHAI file as a stencil, you'll find it hard _not_ to stick to the conventions.<p>
+
+<a name="whitespace">
+<p><hr>
+<b>Whitespace and indents</b>
+<hr><p>
+
+<ul>
+<li>Tabs and indents shoud be _four_ spaces... and NO TABS!  Even if your
+tabstops in your favorite editor are set to four spaces, Jimbo's might not
+be, so use spaces, not tabs.<p>
+
+<li>Other than one-line functions in header files, function bodies should be
+delimited by a bracket appearing on the line _after_ the function name, and
+the function body should be indented two spaces.  The same convention applies
+to conditional statements and loops... e.g.:<br>
+
+<pre><tt>void cGenericObject::onDisplayReset(const bool a_affectChildren)
+{
+    // Forward this call to my children...
+
+    // update children
+    if (a_affectChildren)
+    {
+        for (unsigned int i=0; i&lt;m_children.size(); i++)
+        {
+            m_children[i]-&gt;onDisplayReset(true);
+        }
+    }
+} // void onDisplayReset(...)
+</tt></pre>
+
+<li>Wherever it might not be obvious what a closing bracket means (e.g. because
+it's the end of a long function and the function name is probably a page or
+more away), include a one-line comment after the closing bracket... this really
+helps when loops are heavily nested.  The above example is clearly unnecessary,
+but it illustrates the point.<p>
+
+<li>Skip two lines between the end of one function and the start of another;
+this prevents files from getting crazy-crammed and makes it easier to quickly
+scan through code.
+
+</ul>
+
+<a name="symbols">
+<hr>
+<b>File, class, variable, and function names</b>
+<hr><p>
+<ul>
+<li>All symbols should start new words with a captial letter, e.g.
+<tt>selectedObject</tt>
+<li>Class names always begin with a lowercase 'c' followed by a capital
+letter, e.g. <tt>cCamera</tt>
+<li>The files that define the class cObject are typically called CObject.h
+and CObject.cpp (with capital C's)
+<li>Function parameter names begin with <tt>a_</tt>, followed by a lowercase
+letter, e.g. <tt>a_selectedObject</tt>
+<li>Member variable names begin with <tt>m_</tt>, followed by a lowercase
+letter, e.g. <tt>m_myPrivateVariable</tt>
+<li>Local variables and function names begin with a lowercase letter, e.g.
+<tt>selectedObject</tt> or <tt>getGlobalPos(...)</tt>
+<li>Functions that represent callbacks should begin with 'on', e.g.
+<tt>onDisplayReset()</tt>
+</ul>
+
+<a name="comments">
+<hr>
+<b>Comments</b>
+<hr><p>
+
+<ul>
+<li>Every file that is to be incorporated into CHAI should have the big CHAI header on it, and www.chai3d.org should always be listed as an author... it's at the top of every file, but for completeness I'm pasting it at the <a href="#header">end of this file</a>.<p>
+
+<p>
+<li>All inline comments (comments you sprinkle in your code, as opposed to function or file header comments) should use C++-type comments... i.e. '//' comments, not '/*' comments.  So a multi-line comment should look like this:
+
+<pre><tt>// I'm using a lot of words right now
+// to tell you that I'm incrementing
+// a variable called 'i'...
+i++;
+</tt></pre>
+
+<li>We use doxygen, so we need to mark header comments in the doxygen-ish
+style.  Every function gets one "brief" description and one "long"
+description... we typically put a brief description before a function
+declaration (in a header file) and a long description before a function
+definition (in a .cpp file).<p>
+
+Brief descriptions should look like this:
+
+<pre><tt>//! Set the local position of this object
+inline void setPos(const cVector3d& a_pos) { m_localPos = a_pos; }
+</tt></pre>
+
+...and cannot exceed one line (otherwise doxygen treats them as long descriptions).<p>
+
+Long descriptions look like this:
+<pre><tt>//===========================================================================
+/*!
+    Create a new vertex and add it to the vertex list.
+
+    \fn         unsigned int cMesh::newVertex(const double a_x, const double
+                a_y, const double a_z)
+    \param      a_x  X coordinate of vertex.
+    \param      a_y  Y coordinate of vertex.
+    \param      a_z  Z coordinate of vertex.
+    \return     Return index position of new vertex.
+*/
+//===========================================================================
+unsigned int cMesh::newVertex(const double a_x, const double a_y, const double a_z)
+{
+...
+</tt></pre>
+
+Note the exclamation point, which tells doxygen that a description is coming.  Also note the \fn tag to delimit the function name, the \param tag to delimit parameters, and the \return tag to delimit return values.<p>
+
+<li>Similarly, each class should have an associated doxygen description wherever it's declared, a la:
+<pre><tt>//===========================================================================
+/*!
+      \class      cCamera
+      \brief      cCamera describes a virtual Camera located inside the world.
+                  Its job in life is to set up the OpenGL projection matrix
+                  for the current OpenGL rendering context...
+*/
+//===========================================================================
+</tt></pre>
+ 
+</ul>
+<p>
+
+<a name="headers">
+<hr><b>Header files</b><hr><p>
+
+<ul>
+
+<li>Don't let inline or one-line functions take up tons of space... i.e., please do this:<br>
+<pre><tt>//! Set the local position of this object
+inline void setPos(const cVector3d& a_pos) { m_localPos = a_pos; }
+</tt></pre>
+
+Not this...
+
+<pre><tt>//---------------------------------------
+//! Set the local position of this object
+//---------------------------------------
+inline void setPos(const cVector3d& a_pos)
+{
+  m_localPos = a_pos;
+}
+</tt></pre>
+Particularly when a lot of these functions come one after another (often set/get functions), doing the latter can make header files really difficult to read.<p>
+
+<li>Include a blank line between each function in a header file... this makes
+your headers much more readable.  Alternatively, place a blank line after a
+few closely-related functions to delimit a new category of function.<p>
+</ul>
+
+<a name="tips">
+<hr><b>Coding/Performance tips</b><hr><p>
+
+<ul>
+<li>Remember to declare functions inline if they hardly do anything (e.g. setPos())
+<li>Remember to declare functions const if they don't modify any member variables
+<li>Remember to take parameters by reference if all you're going to do is
+copy them (i.e. if they're const), to avoid extra stack copies.  This is
+particularly relevant for complex types being passed as parameters.
+<li>Remember to declare parameters const if you don't need to modify them
+<li>Always set pointers to null immediately after you delete them
+<li>Remember to (almost) always declare your destructors virtual
+<li>Any time you change an OpenGL state variable, be nice and put the
+state back to where it was when you're finished, unless you have a specific
+reason to do otherwise.  Use glGet to get the state beforehand for any state
+variables you're going to futz with.  Similarly, always leave the GL matrix
+mode set to modelview when you're finished with any matrix strack
+manipulations you might be doing.
+<li>Avoid <tt>using namespace std;</tt>, particularly in header files.  This
+makes supporting multiple compilers more difficult, as difficult compilers
+place different things in different namespaces.
+<li>Avoid using <tt>friend</tt> and <tt>typeid</tt> wherever possible; they
+make extending CHAI more difficult in most cases.
+</ul>
+
+<a name="header">
+<p><hr>
+<b>As promised, the big CHAI header comment to be included at the top of every file:</b><hr><p>
+
+<pre><tt>//===========================================================================
+/*
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License("GPL") version 2
+    as published by the Free Software Foundation.
+
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
+
+    \author:    &lt;http://www.chai3d.org&gt;
+    \author:    Joe Smith 
+    \version    1.1
+    \date       01/2004
+*/
+//===========================================================================
+</tt></pre>
+<p>
+<hr>
+<tt><font size=-1>Written by <a href="http://techhouse.brown.edu/~dmorris">Dan Morris</a>, September 2004</font></tt>
+</html></body> 
+

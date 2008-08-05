@@ -42,6 +42,8 @@ cGenericTool3dof::cGenericTool3dof()
     m_deviceLocalPos.zero();
     m_lastComputedLocalForce.zero();
     m_lastComputedGlobalForce.zero();
+    m_deviceLocalVel.zero();
+    m_deviceGlobalVel.zero();
     m_button = false;
 }
 
@@ -63,6 +65,6 @@ void cGenericTool3dof::setWorkspace(double a_workspaceAxisX,
 {
     m_halfWorkspaceAxisX = a_workspaceAxisX / 2.0;
     m_halfWorkspaceAxisY = a_workspaceAxisY / 2.0;
-    m_halfWorkspaceAxisZ = a_workspaceAxisZ / 2.0;
+    m_halfWorkspaceAxisZ = a_workspaceAxisZ / 2.0;    
 }
 

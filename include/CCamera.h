@@ -45,6 +45,29 @@ const int CHAI_STEREO_DEFAULT   =  -1000;
 
 //---------------------------------------------------------------------------
 
+// The maximum number of arbitrary clip planes
+#define CHAI_MAX_CLIP_PLANES 6
+
+// Struct used for enabling arbitrary clipping planes after the viewing
+// matrix has been set up
+struct cClippingPlane {
+
+  // Is this clip plane enabled?
+  //
+  //  0 : disabled
+  //  1 : enabled
+  // -1 : don't touch
+  int enabled;
+
+  // The plane equation
+  double peqn[4];
+
+  cClippingPlane() {
+    enabled = -1;
+    peqn[0] = peqn[1] = peqn[2] = peqn[3] = 0.0f;
+  }
+};
+
 //===========================================================================
 /*!
       \class      cCamera
@@ -95,6 +118,9 @@ class cCamera : public cGenericObject
 
     //! Automatically adjust back and front clipping planes
     void adjustClippingPlanes();
+
+    //! Enable or disable one of the (six) arbitrary clipping planes
+    void enableClipPlane(const unsigned int& index, const int& enable, const double* peqn=0);
 
     //! Set field of view angle (in degrees)
     void setFieldViewAngle(double a_fieldViewAngle);
@@ -152,6 +178,9 @@ class cCamera : public cGenericObject
     //! Distance to far clipping plane.
     double m_distanceFar;
 
+    //! Other clipping planes
+    cClippingPlane m_clipPlanes[CHAI_MAX_CLIP_PLANES];
+
     //! Field of view angle in degrees
     double m_fieldViewAngle;
 
@@ -172,6 +201,7 @@ class cCamera : public cGenericObject
     //! Older apps may have the camera as a child of the world, which
     //! would cause recursion when resetting the display
     bool m_performingDisplayReset;
+    
 };
 
 //---------------------------------------------------------------------------

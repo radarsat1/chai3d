@@ -35,7 +35,13 @@
       \param    a_modifyMaterialState If true, this function sets GL to the preferred material state
 */
 //===========================================================================
-void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
+void cDrawFrame(const double a_scale, const bool a_modifyMaterialState)
+{
+  cDrawFrame(a_scale,a_scale,a_modifyMaterialState);
+}
+
+void cDrawFrame(const double a_axisLengthScale, const double a_axisThicknessScale,
+                const bool a_modifyMaterialState)
 {
 
   // The vertices that make a nice frame are just hard-coded here...
@@ -163,25 +169,25 @@ void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
                   Normals[Face3[i][1]][1],
                   Normals[Face3[i][1]][2]);
 
-      glVertex3d((a_scale * Vertices[Face3[i][0]][0]),
-                 (a_scale * Vertices[Face3[i][0]][1]),
-                 (a_scale * Vertices[Face3[i][0]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][0]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][0]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][0]][2]));
       //glNormal3dv((const double *)&Normals[Face3[i][3]][0]);
       glNormal3d( Normals[Face3[i][3]][0],
                   Normals[Face3[i][3]][1],
                   Normals[Face3[i][3]][2]);
 
-      glVertex3d((a_scale * Vertices[Face3[i][2]][0]),
-                 (a_scale * Vertices[Face3[i][2]][1]),
-                 (a_scale * Vertices[Face3[i][2]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][2]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][2]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][2]][2]));
       //glNormal3dv((const double *)&Normals[Face3[i][5]][0]);
       glNormal3d( Normals[Face3[i][5]][0],
                   Normals[Face3[i][5]][1],
                   Normals[Face3[i][5]][2]);
 
-      glVertex3d((a_scale * Vertices[Face3[i][4]][0]),
-                 (a_scale * Vertices[Face3[i][4]][1]),
-                 (a_scale * Vertices[Face3[i][4]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][4]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][4]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][4]][2]));
     glEnd();
   }
 
@@ -189,21 +195,21 @@ void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
   {
     glBegin(GL_POLYGON);
       glNormal3dv((const double *)&(Normals[Face4[i][1]][0]));
-      glVertex3d((a_scale * Vertices[Face4[i][0]][0]),
-                 (a_scale * Vertices[Face4[i][0]][1]),
-                 (a_scale * Vertices[Face4[i][0]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][0]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][0]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][0]][2]));
       glNormal3dv((const double *)&(Normals[Face4[i][3]][0]));
-      glVertex3d((a_scale * Vertices[Face4[i][2]][0]),
-                 (a_scale * Vertices[Face4[i][2]][1]),
-                 (a_scale * Vertices[Face4[i][2]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][2]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][2]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][2]][2]));
       glNormal3dv((const double *)&(Normals[Face4[i][5]][0]));
-      glVertex3d((a_scale * Vertices[Face4[i][4]][0]),
-                 (a_scale * Vertices[Face4[i][4]][1]),
-                 (a_scale * Vertices[Face4[i][4]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][4]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][4]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][4]][2]));
       glNormal3dv((const double *)&(Normals[Face4[i][7]][0]));
-      glVertex3d((a_scale * Vertices[Face4[i][6]][0]),
-                 (a_scale * Vertices[Face4[i][6]][1]),
-                 (a_scale * Vertices[Face4[i][6]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][6]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][6]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][6]][2]));
     glEnd();
   }
 
@@ -223,17 +229,17 @@ void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
   {
     glBegin(GL_TRIANGLES);
       glNormal3dv((const double *)&Normals[Face3[i][1]]);
-      glVertex3d((a_scale * Vertices[Face3[i][0]][0]),
-                 (a_scale * Vertices[Face3[i][0]][1]),
-                 (a_scale * Vertices[Face3[i][0]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][0]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][0]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][0]][2]));
       glNormal3dv((const double *)&Normals[Face3[i][3]]);
-      glVertex3d((a_scale * Vertices[Face3[i][2]][0]),
-                 (a_scale * Vertices[Face3[i][2]][1]),
-                 (a_scale * Vertices[Face3[i][2]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][2]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][2]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][2]][2]));
       glNormal3dv((const double *)&Normals[Face3[i][5]]);
-      glVertex3d((a_scale * Vertices[Face3[i][4]][0]),
-                 (a_scale * Vertices[Face3[i][4]][1]),
-                 (a_scale * Vertices[Face3[i][4]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][4]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][4]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][4]][2]));
     glEnd();
   }
 
@@ -241,21 +247,21 @@ void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
   {
     glBegin(GL_POLYGON);
       glNormal3dv((const double *)&Normals[Face4[i][1]]);
-      glVertex3d((a_scale * Vertices[Face4[i][0]][0]),
-                 (a_scale * Vertices[Face4[i][0]][1]),
-                 (a_scale * Vertices[Face4[i][0]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][0]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][0]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][0]][2]));
       glNormal3dv((const double *)&Normals[Face4[i][3]]);
-      glVertex3d((a_scale * Vertices[Face4[i][2]][0]),
-                 (a_scale * Vertices[Face4[i][2]][1]),
-                 (a_scale * Vertices[Face4[i][2]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][2]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][2]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][2]][2]));
       glNormal3dv((const double *)&Normals[Face4[i][5]]);
-      glVertex3d((a_scale * Vertices[Face4[i][4]][0]),
-                 (a_scale * Vertices[Face4[i][4]][1]),
-                 (a_scale * Vertices[Face4[i][4]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][4]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][4]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][4]][2]));
       glNormal3dv((const double *)&Normals[Face4[i][7]]);
-      glVertex3d((a_scale * Vertices[Face4[i][6]][0]),
-                 (a_scale * Vertices[Face4[i][6]][1]),
-                 (a_scale * Vertices[Face4[i][6]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][6]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][6]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][6]][2]));
     glEnd();
   }
 
@@ -275,17 +281,17 @@ void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
   {
     glBegin(GL_TRIANGLES);
       glNormal3dv((const double *)&Normals[Face3[i][1]]);
-      glVertex3d((a_scale * Vertices[Face3[i][0]][0]),
-                 (a_scale * Vertices[Face3[i][0]][1]),
-                 (a_scale * Vertices[Face3[i][0]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][0]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][0]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][0]][2]));
       glNormal3dv((const double *)&Normals[Face3[i][3]]);
-      glVertex3d((a_scale * Vertices[Face3[i][2]][0]),
-                 (a_scale * Vertices[Face3[i][2]][1]),
-                 (a_scale * Vertices[Face3[i][2]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][2]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][2]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][2]][2]));
       glNormal3dv((const double *)&Normals[Face3[i][5]]);
-      glVertex3d((a_scale * Vertices[Face3[i][4]][0]),
-                 (a_scale * Vertices[Face3[i][4]][1]),
-                 (a_scale * Vertices[Face3[i][4]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face3[i][4]][0]),
+                 (a_axisThicknessScale * Vertices[Face3[i][4]][1]),
+                 (a_axisLengthScale * Vertices[Face3[i][4]][2]));
     glEnd();
   }
 
@@ -293,21 +299,21 @@ void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
   {
     glBegin(GL_POLYGON);
       glNormal3dv((const double *)&Normals[Face4[i][1]]);
-      glVertex3d((a_scale * Vertices[Face4[i][0]][0]),
-                 (a_scale * Vertices[Face4[i][0]][1]),
-                 (a_scale * Vertices[Face4[i][0]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][0]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][0]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][0]][2]));
       glNormal3dv((const double *)&Normals[Face4[i][3]]);
-      glVertex3d((a_scale * Vertices[Face4[i][2]][0]),
-                 (a_scale * Vertices[Face4[i][2]][1]),
-                 (a_scale * Vertices[Face4[i][2]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][2]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][2]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][2]][2]));
       glNormal3dv((const double *)&Normals[Face4[i][5]]);
-      glVertex3d((a_scale * Vertices[Face4[i][4]][0]),
-                 (a_scale * Vertices[Face4[i][4]][1]),
-                 (a_scale * Vertices[Face4[i][4]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][4]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][4]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][4]][2]));
       glNormal3dv((const double *)&Normals[Face4[i][7]]);
-      glVertex3d((a_scale * Vertices[Face4[i][6]][0]),
-                 (a_scale * Vertices[Face4[i][6]][1]),
-                 (a_scale * Vertices[Face4[i][6]][2]));
+      glVertex3d((a_axisThicknessScale * Vertices[Face4[i][6]][0]),
+                 (a_axisThicknessScale * Vertices[Face4[i][6]][1]),
+                 (a_axisLengthScale * Vertices[Face4[i][6]][2]));
     glEnd();
   }
 

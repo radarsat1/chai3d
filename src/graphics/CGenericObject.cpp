@@ -58,6 +58,7 @@ cGenericObject::cGenericObject()
     // set showframe status and frame size
     m_showFrame = false;
     m_frameSize = 1.0;
+    m_frameThicknesScale = 1.0;
 
     // initialize the boundary box
     m_boundaryBoxMin.zero();
@@ -80,7 +81,7 @@ cGenericObject::cGenericObject()
 		m_hapticEnabled = true;
 
     // custom user information
-    m_tag = 0;
+    m_tag = -1;
     m_userData = 0;
     m_objectName[0] = '\0';
 };
@@ -123,6 +124,35 @@ void cGenericObject::addChild(cGenericObject* a_object)
 
     // add this child to my list of children
     m_children.push_back(a_object);
+}
+
+
+
+//===========================================================================
+/*!
+Non-uniform scale, optionally include children.  Not necessarily
+implemented in all subclasses.  Does nothing at the cGenericObject
+level; subclasses should scale themselves, then call the superclass
+method.
+
+\fn       void cGenericObject::scaleObject(const cVector3d& a_scaleFactor, 
+                const bool a_includeChildren);
+\param    a_scaleFactor  Possibly non-uniform scale factors
+\param    a_includeChildren  If true, this message is passed to children.
+*/
+//===========================================================================
+void cGenericObject::scaleObject(const cVector3d& a_scaleFactor, 
+                                 const bool a_includeChildren)
+{
+
+  if (a_includeChildren == false) return;
+
+  for (unsigned int i=0; i<m_children.size(); i++)
+  {
+    cGenericObject* nextObject = m_children[i];
+    nextObject->scaleObject(a_scaleFactor,true);
+  }
+  
 }
 
 
@@ -251,6 +281,29 @@ void cGenericObject::deleteAllChildren()
 
     // clear my list of children
     m_children.clear();
+}
+
+
+//===========================================================================
+/*!
+ Return my total number of descendants, optionally including this object
+\fn     unsigned int cGenericObject::getNumDescendants(bool a_includeCurrentObject);
+\param  a_includeCurrentObject Should I include myself in the count?
+*/
+//===========================================================================
+unsigned int cGenericObject::getNumDescendants(bool a_includeCurrentObject)
+{
+
+  unsigned int numDescendants = a_includeCurrentObject?1:0;
+
+  for (unsigned int i=0; i<m_children.size(); i++)
+  {
+    cGenericObject* nextObject = m_children[i];
+    numDescendants += nextObject->getNumDescendants(true);
+  }
+
+  return numDescendants;
+
 }
 
 
@@ -464,7 +517,56 @@ void cGenericObject::computeGlobalCurrentObjectOnly(const bool a_frameOnly)
 
 //===========================================================================
 /*!
-    Set the m_userData pointer for this mesh and - optionally - for my children.
+Set the tag for this object and - optionally - for my children.
+
+\fn     void cGenericObject::setTag(const int a_tag, const bool a_affectChildren=0)
+\param  a_tag   The tag we'll assign to this object
+\param  a_affectChildren  If \b true, the operation propagates through the scene graph.
+*/
+//===========================================================================
+void cGenericObject::setTag(const int a_tag, const bool a_affectChildren)
+{
+  m_tag = a_tag;
+
+  // update children
+  if (a_affectChildren)
+  {
+    for (unsigned int i=0; i<m_children.size(); i++)
+    {
+      m_children[i]->setTag(a_tag,true);
+    }
+  }
+}
+
+
+//===========================================================================
+/*!
+Set the name for this object and - optionally - for my children.
+
+\fn     void cGenericObject::setName(const char* a_name, const bool a_affectChildren=0)
+\param  a_name   The name we'll assign to this object
+\param  a_affectChildren  If \b true, the operation propagates through the scene graph.
+*/
+//===========================================================================
+void cGenericObject::setName(const char* a_name, const bool a_affectChildren)
+{
+  strncpy(m_objectName,a_name,CHAI_MAX_OBJECT_NAME_LENGTH);
+  m_objectName[CHAI_MAX_OBJECT_NAME_LENGTH-1]='\0';
+
+  // update children
+  if (a_affectChildren)
+  {
+    for (unsigned int i=0; i<m_children.size(); i++)
+    {
+      m_children[i]->setName(a_name,true);
+    }
+  }
+}
+
+
+//===========================================================================
+/*!
+    Set the m_userData pointer for this object and - optionally - for my children.
 
     \fn     void cGenericObject::setUserData(void* data, const bool a_affectChildren=0)
     \param  a_data   The pointer to which we will set m_userData
@@ -671,20 +773,22 @@ void cGenericObject::setShowFrame(const bool a_showFrame, const bool a_affectChi
     \param  a_affectChildren  If \b true all children are updated.
 */
 //===========================================================================
-bool cGenericObject::setFrameSize(const double a_size, const bool a_affectChildren)
+bool cGenericObject::setFrameSize(const double a_size, const double a_thickness,
+                                  const bool a_affectChildren)
 {
     // check value of size
     if (a_size <= 0) { return (false); }
 
     // update current object
     m_frameSize = a_size;
+    m_frameThicknesScale = a_thickness;
 
     // update children
     if (a_affectChildren)
     {
         for (unsigned int i=0; i<m_children.size(); i++)
         {
-            m_children[i]->setFrameSize(a_size, a_affectChildren);
+            m_children[i]->setFrameSize(a_size, a_thickness, a_affectChildren);
         }
     }
 
@@ -1170,7 +1274,8 @@ void cGenericObject::AdjustCollisionSegment(cVector3d& a_segmentPointA,cVector3d
     and the collision and/or scenegraph trees.
     
     The object itself is rendered by calling render(), which should be defined
-    for each subclass that has a graphical representation.
+    for each subclass that has a graphical representation.  renderSceneGraph
+    does not generally need to be over-ridden in subclasses.
 
     The a_renderMode parameter is used to allow multiple rendering passes,
     and takes one of the following values:
@@ -1252,7 +1357,7 @@ void cGenericObject::renderSceneGraph(const int a_renderMode)
             glPolygonMode(GL_FRONT, GL_FILL);
 
             // draw frame
-            cDrawFrame(m_frameSize);
+            cDrawFrame(m_frameSize,m_frameThicknesScale,1);
         }
     }
 

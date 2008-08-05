@@ -90,7 +90,7 @@
 #undef ALLOCATE_SCOPED_GLOBALS
 
 // Default initial position for the object that will appear in the main window
-cVector3d g_initial_object_pos(1, 1, 0);
+cVector3d g_initial_object_pos(0, 1, 0);
 
 cMaterial material;
   
@@ -132,7 +132,7 @@ Cdynamic_odeApp::Cdynamic_odeApp() {
 
   HWND con_wnd = GetConsoleWindow();
 
-  // We want the console to pop up over any non-TG2 windows, although
+  // We want the console to pop up over any non-chai windows, although
   // we'll put the main dialog window above it.
   ::SetForegroundWindow(con_wnd);
   
@@ -208,7 +208,7 @@ BOOL Cdynamic_odeApp::InitInstance() {
   // the way OpenGL users expect them to appear, with z going in and
   // out of the plane of the screen.
   int result = camera->set(
-              cVector3d(4,0,0),           // position of camera
+              cVector3d(5,0.0,0),           // position of camera
               cVector3d(0.0, 0.0, 0.0),   // camera looking at origin
               cVector3d(0.0, 0.0, 1.0)  // orientation of camera (standing up)
               );
@@ -241,13 +241,13 @@ BOOL Cdynamic_odeApp::InitInstance() {
   // that, I "place" the light off to the left and behind the
   // origin (positive z relative to the origin).
   light->setDirectionalLight(false);
-  light->setPos(cVector3d(4,0,1));
+  light->setPos(cVector3d(4,1,1));
 
   // create cube
   object = new cODEMesh(world, ode_world, ode_space);
   world->addChild(object);
 
-  double size = 1.4;
+  double size = 1.0;
   createCube(object,size);
 
   // initialize ODE parameters
@@ -311,7 +311,7 @@ cODEMesh* Cdynamic_odeApp::create_wall(double a_x, double a_y, double a_z, bool 
   new_mesh->m_material.setShininess(100);
   new_mesh->m_material.setStiffness(K);
 	new_mesh->setFriction(MU_S, MU_D, 1);
-  new_mesh->initDynamic(BOX,STATIC,g_initial_object_pos.x+a_x, g_initial_object_pos.y+a_y, g_initial_object_pos.z+a_z);
+  new_mesh->initDynamic(BOX,STATIC,a_x, a_y, a_z);
   world->addChild(new_mesh);
   new_mesh->computeAllNormals();
 	
@@ -512,11 +512,11 @@ void dynamic_ode_haptic_iteration(void* param) {
 	    for (unsigned int i=0; i<app->world->getNumChildren(); i++)
 		    app->world->getChild(i)->setHapticEnabled(0, 1);
 
-		  if ( (app->tool1->m_deviceGlobalPos.x > g_initial_object_pos.x+BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&  
-	         (app->tool1->m_deviceGlobalPos.x < g_initial_object_pos.x+FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) && 
-			     (app->tool1->m_deviceGlobalPos.y > g_initial_object_pos.y+LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
-			     (app->tool1->m_deviceGlobalPos.y < g_initial_object_pos.y+RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
-				   (app->tool1->m_deviceGlobalPos.z > g_initial_object_pos.z+BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2)) 
+		  if ( (app->tool1->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&  
+	         (app->tool1->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) && 
+			     (app->tool1->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
+			     (app->tool1->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
+				   (app->tool1->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2)) 
 		    app->tool1_ready = 1;
 		}
     else 
@@ -542,11 +542,11 @@ void dynamic_ode_haptic_iteration(void* param) {
 	    for (unsigned int i=0; i<app->world->getNumChildren(); i++)
 		    app->world->getChild(i)->setHapticEnabled(0, 1);
 
-		  if ( (app->tool2->m_deviceGlobalPos.x > g_initial_object_pos.x+BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&  
-	         (app->tool2->m_deviceGlobalPos.x < g_initial_object_pos.x+FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) && 
-			     (app->tool2->m_deviceGlobalPos.y > g_initial_object_pos.y+LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
-			     (app->tool2->m_deviceGlobalPos.y < g_initial_object_pos.y+RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
-				   (app->tool2->m_deviceGlobalPos.z > g_initial_object_pos.z+BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2)) 
+		  if ( (app->tool2->m_deviceGlobalPos.x > BACK_WALL_OFFSET+WALL_SIZE/2+0.2) &&  
+	         (app->tool2->m_deviceGlobalPos.x < FRONT_WALL_OFFSET-WALL_SIZE/2-0.2) && 
+			     (app->tool2->m_deviceGlobalPos.y > LEFT_WALL_OFFSET+WALL_SIZE/2+0.2) &&
+			     (app->tool2->m_deviceGlobalPos.y < RIGHT_WALL_OFFSET-WALL_SIZE/2-0.2) &&
+				   (app->tool2->m_deviceGlobalPos.z > BOTTOM_WALL_OFFSET+WALL_SIZE/2+0.2)) 
 		    app->tool2_ready = 1;
 		}
     else 
@@ -565,12 +565,11 @@ void dynamic_ode_haptic_iteration(void* param) {
 
   // code to get forces from CHAI and apply them to the appropriate meshes, calling ODE functions to calculate the dynamics
 
-
   if (app->ode_clock->on()) 
   {  
-	  if ( (app->ode_clock->timeoutOccured()) && app->ready) 
+    if ( (app->ode_clock->timeoutOccured()) && app->ready) 
 	  {
-		  app->ready = false;
+      app->ready = false;
 
 			if (app->tool1 && app->first_device_enabled)
 			{
@@ -737,7 +736,7 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
 		// Enable the "dynamic proxy", which will handle moving objects
     //cProxyPointForceAlgo* proxy = tool->getProxy();
     //proxy->enableDynamicProxy(0);
-		tool1->ForcesON();
+		tool1->setForcesON();
       
 	  ode_clock = new cPrecisionClock();
 	  ode_clock->setTimeoutPeriod(TIME_STEP * 1e+6);
@@ -788,13 +787,13 @@ void Cdynamic_odeApp::toggle_haptics(int enable) {
 #endif
     
     // Stop the haptic device...
-    tool1->ForcesOFF();
+    tool1->setForcesOFF();
     tool1->stop();
 
 	  // If a second device is also running, stop it too
 	  second_device_enabled = 0;
 	  if (tool2) {
-      tool2->ForcesOFF();
+      tool2->setForcesOFF();
       tool2->stop();
     }       
 
@@ -853,7 +852,7 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
     // I need to call this so the tool can update its internal
     // transformations before performing collision detection, etc.
     tool2->computeGlobalPositions();
-    tool2->ForcesON(); 
+    tool2->setForcesON(); 
 
 		Sleep(100);
 
@@ -876,7 +875,7 @@ void Cdynamic_odeApp::toggle_second_device(int enable) {
     second_device_enabled = 0;
     
 	  // Stop the haptic device...
-    tool2->ForcesOFF();
+    tool2->setForcesOFF();
     tool2->stop();        
   } // disabling
 }

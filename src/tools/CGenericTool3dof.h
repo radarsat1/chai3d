@@ -46,29 +46,10 @@ class cGenericTool3dof : public cGenericTool
     virtual ~cGenericTool3dof() {};
 
     // METHODS:
-    //! Update Position, orientation, velocity and other degree of freedoms of haptic tool
-    virtual void updatePose() {};
-    //! Compute interaction forces with environment.
-    virtual void computeForces() {};
-    //! Apply latest computed forces to device.
-    virtual void applyForces() {};
-    //! Stop system. apply no forces to device.
-    virtual void stop() {};
-    //! Render the tool in OpenGL.
-    virtual void render(const int a_renderMode) {};
-    //! Start the haptic device connected to the tool
-    virtual void start() {};
-    //! Initializes encoders on device connected to the tool
-    virtual void initialize() {};
     //! Set virtual workspace dimensions in which tool will be working.
     void setWorkspace(double a_workspaceAxisX, double a_workspaceAxisY,
                       double a_workspaceAxisZ);
-    //! Toggles forces on
-    virtual void ForcesON() {};
-    //! Toggles forces off
-    virtual void ForcesOFF() {};
-
-
+    
     // PROPERTIES:
     //! Width of workspace.
     double m_halfWorkspaceAxisX;
@@ -80,9 +61,13 @@ class cGenericTool3dof : public cGenericTool
     cVector3d m_deviceLocalPos;
     //! Position of device in world global coordinate system
     cVector3d m_deviceGlobalPos;
+    //! Velocity of device in device local coordinate system
+    cVector3d m_deviceLocalVel;
     //! Velocity of device in world global coordinate system
     cVector3d m_deviceGlobalVel;
     //! Last computed force between tool and world in world coordinate system.
+    //! If you want to manually send forces to a device, you can modify this
+    //! value before calling 'applyForces'.
     cVector3d m_lastComputedGlobalForce;
     //! Last computed force in device coordinate system.
     cVector3d m_lastComputedLocalForce;

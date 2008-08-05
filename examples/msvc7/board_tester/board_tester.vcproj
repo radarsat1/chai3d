@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="board_tester"
 	ProjectGUID="{22B09144-688B-42E3-A418-2247098FF233}"
+	RootNamespace="board_tester"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">
@@ -14,7 +15,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -42,7 +43,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="chai3d_complete.lib DLPORTIO.lib"
-				OutputFile="bin/board_tester.exe"
+				OutputFile="../../../bin/board_tester_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="../../../lib/msvc7"
@@ -81,7 +82,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -110,7 +111,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="chai3d_complete.lib DLPORTIO.lib"
-				OutputFile="bin/board_tester.exe"
+				OutputFile="../../../bin/board_tester_msvc7.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="../../../lib/msvc7"

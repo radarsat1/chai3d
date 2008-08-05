@@ -429,6 +429,11 @@ void Cmass_springsApp::compute_spring_forces() {
   double elapsed = curtime - g_last_iteration_time;
   g_last_iteration_time = curtime;
   
+  // Use a fixed timestep on the graphics thread...
+  if (haptics_enabled == 0) {
+    elapsed = 0.03;
+  }
+
   unsigned int i;
 
   // Clear the force that's applied to each ball
@@ -631,7 +636,7 @@ void Cmass_springsApp::toggle_haptics(int enable) {
     tool->start();      
 
     // Enable forces
-    tool->ForcesON();
+    tool->setForcesON();
 
     // Tell the proxy algorithm associated with this tool to enable its
     // "dynamic mode", which allows interaction with moving objects
@@ -678,7 +683,7 @@ void Cmass_springsApp::toggle_haptics(int enable) {
 #endif
     
     // Stop the haptic device...
-    tool->ForcesOFF();
+    tool->setForcesOFF();
     tool->stop();
     
     // SetPriorityClass(GetCurrentProcess(),NORMAL_PRIORITY_CLASS);    

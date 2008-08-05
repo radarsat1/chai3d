@@ -6,12 +6,28 @@
 
 ****/
 
-This example plays sounds based on frequencies, amplitudes,
-and decay coefficients from a data file, based on the algorithm
+This example generates sounds based on frequencies, amplitudes,
+and decay coefficients from a data file, convolved with the
+haptic normal force, based on the algorithm
 by Kies Van den Doel K and Dinesh Pai in "The sounds of
 physical shapes". Presence 1998, 7(4): 382-395, and
 "The AHI: An Audio and Haptic Interface For Contact
 Interactions" by DiFilippo and Pai.  Sample data files for 
 a bell and a teapot are in this directory.
+
+If the sound doesn't sound right on your machine, try adjusting 
+the following constants at the top of CSound.cpp: 
+
+// Sample rate; decrease (perhaps to 22000 or so) if sound is jerky
+#define SAMPLE_RATE 44100
+
+// Buffer size; decrease (perhaps to 128 or so) if there is a perceptable pause
+// between impact and initiation of sound
+#define BUFFER_SIZE 1024
+
+// Number of samples generated per impact; decrease in proportion to SAMPLE_RATE
+// if you decrease that; increase (decrease) if sound fades too quickly (too slowly)
+#define MAX_SAMPLES_PER_IMPACT 200000
+
 
  

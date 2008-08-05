@@ -1,0 +1,109 @@
+<html>
+<head>
+<STYLE type="text/css">
+<!--
+A { text-decoration:none }
+-->
+</STYLE>
+
+<title>CHAI 3D: Getting Started</title></head>
+
+<body bgcolor=#ffffff text=#000000 link=#886666 vlink = #886666>
+
+<table border=0 cellspacing=10 cellpadding=10><tr><td>
+
+<table border=0 cellspacing=0 cellpadding=5>
+
+<tr>
+<td valign="middle"><a href="http://www.chai3d.org"><img src="chaiLogo0.gif" border=0 valign="middle"></a></td>
+<td valign="middle">
+<font size="+2" face="Arial"><b>CHAI 3D<br>Computer Haptics &amp; Active Interfaces</b></font>
+</td>
+</tr>
+</table>
+
+<p><font size="+1" face="Arial">
+<b>Getting Started (also see the <a href="bin/examples.html">examples
+page</a>)</b></p>
+<p>
+<p>
+<font size="2" face="Arial">
+<hr>
+<b>Installation</b>
+<hr>
+</font>
+<p><font size=2" face="Arial">
+
+<p>The main CHAI distribution file unzips to a set of directories that is ready for compilation and linking. All relevant header files are in the 'include' directory. To link against the CHAI libraries, use the .lib files in the 'lib/msvc6', 'lib/msvc7', or 'lib/bbcp6' directories.</p>
+
+<p>If you want to modify and/or rebuild CHAI, project files for MSVC6 and MSVC7 are located in the 'msvc6' and 'msvc7' directories, and project files for Borland C++ 6 are located in the 'bbcp6' directory. Both projects build straight to the appropriate lib directory.</p>
+
+<p>All the example CHAI applications build to the 'bin' directory, and you
+can run them from there without modifying your system path.  If you want to
+build CHAI applications to other directories, you should include the 'bin' directory in your system path. Relevant dll's for interfacing with haptic devices are located in this directory.</p>
+
+<p>You'll also find a &quot;virtual haptic device&quot; ('dhdVirtual.exe') in the 'bin' directory; when you run it, you will be able to manipulate the position of a contact point, and forces rendered by CHAI will be displayed as a vector in the virtual device application. This is very handy for developing when you don't have a device around, or for creating a controlled environment for debugging haptic applications.</p>
+
+<p>If you are planning to use the CHAI interface to the ServoToGo I/O board, you'll also need to set up the <a href=http://www.driverlinx.com/DownLoad/DlPortIO.htm>dlportio</a> library, which we've included in the 'bin' directory. You can just copy DLPORTIO.sys into your 'system32/drivers' directory, or you can use the installer ('port95nt.exe') provided by the manufacturer (DriverLinx), which we've also included in the 'external' directory. 
+
+<p><b>Borland users:</b></p>
+<ul>
+
+<li>You should install BCPP6 updates 1-4 before compiling CHAI.  A bug in the
+Borland includes in updates 1-3 prevented structures from being aligned
+correctly, which in CHAI manifests itself as problems with loading bitmaps.
+
+<li>If you are using the board interfaces and you have any link-time or
+run-time trouble with the DLPORTIO libraries provided in the DriverLinx
+installer, there is a free <a
+href="http://www.vclcomponents.com/search.asp?ID_COMPONENTS=16294">wrapper</a>
+available.
+
+</ul>
+
+<p></p>
+<hr>
+<b>Getting started with CHAI development</b>
+<hr>
+<p>Although full doxygen documentation can be viewed from the <a
+href="http://www.chai3d.org/doc/html/hierarchy.html">docs</a> page, the best way to get
+started with CHAI is to take a look at the examples that are provided in the
+main distribution. Examples are provided for MSVC 6.0, MSVC 7.0 (.net 2003),
+and Borland C++ 6.00. Each example includes a README with helpful hints about
+where the &quot;highlights&quot; in in the code are.  All the examples build
+to the 'bin' directory, so you can see what they do just by starting them
+there.</p>
+
+<p>For more information, you should see the <a
+href="bin/examples.html">examples page</a>, which explains what the
+examples do and lets you launch them from your browser.</p>
+
+<p>
+<hr>
+<b>Contributing to CHAI</b>
+<hr>
+<p>Right now, CHAI is produced by academics, for academics, and we claim neither that it's full-featured nor that it's bug-free. Your suggestions and contributions will be invaluable in building CHAI into a standard for multimodal environment development.</p>
+
+<p>You may report problems, questions, suggestion or contributions to CHAI to <a href="mailto:support@chai3d.org">support@chai3d.org</a>.
+
+<p>Users are encouraged to submit contributions to CHAI.  Please read over the <a href="http://www.chai3d.org/chai_contributions.html">contributions and copyright policy</a>, which we have borrowed from <a href="http://public.kitware.com/VTK/">VTK</a>.  The summary is that for logistic reasons, the copyright for all CHAI code goes to <a href="http://www.chai3d.org/people.html">the CHAI team</a>, and you can trust that we will maintain your name as it appears in your modified source.</p>
+
+<p><b>Related Links</b></p>
+<ul>
+<li><a href="doc/html/index.html">CHAI online documentation</a>
+<li><a href="http://www.opengl.org">OpenGL</a>
+<li><a href="http://www.borland.com/cbuilder/index.html">Borland C++ Studio Builder</a>
+<li><a href="http://msdn.microsoft.com/vstudio/">Microsoft Visual Studio<br>
+</a>
+</ul>
+
+<p></p>
+
+<hr>
+<tt><font size=-1>Written by <a
+href="http://techhouse.brown.edu/~dmorris">Dan Morris</a>, September
+2005</font></tt>
+
+</td></tr></table>
+
+</body></html>

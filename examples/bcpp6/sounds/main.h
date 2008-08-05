@@ -76,15 +76,10 @@ __published:
     TPanel *Panel1;
     TSplitter *Splitter2;
     TOpenDialog *OpenDialog1;
-    TPanel *Panel4;
-    TGroupBox *GroupBox2;
-    TButton *Button2;
-    TGroupBox *GroupBox7;
-    TLabel *Label5;
-    TLabel *Label4;
-    TLabel *NumVerticesLabel;
-    TLabel *NumTrianglesLabel;
-    TStatusBar *StatusBar1;
+    TPanel *Panel2;
+    TButton *Button1;
+    TMemo *Memo1;
+    TButton *Button3;
     void __fastcall FormCreate(TObject *Sender);
     void __fastcall Timer1Timer(TObject *Sender);
     void __fastcall ToggleHapticsButtonClick(TObject *Sender);
@@ -95,6 +90,7 @@ __published:
           int X, int Y);
     void __fastcall Panel1MouseUp(TObject *Sender, TMouseButton Button,
           TShiftState Shift, int X, int Y);
+    void __fastcall Button3Click(TObject *Sender);
 
 private:
     // virtual world

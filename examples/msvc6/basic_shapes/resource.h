@@ -1,8 +1,8 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by basic_shapes.rc
 //
-#define IDD_basic_shapes_DIALOG       102
+#define IDD_basic_shapes_DIALOG         102
 #define IDR_MAINFRAME                   128
 #define IDC_GL_AREA                     1001
 #define IDC_CHECK_WIREFRAME             1002
@@ -18,6 +18,7 @@
 #define IDC_LOAD_TEXTURE_BUTTON         1012
 #define IDC_CAMZOOM_SLIDER              1015
 #define IDC_TOGGLEHAPTICS_BUTTON        1016
+#define IDC_STATIC1                     1017
 
 // Next default values for new objects
 // 
@@ -25,7 +26,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_CONTROL_VALUE         1018
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

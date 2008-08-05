@@ -166,7 +166,7 @@ class cMesh : public cGenericObject
     bool getMaterialEnabled() const { return m_useMaterialProperty; }
     
     //! Enable or disable the rendering of vertex normals, optionally propagating the operation to my children
-    void showNormals(const bool a_showNormals, const bool a_affectChildren=true);
+    void showNormals(const bool& a_showNormals, const bool a_affectChildren=true, const bool a_trianglesOnly = true);
     //! Set graphic properties for normal-rendering, optionally propagating the operation to my children
     void setNormalsProperties(const double a_length, const cColorf& a_color, const bool a_affectChildren);
 
@@ -209,6 +209,9 @@ class cMesh : public cGenericObject
     void extrude(const double a_extrudeDistance, const bool a_affectChildren=0,
       const bool a_updateCollisionDetector=0);
 
+    //! Scale vertices and normals by the specified scale factors and re-normalize
+    virtual void scaleObject(const cVector3d& a_scaleFactor, const bool a_includeChildren=false);
+
     //! Simple method used to create a new (empty) mesh of my type
     inline virtual cMesh* createMesh() const { return new cMesh(m_parentWorld); }
 
@@ -221,6 +224,9 @@ class cMesh : public cGenericObject
     //! Reverse all normals on this model
     virtual void reverseAllNormals(const bool a_affectChildren=0);
 
+    //! Remove redundant triangles from this model
+    virtual void removeRedundantTriangles(const bool a_affectChildren=0);
+
 		// MEMBERS:
     // material property of mesh
     cMaterial m_material;
@@ -232,15 +238,13 @@ class cMesh : public cGenericObject
     //! Render the mesh itself
     virtual void render(const int a_renderMode=0);
     //! Draw a small line for each vertex normal
-    virtual void renderNormals();
+    virtual void renderNormals(const bool a_trianglesOnly=true);
     
     //! Update the global position of each of my vertices
     virtual void updateGlobalPositions(const bool a_frameOnly);
     //! Update my boundary box dimensions based on my vertices
     virtual void updateBoundaryBox();
-    //! Scale the mesh by the specified scale factor
-    virtual void scaleObject(double a_scaleFactor);
-
+    
     // MEMBERS - DISPLAY PROPERTIES:
 
     //! Parent world
@@ -248,6 +252,8 @@ class cMesh : public cGenericObject
 
     //! If \b true, then normals are displayed.
     bool m_showNormals;
+    //! If \b true, normals are displayed only for vertices that are used in triangles
+    bool m_showNormalsForTriangleVerticesOnly;
     //! Color used to render lines representing normals
     cColorf m_showNormalsColor;
     //! Length of each normal (for graphic rendering of normals)

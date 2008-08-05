@@ -48,6 +48,12 @@ class cDeltaDevice : public cGenericDevice
   private:
     //! Device ID number
     int m_deviceID;
+
+    //! Half size of the workspace
+    double m_halfSizeWorkspace;
+
+    //! Maximum forces
+    double m_maximumForces;
 };
 
 //---------------------------------------------------------------------------

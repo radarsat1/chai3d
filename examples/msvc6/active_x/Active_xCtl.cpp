@@ -297,7 +297,7 @@ void CActive_xCtrl::toggle_haptics(int enable)
 
 
 		// Enable forces
-		tool->ForcesON();
+		tool->setForcesON();
 
 		// Tell the proxy algorithm associated with this tool to enable its
 		// "dynamic mode", which allows interaction with moving objects
@@ -330,7 +330,7 @@ void CActive_xCtrl::toggle_haptics(int enable)
 		// Stop the haptic device...
 		if (tool != NULL)
 		{
-			tool->ForcesOFF();
+			tool->setForcesOFF();
 			tool->stop();
 		}
 

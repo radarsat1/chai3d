@@ -32,11 +32,14 @@
 //! Finds the extension in a filename and returns a pointer to the character after the '.'
 char* find_extension(const char* a_input);
 
+//! Discards the path component of a filename and returns the result in a_dest
+void find_filename(char* a_dest, const char* a_input, bool a_includeExtension=false);
+
+//! Finds only the _path_ portion of source, and copies it to a_dest
+void find_directory(char* a_dest, const char* a_source);
+
 //! Converts a string to lower-case
 void string_tolower(char* a_dest,const char* a_source);
-
-//! Finds only the _path_ portion of source, and copies it to dest
-void find_directory(char* a_dest, const char* a_source);
 
 
 //===========================================================================

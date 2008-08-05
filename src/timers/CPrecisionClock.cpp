@@ -47,10 +47,10 @@ cPrecisionClock::cPrecisionClock()
 		m_highres  = true;
 	}
 
-	// initialise current time
+	// initialize current time
 	m_timeCurrent = 0;
 
-	// initialise timeout
+	// initialize timeout
 	m_timeoutPeriod = 0;
 }
 
@@ -164,6 +164,19 @@ bool cPrecisionClock::timeoutOccured()
 
 //===========================================================================
 /*!
+Set the current time of timer. Result is returned in \e microseconds.
+
+\fn			long cPrecisionClock::getCurrentTime()
+*/
+//===========================================================================
+void cPrecisionClock::setCurrentTime(long a_currentTime)
+{
+  m_timeCurrent = a_currentTime;
+}
+
+
+//===========================================================================
+/*!
 	Read the current time of timer. Result is returned in \e microseconds.
 
 	\fn			long cPrecisionClock::getCurrentTime()
@@ -186,7 +199,7 @@ long cPrecisionClock::getCurrentTime()
 
 //===========================================================================
 /*!
-	Read the highresolution clock of the computer
+	Read the high resolution clock of the computer
 
 	\fn			long cPrecisionClock::getCount()
 	\return     Return cpu clock in \e microseconds.

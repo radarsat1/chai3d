@@ -180,15 +180,16 @@ bool cViewport::cleanup()
         If the window has been modified, or just created, call this function
         to update the OpenGL display context.
 
-        \fn         bool cViewport::update()
+        \fn         bool cViewport::update(bool resizeOnly)
+        \param      resizeOnly  If false (default), reinitializes the GL context.
         \return     Return true if operation succeeded.
 */
 //===========================================================================
-bool cViewport::update()
+bool cViewport::update(bool resizeOnly)
 {
 
     // Clean up the old rendering context if necessary
-    if (m_glDC) cleanup();    
+    if ((resizeOnly == false) && m_glDC) cleanup();    
 
     // declare variables
     int formatIndex;
@@ -238,39 +239,43 @@ bool cViewport::update()
        return(false);
     }
 
-    // find pixel format supported by the device context. If error return false.
-    formatIndex = ChoosePixelFormat(m_glDC, &m_pixelFormat);
-    if (formatIndex == 0)
+    if (resizeOnly == false)
     {
-        return(false);
-    }
+      // find pixel format supported by the device context. If error return false.
+      formatIndex = ChoosePixelFormat(m_glDC, &m_pixelFormat);
+      if (formatIndex == 0)
+      {
+          return(false);
+      }
 
-    // sets the specified device context's pixel format. If error return false
-    if (!SetPixelFormat(m_glDC, formatIndex, &m_pixelFormat))
-    {
-        return(false);
-    }
+      // sets the specified device context's pixel format. If error return false
+      if (!SetPixelFormat(m_glDC, formatIndex, &m_pixelFormat))
+      {
+          return(false);
+      }
 
-    formatIndex = GetPixelFormat (m_glDC);
-    DescribePixelFormat (m_glDC, formatIndex, sizeof(PIXELFORMATDESCRIPTOR), &m_pixelFormat);
+      formatIndex = GetPixelFormat (m_glDC);
+      DescribePixelFormat (m_glDC, formatIndex, sizeof(PIXELFORMATDESCRIPTOR), &m_pixelFormat);
+      
+      // if stereo was enabled but can not be displayed, switch over to mono.
+      if (((m_pixelFormat.dwFlags & PFD_STEREO) == 0) && m_stereoEnabled)
+      {
+          m_stereoEnabled = false;
+      }
+
+      // create display context
+      m_glContext = wglCreateContext(m_glDC);
+      if (m_glContext == 0)
+      {        
+          return(false);
+      }    
+
+      wglMakeCurrent(m_glDC, m_glContext);
+
+    }
 
     // OpenGL is now ready for rendering
     m_glReady = true;
-
-    // if stereo was enabled but can not be displayed, switch over to mono.
-    if (((m_pixelFormat.dwFlags & PFD_STEREO) == 0) && m_stereoEnabled)
-    {
-        m_stereoEnabled = false;
-    }
-
-    // create display context
-    m_glContext = wglCreateContext(m_glDC);
-    if (m_glContext == 0)
-    {        
-        return(false);
-    }    
-
-    wglMakeCurrent(m_glDC, m_glContext);
 
     lastActiveViewport = this;
 
@@ -351,7 +356,7 @@ bool cViewport::render(int imageIndex)
 
     \fn         void cViewport::render()
     \param      a_imageIndex  CHAI_MONO, CHAI_STEREO_LEFT or CHAI_STEREO_RIGHT
-    \return     Return \b true if operation succeded.
+    \return     Return \b true if operation succeeded.
 */
 //===========================================================================
 bool cViewport::renderView(const int a_imageIndex)
@@ -447,7 +452,7 @@ bool cViewport::renderView(const int a_imageIndex)
         SwapBuffers(m_glDC);
     }
 
-    // deactivate display context
+    // deactivate display context (not necessary)
     // wglMakeCurrent(m_glDC, 0);
 
     // operation succeeded

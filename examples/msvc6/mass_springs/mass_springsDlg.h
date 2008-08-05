@@ -31,6 +31,7 @@ class Cmass_springsDlg : public CDialog {
 public:
 	Cmass_springsDlg(CWnd* pParent = NULL);
   HWND m_gl_area_hwnd;  
+  int initialized;
 
 // Dialog Data
 	//{{AFX_DATA(Cmass_springsDlg)
@@ -75,6 +76,9 @@ protected:
 	afx_msg void OnRemoveBallButton();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:  
+  afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
+  afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 //{{AFX_INSERT_LOCATION}}

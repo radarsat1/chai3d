@@ -40,7 +40,11 @@
 //===========================================================================
 
 //! Draw an x-y-z frame.
-void cDrawFrame(const double a_scale=1.0, bool a_modifyMaterialState=1);
+void cDrawFrame(const double a_scale=1.0, const bool a_modifyMaterialState=1);
+
+//! Draw an x-y-z frame.
+void cDrawFrame(const double a_axisLengthScale, const double a_axisThicknessScale,
+                const bool a_modifyMaterialState);
 
 //! Draw a box using lines.
 void cDrawWireBox(const double a_xMin, const double a_xMax,

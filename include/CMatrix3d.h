@@ -27,6 +27,13 @@
 #include "CVector3d.h"
 //---------------------------------------------------------------------------
 
+#ifdef _MSVC
+#include <conio.h>
+#define CHAI_DEBUG_PRINT _cprintf
+#else 
+#define CHAI_DEBUG_PRINT printf
+#endif
+
 //===========================================================================
 /*!
       \struct   cMatrix3d
@@ -795,6 +802,34 @@ struct cMatrix3d
     a_string.append("]");
   }
 
+  //-----------------------------------------------------------------------
+  /*!
+  Convert current matrix into a string, which is returned on the stack.
+  \param    a_precision  Number of digits.
+  */
+  //-----------------------------------------------------------------------
+  inline string str(const unsigned int a_precision=2) const
+  {
+    string a_string;
+    str(a_string,a_precision);
+    return a_string;
+  }
+
+  //-----------------------------------------------------------------------
+  /*!
+  Print the current matrix using the CHAI_DEBUG_PRINT macro.
+
+  \param    a_string   String where conversion is stored
+  \param    a_precision  Number of digits.
+  */
+  //-----------------------------------------------------------------------  
+  inline void print(const unsigned int a_precision=2) const
+  {
+    string s;
+    str(s,a_precision);
+    CHAI_DEBUG_PRINT("%s\n",s.c_str());
+  }  
+  
 
   //-----------------------------------------------------------------------
   /*!

@@ -73,15 +73,10 @@ __published:
     TPanel *Panel1;
     TSplitter *Splitter2;
     TOpenDialog *OpenDialog1;
-    TPanel *Panel4;
-    TGroupBox *GroupBox2;
+    TPanel *Panel2;
     TButton *Button2;
-    TGroupBox *GroupBox7;
-    TLabel *Label5;
-    TLabel *Label4;
-    TLabel *NumVerticesLabel;
-    TLabel *NumTrianglesLabel;
-    TStatusBar *StatusBar1;
+    TMemo *Memo1;
+    TButton *Button1;
     void __fastcall FormCreate(TObject *Sender);
     void __fastcall Timer1Timer(TObject *Sender);
     void __fastcall ToggleHapticsButtonClick(TObject *Sender);
@@ -92,6 +87,7 @@ __published:
           int X, int Y);
     void __fastcall Panel1MouseUp(TObject *Sender, TMouseButton Button,
           TShiftState Shift, int X, int Y);
+    void __fastcall Button1Click(TObject *Sender);
 
 private:
     // virtual world
@@ -103,17 +99,8 @@ private:
     // light source
     cLight* light;
 
-    // object mesh
-    cMesh* object;
-
     // viewport
     cViewport* viewport;
-
-    // material properties
-    cMaterial* material;
-
-    // world scale
-    double scale;
 
     // update camera settings
     void updateCameraPosition();
@@ -131,6 +118,13 @@ public:
 
     // haptic tool
     cMeta3dofPointer* tool;
+
+    // temp poiner
+    cMesh* lastObject;
+
+    // material properties
+    cMaterial materialGray;
+    cMaterial materialRed;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

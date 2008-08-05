@@ -16,6 +16,7 @@
 #define IDC_CHECK_CULLING               1010
 #define IDC_LOAD_MODEL_BUTTON           1011
 #define IDC_LOAD_TEXTURE_BUTTON         1012
+#define IDC_STATIC_1                    1013
 #define IDC_CAMZOOM_SLIDER              1015
 #define IDC_TOGGLEHAPTICS_BUTTON        1016
 #define IDC_ADDBALL_BUTTON              1017

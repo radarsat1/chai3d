@@ -79,6 +79,7 @@ protected:
 	HICON m_hIcon;
   int m_left_scrolling_gl_area;
   int m_right_scrolling_gl_area;
+  int initialized;
 
   // The last point scrolled through by each mouse button,
   // in _viewport_ coordinates (i.e. (0,0) is the top-left
@@ -112,6 +113,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:  
+  afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
+  afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 //{{AFX_INSERT_LOCATION}}

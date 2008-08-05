@@ -40,7 +40,7 @@ typedef enum {
       \class      cGeneric3dofPointer
       \brief      cGeneric3dofPointer provides a cursor like tool which is
                   graphically rendered by a small sphere illustrating the tip
-                  of the device. The tools interacts with the enviornment
+                  of the device. The tools interacts with the environment
                   by using the finger-proxy algorithm
 */
 //===========================================================================
@@ -54,37 +54,48 @@ class cGeneric3dofPointer : public cGenericTool3dof
     virtual ~cGeneric3dofPointer();
 
     // METHODS:
-    //! Device initialization. Forces are NOT started.
-    virtual void initialize();
-    //! Start communication with device.  Forces are NOT started.
-    virtual void start();
-    //! Stop communication with device.
-    virtual void stop();
-    //! Toggles forces on
-    virtual void setForcesON();
-    //! Toggles forces off
-    virtual void setForcesOFF();
-    
+
+    // Graphics
+
+    //! Render the object in OpenGL 
+    virtual void render(const int a_renderMode=0);
+    //! toggle on/off the tool frame
+    virtual void visualizeFrames(bool a_showToolFrame) { m_showToolFrame = a_showToolFrame; }
+    //! set the visual settings of the tool frame
+    virtual void setToolFrame(bool a_showToolFrame, double a_toolFrameSize);
+    //! Control proxy rendering options
+    virtual void setRenderingMode(proxy_render_modes render_mode) { m_render_mode = render_mode; }
+
+    // Initialization / shutdown
+
+    //! Start communication with the device connected to the tool (0 indicates success)
+    virtual int start();
+    //! Stop communication with the device connected to the tool (0 indicates success)
+    virtual int stop();
+    //! Initialize encoders on device connected to the tool (0 indicates success)
+    virtual int initialize();  
+    //! Toggle forces on
+    virtual int setForcesON();
+    //! Toggle forces off
+    virtual int setForcesOFF();
+
+    // Data transfer
+
     //! Update position and orientation of the device.
     virtual void updatePose();
     //! Compute interaction forces with environment.
     virtual void computeForces();
-    
     //! Apply latest computed forces to device.
     virtual void applyForces();
-    //! Render the object in OpenGL 
-    virtual void render(const int a_renderMode=0);
+
+    // Miscellaneous 
+
     //! Set radius of pointer
     virtual void setRadius(double a_radius);
     //! Set haptic device driver.
     virtual void setDevice(cGenericDevice *a_device);
-    //! toggle on/off frames on the tool position following its orientation
-    virtual void visualizeFrames(bool val);
     //! Get information about the proxy directly
     virtual cProxyPointForceAlgo* getProxy() { return &m_proxyPointForceAlgo; }
-
-    //! Control proxy rendering options
-    virtual void setRenderingMode(proxy_render_modes render_mode) { m_render_mode = render_mode; }
 
     // MEMBERS:
     //! Color of sphere representing position of device.
@@ -96,6 +107,19 @@ class cGeneric3dofPointer : public cGenericTool3dof
     //! Color of line connecting proxy and device position together
     cColorf m_colorLine;
 
+    //! Orientation of wrist in local coordinates of device
+    cMatrix3d m_deviceLocalRot;
+    //! Orientation of wrist in global coordinates of device
+    cMatrix3d m_deviceGlobalRot;
+
+    //! Normally this class waits for a very small force before initializing forces
+    //! to avoid initial "jerks" (a safety feature); you can bypass that requirement
+    //! with this variable
+    bool m_waitForSmallForce;
+
+    //! Mesh force algorithm.
+    cProxyPointForceAlgo m_proxyPointForceAlgo;
+
   protected:
     // MEMBERS:
     //! Radius of sphere representing position of pointer.
@@ -104,22 +128,20 @@ class cGeneric3dofPointer : public cGenericTool3dof
     cGenericDevice *m_device;
     //! World in which tool is interacting
     cWorld* m_world;
-    //! Mesh force algorithm.
-    cProxyPointForceAlgo m_proxyPointForceAlgo;
     //! Implicit function based object
     cPotentialFieldForceAlgo m_potentialFieldForceAlgo;
-    //! Orientation of wrist in local coordinates of device
-    cMatrix3d m_deviceLocalRot;
-    //! Orientation of wrist in global coordinates of device
-    cMatrix3d m_deviceGlobalRot;
-    //! flag for frames visualization
-    bool m_visualizeFrames;
-    //! flag to turn forces on or off
-    bool m_forceON;
-    //! flag to avoid initial bumps in force
-    bool m_forceStarted;
+    //! flag for frame visualization of the proxy
+    bool m_showToolFrame;
+    //! size of the frame visualization of the proxy
+    double m_toolFrameSize;
     //! Should we render the device position, the proxy position, or both?
     proxy_render_modes m_render_mode;
+
+
+    //! this flag records whether the user has enabled forces
+    bool m_forceON;
+    //! flag to avoid initial bumps in force (has the user sent a _small_ force yet?)
+    bool m_forceStarted;
 };
 
 //---------------------------------------------------------------------------

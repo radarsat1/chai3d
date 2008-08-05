@@ -45,7 +45,7 @@ class cPhantomDevice : public cGenericDevice
     virtual int close();
     //! Calibrate phantom device.
     virtual int initialize();
-    //! Set a command to the phantom device.
+    //! Send a command to the phantom device.
     virtual int command(int a_command, void* a_data);
 
   private:

@@ -19,15 +19,13 @@ CFG=active_x - Win32 Debug
 !MESSAGE 
 !MESSAGE "active_x - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "active_x - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "active_x - Win32 Unicode Debug" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "active_x - Win32 Unicode Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=cl.exe
+CPP=xicl6.exe
 MTL=midl.exe
 RSC=rc.exe
 
@@ -55,13 +53,13 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=link.exe
+LINK32=xilink6.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 winmm.lib opengl32.lib ..\..\..\lib\msvc6\chai3d_complete.lib glu32.lib ..\..\..\lib\msvc6\PhantomDriver.lib ..\..\..\lib\msvc6\dhdms.lib /nologo /subsystem:windows /dll /machine:I386 /out:"bin/active_x.ocx"
+# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib dhdms.lib /nologo /subsystem:windows /dll /machine:I386 /out:"../../../bin/active_x_msvc6.ocx" /libpath:"..\..\..\lib\msvc6\\"
 # Begin Custom Build - Registering ActiveX Control...
 OutDir=.\Release
-TargetPath=.\bin\active_x.ocx
-InputPath=.\bin\active_x.ocx
+TargetPath=\users\dmorris\chai3d\bin\active_x_msvc6.ocx
+InputPath=\users\dmorris\chai3d\bin\active_x_msvc6.ocx
 SOURCE="$(InputPath)"
 
 "$(OutDir)\regsvr32.trg" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -94,89 +92,13 @@ SOURCE="$(InputPath)"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=link.exe
+LINK32=xilink6.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib opengl32.lib ..\..\..\lib\msvc6\chai3d_complete.lib glu32.lib ..\..\..\lib\msvc6\PhantomDriver.lib ..\..\..\lib\msvc6\dhdms.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 winmm.lib opengl32.lib chai3d_complete.lib glu32.lib PhantomDriver.lib ..\..\..\lib\msvc6\dhdms.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../../../bin/active_x_msvc6.ocx" /pdbtype:sept /libpath:"..\..\..\lib\msvc6\\"
 # Begin Custom Build - Registering ActiveX Control...
 OutDir=.\Debug
-TargetPath=.\Debug\active_x.ocx
-InputPath=.\Debug\active_x.ocx
-SOURCE="$(InputPath)"
-
-"$(OutDir)\regsvr32.trg" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	regsvr32 /s /c "$(TargetPath)" 
-	echo regsvr32 exec. time > "$(OutDir)\regsvr32.trg" 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "active_x - Win32 Unicode Debug"
-
-# PROP BASE Use_MFC 2
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "DebugU"
-# PROP BASE Intermediate_Dir "DebugU"
-# PROP BASE Target_Ext "ocx"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 2
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "DebugU"
-# PROP Intermediate_Dir "DebugU"
-# PROP Target_Ext "ocx"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_WINDLL" /D "_AFXDLL" /D "_MBCS" /D "_USRDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_WINDLL" /D "_AFXDLL" /D "_USRDLL" /D "_UNICODE" /Yu"stdafx.h" /FD /GZ /c
-# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# Begin Custom Build - Registering ActiveX Control...
-OutDir=.\DebugU
-TargetPath=.\DebugU\active_x.ocx
-InputPath=.\DebugU\active_x.ocx
-SOURCE="$(InputPath)"
-
-"$(OutDir)\regsvr32.trg" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	regsvr32 /s /c "$(TargetPath)" 
-	echo regsvr32 exec. time > "$(OutDir)\regsvr32.trg" 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "active_x - Win32 Unicode Release"
-
-# PROP BASE Use_MFC 2
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "ReleaseU"
-# PROP BASE Intermediate_Dir "ReleaseU"
-# PROP BASE Target_Ext "ocx"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 2
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "ReleaseU"
-# PROP Intermediate_Dir "ReleaseU"
-# PROP Target_Ext "ocx"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_WINDLL" /D "_AFXDLL" /D "_MBCS" /D "_USRDLL" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_WINDLL" /D "_AFXDLL" /D "_USRDLL" /D "_UNICODE" /Yu"stdafx.h" /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 /nologo /subsystem:windows /dll /machine:I386
-# Begin Custom Build - Registering ActiveX Control...
-OutDir=.\ReleaseU
-TargetPath=.\ReleaseU\active_x.ocx
-InputPath=.\ReleaseU\active_x.ocx
+TargetPath=\users\dmorris\chai3d\bin\active_x_msvc6.ocx
+InputPath=\users\dmorris\chai3d\bin\active_x_msvc6.ocx
 SOURCE="$(InputPath)"
 
 "$(OutDir)\regsvr32.trg" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -191,8 +113,6 @@ SOURCE="$(InputPath)"
 
 # Name "active_x - Win32 Release"
 # Name "active_x - Win32 Debug"
-# Name "active_x - Win32 Unicode Debug"
-# Name "active_x - Win32 Unicode Release"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

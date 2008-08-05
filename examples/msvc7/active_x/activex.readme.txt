@@ -14,5 +14,16 @@ class.  In this case, that class is embedded in an ActiveX
 control.
 
 The provided project compiles to an .ocx file (an ActiveX control)
-in the 'bin' directory, and an .html file is provided in that
+in the 'examples/bin' directory, and an .html file is provided in that
 directory as well, for testing the control.
+
+We have not built a full installer for the activex control.  It should
+be installed automatically if you compile the control from source.  If
+you want to test the provided binary, cd into the 'bin' directory and
+run:
+
+regsvr32 active_x.ocx
+
+This will tell Windows about this control.  You can then open the .htm
+file in Internet Explorer (FireFox doesn't support ActiveX) and you should
+see the CHAI cube.

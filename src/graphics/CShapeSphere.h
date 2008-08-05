@@ -52,7 +52,12 @@ class cShapeSphere : public cGenericPotentialField
     //! Update bounding box of current object
     virtual void updateBoundaryBox();
     //! Scale object of defined scale factor
-    virtual void scaleObject(double a_scaleFactor);
+    virtual void scaleObject(const double& a_scaleFactor);
+    //! Non-uniform scale not supported
+    virtual void scaleObject(const cVector3d& a_scaleFactor) { 
+      scaleObject(a_scaleFactor.x);
+    }
+
     //! Compute interaction force for current object in local frame
     virtual cVector3d computeLocalForce(const cVector3d& a_localPosition);
     //! Set radius of sphere

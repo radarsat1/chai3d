@@ -25,6 +25,7 @@
 #include "object_loader_globals.h"
 
 #include <conio.h>
+#include ".\object_loaderdlg.h"
 
 // Turn off the annoying precision warning in msvc...
 #ifdef _MSVC
@@ -54,10 +55,38 @@ static char THIS_FILE[] = __FILE__;
 #define SEPARATION_SLIDER_SCALE 50.0
 #define FOCUS_SLIDER_SCALE 10.0
 
+static int right_aligned_elements[] = {
+  IDC_STEREOFOCUS_SLIDER, IDC_STATIC, IDC_CHECK_CULLING,
+    IDC_CHECK_MATERIAL, IDC_CHECK_SHOWBOX, IDC_CHECK_TRANSPARENCY,
+    IDC_CHECK_WIREFRAME, IDC_CHECK_SHOWNORMALS, IDC_LOAD_MODEL_BUTTON,
+    IDC_LOAD_TEXTURE_BUTTON, IDC_STATIC, IDC_STEREOSEP_SLIDER,
+    IDC_STEREOFOCUS_TEXT, IDC_STEREOSEP_SLIDER, IDC_STEREOSEP_TEXT,
+    IDC_TOGGLE_STEREO_BUTTON, IDC_CAMZOOM_SLIDER, IDC_CHECK_SHOWFRAME,
+    IDC_CHECK_USECOLORS, IDC_CHECK_USETEXTURE, IDC_STATIC3
+};
+#define NUM_RIGHT_ALIGNED_ELEMENTS 21
+
+static int bottom_aligned_elements[] = {
+  IDC_TOGGLEHAPTICS_BUTTON, IDC_ANIMATION_BUTTON, IDC_DYNAMIC_FRICTION_SLIDER,
+    IDC_STATICFRICTION_TEXT, IDC_STATICFRICTION_SLIDER, IDC_STIFFNESS_TEXT,
+    IDC_STIFFNESS_SLIDER, IDC_STATIC4, IDC_STATIC5,
+    IDC_STATIC6, IDC_DYNAMIC_FRICTION_RADIUS_TEXT
+};
+#define NUM_BOTTOM_ALIGNED_ELEMENTS 11
+
+// Positions relative to the parent window left and _bottom_
+CRect initial_ralign_positions[NUM_RIGHT_ALIGNED_ELEMENTS];
+CRect initial_balign_positions[NUM_BOTTOM_ALIGNED_ELEMENTS];
+CRect initial_dlg_rect;
+CRect initial_dlg_window_rect;
+CRect initial_gl_area_rect;
+CRect initial_gl_wnd_rect;
+
 Cobject_loaderDlg::Cobject_loaderDlg(CWnd* pParent /*=NULL*/)
 : CDialog(Cobject_loaderDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(Cobject_loaderDlg)
+  initialized = 0;
 	m_material_check = TRUE;
 	m_showbox_check = FALSE;
 	m_showframe_check = FALSE;
@@ -126,16 +155,40 @@ BEGIN_MESSAGE_MAP(Cobject_loaderDlg, CDialog)
   ON_BN_CLICKED(IDC_CHECK_WIREFRAME, OnCheck)
 	ON_BN_CLICKED(IDC_ANIMATION_BUTTON, OnAnimationButton)
 	//}}AFX_MSG_MAP
+  ON_WM_SIZING()
+  ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 BOOL Cobject_loaderDlg::OnInitDialog() {
+
+  initialized = 0;
+
+  CDialog::OnInitDialog();
+
+  GetWindowRect(&initial_dlg_window_rect);
+  GetClientRect(&initial_dlg_rect);
+
+  int i;
+  for(i=0; i<NUM_RIGHT_ALIGNED_ELEMENTS; i++) {
+    CWnd* c = this->GetDlgItem(right_aligned_elements[i]);
+    RECT r;
+    c->GetWindowRect(&r);
+    ScreenToClient(&r);
+    initial_ralign_positions[i] = r;
+  }
+
+  for(i=0; i<NUM_BOTTOM_ALIGNED_ELEMENTS; i++) {
+    CWnd* c = this->GetDlgItem(bottom_aligned_elements[i]);
+    RECT r;
+    c->GetWindowRect(&r);
+    ScreenToClient(&r);
+    initial_balign_positions[i] = r;
+  }
 
   m_gl_wnd = 0;
   m_left_scrolling_gl_area = 0;
   m_right_scrolling_gl_area = 0;
   m_middle_scrolling_gl_area = 0;
-
-	CDialog::OnInitDialog();
 
 	SetIcon(m_hIcon, TRUE);
 	SetIcon(m_hIcon, FALSE);
@@ -156,6 +209,15 @@ BOOL Cobject_loaderDlg::OnInitDialog() {
 						       0);
   m_gl_area_hwnd = m_gl_wnd->m_hWnd;
   
+  RECT r;
+  pWnd->GetWindowRect(&r);
+  ScreenToClient(&r);
+  initial_gl_area_rect = r;
+
+  m_gl_wnd->GetWindowRect(&r);
+  pWnd->ScreenToClient(&r);
+  initial_gl_wnd_rect = r;
+
   // Map field of view from 0 to 180 chai units
   m_camera_zoom_slider.SetRange(0,180,1);
   m_camera_zoom_slider.SetPos(45);
@@ -185,6 +247,8 @@ BOOL Cobject_loaderDlg::OnInitDialog() {
 
   UpdateData(FALSE);
   
+  initialized = 1;
+
   return TRUE;
 }
 
@@ -533,4 +597,100 @@ void Cobject_loaderDlg::OnAnimationButton() {
   CButton* button = (CButton*)(GetDlgItem(IDC_ANIMATION_BUTTON));
   button->SetWindowText(g_main_app->moving_object?"Stop Animation":"Animate Object");
 
+}
+
+
+void Cobject_loaderDlg::OnSizing(UINT fwSide, LPRECT pRect)
+{
+  int neww = pRect->right - pRect->left;
+  int initw = initial_dlg_window_rect.right - initial_dlg_window_rect.left;
+
+  if (neww < initw) {
+    if (fwSide == WMSZ_RIGHT || fwSide == WMSZ_TOPRIGHT || fwSide == WMSZ_BOTTOMRIGHT)
+      pRect->right += initw - neww;
+    else
+      pRect->left -= initw - neww;
+  }
+
+  int newh = pRect->bottom - pRect->top;
+  int inith = initial_dlg_window_rect.bottom - initial_dlg_window_rect.top;
+
+  if (newh < inith) {
+    if (fwSide == WMSZ_BOTTOM || fwSide == WMSZ_BOTTOMLEFT || fwSide == WMSZ_BOTTOMRIGHT)
+      pRect->bottom += inith - newh;
+    else
+      pRect->top -= inith - newh;
+  }
+
+  // Repaint
+  Invalidate();
+  UpdateWindow();
+}
+
+
+void Cobject_loaderDlg::OnSize(UINT nType, int cx, int cy)
+{
+  CDialog::OnSize(nType, cx, cy);
+
+  if (initialized==0) return;
+
+  RECT dlgr;
+  GetClientRect(&dlgr);
+
+  int i;
+
+  for(i=0; i<NUM_RIGHT_ALIGNED_ELEMENTS; i++) {
+    CWnd* c = GetDlgItem(right_aligned_elements[i]);
+    int roffset = initial_dlg_rect.right - 
+      initial_ralign_positions[i].left;
+    
+    RECT r;
+    r.left = dlgr.right - roffset;
+    r.top = initial_ralign_positions[i].top;
+    // width and height
+    r.right = initial_ralign_positions[i].right -
+      initial_ralign_positions[i].left;
+    r.bottom =       initial_ralign_positions[i].bottom -
+      initial_ralign_positions[i].top;
+    c->MoveWindow(r.left,r.top,r.right,r.bottom);
+  }
+
+  for(i=0; i<NUM_BOTTOM_ALIGNED_ELEMENTS; i++) {
+    CWnd* c = GetDlgItem(bottom_aligned_elements[i]);
+    int boffset = initial_dlg_rect.bottom - 
+      initial_balign_positions[i].top;
+
+    RECT r;
+    r.left = initial_balign_positions[i].left;
+    r.top = dlgr.bottom - boffset;
+
+    // width and height
+    r.right = initial_balign_positions[i].right -
+      initial_balign_positions[i].left;
+    r.bottom =       initial_balign_positions[i].bottom -
+      initial_balign_positions[i].top;
+    c->MoveWindow(r.left,r.top,r.right,r.bottom);
+  }
+
+
+  // Resize GL area
+  RECT r = initial_gl_area_rect;
+  r.bottom += dlgr.bottom - initial_dlg_rect.bottom;
+  r.right += dlgr.right - initial_dlg_rect.right;
+
+  CWnd* c = GetDlgItem(IDC_GL_AREA);
+  c->MoveWindow(r.left,r.top,r.right - r.left, r.bottom - r.top, false);
+
+  r = initial_gl_wnd_rect;
+  r.bottom += dlgr.bottom - initial_dlg_rect.bottom;
+  r.right += dlgr.right - initial_dlg_rect.right;
+
+  m_gl_wnd->MoveWindow(r.left,r.top,r.right - r.left, r.bottom - r.top, false);
+
+  g_main_app->viewport->update(true);
+
+  // Repaint
+  Invalidate();
+  UpdateWindow();
+  RedrawWindow(0,0,RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
 }
