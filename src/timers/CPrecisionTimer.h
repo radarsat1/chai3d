@@ -66,9 +66,8 @@ void CALLBACK internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DW
 
 #else
 
-typedef unsigned int UINT;
-typedef unsigned int DWORD;
-void internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+class cPrecisionTimer;
+void internal_timer_callback(cPrecisionTimer* cpt);
 
 #endif
 
@@ -174,7 +173,7 @@ class cPrecisionTimer
 #ifdef _WIN32
   friend void CALLBACK internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
 #else
-  friend void internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+  friend void internal_timer_callback(cPrecisionTimer *cpt);
 #endif
 
 #ifdef _POSIX

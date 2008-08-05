@@ -143,7 +143,7 @@ void *timer_thread_func(void *cptimer)
       double start_time = clock.getCPUtime();
 
       // Run the user's callback
-      internal_timer_callback(0,0,(DWORD)(cpt),0,0);
+      internal_timer_callback(cpt);
 
       // Found out how much time we have left
       double end_time = clock.getCPUtime();
@@ -401,7 +401,7 @@ bool cPrecisionTimer::stop()
 #ifdef _WIN32
 void CALLBACK internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2)
 #else
-void internal_timer_callback(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2)
+void internal_timer_callback(cPrecisionTimer* dwUser)
 #endif
 {
     cPrecisionTimer* timer = (cPrecisionTimer*)(dwUser);
