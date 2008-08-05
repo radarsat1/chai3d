@@ -22,10 +22,17 @@
 //---------------------------------------------------------------------------
 #include "CFreedom6SDevice.h"
 //---------------------------------------------------------------------------
+#ifdef WIN32
 #include <windows.h>
-#include "CVector3D.h"
+#endif
+#include "CVector3d.h"
 //---------------------------------------------------------------------------
-
+#ifdef _POSIX
+#define HINSTANCE void*
+#define GetProcAddress dlsym
+#define FreeLibrary dlclose
+#include <dlfcn.h>
+#endif
 //---------------------------------------------------------------------------
 HINSTANCE hf6sDLL = NULL;
 
@@ -87,7 +94,11 @@ cFreedom6SDevice::cFreedom6SDevice() : cGenericDevice()
 
     if (hf6sDLL==NULL)
     {
+#ifdef _POSIX
+        hf6sDLL = dlopen("libfreedom6s.so", RTLD_LAZY);
+#else
         hf6sDLL = LoadLibrary("freedom6s.dll");
+#endif
 
         if (hf6sDLL==NULL)
             return;

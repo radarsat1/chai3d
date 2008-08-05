@@ -117,7 +117,7 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
 
     // No linux support yet for the virtual device or the f6s...
 
-#ifdef _WIN32
+#ifndef _DISABLE_FREEDOM6S_SUPPORT
 
     // try to open Freedom6S device
     m_device = new cFreedom6SDevice();
@@ -134,7 +134,6 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
       delete m_device;
       m_device = NULL;
     }
-
 #endif
 
 // No Linux virtual device yet...

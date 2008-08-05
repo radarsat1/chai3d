@@ -27,10 +27,10 @@
 #include "CPhantomDevices.h"
 #include "CDeltaDevices.h"
 #include "CFalconDevice.h"
+#include "CFreedom6S3dofPointer.h"
 
 #ifdef _WIN32
 #include "CVirtualDevice.h"
-#include "CFreedom6S3dofPointer.h"
 #endif
 
 //---------------------------------------------------------------------------

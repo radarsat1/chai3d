@@ -26,7 +26,8 @@ OBJECTS = ../src/collisions/CCollisionAABB.o ../src/collisions/CCollisionAABBTre
 ../src/scenegraph/CShapeTorus.o ../src/scenegraph/CWorld.o ../src/timers/CPrecisionClock.o ../src/timers/CPrecisionTimer.o \
 ../src/tools/CGeneric3dofPointer.o ../src/tools/CGenericTool.o ../src/tools/CMeta3dofPointer.o ../src/tools/CPhantom3dofPointer.o \
 ../src/tools/CDelta3dofPointer.o ../src/widgets/CBitmap.o ../src/widgets/CFont.o ../src/widgets/CLabelPanel.o \
-../src/widgets/CPanel.o ../src/devices/PhantomDriverLinux.o ../src/devices/CDeltaDevices.o
+../src/widgets/CPanel.o ../src/devices/PhantomDriverLinux.o ../src/devices/CDeltaDevices.o ../src/tools/CFreedom6S3dofPointer.o \
+../src/devices/CFreedom6SDevice.o 
 
 SOURCES = $(OBJECTS:.o=.cpp)
 INCLUDE = -I../src/graphics -I../src/collisions -I../src/devices -I../src/display -I../src/files -I../src/forces -I../src/math -I../src/scenegraph -I../src/timers -I../src/tools -I../src/widgets -I../include/dhd
@@ -37,6 +38,7 @@ LOCALSRCS = $(notdir $(SOURCES) )
 # Optionally add -D_DISABLE_PHANTOM_SUPPORT to compile away SensAble's libraries
 # Optionally add -D_DISABLE_DELTA_SUPPORT to compile away Force Dimension's libraries
 # Optionally add -D_DISABLE_FALCON_DEVICE_SUPPORT to compile away Novint's libraries
+# Optionally add -D_DISABLE_FREEDOM6S_SUPPORT to compile away MPBT's Freedom 6S libraries
 DEFS = -D_POSIX -D_MAX_PATH=260 -D_LINUX -DLINUX -D_DISABLE_PHANTOM_SUPPORT -D_DISABLE_DELTA_SUPPORT -D_DISABLE_FALCON_DEVICE_SUPPORT
 
 CC   = g++
