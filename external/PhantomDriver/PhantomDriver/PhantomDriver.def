@@ -1,0 +1,18 @@
+LIBRARY   PhantomDriver
+DESCRIPTION "Library that takes care of dynamically linking an application with the right version of ghost"
+EXPORTS
+   OpenPhantom
+   PhantomAcces
+   ClosePhantoms
+   ResetPhantomEncoders
+   StartCommunicationPhantom
+   StopCommunicationPhantom
+   ReadPositionPhantom
+   ReadVelocityPhantom
+   ReadNormalizedPositionPhantom
+   SetForcePhantom
+   SetForceTorquePhantom
+   ReadOrientMat3DOFPhantom
+   ReadSwitchPhantom
+   GetMaxForcePhantom
+   

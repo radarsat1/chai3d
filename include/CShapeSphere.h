@@ -30,7 +30,7 @@
 //===========================================================================
 /*!
       \class      cShapeSphere
-      \brief      cShapeSphere describes a simple sphere shape.
+      \brief      cShapeSphere describes a simple spherical potential field
 */
 //===========================================================================
 class cShapeSphere : public cGenericPotentialField
@@ -40,7 +40,7 @@ class cShapeSphere : public cGenericPotentialField
     //! Constructor of cShapeSphere.
     cShapeSphere(double a_radius);
     //! Destructor of cSphere.
-    virtual ~cShapeSphere();
+    virtual ~cShapeSphere() {};
 
     // MEMBERS:
     //! Material properties
@@ -49,8 +49,6 @@ class cShapeSphere : public cGenericPotentialField
     // METHODS:
     //! Render object in OpenGL.
     virtual void render(const int a_renderMode=0);
-    //! Update global positions.
-    virtual void updateGlobalPositions(const bool a_frameOnly) {};
     //! Update bounding box of current object
     virtual void updateBoundaryBox();
     //! Scale object of defined scale factor

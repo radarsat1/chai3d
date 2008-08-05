@@ -37,55 +37,67 @@
       \class      cViewport
       \brief
 
-      cViewport describes a two dimensional window display for rendering an
-      OpenGL scene. You can image the viewport as being a television connected
-      to a camera (cCamera) located inside a world (cWorld).
+      cViewport describes a two-dimensional window for rendering an OpenGL scene.
+      Basically this class encapsulates an OpenGL rendering context.  Creating
+      a window is left to the application programmer, since that will depend
+      on the development environment that you're using.  Once you have a window
+      handle, use this class to bind it to an OpenGL context.
+
+      Typically a cViewport is connected to a cCamera for rendering, and a cCamera
+      is typically connected to a cWorld, where objects actually live.
+      
 */
 //===========================================================================
 class cViewport
 {
   public:
+
     // CONSTRUCTOR & DESTRUCTOR:
-    //! Constructor of cViewport.
-    cViewport(HWND a_winHandle, cCamera *a_camera, const bool a_stereoEnabled = false);
+
+    //! Constructor of cViewport
+    cViewport(HWND a_winHandle, cCamera *a_camera, const bool a_stereoEnabled = false, PIXELFORMATDESCRIPTOR* a_pixelFormat = 0);
     //! Destructor of cViewport.
     ~cViewport();
 
     // METHODS:
+
     //! Get width of viewport.
-    unsigned int getHeight() { return (m_height); }
+    unsigned int getHeight() const { return (m_height); }
     //! Get height of viewport.
-    unsigned int getWidth() { return (m_width); }
+    unsigned int getWidth() const { return (m_width); }
 
-    //! Set camera of viewport.
+    //! Set the camera through which this viewport will be rendered
     void setCamera(cCamera *a_camera);
-    //! Get camera of viewport.
-    cCamera* getCamera() { return (m_camera); }
+    //! Get the camera through which this viewport is being rendered
+    cCamera* getCamera() const { return (m_camera); }
 
-    //! Set status of viewport.
+    //! Enable or disable rendering of this viewport
     void setEnabled( const bool a_enabled ) { m_enabled = a_enabled; }
-    //! Get status of viewport.
-    bool getEnabled() { return (m_enabled); }
+    //! Get the rendering status of this viewport
+    bool getEnabled() const { return (m_enabled); }
 
-    //! Set display mode
-    //!
-    //! Note that it is not possible to change the pixel format of a window
-    //! in Windows, so it is the user's responsibility to create a _new_
-    //! window and a _new_ viewport before enabling stereo.  Therefore calling this
-    //! function on a window that _didn't_ initially have stereo enabled
-    //! will not work.
+    //! Set post-render callback... the object you supply here will be rendered _after_ all other rendering
+    void setPostRenderCallback( cGenericObject* a_postRenderCallback )
+        { m_postRenderCallback = a_postRenderCallback; }
+
+    //! Get post-render callback
+    cGenericObject* getPostRenderCallback() const { return (m_postRenderCallback); }
+
+    //! Enable or disable stereo rendering
     void setStereoOn(bool a_stereoEnabled);
+    //! Is stereo rendering enabled?
+    bool getStereoOn() const { return (m_stereoEnabled); }
 
-    //! Get current display mode.
-    bool getStereoOn() { return (m_stereoEnabled); }
+    //! Render the scene in OpenGL
+    bool render(const int imageIndex = CHAI_STEREO_DEFAULT);
 
-    //! Render the scene in OpenGL.
-    bool render();
+    //! Returns the pixel format used by this viewport
+    const PIXELFORMATDESCRIPTOR* getPixelFormat() { return (&m_pixelFormat); }
 
-    //! Select an object inside the viewport.
+    //! Tell the viewport to figure out whether the (x,y) viewport coordinate is within a visible object
     bool select(const unsigned int a_windowPosX, const unsigned int a_windowPosY,
                 const bool a_selectVisibleObjectsOnly);
-    //! Get last selected mesh.
+    //! Get last selected mesh
     cGenericObject* getLastSelectedObject() { return (m_lastSelectedObject); }
     //! Get last selected triangle.
     cTriangle* getLastSelectedTriangle() { return (m_lastSelectedTriangle); }
@@ -94,8 +106,11 @@ class cViewport
     //! Get distance to last selected object.
     double getLastSelectedDistance(void) { return (m_lastSelectedDistance); }
 
-  private:
+
+  protected:
+
     // PROPERTIES:
+
     //!  Virtual camera connected to this viewport.
     cCamera* m_camera;
     //! Status of viewport.
@@ -122,8 +137,15 @@ class cViewport
     unsigned int m_width;
     //! Height of viewport
     unsigned int m_height;
+    //! Descriptor of the context opened for OpenGL rendering
+    PIXELFORMATDESCRIPTOR m_pixelFormat;
+    //! If non-zero, this object will get rendered immediately 
+    //! before the GL buffer is swapped out, after all other
+    cGenericObject* m_postRenderCallback;
+
 
     // METHODS:
+
     //! Update display context.
     bool update();
     //! Clean up the current rendering context

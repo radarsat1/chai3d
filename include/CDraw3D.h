@@ -31,17 +31,16 @@
 //===========================================================================
 /*!
     \brief
-    The following functions provide useful macros to draw 3D complex objects
-    These function provide the OpenGL code which can be called directly from
-    the render() method of any object inheriting from cGenericObjects.
-    It is up to the user to define colors, polygon rendering modes,
-    line width, etc... whenever the function does not specify these
-    parameters.
+
+    The following functions provide useful macros to draw complex 3D objects.
+
+    In general, they don't set nice colors or modify the OpenGL state, they
+    just draw polygons.
 */
 //===========================================================================
 
 //! Draw an x-y-z frame.
-void cDrawFrame(const double a_scale);
+void cDrawFrame(const double a_scale=1.0, bool a_modifyMaterialState=1);
 
 //! Draw a box using lines.
 void cDrawWireBox(const double a_xMin, const double a_xMax,
@@ -50,7 +49,7 @@ void cDrawWireBox(const double a_xMin, const double a_xMax,
 
 //! Draw a sphere.
 void cDrawSphere(const double a_radius,
-                 const unsigned int a_numSlices, const unsigned int a_numStacks);
+                 const unsigned int a_numSlices=10, const unsigned int a_numStacks=10);
 
 //---------------------------------------------------------------------------
 #endif

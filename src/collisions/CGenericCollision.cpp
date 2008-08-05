@@ -27,20 +27,19 @@
 /*!
     Constructor of cGenericCollision.
 
-    \fn     cGenericCollision::cGenericCollision()
+    \fn       cGenericCollision::cGenericCollision()
 */
 //===========================================================================
 cGenericCollision::cGenericCollision()
 {
-    // set default color for rendering collision detector
     // set material properties
-	m_material.setShininess(100);
+    // set default color for rendering collision detector
     m_material.m_ambient.set((float)0.3, (float)0.3, (float)0.3);
     m_material.m_diffuse.set((float)0.8, (float)0.8, (float)0.0);
     m_material.m_specular.set((float)1.0, (float)1.0, (float)1.0);
+    m_material.setShininess(100);
 
-
-    // set default value for display depth. 
+    // set default value for display depth (level 0 = root)
     m_displayDepth = 0;
 }
 

@@ -41,7 +41,7 @@ cMaterial::cMaterial()
     m_emission.set(0.0f, 0.0f, 0.0f, 1.0f);
     setShininess(64);
 
-    // set haptic properties
+    // set default haptic properties
     setStiffness(100.0);
     setStaticFriction(0.0);
     setDynamicFriction(0.0);
@@ -50,7 +50,7 @@ cMaterial::cMaterial()
 
 //===========================================================================
 /*!
-    Set the transparency level.
+    Set the transparency level (by setting the alpha value for all color properties)
 
     \fn     void cMaterial::setTransparencyLevel(const float a_levelTransparency)
     \param  a_levelTransparency  Level of transparency.
@@ -71,10 +71,10 @@ void cMaterial::setTransparencyLevel(float a_levelTransparency)
 
 //===========================================================================
 /*!
-    Set the level of shininess. Value must range between 0 and 128.
+    Set the level of shininess. Value are clamped to range from 0 --> 128
 
     \fn     void cMaterial::setShininess(const GLuint a_shininess)
-    \param  a_shininess  Level of shininess.
+    \param  a_shininess  Level of shininess
 */
 //===========================================================================
 void cMaterial::setShininess(GLuint a_shininess)
@@ -85,10 +85,10 @@ void cMaterial::setShininess(GLuint a_shininess)
 
 //===========================================================================
 /*!
-    Set the level of stiffness. Value must be positive.
+    Set the level of stiffness. Clamped to be a non-negative value.
 
     \fn     void cMaterial::setStiffness(const double a_stiffness)
-    \param  a_stiffness  Level of stiffness.
+    \param  a_stiffness  Level of stiffness
 */
 //===========================================================================
 void cMaterial::setStiffness(double a_stiffness)
@@ -99,7 +99,7 @@ void cMaterial::setStiffness(double a_stiffness)
 
 //===========================================================================
 /*!
-    Set the level of staticfriction. Value must be positive
+    Set the level of static friction. Clamped to be a non-negative value.
 
     \fn     void cMaterial::setStaticFriction(const double a_friction)
     \param  a_friction  Level of friction.
@@ -113,7 +113,7 @@ void cMaterial::setStaticFriction(double a_friction)
 
 //===========================================================================
 /*!
-    Set the level of dynamic friction. Value must be positive
+    Set the level of dynamic friction. Clamped to be a non-negative value.
 
     \fn     void cMaterial::setDynamicFriction(const double a_friction)
     \param  a_friction  Level of friction.
@@ -127,7 +127,7 @@ void cMaterial::setDynamicFriction(double a_friction)
 
 //===========================================================================
 /*!
-    Render material in OpenGL.
+    Render this material in OpenGL.
 
     \fn     void cMaterial::render()
 */

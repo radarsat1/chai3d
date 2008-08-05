@@ -21,7 +21,7 @@
 
 //---------------------------------------------------------------------------
 #ifndef CMeta3dofPointerH
-#define CcMeta3dofPointerH
+#define CMeta3dofPointerH
 //---------------------------------------------------------------------------
 #include "CGeneric3dofPointer.h"
 #include "CPhantomDevices.h"

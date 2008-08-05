@@ -39,6 +39,13 @@ xcopy /Y src\math\*.h 			include
 xcopy /Y src\timers\*.h 		include
 xcopy /Y src\tools\*.h 			include
 
+rem ----------------------------------------------------
+rem COPY MSVC7 LIBRARY FILES NOT WRITTEN AT COMPILE-TIME
+rem ----------------------------------------------------
+
+xcopy /Y lib\msvc6\DLPORTIO.lib lib\msvc7
+xcopy /Y lib\msvc6\PhantomDriver.lib lib\msvc7
+xcopy /Y lib\msvc6\dhdms.lib lib\msvc7
 
 rem -----------------------------------------
 rem FINALIZE

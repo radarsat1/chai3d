@@ -160,13 +160,17 @@ BOOL Cbasic_shapesApp::InitInstance() {
 
 
   // Turn on one light...
-  // Create a light source and attach it to camera
   light = new cLight(world);
 
-  camera->addChild(light);
   light->setEnabled(true);
-  light->setPos(cVector3d(0,0,0));
-  light->rotate(cVector3d(0,0,1), cDegToRad(180));
+
+  // Put the light somewhere that looks nice
+  light->setPos(cVector3d(240, 200, 200));
+  light->setDir(cVector3d(-1.4, -1.0, -1.0));
+
+  // Don't make it a spotlight
+  light->setCutOffAngle(180.0);
+  
 
   // Create a display for graphic rendering
   viewport = new cViewport(g_main_dlg->m_gl_area_hwnd, camera, false);
@@ -183,8 +187,11 @@ BOOL Cbasic_shapesApp::InitInstance() {
 
   // Move the object over some so the Phantom will not initially be
   // inside the object.
-  object->translate(0.0 ,0.0 ,-1.2);
+  object->translate(1.5 ,0.0 ,-1.2);
+
+  // Rotate the cube to make it look nice
   object->rotate(cVector3d(0,1,0),30.0 * 3.14159 / 180.0);
+  object->rotate(cVector3d(1,0,0),30.0 * 3.14159 / 180.0);
 
   // Initialize the object's collision-detection state
   object->computeGlobalPositions();
@@ -444,7 +451,6 @@ void Cbasic_shapesApp::toggle_haptics(int enable) {
       // Rotate the tool so its axes align with our opengl-like axes
       tool->rotate(cVector3d(0,0,1),-90.0*M_PI/180.0);
       tool->rotate(cVector3d(1,0,0),-90.0*M_PI/180.0);
-	  tool->setPos(0,1,0);
       tool->setRadius(0.05);
       
     }

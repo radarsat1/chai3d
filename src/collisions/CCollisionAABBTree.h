@@ -14,6 +14,8 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Christopher Sewell
+    \author     Based on code by Charity Lu
+    \author     clu@cs.stanford.edu
     \version    1.1
     \date       01/2004
 */
@@ -33,7 +35,7 @@
 /*!
       \class    cCollisionAABBNode
       \brief    cCollisionAABBNode is an abstract class that contains methods
-                to set up and maintain internal and leaf nodes of an AABB tree
+                to set up internal and leaf nodes of an AABB tree
                 and to use them to detect for collision with a line.
 */
 //===========================================================================
@@ -42,37 +44,39 @@ class cCollisionAABBNode
   public:
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cCollisionAABBNode.
-    cCollisionAABBNode() {}
+    cCollisionAABBNode() { m_parent = 0; }
     //! Destructor of cCollisionAABBNode.
     virtual ~cCollisionAABBNode() {}
 
     // METHODS:
+    //! Create a bounding box for the portion of the model at or below the node.
     virtual void fitBBox() {}
-    //! Draw the edges of the bounding box for a tree node.
-    virtual void render(unsigned int a_depth = -1) = 0;
-    //! Determine whether given lines intersect the mesh bounded by the subtree
-    //! rooted at the node.
-    virtual bool computeCollision(
-    cVector3d& a_segmentPointA, cVector3d& a_segmentPointB, cCollisionAABBBox &a_lineBox,
-    cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance) = 0;
+    //! Draw the edges of the bounding box for this node, if at the given depth.
+    virtual void render(int a_depth = -1) = 0;
+    //! Determine whether line intersects mesh bounded by subtree rooted at node.
+    virtual bool computeCollision(cVector3d& a_segmentPointA,
+            cVector3d& a_segmentDirection, cCollisionAABBBox &a_lineBox,
+            cTriangle*& a_colTriangle, cVector3d& a_colPoint,
+            double& a_colSquareDistance) = 0;
+    //! Return true if this node contains the specified triangle tag.
+    virtual bool contains_triangle(int a_tag) = 0;
+    //! Set the parent of this node.
+    virtual void setParent(cCollisionAABBNode* a_parent, int a_recusive) = 0;
 
     // MEMBERS:
-    //! The bounding box for the node.
+    //! The bounding box for this node.
     cCollisionAABBBox m_bbox;
-    //! The depth of the node in the collision tree.
-    unsigned int m_depth;
-
-    // Returns true if this node contains the specified triangle tag
-    virtual bool contains_triangle(int tag) = 0;
-    
-    cCollisionAABBNode* parent;
+    //! The depth of this node in the collision tree.
+    int m_depth;
+    //! Parent node of this node.
+    cCollisionAABBNode* m_parent;
 };
 
 
 //===========================================================================
 /*!
       \class    cCollisionAABBLeaf
-      \brief    cCollisionAABBLeaf contains methods to set up and maintain leaf
+      \brief    cCollisionAABBLeaf contains methods to set up leaf
                 nodes of an AABB tree and to use them to detect for collision
                 with a line.
 */
@@ -81,30 +85,31 @@ class cCollisionAABBLeaf : public cCollisionAABBNode
 {
   public:
     // CONSTRUCTOR & DESTRUCTOR:
-    //! Default constructor of cBBoxLeaf.
+    //! Default constructor of cCollisionAABBLeaf.
     cCollisionAABBLeaf() {}
-    //! Constructor of cBBoxLeaf.
+    //! Constructor of cCollisionAABBLeaf.
     cCollisionAABBLeaf(cTriangle *a_triangle) : m_triangle(a_triangle)
-    {
-		  fitBBox();
-    }
+        {fitBBox();}
+    //! Destructor of cCollisionAABBLeaf.
+    virtual ~cCollisionAABBLeaf() {}
 
     // METHODS:
-    //! Create a bounding box to enclose triangle belonging to the leaf node.
+    //! Create a bounding box to enclose triangle belonging to this leaf node.
     void fitBBox();
-    //! Draw the edges of the bounding box for a leaf.
-    void render(unsigned int a_depth = -1);
-    //! Determine whether the given line intersects the leaf's triangle.
+    //! Draw the edges of the bounding box for this leaf if it is at depth a_depth.
+    void render(int a_depth = -1);
+    //! Determine whether the given line intersects this leaf's triangle.
     bool computeCollision(cVector3d& a_segmentPointA,
-    cVector3d& a_segmentPointB, cCollisionAABBBox &a_lineBox,
-    cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance);
+            cVector3d& a_segmentDirection, cCollisionAABBBox &a_lineBox,
+            cTriangle*& a_colTriangle, cVector3d& a_colPoint,
+            double& a_colSquareDistance);
+    //! Return true if this node contains the specified triangle tag.
+    virtual bool contains_triangle(int a_tag)
+        { return (m_triangle != 0 && m_triangle->m_tag == a_tag); }
+    //! Return parent of this node.
+    virtual void setParent(cCollisionAABBNode* a_parent, int a_recusive)
+        { m_parent = a_parent; }
 
-    // Returns true if this node contains the specified triangle tag
-    virtual bool contains_triangle(int tag) {
-      return (m_triangle != 0 && m_triangle->m_tag == tag);
-    }
-
-  protected:
     // MEMBERS:
     //! The triangle bounded by the leaf.
     cTriangle *m_triangle;
@@ -114,7 +119,7 @@ class cCollisionAABBLeaf : public cCollisionAABBNode
 //===========================================================================
 /*!
       \class    cCollisionAABBInternal
-      \brief    cBBoxInternal contains methods to set up and maintain internal
+      \brief    cCollisionAABBInternal contains methods to set up internal
                 nodes of an AABB tree and to use them to detect for collision
                 with a line.
 */
@@ -123,35 +128,33 @@ class cCollisionAABBInternal : public cCollisionAABBNode
 {
   public:
     // CONSTRUCTOR & DESTRUCTOR:
-    //! Default constructor of cBBoxInternal.
+    //! Default constructor of cCollisionAABBInternal.
     cCollisionAABBInternal() { m_depth = 0; }
-    //! Constructor of cBBoxInternal.
+    //! Constructor of cCollisionAABBInternal.
     cCollisionAABBInternal(unsigned int a_numLeaves, cCollisionAABBLeaf *a_leaves,
-                           unsigned int a_depth = -1);
+            unsigned int a_depth = -1);
+    //! Destructor of cCollisionAABBInternal.
+    ~cCollisionAABBInternal();
 
     // METHODS:
-    //! Resize the bounding box to account for changes in the mesh.
+    //! Size the bounding box for this node to enclose its children.
     void fitBBox() {m_bbox.enclose(m_leftSubTree->m_bbox, m_rightSubTree->m_bbox);}
-    //! Draw the edges of the bounding box for an internal node.
-    void render(unsigned int a_depth = -1);
+    //! Draw the edges of the bounding box for this node if it is at depth a_depth.
+    void render(int a_depth = -1);
     //! Determine whether given line intersects the tree rooted at this node.
     bool computeCollision(cVector3d& a_segmentPointA,
-    cVector3d& a_segmentPointB, cCollisionAABBBox &a_lineBox,
-    cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance);
+            cVector3d& a_segmentDirection, cCollisionAABBBox &a_lineBox,
+            cTriangle*& a_colTriangle, cVector3d& a_colPoint,
+            double& a_colSquareDistance);
+    //! Return true if this node contains the specified triangle tag.
+    virtual bool contains_triangle(int a_tag);
+    //! Return parent node and optionally propagate the assignment to children.
+    virtual void setParent(cCollisionAABBNode* a_parent, int a_recursive);
 
-    virtual bool contains_triangle(int tag) {
-      return (
-        m_leftSubTree->contains_triangle(tag)
-        ||
-        m_rightSubTree->contains_triangle(tag)
-        );
-    }
-
-  protected:
     // MEMBERS:
-    //! The root of the node's left subtree.
+    //! The root of this node's left subtree.
     cCollisionAABBNode *m_leftSubTree;
-    //! The root of the node's right subtree.
+    //! The root of this node's right subtree.
     cCollisionAABBNode *m_rightSubTree;
 };
 

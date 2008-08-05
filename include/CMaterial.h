@@ -32,10 +32,14 @@
 //===========================================================================
 /*!
       \class      cMaterial
-      \brief      cMaterial describes the surface properties of a solid called
-                  material properties. A material can be described by five
-                  different parameters: ambient, diffuse, specular, emission
-                  and shininess.
+      \brief      cMaterial describes the graphic and haptic properties of a
+                  solid.
+                  
+                  Graphic properties include the OpenGL favorites:
+                  
+                  ambient color, diffuse color, specular color, emissive color, and shininess
+
+                  Haptic properties currently include stiffness, dynamic friction, and static friction
 */
 //===========================================================================
 struct cMaterial
@@ -47,47 +51,59 @@ struct cMaterial
     //! Destructor of cMaterial.
     ~cMaterial() {};
 
-    // METHODS:
-    //! Set the level of shininess.
+    //! Render the material in OpenGL
+    virtual void render();
+
+
+    // METHODS - GRAPHIC PROPERTIES:
+
+    //! Set shininess (the exponent used for specular lighting)
     void setShininess(GLuint a_shininess);
-    //! Get the level of shininess
+    //! Get shininess
     GLuint getShininess() { return (m_shininess); }
+
+    //! set transparency level (sets the alpha value for all color properties)
+    void setTransparencyLevel(float a_levelTransparency);
+    
+    
+    // METHODS - HAPTIC PROPERTIES:
+
     //! set stiffness level [N/m]
     void setStiffness(double a_stiffness);
     //! get stiffness level [N/m]
-    inline double getStiffness() { return (m_stiffness); }
+    inline double getStiffness() const { return (m_stiffness); }
+
     //! set static friction level
     void setStaticFriction(double a_friction);
     //! set dynamic friction level
     void setDynamicFriction(double a_friction);
-    //! get static stiffness level [N/m]
-    inline double getStaticFriction() { return (m_static_friction); }
-    //! get dynamic stiffness level [N/m]
-    inline double getDynamicFriction() { return (m_dynamic_friction); }
-    //! set transparency level
-    void setTransparencyLevel(float a_levelTransparency);
-    //! Render the material in OpenGL.
-    void render();
-
+    //! get static friction level
+    inline double getStaticFriction() const { return (m_static_friction); }
+    //! get dynamic friction level
+    inline double getDynamicFriction() const { return (m_dynamic_friction); }
+    
 
     // MEMBERS:
-    //! Ambient color property.
+
+    //! Ambient color
     cColorf m_ambient;
-    //! Diffuse color property.
+    //! Diffuse color
     cColorf m_diffuse;
-    //! Specular color property.
+    //! Specular color
     cColorf m_specular;
-    //! Emission color property.
+    //! Emissive color
     cColorf m_emission;
 
+
   protected:
-    //! stiffness [netwons per meter]
+
+    //! Stiffness [netwons per meter]
     double m_stiffness;
-    //! Static friction constant.
+    //! Static friction constant
     double m_static_friction;
-    //! Dynamic friction constant.
+    //! Dynamic friction constant
     double m_dynamic_friction;
-    //! Level of shininess.
+    //! OpenGL shininess
     GLuint m_shininess;
 };
 

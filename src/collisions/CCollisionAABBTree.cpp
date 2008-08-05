@@ -14,6 +14,8 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Christopher Sewell
+    \author     Based on code by Charity Lu
+    \author     clu@cs.stanford.edu
     \version    1.1
     \date       01/2004
 */
@@ -23,21 +25,22 @@
 #include "CCollisionAABBTree.h"
 //---------------------------------------------------------------------------
 
-// pointer for creating new AABB tree nodes
+//! Pointer for creating new AABB tree nodes, declared in CCollisionAABB.cpp.
 extern cCollisionAABBInternal* g_nextFreeNode;
 
 //===========================================================================
 /*!
-      Determine whether the two given boxes intersect each other.
+    Determine whether the two given boxes intersect each other.
 
-      \fn         inline bool intersect(cBBox a_0, cBBox a_1)
-      \param      a_0   First box; may intersect with second box.
-      \param      a_1   Second box; may intersect with first box.
-      \return     Returns whether there is any overlap in the two boxes.
+    \fn       inline bool intersect(cCollisionAABBBox a_0, cCollisionAABBox a_1)
+    \param    a_0   First box; may intersect with second box.
+    \param    a_1   Second box; may intersect with first box.
+    \return   Return whether there is any overlap of the two boxes.
 */
 //===========================================================================
 inline bool intersect(cCollisionAABBBox a_0, cCollisionAABBBox a_1)
 {
+    // check for overlap along each axis
     if (a_0.getLowerX() > a_1.getUpperX()) return false;
     if (a_0.getLowerY() > a_1.getUpperY()) return false;
     if (a_0.getLowerZ() > a_1.getUpperZ()) return false;
@@ -45,23 +48,23 @@ inline bool intersect(cCollisionAABBBox a_0, cCollisionAABBBox a_1)
     if (a_1.getLowerY() > a_0.getUpperY()) return false;
     if (a_1.getLowerZ() > a_0.getUpperZ()) return false;
 
-    // collision has occured.
+    // if the boxes are not separated along any axis, a collision has occured
     return (true);
 }
 
 
 //===========================================================================
 /*!
-      Render bounding box of leaf node.
+    Render bounding box of leaf node if it is at level a_depth in the tree.
 
-      \fn         void cCollisionAABBLeaf::render(unsigned int a_depth)
-      \param      a_depth   Only draw nodes at this depth in the tree.
-                            a_depth = -1 renders the complete tree.
+    \fn       void cCollisionAABBLeaf::render(int a_depth)
+    \param    a_depth  Only draw nodes at this depth in the tree.
+                       a_depth = -1 renders the complete tree.
 */
 //===========================================================================
-void cCollisionAABBLeaf::render(unsigned int a_depth)
+void cCollisionAABBLeaf::render(int a_depth)
 {
-    if (a_depth == m_depth)
+    if (a_depth < 0 || a_depth == m_depth)
     {
         m_bbox.render();
     }
@@ -70,10 +73,10 @@ void cCollisionAABBLeaf::render(unsigned int a_depth)
 
 //===========================================================================
 /*!
-      Create a bounding box to enclose the three vertices in the triangle
+      Create a bounding box to enclose the three vertices of the triangle
       belonging to the leaf node.
 
-      \fn         void cCollisionAABBLeaf::fitBBox()
+      \fn       void cCollisionAABBLeaf::fitBBox()
 */
 //===========================================================================
 void cCollisionAABBLeaf::fitBBox()
@@ -84,50 +87,48 @@ void cCollisionAABBLeaf::fitBBox()
     // enclose all three vertices of triangle
     if (m_triangle != NULL)
     {
-      m_bbox.enclose(m_triangle->getVertex0()->getPos());
-      m_bbox.enclose(m_triangle->getVertex1()->getPos());
-      m_bbox.enclose(m_triangle->getVertex2()->getPos());
+        m_bbox.enclose(m_triangle->getVertex0()->getPos());
+        m_bbox.enclose(m_triangle->getVertex1()->getPos());
+        m_bbox.enclose(m_triangle->getVertex2()->getPos());
     }
 }
 
 
 //===========================================================================
 /*!
-      Determine whether the given line intersects the triangle belonging to
-      the leaf node.
+    Determine whether the given line intersects the triangle belonging to
+    this leaf node by calling the triangle's collision detection method.
 
-      \fn       bool cCollisionAABBLeaf::computeCollision(cVector3d&
-                a_segmentPointA, cVector3d& a_segmentPointB, cCollisionAABBBox
-                &a_lineBox, cTriangle*& a_colTriangle, cVector3d& a_colPoint,
-                double& a_colSquareDistance)
-    \param      a_segmentPointA  Initial point of segment.
-    \param      a_segmentPointB  End point of segment.
-    \param      a_colObject  Pointer to nearest collided object.
-    \param      a_colTriangle Pointer to nearest colided triangle.
-    \param      a_colPoint  Position of nearest collision.
-    \param      a_colSquareDistance  Distance between ray origin and nearest
-                collision point.
-    \return     Returns \b true if a triangles was hit.
+    \fn       bool cCollisionAABBLeaf::computeCollision(cVector3d&
+              a_segmentPointA, cVector3d& a_segmentPointB,
+              cCollisionAABBBox &a_lineBox, cTriangle*& a_colTriangle,
+              cVector3d& a_colPoint, double& a_colSquareDistance)
+    \param    a_segmentPointA  Initial point of segment.
+    \param    a_segmentDirection  Direction of ray from first to second
+                                  segment points (i.e., proxy to goal).
+    \param    a_colObject  Returns pointer to nearest collided object.
+    \param    a_colTriangle  Returns pointer to nearest colided triangle.
+    \param    a_colPoint  Returns position of nearest collision.
+    \param    a_colSquareDistance  Returns distance between ray origin and
+                                   collision point.
+    \return   Return true if the line segment intersects the leaf's triangle.
 */
 //===========================================================================
 bool cCollisionAABBLeaf::computeCollision(cVector3d& a_segmentPointA,
-    cVector3d& a_segmentPointB, cCollisionAABBBox &a_lineBox,
-    cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance)
+                                          cVector3d& a_segmentDirection,
+                                          cCollisionAABBBox &a_lineBox,
+                                          cTriangle*& a_colTriangle,
+                                          cVector3d& a_colPoint,
+                                          double& a_colSquareDistance)
 {
+    // check for a collision between this leaf's triangle and the segment by
+    // calling the triangle's collision detection method; it will only
+    // return true if the distance between the segment origin and this
+    // triangle is less than the current closest intersecting triangle
+    // (whose distance squared is kept in colSquareDistance)
     cGenericObject* colObject;
-   
-    // compute collision detection
-    bool result = m_triangle->computeCollision(
-                                    a_segmentPointA,
-
-                                    // This is really a ray direction at this point.
-                                    // Should be renamed...
-                                    a_segmentPointB,
-                                    colObject,
-                                    a_colTriangle,
-                                    a_colPoint,
-                                    a_colSquareDistance
-                                  );
+    bool result = m_triangle->computeCollision(a_segmentPointA, a_segmentDirection,
+            colObject, a_colTriangle,a_colPoint, a_colSquareDistance);
 
     // return result
     return (result);
@@ -136,18 +137,35 @@ bool cCollisionAABBLeaf::computeCollision(cVector3d& a_segmentPointA,
 
 //===========================================================================
 /*!
-      Draw the edges of the bounding box for an internal tree node, and
-      call the draw function for its children.
+    Destructor of cCollisionAABBInternal.
 
-      \fn         void cCollisionAABBInternal::draw(int depth)
-      \param      depth   Only draw nodes at this level in the tree.
-                          a_depth = -1 renders the complete tree.
+    \fn       cCollisionAABBInternal::~cCollisionAABBInternal()
 */
 //===========================================================================
-void cCollisionAABBInternal::render(unsigned int a_depth)
+cCollisionAABBInternal::~cCollisionAABBInternal()
+{
+    // delete left tree
+    if (m_leftSubTree) delete m_leftSubTree;
+    
+    // delete right tree
+    if (m_rightSubTree) delete m_rightSubTree;
+}
+
+
+//===========================================================================
+/*!
+    Draw the edges of the bounding box for an internal tree node if it is
+    at depth a_depth in the tree, and call the draw function for its children.
+
+    \fn       void cCollisionAABBInternal::draw(int a_depth)
+    \param    a_depth   Only draw nodes at this level in the tree.
+                        a_depth = -1 renders the complete tree.
+*/
+//===========================================================================
+void cCollisionAABBInternal::render(int a_depth)
 {
     // render current node
-    if (m_depth == a_depth)
+    if (a_depth < 0 || a_depth == m_depth)
     {
         m_bbox.render();
     }
@@ -162,20 +180,23 @@ void cCollisionAABBInternal::render(unsigned int a_depth)
 
 //===========================================================================
 /*!
-      Create an internal AABB tree node.
+    Create an internal AABB tree node.
 
-      \fn         cCollisionAABBInternal::cCollisionAABBInternal(int n,
-                                        cCollisionAABBLeaf *l)
-      \param      a_numLeaves   Number of leaves in subtree rooted at this node.
-      \param      a_leaves Pointer to the location in the array of leafs for the
-                           first leaf under this internal node.
-      \param      a_depth  Depth of the node in the collision tree.
-      \return     Returns a pointer to a new cCollisionAABBInternal node.
+    \fn       cCollisionAABBInternal::cCollisionAABBInternal(
+              unsigned int a_numLeaves, cCollisionAABBLeaf *a_leaves,
+              unsigned int a_depth)
+    \param    a_numLeaves  Number of leaves in subtree rooted at this node.
+    \param    a_leaves  Pointer to the location in the array of leafs for the
+                        first leaf under this internal node.
+    \param    a_depth  Depth of this node in the collision tree.
+    \return   Return a pointer to a new cCollisionAABBInternal node.
 */
 //===========================================================================
 cCollisionAABBInternal::cCollisionAABBInternal(unsigned int a_numLeaves,
-    cCollisionAABBLeaf *a_leaves, unsigned int a_depth)
+                                               cCollisionAABBLeaf *a_leaves,
+                                               unsigned int a_depth)
 {
+    // set depth of this node and initialize left and right subtree pointers
     m_depth = a_depth;
     m_leftSubTree = NULL;
     m_rightSubTree = NULL;
@@ -187,8 +208,9 @@ cCollisionAABBInternal::cCollisionAABBInternal(unsigned int a_numLeaves,
         m_bbox.enclose(a_leaves[j].m_bbox);
     }
 
-    // move leafs with smaller coordinates towards the beginning of the array
-    // and leaves with larger coordinates towards the end of the right
+    // move leafs with smaller coordinates (on the longest axis) towards the
+    // beginning of the array and leaves with larger coordinates towards the
+    // end of the array
     int axis = m_bbox.longestAxis();
     unsigned int i = 0;
     unsigned int mid = a_numLeaves;
@@ -204,33 +226,40 @@ cCollisionAABBInternal::cCollisionAABBInternal(unsigned int a_numLeaves,
         }
     }
 
-    // assign leafs before midpoint to right child and create new internal node
+    // we expect mid, used as the right iterator in the "insertion sort" style
+    // rearrangement above, to have moved roughly to the middle of the array;
+    // however, if it never moved left or moved all the way left, set it to
+    // the middle of the array so that neither the left nor right subtree will
+    // be empty
     if (mid == 0 || mid == a_numLeaves)
     {
         mid = a_numLeaves / 2;
     }
 
+    // if the right subtree contains multiple triangles, create new internal node
     if (mid >= 2)
     {
         m_rightSubTree = g_nextFreeNode;
         new(g_nextFreeNode++) cCollisionAABBInternal(mid, &a_leaves[0], m_depth + 1);
     }
+
+    // if there is only one triangle in the right subtree, the right subtree
+    // pointer should just point to the leaf node
     else
     {
         m_rightSubTree = &a_leaves[0];
-
-        if (m_rightSubTree != NULL)
-        {
-            m_rightSubTree->m_depth = m_depth + 1;
-        }
+        if (m_rightSubTree != NULL) m_rightSubTree->m_depth = m_depth + 1;
     }
 
-    // assign leafs after midpoint to left child and create new internal node
+    // if the left subtree contains multiple triangles, create new internal node
     if (a_numLeaves - mid >= 2)
     {
         m_leftSubTree = g_nextFreeNode;
         new(g_nextFreeNode++) cCollisionAABBInternal(a_numLeaves - mid, &a_leaves[mid], m_depth + 1);
     }
+
+    // if there is only one triangle in the left subtree, the left subtree
+    // pointer should just point to the leaf node
     else
     {
         m_leftSubTree = &a_leaves[mid];
@@ -242,32 +271,38 @@ cCollisionAABBInternal::cCollisionAABBInternal(unsigned int a_numLeaves,
 //===========================================================================
 /*!
     Determine whether the given line intersects the mesh covered by the
-    AABB Tree rooted at this internal node.
+    AABB Tree rooted at this internal node.  If so, return (in the output
+    parameters) information about the intersected triangle of the mesh closest
+    to the segment origin.
 
-    \fn       bool cCollisionAABBInternal::computeCollision(cVector3d&
-                a_segmentPointA, cVector3d& a_segmentPointB, cCollisionAABBBox
-                &a_lineBox, cTriangle*& a_colTriangle, cVector3d& a_colPoint,
-                double& a_colSquareDistance)
-    \param      a_segmentPointA  Initial point of segment.
-    \param      a_segmentPointB  End point of segment.
-    \param      a_colObject  Pointer to nearest collided object.
-    \param      a_colTriangle Pointer to nearest colided triangle.
-    \param      a_colPoint  Position of nearest collision.
-    \param      a_colSquareDistance  Distance between ray origin and nearest
-                collision point.
-    \return     Returns \b true if a triangles was hit.
+    \fn       bool cCollisionAABBInternal::computeCollision(
+              cVector3d& a_segmentPointA, cVector3d& a_segmentDirection,
+              cCollisionAABBBox &a_lineBox, cTriangle*& a_colTriangle,
+              cVector3d& a_colPoint, double& a_colSquareDistance)
+    \param    a_segmentPointA  Initial point of segment.
+    \param    a_segmentDirection  Direction of ray from first to second
+                                  segment points (i.e., proxy to goal).
+    \param    a_colObject  Returns pointer to nearest collided object.
+    \param    a_colTriangle  Returns pointer to nearest colided triangle.
+    \param    a_colPoint  Returns position of nearest collision.
+    \param    a_colSquareDistance  Returns distance between ray origin and
+                                   collision point.
+    \return   Return true if line segment intersects a triangle in the subtree.
 */
 //===========================================================================
 bool cCollisionAABBInternal::computeCollision(cVector3d& a_segmentPointA,
-    cVector3d& a_segmentPointB, cCollisionAABBBox &a_lineBox,
-    cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance)
+                                              cVector3d& a_segmentDirection,
+                                              cCollisionAABBBox &a_lineBox,
+                                              cTriangle*& a_colTriangle,
+                                              cVector3d& a_colPoint,
+                                              double& a_colSquareDistance)
 {
     // if a line's bounding box does not intersect the node's bounding box,
     // there can be no intersection
-	if (!intersect(m_bbox, a_lineBox))
-	{
-		return (false);
-	}
+    if (!intersect(m_bbox, a_lineBox))
+    {
+        return (false);
+    }
 
     // initialize objects for calls to left and right subtrees
     cTriangle *l_colTriangle, *r_colTriangle;
@@ -277,16 +312,24 @@ bool cCollisionAABBInternal::computeCollision(cVector3d& a_segmentPointA,
     bool l_result = false;
     bool r_result = false;
 
-    // check collision between line and left subtree node
-    if ( m_leftSubTree->computeCollision(a_segmentPointA, a_segmentPointB,
-            a_lineBox, l_colTriangle, l_colPoint, l_colSquareDistance) )
+    // check collision between line and left subtree node; it will only
+    // return true if the distance between the segment origin and this
+    // triangle is less than the current closest intersecting triangle
+    // (whose distance squared is in l_colSquareDistance)
+    if ( m_leftSubTree && m_leftSubTree->computeCollision(a_segmentPointA,
+            a_segmentDirection, a_lineBox, l_colTriangle, l_colPoint,
+            l_colSquareDistance) )
     {
         l_result = true;
     }
 
-    // check collision between line and right subtree node
-    if ( m_rightSubTree->computeCollision(a_segmentPointA, a_segmentPointB,
-            a_lineBox, r_colTriangle, r_colPoint, r_colSquareDistance) )
+    // check collision between line and right subtree node; it will only
+    // return true if the distance between the segment origin and this
+    // triangle is less than the current closest intersecting triangle
+    // (whose distance squared is in r_colSquareDistance)
+    if ( m_rightSubTree && m_rightSubTree->computeCollision(a_segmentPointA,
+            a_segmentDirection, a_lineBox, r_colTriangle, r_colPoint,
+            r_colSquareDistance) )
     {
         r_result = true;
     }
@@ -310,3 +353,36 @@ bool cCollisionAABBInternal::computeCollision(cVector3d& a_segmentPointA,
     return (l_result || r_result);
 }
 
+
+//===========================================================================
+/*!
+    Return whether this node contains the specified triangle tag.
+
+    \fn       void cCollisionAABBInternal::contains_triangle(int tag)
+    \param    tag  Tag to inquire about
+*/
+//===========================================================================
+bool cCollisionAABBInternal::contains_triangle(int a_tag)
+{
+    return (m_leftSubTree->contains_triangle(a_tag) ||
+            m_rightSubTree->contains_triangle(a_tag));
+}
+
+
+//===========================================================================
+/*!
+    Sets this node's parent pointer and optionally propagate
+    assignments to its children (setting their parent pointers to this node).
+
+    \fn       void cCollisionAABBInternal::setParent(cCollisionAABBNode* parent,
+              int recursive);
+    \param    a_parent  Pointer to this node's parent.
+    \param    a_recursive  Propagate assignment down the tree?
+*/
+//===========================================================================
+void cCollisionAABBInternal::setParent(cCollisionAABBNode* a_parent, int a_recursive)
+{
+    m_parent = a_parent;
+    if (m_leftSubTree && a_recursive)  m_leftSubTree->setParent(this,1);
+    if (m_rightSubTree && a_recursive) m_rightSubTree->setParent(this,1);
+}

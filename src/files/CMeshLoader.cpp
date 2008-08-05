@@ -21,6 +21,20 @@
 
 #include "CMeshLoader.h"
 
+//===========================================================================
+/*!
+     Global function to load a file into a mesh (CHAI currently supports
+     .3ds and .obj files).  Returns true if the file is loaded successfully.
+
+     The file type is determined based on the file extension supplied by
+     the caller.
+
+      \fn     bool cLoadMeshFromFile(cMesh* iMesh, const string& iFileName);
+      \param  cMesh* iMesh  The mesh into which we should write the loaded data
+      \param  string& iFileName The filename from which we should load the mesh
+      \return true is the file is loaded successfully, false for an error
+*/
+//===========================================================================
 bool cLoadMeshFromFile(cMesh* iMesh, const string& iFileName) {
 
   const char* filename = iFileName.c_str();
@@ -30,7 +44,7 @@ bool cLoadMeshFromFile(cMesh* iMesh, const string& iFileName) {
   if (extension == 0) {
     return false;
   }
-
+  
   char lower_extension[1024];
   string_tolower(lower_extension,extension);
 
@@ -41,6 +55,7 @@ bool cLoadMeshFromFile(cMesh* iMesh, const string& iFileName) {
 
   }
 
+  // Load a .3ds file
   else if (strcmp(lower_extension,"3ds")==0) {
 
     return cLoadFile3DS(iMesh, iFileName);

@@ -64,6 +64,9 @@ class cPrecisionClock
 	//! return \b true if high resolution timers are available on this computer.
 	bool highResolution() { return (m_highres); };
 
+    //! If all you want is something that tells you the time, this is your function...
+    double getCPUtime();
+
   private:
 	//! Stores information about CPU high precision clock.
 	LARGE_INTEGER m_freq;

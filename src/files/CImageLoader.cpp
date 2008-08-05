@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Dan Morris
+    \author:    Francois Conti
     \version    1.0
     \date       03/2004
 */
@@ -24,13 +25,16 @@
 #include "CFileLoaderBMP.h"
 #include "CFileLoaderTGA.h"
 //---------------------------------------------------------------------------
+
+// For gl image formats...
 #include <gl/gl.h>
+
 //---------------------------------------------------------------------------
 
 
 //===========================================================================
 /*!
-    Constructor of cImageLoader
+    Default onstructor of cImageLoader
 
     \fn     cImageLoader::cImageLoader()
 */
@@ -44,7 +48,11 @@ cImageLoader::cImageLoader()
 
 //===========================================================================
 /*!
-    Constructor of cImageLoader. a filename is passed by argument
+    Constructor of cImageLoader; loads the specified file.
+    Currently 24-bit .bmp and 32-bit .tga files are supported.
+
+    Use the initialized() function to determine whether loading
+    was successful.
 
     \fn     cImageLoader::cImageLoader(char* a_filename)
     \param  a_filename  Image filename
@@ -55,7 +63,7 @@ cImageLoader::cImageLoader(char* a_filename)
     // init internal variables
     defaults();
 
-    // load imeage file
+    // load image file
     loadFromFile(a_filename);
 }
 
@@ -69,7 +77,7 @@ cImageLoader::cImageLoader(char* a_filename)
 //===========================================================================
 cImageLoader::~cImageLoader()
 {
-    // cleanup memory
+    // clean up memory
     cleanup();
 }
 
@@ -92,7 +100,8 @@ void cImageLoader::defaults()
 
 //===========================================================================
 /*!
-    Free memory of all image data.
+    Free memory that was used for image data, and re-initialize
+    internal variables.
 
     \fn     void cImageLoader::defaults()
 */
@@ -106,7 +115,12 @@ void cImageLoader::cleanup()
 
 //===========================================================================
 /*!
-    Load image file by passing image path and name as argument
+    Loads this image from the specified file.  Returns 0 if all
+    goes well, <0 for an error.  Note that regardless of whether
+    it succeeds, this over-writes any image that had previously
+    been loaded by this object.
+    
+    Always converts the resulting image to RGBA.    
 
     \fn     int cImageLoader::loadFromFile(const char* a_filename)
     \param  a_filename  Image filename
@@ -218,7 +232,7 @@ int cImageLoader::loadFromFile(const char* filename)
     //--------------------------------------------------------------------
     m_initialized = 1;
 
-    convert_to_rgba();
+    convertToRGBA();
 
     return 0;
 }
@@ -226,28 +240,30 @@ int cImageLoader::loadFromFile(const char* filename)
 
 //===========================================================================
 /*!
-    Find the extension of a filename
+    Finds the extension in a filename and returns a pointer
+    to the character after the '.' in the original string,
+    or 0 if no '.' is found.
 
-    \fn     char* find_extension(const char* a_input)
-    \param  a_input Filename
-    \return Return extension of filename
+    \fn     char* find_extension(const char* input);
+    \param  char* a_input The input filename string
+    \return Returns a pointer to the character after the '.', or 0 for an error
 */
 //===========================================================================
-char* find_extension(const char* input)
+char* find_extension(const char* a_input)
 {
-    int length = strlen(input);
+    int length = strlen(a_input);
 
-    char* curpos = (char*)(input + length - 1);
+    char* curpos = (char*)(a_input + length - 1);
 
     // The last character can never be the '.' preceding a valid
     // extension
     curpos--;
 
     // Look for the last '.'
-    while( (curpos > input) && (*curpos != '.')) curpos--;
+    while( (curpos > a_input) && (*curpos != '.')) curpos--;
 
     // No '.' found
-    if (curpos == input) return 0;
+    if (curpos == a_input) return 0;
 
     return curpos + 1;
 }
@@ -255,12 +271,12 @@ char* find_extension(const char* input)
 
 //===========================================================================
 /*!
-    Convert image to OpenGL compatible RGBA format
+    Convert image to OpenGL-compatible RGBA format
 
-    \fn     void cImageLoader::convert_to_rgba()
+    \fn     void cImageLoader::convertToRGBA()
 */
 //===========================================================================
-void cImageLoader::convert_to_rgba()
+void cImageLoader::convertToRGBA()
 {
     if (m_initialized == 0) return;
 
@@ -292,10 +308,12 @@ void cImageLoader::convert_to_rgba()
 
 //===========================================================================
 /*!
-    Extract directory
+    Finds only the _path_ portion of source, and copies it with
+    _no_ trailing '\\'.  If there's no /'s or \\'s, writes an
+    empty string
 
     \fn     void find_directory(char* a_dest, const char* a_source)
-    \param  a_dest  String which will contain the directory
+    \param  a_dest    String which will contain the directory name
     \return a_source  Input string containing path and filename
 */
 //===========================================================================
@@ -319,19 +337,19 @@ void find_directory(char* a_dest, const char* a_source)
     Convert a string into lower case.
 
     \fn    void string_tolower(char* dest,const char* source)
-    \param  a_dest  Output string.
-    \return a_source  Input string.
+    \param  a_dest    Output string
+    \param  a_source  Input string    
 */
 //===========================================================================
-void string_tolower(char* dest,const char* source)
+void string_tolower(char* a_dest, const char* a_source)
 {
-    int len = strlen(source);
+    int len = strlen(a_source);
 
     for(int i=0; i<len; i++)
     {
-        dest[i] = tolower(source[i]);
+        a_dest[i] = tolower(a_source[i]);
     }
 
-    dest[len] = '\0';
+    a_dest[len] = '\0';
 }
 

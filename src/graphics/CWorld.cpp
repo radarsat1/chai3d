@@ -44,6 +44,8 @@ cWorld::cWorld()
 
     // set background properties
     m_backgroundColor.set(0.0f, 0.0f, 0.0f, 1.0f);
+
+    m_renderLightSources = 1;
 }
 
 
@@ -181,7 +183,8 @@ void cWorld::deleteAllTextures()
 
 //===========================================================================
 /*!
-    Set background color.
+    Set the background color used when rendering.  This really belongs in
+    cCamera or cViewport; it's a historical artifcat that it lives here.
 
     \fn         void cWorld::setBackgroundColor(const GLfloat a_red,
                 const GLfloat a_green, const GLfloat a_blue)
@@ -199,7 +202,8 @@ void cWorld::setBackgroundColor(const GLfloat a_red, const GLfloat a_green,
 
 //===========================================================================
 /*!
-    Set background color.
+    Set the background color used when rendering.  This really belongs in
+    cCamera or cViewport; it's a historical artifcat that it lives here.
 
     \fn         void cWorld::setBackgroundColor(const cColorf& a_color)
     \param      a_color  new background color.
@@ -226,7 +230,7 @@ void cWorld::setBackgroundColor(const cColorf& a_color)
 bool cWorld::addLightSource(cLight* a_light)
 {
     // check if number of lights already equal to 8.
-    if (m_lights.size() >= 8)
+    if (m_lights.size() >= MAXIMUM_OPENGL_LIGHT_COUNT)
     {
         return (false);
     }
@@ -236,7 +240,7 @@ bool cWorld::addLightSource(cLight* a_light)
     bool found = false;
     int count = 0;
 
-    while ((count < 8) && (!found))
+    while ((count < MAXIMUM_OPENGL_LIGHT_COUNT) && (!found))
     {
         // next possible ID:
         switch (count)
@@ -325,6 +329,27 @@ bool cWorld::removeLightSource(cLight* a_light)
 
 //===========================================================================
 /*!
+    Get access to a particular light source (between 0 and MAXIMUM_OPENGL_LIGHT_COUNT-1).
+    Returns a pointer to the requested light, or zero if it's not available.
+
+    \fn         cLight cWorld::getLightSource(int index)
+    \param      index  Specifies the light (0 -> 7) that should be accessed
+    \return     return \b A pointer to a valid light or 0 if that light doesn't exist                
+*/
+//===========================================================================
+cLight* cWorld::getLightSource(int index) {
+
+  // Make sure this is a valid index
+  if (index < 0 || (unsigned int)(index) >= m_lights.size()) return 0;
+
+  // Return the light that we were supplied with by the creator of the world
+  return m_lights[index];
+
+}
+
+
+//===========================================================================
+/*!
     Render the world in OpenGL.
 
     \fn         void cWorld::render(const int a_renderMode)
@@ -333,18 +358,17 @@ bool cWorld::removeLightSource(cLight* a_light)
 //===========================================================================
 void cWorld::render(const int a_renderMode)
 {
-    // set matrix mode to model view
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    // enable lighting
-    glEnable(GL_LIGHTING);
-
-    // render light sources
-    int i;
-    for (i=0; i<m_lights.size(); i++)
+    if (m_renderLightSources) 
     {
-        m_lights[i]->renderLightSource();
+      // enable lighting
+      glEnable(GL_LIGHTING);
+
+      // render light sources
+      unsigned int i;
+      for (i=0; i<m_lights.size(); i++)
+      {
+          m_lights[i]->renderLightSource();
+      }    
     }
 }
 
@@ -427,9 +451,11 @@ bool cWorld::computeCollisionDetection(
        }       
     }
 
-    // for optimization reasons, the collision detectors only computes the
-    // square distance between origin (a_segmentA) and collision point.
-    // compute square root to obtain real distance.
+    // for optimization reasons, the collision detectors only compute the
+    // square distance between the origin (a_segmentA) and the collision point.
+    //
+    // So now we compute the square root of colSquareDistance to obtain a real
+    // distance value.
     a_colDistance = sqrt(colSquareDistance);
 
     // return result

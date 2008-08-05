@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
@@ -31,17 +32,29 @@
 //---------------------------------------------------------------------------
 class cWorld;
 //---------------------------------------------------------------------------
+
+// Constants specifying specific stereo rendering frames
 const int CHAI_MONO             =  0;
 const int CHAI_STEREO_LEFT      = -1;
 const int CHAI_STEREO_RIGHT     =  1;
+
+// This constant is used to tell the _viewport_ that he should decide
+// which frame(s) to render, and send MONO, LEFT, and/or RIGHT to the
+// camera.
+const int CHAI_STEREO_DEFAULT   =  -1000;
+
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
       \class      cCamera
       \brief      cCamera describes a virtual Camera located inside the world.
-                  The output of image of a virtual camera can be displayed
-                  on a Viewport. see cViewport.
+                  Its job in life is to set up the OpenGL projection matrix
+                  for the current OpenGL rendering context.  The default camera
+                  looks down the negative x-axis.  OpenGL folks may wonder why
+                  we chose the negative x-axis... it turns out that's a better
+                  representation of the standard conventions used in general
+                  robotics.
 */
 //===========================================================================
 class cCamera : public cGenericObject
@@ -49,21 +62,23 @@ class cCamera : public cGenericObject
   friend class cWorld;
 
   public:
-    // CONSTRUCTOR & DESTRUCTOR:
-    //! Constructor of cCamera.
+
+    //! Constructor of cCamera
     cCamera(cWorld* iParent);
-    //! Destructor of cCamera.
+
+    //! Destructor of cCamera
     virtual ~cCamera() {};
 
     // METHODS:
-    //! Set the position and orientation of the camera.
+
+    //! Set the position and orientation of the camera
     virtual bool set(const cVector3d& a_localPosition, const cVector3d& a_localLookAt,
              const cVector3d& a_localUp);
 
-    //! Get pointer to parent world.
+    //! Get pointer to parent world
     cWorld* getParentWorld() { return (m_parentWorld); }
 
-    //! Set clipping planes.
+    //! Set near and far clipping planes
     void setClippingPlanes(const double a_distanceNear, const double a_distanceFar);
 
     //! Get near clipping plane
@@ -72,10 +87,10 @@ class cCamera : public cGenericObject
     //! Get far clipping plane
     double getFarClippingPlane() { return (m_distanceFar); }
 
-    //! Set field of view.
+    //! Set field of view angle (in degrees)
     void setFieldViewAngle(double a_fieldViewAngle);
 
-    //! Read field of view
+    //! Read field of view angle (in degrees)
     double getFieldViewAngle() { return (m_fieldViewAngle); }
 
     //! Set stereo focal length
@@ -90,37 +105,43 @@ class cCamera : public cGenericObject
     //! Get stereo eye separation
     double getStereoEyeSeparation() { return (m_stereoEyeSeparation); }
 
-    //! Render the camera in OpenGL.
-    virtual void renderView(const int a_windowWidth, const int a_windowHeight, const int a_imageIndex);
+    //! Render the camera in OpenGL (i.e. set up the projection matrix)... also nukes the contents of the GL buffers
+    virtual void renderView(const int a_windowWidth, const int a_windowHeight, const int a_imageIndex = CHAI_MONO);
 
-    //! Check any collision between mouse cursor and object in scenegraph
+    //! Query whether the specified position is 'pointing at' any objects in the world
     virtual bool select(const int a_windowPosX, const int a_windowPosY,
                 const int a_windowWidth, const int a_windowHeight, cGenericObject*& a_selectedObject,
                 cTriangle*& a_selectedTriangle, cVector3d& a_selectedPoint, double a_selectedDistance,
                 const bool a_visibleObjectsOnly);
 
+    //! Enable or disable additional rendering passes for transparency (see full comment)
+    virtual void enableMultipassTransparency(bool enable);
+
   protected:
 
-    // PROPERTIES:
     //! Parent world.
     cWorld *m_parentWorld;
 
-    //! Distance to Near clipping plane.
+    //! Distance to near clipping plane.
     double m_distanceNear;
-    //! Distance to Far clipping plane.
+
+    //! Distance to far clipping plane.
     double m_distanceFar;
-    //! Field of view. Angle in degrees.
+
+    //! Field of view angle in degrees
     double m_fieldViewAngle;
 
     // Stereo Parameters:
-    //! Focal length.
+
+    //! Focal length
     double m_stereoFocalLength;
+
     //! Eye separation
     double m_stereoEyeSeparation;
 
-    // VIRTUAL METHODS:
-    //! Update global positions. This method is specific to each object type.
-    virtual void updateGlobalPositions(const bool a_frameOnly) {};
+    //! If true, three rendering passes are performed to approximate back-front sorting (see long comment)
+    bool m_useMultipassTransparency;
+
 };
 
 //---------------------------------------------------------------------------

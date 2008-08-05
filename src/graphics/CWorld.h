@@ -36,12 +36,15 @@
 //---------------------------------------------------------------------------
 class cLight;
 
+// The maximum number of lights that we expect OpenGL to support
+#define MAXIMUM_OPENGL_LIGHT_COUNT 8
 
 //===========================================================================
 /*!
       \class      cWorld
-      \brief      cWorld class contains the description of the entire virtual
-                  environment.
+      \brief      cWorld defines the typical root of the CHAI scene graph.
+                  It stores lights, allocates textures, and serves as the
+                  root for scene-wide collision detection.
 */
 //===========================================================================
 class cWorld : public cGenericObject
@@ -55,51 +58,61 @@ class cWorld : public cGenericObject
     virtual ~cWorld();
 
     // METHODS:
-    //! Set background color.
+    //! Set the background color used when rendering.
     void setBackgroundColor(const GLfloat a_red, const GLfloat a_green,
                            const GLfloat a_blue);
-    //! Set backround color.
+    //! Set the background color used when rendering.
     void setBackgroundColor(const cColorf& a_color);
-    //! Get backround color.
+    //! Get the background color used when rendering.
     cColorf getBackgroundColor() const { return (m_backgroundColor); }
+
+    //! Enable or disable the rendering of this world's light sources
+    void enableLightSourceRendering(bool enable) { m_renderLightSources = enable; }
 
     //! Create a new bitmap texture.
     cTexture2D* newTexture();
-    //! Get pointer to texture by passing its index number
+    //! Get a pointer to a texture by passing an index into my texture list
     cTexture2D* getTexture(unsigned int a_index) { return (m_textures[a_index]); };
-    //! Add texture to texture list
+    //! Add a texture to my texture list
     void addTexture(cTexture2D* a_texture);
-    //! Remove texture.
+    //! Remove a texture from my texture list
     bool removeTexture(cTexture2D* a_texture);
-    //! Delete texture.
+    //! Delete a texture
     bool deleteTexture(cTexture2D* a_texture);
-    //! Delete all textures.
+    //! Delete all textures
     void deleteAllTextures();
-    //! Compute collision detection between a segment and all objects in world.
+
+    //! Compute collision detection between a ray segment and all objects in this world
     virtual bool computeCollisionDetection(
         cVector3d& a_segmentPointA, cVector3d& a_segmentPointB,
         cGenericObject*& a_colObject, cTriangle*& a_colTriangle, cVector3d& a_colPoint,
         double& a_colDistance, const bool a_visibleObjectsOnly, int a_proxyCall=-1,
         cGenericPointForceAlgo* force_algo=0);
 
-    //! Render world properties in OpenGL.
+    //! Render OpenGL lights
     virtual void render(const int a_renderMode=0);
 
-  protected:
+    //! Get access to a particular light source (between 0 and MAXIMUM_OPENGL_LIGHT_COUNT-1).
+    virtual cLight* getLightSource(int index);
+
+protected:
     // METHODS:
     //! Add a light source to this world
     friend cLight;
     bool addLightSource(cLight* a_light);
-    //! remove a light source from world
+    //! Remove a light source from this world
     bool removeLightSource(cLight* a_light);
 
     // MEMBERS:
-    //! Backround color. Default color is black.
+
+    //! Background color. Default color is black.
     cColorf m_backgroundColor;
-    //! List of textures.
+    //! List of textures
     vector<cTexture2D*> m_textures;
     //! List of light sources
     vector<cLight*> m_lights;
+    //! Should I render my light sources, or just use the current OpenGL light state?
+    bool m_renderLightSources;
 };
 
 //---------------------------------------------------------------------------

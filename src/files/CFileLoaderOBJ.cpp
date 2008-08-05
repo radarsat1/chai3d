@@ -126,7 +126,7 @@ bool cLoadFileOBJ(cMesh* a_mesh, const string& a_fileName)
             newMesh->m_material.m_specular.setA(1.0);
 
             // get shininess
-            newMaterial.setShininess(material.m_shininess);
+            newMaterial.setShininess((GLuint)(material.m_shininess));
 
             i++;
         }

@@ -201,7 +201,7 @@ long cPrecisionClock::getCount()
 	{
 		LARGE_INTEGER t_value;
 		QueryPerformanceCounter (&t_value);
-		t_count = (long)(1000000.0f * (float)(t_value.QuadPart) / (m_freq.QuadPart));
+		t_count = (long)(1000000.0 * ((double)(t_value.QuadPart)) / ((double)(m_freq.QuadPart)));    
 	}
 
 	// else use windows clock (resolution: 10 ms)
@@ -214,4 +214,27 @@ long cPrecisionClock::getCount()
 }
 
 
+
+//===========================================================================
+/*!
+	If all you want is something that tells you the time, this is your function...
+
+	\fn			long cPrecisionClock::getCPUtime()
+	\return     Return cpu clock in \e seconds.
+*/
+//===========================================================================
+
+double cPrecisionClock::getCPUtime()
+{
+
+    if (m_highres)
+    {
+        __int64 curtime;
+        QueryPerformanceCounter( (LARGE_INTEGER *)&curtime );
+
+        return (double)curtime / (double)m_freq.QuadPart;
+    }
+
+    return ((double)(GetTickCount())) / 1000.0;
+}
 

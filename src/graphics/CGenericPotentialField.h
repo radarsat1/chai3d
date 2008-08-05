@@ -30,12 +30,13 @@
 /*!
       \class      cGenericPotentialField
       \brief      cGenericPotentialField describes a generic class to create
-                  objects which are describe by implicit functions.
+                  objects which are describe by implicit functions
 */
 //===========================================================================
 class cGenericPotentialField : public cGenericObject
 {
   public:
+
     // CONSTRUCTOR & DESTRUCTOR:
     //! Constructor of cGenericPotentialField.
     cGenericPotentialField() {};
@@ -43,20 +44,15 @@ class cGenericPotentialField : public cGenericObject
     virtual ~cGenericPotentialField() {};
 
     // METHODS:
-    //! compute interaction forces between finger and object.
-    cVector3d computeForces(cVector3d& a_fingerPosition);
+    //! Compute interaction forces between a probe and this object, descending through child objects
+    cVector3d computeForces(cVector3d& a_probePosition);
+
+  protected:
 
     // VIRTUAL METHODS:
-    //! Render object in OpenGL.
-    virtual void render(const int a_renderMode=0) {};
-    //! Update global positions.
-    virtual void updateGlobalPositions(const bool a_frameOnly) {};
-    //! Update bounding box of current object
-    virtual void updateBoundaryBox() {};
-    //! Scale object of defined scale factor
-    virtual void scaleObject(double a_scaleFactor) {};
-    //! Compute interaction force for current object in local frame
-    virtual cVector3d computeLocalForce(const cVector3d& a_localPosition) { return (cVector3d(0,0,0)); };
+
+    //! Compute the interaction force for this object in its local frame
+    virtual cVector3d computeLocalForce(const cVector3d& a_localProbePosition) const { return (cVector3d(0,0,0)); };
 };
 
 //---------------------------------------------------------------------------

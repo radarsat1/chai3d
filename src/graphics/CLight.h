@@ -37,23 +37,30 @@ class cWorld;
 //===========================================================================
 /*!
       \class      cLight
-      \brief      cLight describes an OpenGL light source. 8 light sources
-                  are create inside the world (see cWorld) and can be enabled
-                  and tuned independently.
+      \brief      cLight describes an OpenGL light source, generally rendered
+                  by a cWorld object, which is typically the top of a scene
+                  graph
+
+                  By default, lights are directional and non-spot.
 */
 //===========================================================================
 class cLight : public cGenericObject
 {
+
+  // cWorld needs to access openGL information stored privately in cLight
   friend class cWorld;
 
   public:
     // CONSTRUCTOR & DESTRUCTOR:
+
     //! Constructor of cLight.
     cLight(cWorld* a_world);
     //! Destructor of cLight.
     ~cLight();
 
+
     // MEMBERS:
+
     //! Ambient light component.
     cColorf m_ambient;
     //! Diffuse light component.
@@ -61,44 +68,52 @@ class cLight : public cGenericObject
     //! Specular light component.
     cColorf m_specular;
 
-    // METHODS:
-    //! Set direction of light beam.
+
+    // METHODS: LIGHT PROPERTIES
+
+    //! Set the direction of the light beam
     void setDir(const cVector3d& a_direction);
-    //! Set direction of light beam.
+    //! Set the direction of the light beam
     void setDir(const double a_x, const double a_y, const double a_z);
-    //! Read direction of light beam
+    //! Read the direction of the light beam
     cVector3d getDir() const { return (m_localRot.getCol0()); }
-    //! Set constant attenuation parameter.
+
+    //! Set this light to be purely directional (true) or purely positional (false)
+    void setDirectionalLight(bool a_directionalLight) { m_directionalLight = a_directionalLight; }
+    //! Returns true for a directional light, false for a positional light
+    bool getDirectionalLight() { return m_directionalLight; }
+
+    //! Set my constant attenuation parameter
     void setAttConstant(const GLfloat& a_value) { m_attConstant = cClamp(a_value, 0.0f, 1.0f); }
-    //! Read constant attenuation parameter.
+    //! Read my constant attenuation parameter
     GLfloat getAttConstant() const { return (m_attConstant); }
-    //! Set linear attenuation parameter.
+    //! Set my linear attenuation parameter
     void setAttLinear(const GLfloat& a_value) { m_attLinear = cClamp(a_value, 0.0f, 1.0f); }
-    //! Read linear attenuation parameter.
+    //! Read my linear attenuation parameter
     GLfloat getAttLinear() const { return (m_attLinear); }
-    //! Set quadratic attenuation parameter.
+    //! Set my quadratic attenuation parameter
     void setAttQuadratic(const GLfloat& a_value) { m_attQuadratic = cClamp(a_value, 0.0f, 1.0f); }
-    //! Read quadratic attenuation parameter.
+    //! Read my quadratic attenuation parameter
     GLfloat getAttQuadratic() const { return (m_attQuadratic); }
-    //! Set concentration level of the light.
+    //! Set concentration level of the light
     void setSpotExponent(const GLfloat& a_value) { m_spotExponent = cClamp(a_value, 0.0f, 100.0f); }
     //! Read concentration level of the light.
     GLfloat getSpotExponent() const { return (m_spotExponent); }
-    //! Set Cut off angle (for spot lights, values ranges between [0, 90]) otherwize set 180.
+    //! Set the cutoff angle in degrees
     void setCutOffAngle(const GLfloat& a_value);
     //! Read Cut off angle.
     GLfloat getCutOffAngle() const { return (m_cutOffAngle); }
-    //! Set enable status of light source.
+
+    //! Enable or disable this light source
     void setEnabled(const bool& a_enabled) { m_enabled = a_enabled; }
-    //! Read enable status of light source.
+    //! Is this light source enabled?
     bool getEnabled() const { return (m_enabled); }
 
   protected:
     // MEMBERS:
+
     //! Parent world
     cWorld* m_parentWorld;
-    //! Direction of the spot beam.
-    cVector3d m_dir;
     //! Constant attenuation parameter.
     GLfloat m_attConstant;
     //! Linear attenuation parameter.
@@ -113,6 +128,8 @@ class cLight : public cGenericObject
     bool m_enabled;
     //! Identity number of the light (1-8) for OpenGL purpose only.
     GLint m_glLightNumber;
+    //! Is this a directional (true) or positional (false) light
+    bool m_directionalLight;
 
     // METHODS:
     //! Render the light in OpenGL.

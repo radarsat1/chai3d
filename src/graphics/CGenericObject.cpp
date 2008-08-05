@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
@@ -63,7 +64,7 @@ cGenericObject::cGenericObject()
     m_showBox = false;
     m_boundaryBoxColor.set(0.5, 0.5, 0.0);
 
-    // set showTree status default color for tree
+    // set showTree status and default color for tree
     m_showTree = false;
     m_treeColor.set(0.5, 0.0, 0.0);
 
@@ -80,13 +81,21 @@ cGenericObject::cGenericObject()
 
 //===========================================================================
 /*!
-    Destructor of cGenericObject.
+    Destructor of cGenericObject.  This function deletes all children
+    starting from this point in the scene graph, so if you have objects
+    that shouldn't be deleted, be sure to remove them from the scene
+    graph before deleting their parents.
 
     \fn       cGenericObject::~cGenericObject()
 */
 //===========================================================================
 cGenericObject::~cGenericObject()
 {
+
+    // Each of my children will remove their own collision detectors when
+    // they get deleted, so I just delete my own right now...
+    if (m_collisionDetector) deleteCollisionDetector(0);
+
     // delete all children
     deleteAllChildren();
 };
@@ -94,7 +103,7 @@ cGenericObject::~cGenericObject()
 
 //===========================================================================
 /*!
-    Add a child object to current generic object.
+    Adds an object to the scene graph below this object
 
     \fn       void cGenericObject::addChild(cGenericObject* a_object)
     \param    a_object  Object to be added to children list.
@@ -102,57 +111,65 @@ cGenericObject::~cGenericObject()
 //===========================================================================
 void cGenericObject::addChild(cGenericObject* a_object)
 {
-    // update parent
+    // update the child object's parent pointer
     a_object->m_parent = this;
 
-    // add child to list
+    // add this child to my list of children
     m_children.push_back(a_object);
 }
 
 
 //===========================================================================
 /*!
-    Remove an object from children list. Object is not deleted from memory.
+    Removes an object from my list of children, without deleting the
+    child object from memory.
+
+    This method assigns the child object's parent point to null, so
+    if you're moving someone around in your scene graph, make sure you
+    call this function _before_ you add the child to another node in
+    the scene graph.
 
     \fn       bool cGenericObject::removeChild(const cGenericObject* a_object)
-    \param    a_object  Object to be removed from children list.
+    \param    a_object  Object to be removed from my list of children
+    \return   Returns true if the specified object was found on my list of children
 */
 //===========================================================================
 bool cGenericObject::removeChild(cGenericObject* a_object)
 {
-    // set iterator
     std::vector<cGenericObject*>::iterator nextObject;
 
     for(nextObject = m_children.begin();
         nextObject != m_children.end();
         nextObject++ ) {
 
-
+        // Did we find the object we're trying to delete?
         if ((*nextObject) == a_object)
         {
-            // no more parent.
+            // he doesn't have a parent any more
             a_object->m_parent = NULL;
 
-            // remove object from list
+            // remove this object from my list of children
             m_children.erase(nextObject);
 
             // return success
-            return (true);
+            return true;
         }
 
     }
 
     // opertation failed
-    return (false);
+    return false;
 }
 
 
 //===========================================================================
 /*!
-    Remove child from children list and delete it.
+    Removes an object from my list of children, and deletes the
+    child object from memory.
 
-    \fn         bool cGenericObject::deleteChild(const cGenericObject a_object)
-    \param      a_object  Object to be removed and deleted from children list.
+    \fn       bool cGenericObject::deleteChild(const cGenericObject* a_object)
+    \param    a_object  Object to be removed from my list of children and deleted
+    \return   Returns true if the specified object was found on my list of children
 */
 //===========================================================================
 bool cGenericObject::deleteChild(cGenericObject* a_object)
@@ -160,20 +177,20 @@ bool cGenericObject::deleteChild(cGenericObject* a_object)
     // remove object from list
     bool result = removeChild(a_object);
 
-    // if operation succeeds, delete object
+    // if operation succeeds, delete the object
     if (result)
     {
         delete a_object;
     }
 
     // return result
-    return (result);
+    return result;
 }
 
 
 //===========================================================================
 /*!
-    Clear all objects from children list.
+    Clear all objects from my list of children, without deleting them
 
     \fn     void cGenericObject::clearAllChildren()
 */
@@ -187,9 +204,9 @@ void cGenericObject::clearAllChildren()
 
 //===========================================================================
 /*!
-    Delete and clear all objects from children list.
+    Delete and clear all objects from my list of children
 
-    \fn     void cGenericObject::clearAllChildren()
+    \fn     void cGenericObject::deleteAllChildren()
 */
 //===========================================================================
 void cGenericObject::deleteAllChildren()
@@ -201,22 +218,22 @@ void cGenericObject::deleteAllChildren()
         delete nextObject;
     }
 
-    // clear children list
+    // clear my list of children
     m_children.clear();
 }
 
 
 //===========================================================================
 /*!
-    Translate an object by giving a translation offset.
+    Translate this object by a specified offset
 
     \fn     void cGenericObject::translate(const cVector3d& a_translation)
-    \param  a_translation  Translation offset.
+    \param  a_translation  Translation offset
 */
 //===========================================================================
 void cGenericObject::translate(const cVector3d& a_translation)
 {
-    // apply translation to object and bounding box
+    // apply the translation to this object and its bounding box
     m_boundaryBoxMin.add(a_translation);
     m_boundaryBoxMax.add(a_translation);
 
@@ -227,25 +244,24 @@ void cGenericObject::translate(const cVector3d& a_translation)
 
 //===========================================================================
 /*!
-    Translate an object by giving a translation offset.
+    Translate an object by a specified offset
 
     \fn     void cGenericObject::translate(const double a_x, const double a_y,
             const double a_z)
-    \param  a_x  Translation component X.
-    \param  a_y  Translation component Y.
-    \param  a_z  Translation component Z.
+    \param  a_x  Translation component X
+    \param  a_y  Translation component Y
+    \param  a_z  Translation component Z
 */
 //===========================================================================
 void cGenericObject::translate(const double a_x, const double a_y, const double a_z)
 {
-    translate(cVector3d(a_x,a_y,a_z));    
+    translate(cVector3d(a_x,a_y,a_z));  
 }
 
 
 //===========================================================================
 /*!
-    Rotate object by multiplying current rotation matrix with an external
-    rotation matrix passed as parameter.
+    Rotate this object by multiplying with a specified rotation matrix
 
     \fn     void cGenericObject::rotate(const cMatrix3d& a_rotation)
     \param  a_rotation  Rotation matrix
@@ -253,7 +269,6 @@ void cGenericObject::translate(const double a_x, const double a_y, const double 
 //===========================================================================
 void cGenericObject::rotate(const cMatrix3d& a_rotation)
 {
-    // apply rotation:
     cMatrix3d new_rot = m_localRot;
     new_rot.mul(a_rotation);
     setRot(new_rot);
@@ -262,17 +277,18 @@ void cGenericObject::rotate(const cMatrix3d& a_rotation)
 
 //===========================================================================
 /*!
-    Rotate object arround an axis and angle.
+    Rotate this object around axis a_axis by angle a_angle (radians).  a_axis
+    is not normalized, so unless you know what you're doing, normalize your
+    axis before supplying it to this function.
 
     \fn     void cGenericObject::rotate(const cVector3d& a_axis,
             const double a_angle)
-    \param  a_axis   Rotation axis (length must equal to 1)
-    \parame a_angle  Rotation angle in radian.
+    \param  a_axis   Rotation axis
+    \parame a_angle  Rotation angle in radians
 */
 //===========================================================================
 void cGenericObject::rotate(const cVector3d& a_axis, const double a_angle)
 {
-    // apply rotation
     cMatrix3d new_rot = m_localRot;
     new_rot.rotate(a_axis, a_angle);
     setRot(new_rot);
@@ -282,10 +298,12 @@ void cGenericObject::rotate(const cVector3d& a_axis, const double a_angle)
 
 //===========================================================================
 /*!
-    Scale the object by passing a scaling factor
+    Scale this object by the specified scale factor, and scale the 
+    position of all my children within my reference frame.
 
     \fn     void cGenericObject::scale(const double a_scaleFactor)
-    \param  a_scaleFactor   current size of object is multiplied by this scale factor.
+    \param  a_scaleFactor   The current size of object is multiplied by this
+                            scale factor.
 */
 //===========================================================================
 void cGenericObject::scale(const double a_scaleFactor)
@@ -293,12 +311,12 @@ void cGenericObject::scale(const double a_scaleFactor)
     // scale this object
     scaleObject(a_scaleFactor);
 
-    // scale children
+    // scale all of my children
     for (unsigned int i=0; i<m_children.size(); i++)
     {
         cGenericObject* nextObject = m_children[i];
 
-        // scale position of child
+        // scale the position of this child
         nextObject->m_localPos.mul(a_scaleFactor);
 
         // scale child
@@ -309,16 +327,17 @@ void cGenericObject::scale(const double a_scaleFactor)
 
 //===========================================================================
 /*!
-    Compute globalPos and globalRot given localPos and localRot (frame).
-    of current object and its children. \n
+    Compute globalPos and globalRot given the localPos and localRot
+    of this object and its children.
+
     if \e a_frameOnly is set to \b false, additional global positions such as
-    vertex positions are computed.
+    vertex positions are computed (which can be time-consuming)
 
     \fn     void cGenericObject::computeGlobalPositions(const bool a_frameOnly,
             const cVector3d& a_globalPos, const cMatrix3d& a_globalRot)
-    \param  a_frameOnly  If \b true then only frame is computed.
-    \param  a_globalPos  Global position of parent.
-    \param  a_globalRot  Global rotation matrix of parent.
+    \param  a_frameOnly  If \b true then only the global frame is computed
+    \param  a_globalPos  Global position of my parent
+    \param  a_globalRot  Global rotation matrix of my parent
 */
 //===========================================================================
 void cGenericObject::computeGlobalPositions(const bool a_frameOnly,
@@ -329,10 +348,11 @@ void cGenericObject::computeGlobalPositions(const bool a_frameOnly,
     m_globalPos = cAdd(a_globalPos, cMul(a_globalRot, m_localPos));
     m_globalRot = cMul(a_globalRot, m_localRot);
 
-    // update current object
+    // update any positions within the current object that need to be 
+    // updated (e.g. vertex positions)
     updateGlobalPositions(a_frameOnly);
 
-    // update children
+    // propagate this method to my children
     for (unsigned int i=0; i<m_children.size(); i++)
     {
         m_children[i]->computeGlobalPositions(a_frameOnly, m_globalPos, m_globalRot);
@@ -343,30 +363,30 @@ void cGenericObject::computeGlobalPositions(const bool a_frameOnly,
 
 //===========================================================================
 /*!
-    Compute globalPos and globalRot of this object only. the algorithm
-    computes the global position and rotation matrix by recursively climbing
-    up the scene graph tree until the root is reached\n
-    if \e a_frameOnly is set to \b false, additional global positions such as
+    Compute globalPos and globalRot for this object only, by recursively
+    climbing up the scene graph tree until the root is reached.
+
+    If \e a_frameOnly is set to \b false, additional global positions such as
     vertex positions are computed.
 
     \fn     void cGenericObject::computeGlobalCurrentObjectOnly(
             const bool a_frameOnly)
-    \param  a_frameOnly  If \b true then only frame is computed.
+    \param  a_frameOnly  If \b true then only the global frame is computed
 */
 //===========================================================================
 void cGenericObject::computeGlobalCurrentObjectOnly(const bool a_frameOnly)
 {
 
-    // init
     cMatrix3d globalRot;
     cVector3d globalPos;
     globalRot.identity();
     globalPos.zero();
 
-    // get current object
+    // get a pointer to current object
     cGenericObject *curObject = this;
 
-    // parse all parents
+    // walk up the scene graph until we reach the root, updating
+    // my global position and rotation at each step
     while (curObject != NULL)
     {
         curObject->getRot().mul(globalPos);
@@ -381,14 +401,48 @@ void cGenericObject::computeGlobalCurrentObjectOnly(const bool a_frameOnly)
     m_globalPos = globalPos;
     m_globalRot = globalRot;
 
-    // update current object
+    // update any positions within the current object that need to be 
+    // updated (e.g. vertex positions)
     updateGlobalPositions(a_frameOnly);
 }
 
 
 //===========================================================================
 /*!
-    Set the display status of the object.
+    Users should call this function when it's necessary to re-initialize the OpenGL
+    context; e.g. re-initialize textures and display lists.  Subclasses should
+    perform whatever re-initialization they need to do.
+
+    Note that this is not an event CHAI can easily detect, so it's up to
+    the application-writer to call this function on the root of the scenegraph.
+
+    \fn     void cGenericObject::onDisplayReset(const bool a_affectChildren)
+    \param  a_affectChildren  If \b true, the operation propagates through the scene graph
+*/
+//===========================================================================
+void cGenericObject::onDisplayReset(const bool a_affectChildren)
+{
+    // Since I don't have any display context to update, I don't do anything here...
+
+    // We _don't_ call this method on the current object, which allows subclasses
+    // to do their business in this method, then call the cGenericObject version
+    // to propagate the call through the scene graph
+
+    // update children
+    if (a_affectChildren)
+    {
+        for (unsigned int i=0; i<m_children.size(); i++)
+        {
+            m_children[i]->onDisplayReset(true);
+        }
+    }
+}
+
+
+//===========================================================================
+/*!
+    Show or hide this object.
+
     If \e a_affectChildren is set to \b true then all children are updated
     with the new value.
 
@@ -416,7 +470,8 @@ void cGenericObject::setShow(const bool a_show, const bool a_affectChildren)
 
 //===========================================================================
 /*!
-    Set display status of frame.
+    Show or hide the set of arrows that represent this object's reference frame.
+
     If \e a_affectChildren is set to \b true then all children are updated
     with the new value.
 
@@ -444,8 +499,9 @@ void cGenericObject::setShowFrame(const bool a_showFrame, const bool a_affectChi
 
 //===========================================================================
 /*!
-    Set display size of frame. The size corresponds to the length of each
-    displayed axis (X-Y-Z).
+    Set the display size of the arrows representing my reference frame.
+    The size corresponds to the length of each displayed axis (X-Y-Z).
+
     If \e a_affectChildren is set to \b true then all children are updated
     with the new value.
 
@@ -480,7 +536,9 @@ bool cGenericObject::setFrameSize(const double a_size, const bool a_affectChildr
 
 //===========================================================================
 /*!
-    Set display status of tree.
+    Show or hide the graphic representation of the scene graph at this
+    node.
+
     If \e a_affectChildren is set to \b true then all children are updated
     with the new value.
 
@@ -508,11 +566,14 @@ void cGenericObject::setShowTree(const bool a_showTree, const bool a_affectChild
 
 //===========================================================================
 /*!
-    Set color of tree.
+    Set the color of the graphic representation of the scene graph at
+    this node.
+
     If \e a_affectChildren is set to \b true then all children are updated
     with the new value.
 
-    \fn     void cGenericObject::setTreeColor(const cColor& iTreeColor, const bool a_affectChildren)
+    \fn     void cGenericObject::setTreeColor(const cColor& iTreeColor,
+      const bool a_affectChildren)
     \param  a_treeColor  Color of tree.
     \param  a_affectChildren  If \b true all children are updated.
 */
@@ -535,7 +596,8 @@ void cGenericObject::setTreeColor(const cColorf& a_treeColor, const bool a_affec
 
 //===========================================================================
 /*!
-    Set the display status of boundary box.
+    Show or hide the graphic representation of the boundary box of this object.
+
     If \e a_affectChildren is set to \b true then all children are updated
     with the new value.
 
@@ -563,7 +625,7 @@ void cGenericObject::setShowBox(const bool a_showBox, const bool a_affectChildre
 
 //===========================================================================
 /*!
-    Set the color of boundary box.
+    Set the color of the graphic representation of the boundary boundary box of this object.
 
     \fn     void cGenericObject::setBoxColor(const cColor& a_boxColor,
             const bool a_affectChildren)
@@ -589,7 +651,8 @@ void cGenericObject::setBoxColor(const cColorf& a_boxColor, const bool a_affectC
 
 //===========================================================================
 /*!
-    Show collision tree
+    Show or hide the graphic representation of the collision tree at this node.
+
     If \e a_affectChildren is set to \b true then all children are updated
     with the new value.
 
@@ -617,14 +680,48 @@ void cGenericObject::showCollisionTree(const bool a_showCollisionTree, const boo
 
 //===========================================================================
 /*!
-    Set rendering properties of collision detector
+    Delete any existing collision detector and set the current cd to null.  
+    It's fine for an object to have a null collision detector (that's the
+    default for a new object, in fact), it just means that no collisions will be
+    found.
+
+    \fn     void cGenericObject::deleteCollisionDetector(const bool a_affectChildren)
+    \param  a_affectChildren  If \true all my children's cd's are also deleted
+*/
+//===========================================================================
+void cGenericObject::deleteCollisionDetector(const bool a_affectChildren)
+{
+
+    if (m_collisionDetector)
+    {
+        delete m_collisionDetector;
+        m_collisionDetector = 0;
+    }
+
+    // update children
+    if (a_affectChildren)
+    {
+        for (unsigned int i=0; i<m_children.size(); i++)
+        {
+            m_children[i]->deleteCollisionDetector(true);
+        }
+    }
+}
+
+
+//===========================================================================
+/*!
+    Set the rendering properties for the graphic representation of collision detection
+    tree at this node.
+
     If \e a_affectChildren is set to \b true then all children are updated
     with the new values.
 
     \fn     void cGenericObject::setCollisionDetectorProperties
             ( unsigned int a_displayDepth, cColor& a_color, const bool a_affectChildren)
     \param  a_color  Color used to render collision detector.
-    \param  a_displayDepth  Indicated which depth of collision tree needs to be displayed.
+    \param  a_displayDepth  Indicated which depth of collision tree needs to be displayed
+                            (see cGenericCollision)
     \param  a_affectChildren  If \true all children are updated
 */
 //===========================================================================
@@ -651,11 +748,19 @@ void cGenericObject::setCollisionDetectorProperties(unsigned int a_displayDepth,
 }
 
 
+// We need a constant to determine if an object has already been assigned
+// a 'real' bounding box
+#define BOUNDARY_BOX_EPSILON 1e-15
+
 //===========================================================================
 /*!
-    Compute the bounding box of an object and its children. If parameter
-    \e a_includeChildren is set to \b true then each bounding box covers
-    itself and all its children.
+    Compute the bounding box of this object and (optionally) its children.
+    
+    If parameter \e a_includeChildren is set to \b true then each object's 
+    bounding box covers its own volume and the volume of its children.
+
+    Note that regardless of this parameter's value, this operation propagates
+    down the scene graph.
 
     \fn     void cGenericObject::computeBoundaryBox(const bool a_includeChildren)
     \param  a_includeChildren  If \true, then children are included.
@@ -663,14 +768,14 @@ void cGenericObject::setCollisionDetectorProperties(unsigned int a_displayDepth,
 //===========================================================================
 void cGenericObject::computeBoundaryBox(const bool a_includeChildren)
 {
-    #define BOUNDARY_BOX_EPSILON 1e-15
 
-    // compute bounding box of current object
+    // compute the bounding box of this object
     updateBoundaryBox();
 
-    // compute bounding box of children
+    // compute the bounding box of all my children
     for (unsigned int i=0; i<m_children.size(); i++)
     {
+
         m_children[i]->computeBoundaryBox(a_includeChildren);
 
         // inlcude children
@@ -732,27 +837,29 @@ void cGenericObject::computeBoundaryBox(const bool a_includeChildren)
 
 //===========================================================================
 /*!
-    Check if a ray intersects this current triangle. The segment is described
-    by a start point /e a_segmentPointA and end point /e a_segmentPointB. \n
+    Test whether a ray intersects this object. The test segment is described
+    by a start point /e a_segmentPointA and end point /e a_segmentPointB.
 
-    If a collision occures, the square distance between the segment start point
-    and collision point in measured and compared to any previous collision
+    If a collision occurs, the squared distance between the segment start point
+    and the collision point in measured and compared to any previous collision
     information stored in parameters \e a_colObject, \e a_colTriangle,
-    \e a_colPoint, and \e a_colSquareDistance. If the new collision is located
-    nearer to ray origin than previous collision point, it is stored
-    in the corresponding parameters \e a_colObject, \e a_colTriangle,
     \e a_colPoint, and \e a_colSquareDistance.
+    
+    If the new collision is located nearer to the ray origin than the previous
+    collision point, it is stored in the corresponding parameters \e a_colObject,
+    \e a_colTriangle, \e a_colPoint, and \e a_colSquareDistance.
 
-    \param  a_segmentPointA  Start point of segment.
-    \param  a_segmentPointB  End point of segment.
-    \param  a_colObject  Pointer to nearest collided object.
-    \param  a_colTriangle Pointer to nearest colided triangle.
-    \param  a_colPoint  Position of nearest collision.
-    \param  a_colSquareDistance  Square distance between ray origin and nearest
-            collision point
+    \param  a_segmentPointA      Start point of segment.
+    \param  a_segmentPointB      End point of segment.
+    \param  a_colObject          Pointer to nearest collided object.
+    \param  a_colTriangle        Pointer to nearest colided triangle.
+    \param  a_colPoint           Position to the nearest collision
+    \param  a_colSquareDistance  Squared distance between ray origin and nearest
+                                 collision point
+
     \param  a_proxyCall  If this is > 0, this is a call from a proxy, and the value
-                         of a_proxyCall specifies which call this is.  -1 for non-proxy
-                         calls.
+                         of a_proxyCall specifies which call this is.  -1 is passed
+                         for non-proxy calls.
 */
 //===========================================================================
 bool cGenericObject::computeCollisionDetection(
@@ -763,7 +870,7 @@ bool cGenericObject::computeCollisionDetection(
 {
     // no collision found yet
     bool hit = false;
-
+    
     // convert collision segment into local coordinate system.
     cMatrix3d transLocalRot;
     m_localRot.transr(transLocalRot);
@@ -834,13 +941,23 @@ bool cGenericObject::computeCollisionDetection(
 
 //===========================================================================
 /*!
-    Render sceene graph. This method is called for each object and renders
-    the frame and tree. The graphical representation of the object is
-    rendered by method render(). Method render() is specific for each type
-    of object and should be modified accordingly.
+    Render the scene graph starting at this object. This method is called
+    for each object and optionally renders the object itself, its reference frame
+    and the collision and/or scenegraph trees.
+    
+    The object itself is rendered by calling render(), which should be defined
+    for each subclass that has a graphical representation.
+
+    The a_renderMode parameter is used to allow multiple rendering passes,
+    and takes one of the following values:
+
+    CHAI_RENDER_NON_TRANSPARENT, CHAI_RENDER_TRANSPARENT_FRONT, CHAI_RENDER_TRANSPARENT_BACK
+
+    If you have multipass transparency disabled (see cCamera), your objects will
+    only be rendered once per frame, with a_renderMode set to CHAI_RENDER_NON_TRANSPARENT.
 
     \fn     void cGenericObject::renderSceneGraph(const int a_renderMode)
-    \param  a_renderMode  Rendering mode.
+    \param  a_renderMode  Rendering mode
 */
 //===========================================================================
 void cGenericObject::renderSceneGraph(const int a_renderMode)

@@ -13,7 +13,7 @@
     Professional Edition License.
 
     \author:    <http://www.chai3d.org>
-    \author:    Christopher Sewell
+    \author:    Francois Conti
     \version    1.1
     \date       01/2004
 */
@@ -31,12 +31,12 @@
 
     \fn       cVector3d cPotentialFieldForceAlgo::computeForces(const
               cVector3d& a_nextDevicePos)
-    \param    next position of haptic device or virtual finger.
+    \param    a_nextDevicePos  Next position of haptic device or virtual finger.
 */
 //===========================================================================
 cVector3d cPotentialFieldForceAlgo::computeForces(cVector3d& a_nextDevicePos)
 {
-    // init force
+    // initialize force
     cVector3d force;
     force.zero();
 
@@ -48,6 +48,9 @@ cVector3d cPotentialFieldForceAlgo::computeForces(cVector3d& a_nextDevicePos)
         {
             cGenericObject *nextObject = m_world->getChild(i);
 
+            // if this object is a cGenericPotentialField, calculate the force
+            // by calling the object's computeForces method, and add this to
+            // the cumulative total
             if (typeid(*nextObject) == typeid(cGenericPotentialField))
             {
                 cGenericPotentialField* nextField = (cGenericPotentialField*)nextObject;

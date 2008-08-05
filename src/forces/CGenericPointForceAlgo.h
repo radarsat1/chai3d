@@ -41,25 +41,23 @@ class cGenericPointForceAlgo
 {
   public:
     // CONSTRUCTOR & DESTRUCTOR:
-    //! Constructor of cGenericObject.
+    //! Constructor of cGenericPointForceAlgo.
     cGenericPointForceAlgo();
-    //! Destructor of cGenericObject.
+    //! Destructor of cGenericPointForceAlgo.
     virtual ~cGenericPointForceAlgo() {};
 
     // METHODS:
-    //! get world in which force algorithm is operating.
+    //! Get a pointer to the world in which the force algorithm is operating.
     cWorld* getWorld() { return (m_world); }
-
-    // VIRTUAL METHODS:
     //! Initialize the algorithm by passing the inital position of the device.
     virtual void initialize(cWorld* a_world, const cVector3d& a_initialPos) {};
-    //! Compute the next force by updating the position of the device.
+    //! Compute the next force given the updated position of the device.
     virtual cVector3d computeForces(const cVector3d& a_nextDevicePos)
         { return (cVector3d(0.0, 0.0, 0.0)); }
 
   protected:
-    // MEMBERS:
-    //! World in which the algorithm operates.
+    // PROPERTIES:
+    //! Pointer to the world in which the force algorithm operates.
     cWorld* m_world;
 };
 

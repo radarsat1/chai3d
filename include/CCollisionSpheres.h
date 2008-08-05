@@ -1,17 +1,26 @@
 //===========================================================================
-//  - UNIT -
-//
-//    Copyright (C) 2003. Stanford University - Robotics Laboratory
-/*!
-      \author     Collision detection algorithm by Joel Brown
-      \author     jbrown@cs.stanford.edu
-      \author     Based on code by Stephen Sorkin
-      \author     ssorkin@cs.stanford.edu
-      \author     Integrated into CHAI by Christopher Sewell
-      \author     csewell@stanford.edu
-      \file       CCollisionSpheres.h
-      \version    1.0
-      \date       09/2003
+/*
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License("GPL") version 2
+    as published by the Free Software Foundation.
+
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
+
+    \author     Collision detection algorithm by Joel Brown
+    \author     jbrown@cs.stanford.edu
+    \author     Based on code by Stephen Sorkin
+    \author     ssorkin@cs.stanford.edu
+    \author     Integrated into CHAI by Christopher Sewell
+    \author     csewell@stanford.edu
+    \file       CCollisionSpheres.h
+    \version    1.0
+    \date       01/2004
 */
 //===========================================================================
 
@@ -19,7 +28,7 @@
 #ifndef CCollisionSpheresH
 #define CCollisionSpheresH
 #ifdef _MSVC
-// Turn off annoying compiler warnings
+// Turn off annoying compiler warnings in MSVC.
 #pragma warning(disable: 4305)
 #pragma warning(disable: 4800) 
 #pragma warning(disable: 4786)
@@ -40,8 +49,8 @@
 #include "gl/glu.h"
 //---------------------------------------------------------------------------
 // TYPEDEFS:
-//! List of shape primitives.
-typedef vector<cCollisionSpheresGenericShape *> Plist;
+//! Pointer to list of shape primitives.
+typedef vector<cCollisionSpheresGenericShape*> Plist;
 
 // FORWARD DECLARATIONS:
 //! Nodes of the collision sphere tree (abstract class).
@@ -63,31 +72,32 @@ class cCollisionSpheres : public cGenericCollision
   public:
     // CONSTRUCTOR:
     //! Constructor of cCollisionSpheres.
-    cCollisionSpheres(vector<cTriangle>* a_triangles, bool a_useNeighbors);
+    cCollisionSpheres(vector<cTriangle> *a_triangles, bool a_useNeighbors);
+    //! Destructor of cCollisionSpheres.
     virtual ~cCollisionSpheres();
 
     // METHODS:
     //! Build the sphere tree based on the given triangles.
     void initialize();
-    //! Draw the collision spheres at the given level.
+    //! Draw the collision spheres in OpenGL.
     void render();
-    //! Return a list of triangles intersected by the given line, if any.
+    //! Return the nearest triangle intersected by the given segment, if any.
     bool computeCollision(cVector3d& a_segmentPointA,
-        cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
-        cTriangle*& a_colTriangle, cVector3d& a_colPoint,
-        double& a_colSquareDistance, int a_proxyCall = -1);
+            cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
+            cTriangle*& a_colTriangle, cVector3d& a_colPoint,
+            double& a_colSquareDistance, int a_proxyCall = -1);
 
     // PROPERTIES:
-    //! The sphere at the root of the sphere tree.
-    cCollisionSpheresSphere* m_root;
+    //! Pointer to the sphere at the root of the sphere tree.
+    cCollisionSpheresSphere *m_root;
     //! Pointer to the list of triangles in the mesh.
-    vector<cTriangle>* m_trigs;
+    vector<cTriangle> *m_trigs;
     //! Triangle returned by last successful collision test.
-    cTriangle* m_lastCollision;
+    cTriangle *m_lastCollision;
     //! Use neighbor list to speed up collision detection?
     bool m_useNeighbors;
-    //! Beginning of list of leaf nodes.
-    cCollisionSpheresLeaf* m_firstLeaf;
+    //! Pointer to the beginning of list of leaf nodes.
+    cCollisionSpheresLeaf *m_firstLeaf;
 };
 
 
@@ -107,40 +117,39 @@ class cCollisionSpheresSphere
   friend class cCollisionSpheresLeaf;
 
   public:
-    // CONSTRUCTORS:
+    // CONSTRUCTORS AND DESTRUCTOR:
     //! Constructor of cCollisionSpheresSphere.
-    cCollisionSpheresSphere(cCollisionSpheresSphere *parent_);
+    cCollisionSpheresSphere(cCollisionSpheresSphere *a_parent);
     //! Default constructor of cCollisionSpheresSphere.
-    cCollisionSpheresSphere() {};
+    cCollisionSpheresSphere() { m_center.set(0,0,0); m_parent = 0; };
     //! Destructor of cCollisionsSpheresSphere.
     virtual ~cCollisionSpheresSphere() {};
 
     // METHODS:
     //! Return the center of the sphere.
-    inline const cVector3d &getCenter() {return center;}
+    inline const cVector3d &getCenter() {return m_center;}
     //! Return the radius of the sphere.
-    inline double getRadius() {return radius;}
+    inline double getRadius() {return m_radius;}
     //! Return whether the node is a leaf node.
     virtual bool isLeaf() = 0;
-    //! Draw the collision sphere if at the given level.
-    virtual void draw(int depth) = 0;
+    //! Draw the collision sphere for this node, if at the given depth.
+    virtual void draw(int a_depth = -1) = 0;
     //! Calculate the distance between the two given collision spheres.
-    static bool cCollisionSpheresSphere::dist(cCollisionSpheresSphere *sa,
-                cGenericObject*& a_colObject,
-                cTriangle*& a_colTriangle, cVector3d& a_colPoint,
-                double& a_colSquareDistance,
-                cCollisionSpheresSphere *sb);
+    static bool cCollisionSpheresSphere::computeCollision(cCollisionSpheresSphere *a_sa,
+                cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
+                cVector3d& a_colPoint, double& a_colSquareDistance,
+                cCollisionSpheresSphere *a_sb);
 
   protected:
     // PROPERTIES:
     //! The parent of the node in the tree.
-    cCollisionSpheresSphere *parent;
+    cCollisionSpheresSphere *m_parent;
     //! The center of the node.
-    cVector3d center;
+    cVector3d m_center;
     //! The radius of the node.
-    double radius;
-    //! The level of the node in the tree.
-    int level;
+    double m_radius;
+    //! The depth of this node in the collision tree.
+    int m_depth;
 };
 
 
@@ -155,39 +164,39 @@ class cCollisionSpheresSphere
 class cCollisionSpheresNode : public cCollisionSpheresSphere
 {
   public:
-    // CONSTRUCTORS:
+    // CONSTRUCTORS AND DESTRUCTOR:
     //! Constructor of cCollisionSpheresNode.
-    cCollisionSpheresNode(Plist &primList,
-                          cCollisionSpheresSphere *parent_ = NULL);
+    cCollisionSpheresNode(Plist &a_primList,
+            cCollisionSpheresSphere *a_parent = NULL);
     //! Constructor of cCollisionSpheresNode.
-    cCollisionSpheresNode(std::vector<cTriangle>* tris,
-                          cCollisionSpheresSphere *parent_ = NULL);
+    cCollisionSpheresNode(std::vector<cTriangle> *a_tris,
+            cCollisionSpheresSphere *a_parent = NULL);
     //! Default constructor of cCollisionSpheresNode.
-    cCollisionSpheresNode() {};
+    cCollisionSpheresNode() : cCollisionSpheresSphere() { m_left = m_right = 0; };
     //! Destructor of cCollisionSpheseNode.
-    ~cCollisionSpheresNode() {};
+    virtual ~cCollisionSpheresNode() {};
 
     // METHODS:
     //! Create subtrees by splitting primitives into left and right lists.
-    void ConstructChildren(Plist &primList);
-    //! Return whether the node is a leaf node. (It is not.)
-    bool isLeaf()  {return false;}
-    //! Draw the collision sphere if at the given level.
-    void draw(int depth);
-    //! Calculate distance between given nodes, the first an internal node.
-    static bool dist(cCollisionSpheresNode *sa,
-                 cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-                 cVector3d& a_colPoint, double& a_colSquareDistance,
-                 cCollisionSpheresSphere *sb);
+    void ConstructChildren(Plist &a_primList);
+    //! Return whether the node is a leaf node. (In this class, it is not.)
+    bool isLeaf()  { return false; }
+    //! Draw the collision sphere if at the given depth.
+    void draw(int a_depth);
+    //! Check for intersection between given nodes, the first an internal node.
+    static bool cCollisionSpheresNode::computeCollision(cCollisionSpheresNode *a_sa,
+            cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
+            cVector3d& a_colPoint, double& a_colSquareDistance,
+            cCollisionSpheresSphere *a_sb);
     //! Exchange the two given pointers.
-    static void swapptr(void **a, void **b);
+    static void swapptr(void **a_a, void **a_b);
 
-  private:
+  protected:
     // PROPERTIES:
     //! Pointer to the left child in the sphere tree.
-    cCollisionSpheresSphere *left;
+    cCollisionSpheresSphere *m_left;
     //! Pointer to the right child in the sphere tree.
-    cCollisionSpheresSphere *right;
+    cCollisionSpheresSphere *m_right;
 };
 
 
@@ -202,32 +211,32 @@ class cCollisionSpheresNode : public cCollisionSpheresSphere
 class cCollisionSpheresLeaf : public cCollisionSpheresSphere
 {
   public:
-    // CONSTRUCTORS:
+    // CONSTRUCTORS AND DESTRUCTOR:
     //! Constructor of cCollisionSpheresLeaf.
-    cCollisionSpheresLeaf(cCollisionSpheresGenericShape *prim_,
-                          cCollisionSpheresSphere *parent_ = NULL);
+    cCollisionSpheresLeaf(cCollisionSpheresGenericShape *a_prim,
+            cCollisionSpheresSphere *a_parent = NULL);
     //! Constructor of cCollisionSpheresLeaf.
-    cCollisionSpheresLeaf(cTriangle *tri,
-                          cCollisionSpheresSphere *parent_ = NULL);
+    cCollisionSpheresLeaf(cTriangle *a_tri,
+            cCollisionSpheresSphere *a_parent = NULL);
     //! Default constructor of cCollisionSpheresLeaf
-    cCollisionSpheresLeaf() {};
+    cCollisionSpheresLeaf() : cCollisionSpheresSphere() { m_prim = 0; };
     //! Destructor of cCollisionSpheresLeaf()
-    ~cCollisionSpheresLeaf() { if (prim) delete prim; };
+    ~cCollisionSpheresLeaf() { if (m_prim) delete m_prim; };
 
     // METHODS:
-    //! Return whether the node is a leaf node. (It is.)
-    bool isLeaf()  {return true;}
-    //! Draw the collision sphere if at the given level.
-    void draw(int depth);
-    //! Calculate the distance between the two given leaf nodes.
-    static bool cCollisionSpheresLeaf::dist(cCollisionSpheresLeaf *sa,
-                 cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-                 cVector3d& a_colPoint, double& a_colSquareDistance,
-                 cCollisionSpheresLeaf *sb);
+    //! Return whether the node is a leaf node. (In this class, it is.)
+    bool isLeaf()  { return true; }
+    //! Draw the collision sphere if at the given depth.
+    void draw(int a_depth);
+    //! Check for intersection between the two given leaf nodes.
+    static bool cCollisionSpheresLeaf::computeCollision(cCollisionSpheresLeaf *a_sa,
+            cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
+            cVector3d& a_colPoint, double& a_colSquareDistance,
+            cCollisionSpheresLeaf *a_sb);
 
     // PROPERTIES:
     //! The shape primitive bounded by the sphere leaf.
-    cCollisionSpheresGenericShape *prim;
+    cCollisionSpheresGenericShape *m_prim;
 };
 
 //---------------------------------------------------------------------------

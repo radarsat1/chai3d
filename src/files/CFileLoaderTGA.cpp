@@ -12,6 +12,13 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
+    This TGA loader was written by Lev Povalahev and was 
+    downloaded from:
+    
+    http://www.levp.de/3d/index.html
+
+    Used with permission.
+
     \author:    <http://www.chai3d.org>
     \author:    Lev Povalahev
     \author:    Dan Morris
@@ -30,7 +37,7 @@
 //---------------------------------------------------------------------------
 static int TGAReadError = 0;
 
-void ReadData(std::ifstream &file, char* data, uint size)
+static void ReadData(std::ifstream &file, char* data, uint size)
 {
     if (!file.is_open())
         return;

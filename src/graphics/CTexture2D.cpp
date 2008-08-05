@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
@@ -50,19 +51,27 @@ cTexture2D::cTexture2D()
 //===========================================================================
 cTexture2D::~cTexture2D()
 {
-    
+
+  if (m_textureID != -1) {
+    glDeleteTextures(1,&m_textureID);
+    m_textureID = -1;
+  }
+
 }
 
 
 //===========================================================================
 /*!
-    This function initalizes all internal values to this class.
+    Reset internal variables. This function should be called only by constructors.
 
     \fn         void cTexture2D::reset()
 */
 //===========================================================================
 void cTexture2D::reset()
 {
+
+    texture_environment_mode = GL_MODULATE;
+
     // id number provided by OpenGL once texture is stored in graphics
     // card memory
     m_textureID = -1;
@@ -76,7 +85,7 @@ void cTexture2D::reset()
 
 //===========================================================================
 /*!
-      Render texture image. (OpenGL).
+      Enable texturing and set this texture as the current texture
 
       \fn         void cTexture2D::render()
 */
@@ -108,13 +117,17 @@ void cTexture2D::render()
 
     // make this the current texture
     glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+    // set the texture environment mode
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texture_environment_mode);
     
 }
 
 
 //===========================================================================
 /*!
-      Load a texture image from a file. (OpenGL).
+      Load an image file (CHAI currently supports 24-bit .bmp and
+      32-bit .tga files)
 
       \fn         bool cTexture2D::loadFromFile(char*)
 */
@@ -142,16 +155,23 @@ bool cTexture2D::loadFromFile(char* a_fileName)
 //===========================================================================
 void cTexture2D::update() {
 
-  if (m_textureID == -1) {
-    glDeleteTextures(1,&m_textureID);
-  }
+  if (m_textureID != -1) {
 
+    // Deletion makes for all kinds of new hassles, particularly
+    // when re-initializing a whole display context, since opengl
+    // automatically starts re-assigning texture ID's.  Not worth it.
+
+    // glDeleteTextures(1,&m_textureID);
+    // m_textureID = -1;
+  }
+  
   // Generate a texture ID and bind to it
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glGenTextures(1,&m_textureID); 
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
   int components = (m_image_loader.getFormat() == GL_RGB ? 3 : 4);
+
   gluBuild2DMipmaps(GL_TEXTURE_2D, 
 						  components, 
 						  m_image_loader.getWidth(),
@@ -160,5 +180,7 @@ void cTexture2D::update() {
 						  GL_UNSIGNED_BYTE,
 						  m_image_loader.getData()
               );	
+              
+
 }
 

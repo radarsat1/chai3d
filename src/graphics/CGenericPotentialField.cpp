@@ -25,39 +25,42 @@
 
 //==========================================================================
 /*!
-      Compute interaction forces between finger and object.
+      Compute interaction forces between a probe and this object, descending
+      through child objects
 
       \fn       cVector3d cGenericPotentialField::computeForces
-                (cVector3d& a_fingerPosition)
-      \param    a_fingerPosition   Position of finger
-      \return   Return computed force
+                (cVector3d& a_probePosition)
+      \param    a_probePosition   Position of the probe in my parent's coordinate frame
+      \return   Returns the computed force in my parent's coordinate frame
 */
 //===========================================================================
-cVector3d cGenericPotentialField::computeForces(cVector3d& a_fingerPosition)
+cVector3d cGenericPotentialField::computeForces(cVector3d& a_probePosition)
 {
-    // compute the position of the finger in local coordinates.
-    cVector3d fingerPositionLocal;
-    fingerPositionLocal = cMul(cTrans(m_localRot), cSub(a_fingerPosition, m_localPos));
+    // compute the position of the probe in local coordinates.
+    cVector3d probePositionLocal;
+    probePositionLocal = cMul(cTrans(m_localRot), cSub(a_probePosition, m_localPos));
 
     // compute interaction forces with this object
     cVector3d localForce;
-    localForce = computeForces(fingerPositionLocal);
+    localForce = computeForces(probePositionLocal);
 
     // compute interaction forces with children
     for (unsigned int i=0; i<m_children.size(); i++)
     {
         cGenericObject *nextObject = m_children[i];
 
-        if (typeid(*nextObject) == typeid(cGenericPotentialField))
+        // Only propagate to potential field objects
+        cGenericPotentialField* nextField = dynamic_cast<cGenericPotentialField*>(nextObject);
+
+        if (nextField)
         {
-            cGenericPotentialField* nextField = (cGenericPotentialField*)nextObject;
-            cVector3d force = nextField->computeForces(fingerPositionLocal);
+            cVector3d force = nextField->computeForces(probePositionLocal);
             localForce.add(force);
         }
     }
 
-    // convert reaction force in parent coodinates
+    // convert the reaction force into my parent coodinates
     cVector3d parentForce;
     parentForce = cMul(m_localRot, localForce);
-    return (parentForce);
+    return parentForce;
 }

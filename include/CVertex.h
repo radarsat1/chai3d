@@ -31,9 +31,9 @@
 //===========================================================================
 /*!
       \struct     cVertex
-      \brief      cVertex defines a point in 3 dimensional space. A vertex
-                  own several properties such as a position vector, a color,
-                  texture coordinate and a surface normal.
+      \brief      cVertex defines a point in 3 dimensional space and the
+                  associated rendering properties (position, color, texture
+                  coordinate, and surface normal)                  
 */
 //===========================================================================
 class cVertex
@@ -238,19 +238,19 @@ class cVertex
     /*!
         Set color of vertex.
 
-        \param    a_red  Red component.
+        \param    a_red    Red component.
         \param    a_green  Green component.
-        \param    a_blue  Blue component.
-        \param    a_transparency  Transparency component.
+        \param    a_blue   Blue component.
+        \param    a_alpha  Alpha component.
     */
     //-----------------------------------------------------------------------
     inline void setColor(float a_red, float a_green,
-                         float a_blue, float a_transparency )
+                         float a_blue, float a_alpha )
     {
-        m_color.set( (GLubyte)(a_red * (GLfloat)0xff),
+        m_color.set( (GLubyte)(a_red   * (GLfloat)0xff),
                      (GLubyte)(a_green * (GLfloat)0xff),
-                     (GLubyte)(a_blue * (GLfloat)0xff),
-                     (GLubyte)(a_transparency * (GLfloat)0xff) );
+                     (GLubyte)(a_blue  * (GLfloat)0xff),
+                     (GLubyte)(a_alpha * (GLfloat)0xff) );
     }
 
 
@@ -260,7 +260,7 @@ class cVertex
         and global rotation matrix of the parent object.
 
         \param    a_globalPos  Global position vector of parent.
-        \param    a_globalRot Global rotation matrix of parent.
+        \param    a_globalRot  Global rotation matrix of parent.
     */
     //-----------------------------------------------------------------------
     inline void computeGlobalPosition(const cVector3d& a_globalPos, const cMatrix3d& a_globalRot)
@@ -270,20 +270,22 @@ class cVertex
     }
 
   protected:
+    
     // MEMBERS:
-    //! Local position of vertex.
+
+    //! Local position of this vertex
     cVector3d m_localPos;
-    //! Global position of vertex in world coordinates.
+    //! Global position of this vertex in world coordinates.
     cVector3d m_globalPos;
-    //! Normal
+    //! Surface normal
     cVector3d m_normal;
-    //! Texture coordinate
+    //! Texture coordinate (uvw)
     cVector3d m_texCoord;
     //! Color
     cColorb m_color;
-    //! Index number in vertices list
+    //! My index in the vertex list of the mesh that owns me
     int m_index;
-    //! Is vertex allocated to a triangle?
+    //! Is this vertex allocated to a triangle?
     bool m_allocated;
 };
 

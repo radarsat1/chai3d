@@ -105,7 +105,77 @@ struct cVector3d
         }
         return (0);
     }
+    inline double operator[] (const unsigned int a_component) const
+    {
+        switch (a_component)
+        {
+            case 0:  return (x);
+            case 1:  return (y);
+            case 2:  return (z);
+        }        
+        return (0);
+    }
 
+    /*!
+        An overloaded /= operator for vector/scalar division
+    */
+    inline void operator/= (const double& a_val)
+    {
+      x /= a_val;
+      y /= a_val;
+      z /= a_val;
+    }
+
+    /*!
+        An overloaded *= operator for vector/scalar multiplication
+    */
+    inline void operator*= (const double& a_val)
+    {
+      x *= a_val;
+      y *= a_val;
+      z *= a_val;
+    }
+
+    /*!
+        An overloaded += operator for vector/vector addition
+    */
+    inline void operator+= (const cVector3d& a_input)
+    {
+      x += a_input.x;
+      y += a_input.y;
+      z += a_input.z;      
+    }
+
+    /*!
+        An overloaded -= operator for vector/vector substraction
+    */
+    inline void operator-= (const cVector3d& a_input)
+    {
+      x -= a_input.x;
+      y -= a_input.y;
+      z -= a_input.z;      
+    }
+
+    //-----------------------------------------------------------------------
+    /*!
+        Return the i th component of the vector. a_component = 0 return x,
+        a_component = 1 returns y, a_component = 2 returns z.
+
+        This is the non-const version of this function, so its return value
+        can be used as an l-value.
+
+        \param  a_component  component number
+    */
+    //-----------------------------------------------------------------------
+    inline double& operator[] (const unsigned int a_component)
+    {
+        switch (a_component)
+        {
+            case 0:  return (x);
+            case 1:  return (y);
+            default:  return (z);
+        }        
+    }
 
 	//-----------------------------------------------------------------------
 	/*!

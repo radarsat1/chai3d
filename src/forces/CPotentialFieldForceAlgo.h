@@ -13,7 +13,7 @@
     Professional Edition License.
 
     \author:    <http://www.chai3d.org>
-    \author:    Christopher Sewell
+    \author:    Francois Conti
     \version    1.1
     \date       01/2004
 */
@@ -30,8 +30,8 @@
 //===========================================================================
 /*!
       \class    cPotentialFieldForceAlgo
-      \brief    cPotentialFieldForceAlgo is an abstract class for algorithms that
-                compute single point force contacts.
+      \brief    cPotentialFieldForceAlgo is an abstract class for algorithms
+                that compute single point force contacts.
 */
 //===========================================================================
 class cPotentialFieldForceAlgo : public cGenericPointForceAlgo
@@ -46,7 +46,7 @@ class cPotentialFieldForceAlgo : public cGenericPointForceAlgo
     // METHODS:
     //! Initialize the algorithm by passing the inital position of the device.
     virtual void initialize(cWorld* a_world, const cVector3d& a_initialPos) {};
-    //! Compute the next force by updating the position of the device.
+    //! Compute the next force given the updated position of the device.
     virtual cVector3d computeForces(cVector3d& a_nextDevicePos);
 };
 

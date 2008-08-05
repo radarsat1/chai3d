@@ -27,12 +27,12 @@
 /*!
     Constructor of cGenericPointForceAlgo.
 
-    \fn         cGenericPointForceAlgo::cGenericPointForceAlgo()
+    \fn       cGenericPointForceAlgo::cGenericPointForceAlgo()
 */
 //===========================================================================
 cGenericPointForceAlgo::cGenericPointForceAlgo()
 {
-    // no world has been defined yet in which force algorithm is operating.
+    // no world has been defined yet in which force algorithm is operating
     m_world = NULL;
 };
 

@@ -12,7 +12,11 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
+    The bulk of this file comes from Lev Povalahev's l3ds.cpp,
+    copyright (c) 2001-2002 Lev Povalahev.  Used with permission.
+
     \author:    <http://www.chai3d.org>
+    \author:    Lev Povalahev
     \author:    Dan Morris
     \version    1.0
     \date       03/2004
@@ -140,7 +144,7 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
         newMesh->m_material.m_specular.setA(1.0);
 
         // get shininess
-        newMesh->m_material.setShininess(cur_material.GetShininess());
+        newMesh->m_material.setShininess((GLuint)(cur_material.GetShininess()));
 
       } // For every material in this mesh
 
@@ -174,7 +178,7 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
         int local_mat_id = -1;
 
         // So we look it up in the list
-        for(k=0; k<materials.size(); k++) {
+        for(unsigned int k=0; k<materials.size(); k++) {
           if (materials[k] == global_mat_id) {
             local_mat_id = k;
             break;
@@ -230,7 +234,13 @@ bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 
 }
 
-//---------------------------------------------------------------------------
+/******
+
+  The remainder of this file comes from Lev Povalahev's l3ds.cpp
+  copyright (c) 2001-2002 Lev Povalahev
+
+******/
+
 typedef unsigned long ulong;
 
 #define SEEK_START           1900

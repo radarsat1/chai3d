@@ -643,7 +643,7 @@ struct cMatrix3d
 
 	//-----------------------------------------------------------------------
 	/*!
-		Convert current matric into a string.
+		Convert current matrix into a string.
 
 		\param    a_string   String where conversion is stored
 		\param    a_precision  Number of digits.

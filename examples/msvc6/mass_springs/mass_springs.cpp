@@ -126,17 +126,26 @@ BOOL Cmass_springsApp::InitInstance() {
   // Turn on one light...
   light = new cLight(world);
 
-  camera->addChild(light);
   light->setEnabled(true);
-  light->setPos(cVector3d(0,0,0));
-  light->rotate(cVector3d(0,0,1), cDegToRad(180));
+
+  // We don't want a spotlight...
+  light->setCutOffAngle(180.0);
+
+  // Put the light somewhere that looks nice
+  light->setPos(cVector3d(220, 200, 200));
+  light->setDir(-1,-1,-1);
+  
+  cVector3d dir  = light->getDir();
+  cVector3d lpos = light->getPos();
+  cVector3d gpos = light->getGlobalPos();
 
   // set camera position and orientation
   // 
   // We choose to put it out on the positive z axis, so things appear
   // the way OpenGL users expect them to appear, with z going in and
   // out of the plane of the screen.
-  int result = camera->set(cVector3d(0,0,4),   // position of camera
+  int result = camera->set(
+              cVector3d(0,0,4),           // position of camera
               cVector3d(0.0, 0.0, 0.0),   // camera looking at origin
               cVector3d(0.0, 1.0, 0.0));  // orientation of camera (standing up)
 
@@ -188,7 +197,6 @@ BOOL Cmass_springsApp::InitInstance() {
   }
 
   world->computeGlobalPositions(false);
-
 
   return TRUE;
 }

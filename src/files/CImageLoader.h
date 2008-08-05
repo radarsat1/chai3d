@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Dan Morris
+    \author:    Francois Conti
     \version    1.0
     \date       03/2004
 */
@@ -28,34 +29,35 @@
 
 // Global utility functions:
 
-// Finds the extension in a filename and returns a pointer
-// to the character after the '.' in the original string,
-// or 0 if no '.' is found.
-char* find_extension(const char* input);
+//! Finds the extension in a filename and returns a pointer to the character after the '.'
+char* find_extension(const char* a_input);
 
-// converts a string to lower-case
-void string_tolower(char* dest,const char* source);
+//! Converts a string to lower-case
+void string_tolower(char* a_dest,const char* a_source);
 
-// Finds only the _path_ portion of source, and copies it with
-// _no_ trailing path separator to dest.  If there's no /'s or \'s,
-// writes null
-void find_directory(char* dest, const char* source);
+//! Finds only the _path_ portion of source, and copies it to dest
+void find_directory(char* a_dest, const char* a_source);
 
 
 //===========================================================================
 /*!
-      \class    cFileLoaderBMP
-      \brief    cFileLoaderBMP provides a class to load BMp bitmap
-                images into memory.
+      \class    cImageLoader
+      \brief    cImageLoader provides a class to load images files
+                into memory.  The real work is deferred to specific files
+                that know how to load specific image file types.
 */
 //===========================================================================
 class cImageLoader
 {
   public:
 
+    //! Default constructor; doesn't load anything...
     cImageLoader();
+
+    //! Default constructor; loads the specified filename...
     cImageLoader(char* filename);
 
+    //! Destructor of cImageLoader
     virtual ~cImageLoader();
 
     //! Get a pointer to the actual image data... use with care...
@@ -76,30 +78,36 @@ class cImageLoader
     //! Returns 1 if a file has been successfully loaded, 0 otherwise
     inline unsigned int initialized() { return m_initialized; }
 
-    //! Loads this image from the specified file.  Returns 0 if all
-    //! goes well, <0 for an error.  Note that regardless of whether
-    //! it succeeds, this over-writes any image that had previously
-    //! been loaded.
-    //!
-    //! Always converts the resulting image to RGBA.
+    //! Load image file by passing image path and name as argument
     int loadFromFile(const char* filename);
 
-  private:
+  protected:
 
+    //! Initialize member variables
     void defaults();
+
+    //! Delete memory and rid ourselves of any image we had previously stored
     void cleanup();
 
+    //! The last image filename that I loaded
     char m_filename[_MAX_PATH];
+
+    //! The dimensions of the current image
     int m_width, m_height;
 
-    // Either GL_RGB or GL_RGBA
+    //! Either GL_RGB or GL_RGBA
     unsigned int m_format;
+
+    //! Basically always 8...
     unsigned int m_bits_per_pixel;
 
-    void convert_to_rgba();
+    //! All images are converted from their native format to RGBA by this class
+    void convertToRGBA();
 
+    //! The image data itself
     unsigned char* m_data;
 
+    //! Have I actually loaded a valid image?
     bool m_initialized;
 };
 

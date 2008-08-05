@@ -36,32 +36,33 @@ using std::vector;
 /*!
       \class    cCollisionBrute
       \brief    cCollisionBrute provides methods to check for the intersection
-                of a line with a mesh by checking all triangles in the mesh.
+                of a line segment with a mesh by checking all triangles in the
+                mesh.
 */
 //===========================================================================
 class cCollisionBrute : public cGenericCollision
 {
   public:
     // CONSTRUCTOR & DESTRUCTOR
-    //! Constructor of cCollisionBrute
-    cCollisionBrute(vector<cTriangle> *triangles);
-
+    //! Constructor of cCollisionBrute.
+    cCollisionBrute(vector<cTriangle> *a_triangles);
+    //! Destructor of cCollisionBrute.
     virtual ~cCollisionBrute() { }
 
     // VIRTUAL METHODS:
-    //! Do any necessary initialization, such as building trees.
+    //! No initialization is necessary for the brute force method.
     virtual void initialize() {};
-    //! Provide a visual representation of the method.
+    //! There isn't really a useful "visualization" of "check all triangles".
     virtual void render() {};
-    //! Return a list of triangles intersected by the given line, if any.
+    //! Return the nearest triangle intersected by the given segment, if any.
     virtual bool computeCollision(cVector3d& a_segmentPointA,
-    cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
-    cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance,
-                  int a_proxyCall = -1);
+            cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
+            cTriangle*& a_colTriangle, cVector3d& a_colPoint,
+            double& a_colSquareDistance, int a_proxyCall = -1);
 
   protected:
-    //! List of triangles.
-    vector<cTriangle>* m_triangles;
+    //! Pointer to the list of triangles in the mesh.
+    vector<cTriangle> *m_triangles;
 };
 
 //---------------------------------------------------------------------------

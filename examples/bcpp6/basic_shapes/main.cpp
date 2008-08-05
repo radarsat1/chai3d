@@ -55,10 +55,8 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 
     // Create a light source and attach it to camera
     light = new cLight(world);
-    camera->addChild(light);
     light->setEnabled(true);
-    light->setPos(cVector3d(0,0,0));
-    light->rotate(cVector3d(0,0,1), cDegToRad(180));
+    light->setPos(cVector3d(2,1,1));
 
     // define camera position
     cameraAngleH = 10;

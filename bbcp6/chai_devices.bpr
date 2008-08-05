@@ -15,7 +15,7 @@
     <LIBFILES value="..\lib\bbcp6\DLPortIO.lib"/>
     <LIBRARIES value=""/>
     <PACKAGES value=""/>
-    <PATHCPP value=".;..\src\devices"/>
+    <PATHCPP value=".;..\src\devices;..\src\devices;..\src\devices;..\src\devices;..\src\devices;..\src\devices;..\src\devices"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>

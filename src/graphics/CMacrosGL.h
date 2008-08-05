@@ -25,7 +25,6 @@
 //---------------------------------------------------------------------------
 #include "CVector3d.h"
 #include "CMatrix3d.h"
-#include "CString.h"
 #include "windows.h"
 #include "gl/gl.h"
 //---------------------------------------------------------------------------
@@ -37,40 +36,55 @@
                 and 3D vectors (cMatrix3d) to express position or translation.
                 On the OpenGL side 4x4 matrices are required to perform all
                 geometrical transformations. cMatrixGL provides a structure
-                which encapsulates all the necessary
-                functionalities to generate 4x4 OpenGL transformation matrices
-                by passing 3D position vectors and rotation matrices.
-                DCSGL also provides OpenGL calls to push, multiply and pop
-                matrices off the OpenGL stack. OpenGL Matrices are COLUMN major.
+                which encapsulates all the necessary functionaly to generate 4x4
+                OpenGL transformation matrices from 3D position vectors and rotation
+                matrices.
+
+                cMatrixGL also provides OpenGL calls to push, multiply and pop
+                matrices off the OpenGL stack.
+                
+                Note that OpenGL Matrices are COLUMN major, but CHAI matrices
+                (and all other matrices in the universe) are ROW major.
 */
 //===========================================================================
 struct cMatrixGL
 {
   private:
-	//! array of type \e double.
-	double  m[4][4];
+    //! array of type \e double, defining the actual transformation
+    double  m[4][4];
 
   public:
-    //-----------------------------------------------------------------------
-	/*!
-		  Returns a pointer to the matrix array in memory.
-
-	      \return   Returns pointer of type \e double.
-	*/
-    //-----------------------------------------------------------------------
-	const double* pMatrix() const { return m[0]; }
-
 
     //-----------------------------------------------------------------------
-	/*!
-		  Creates OpenGL translation matrix from a position vector passed as
+    /*!
+          Default constructor
+    */
+    //-----------------------------------------------------------------------
+    cMatrixGL()
+    {
+        identity();
+    }
+
+    //-----------------------------------------------------------------------
+    /*!
+          Returns a pointer to the matrix array in memory.
+
+          \return   Returns a pointer of type \e double.
+    */
+    //-----------------------------------------------------------------------
+    const double* pMatrix() const { return m[0]; }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Creates OpenGL translation matrix from a position vector passed as
           parameter.
 
           \param    a_pos   Input vector.
-	*/
+    */
     //-----------------------------------------------------------------------
-	inline void set(const cVector3d& a_pos)
-	{
+    inline void set(const cVector3d& a_pos)
+    {
         m[0][0] = 1.0;      m[0][1] = 0.0;       m[0][2] = 0.0;       m[0][3] = 0.0;
         m[1][0] = 0.0;      m[1][1] = 1.0;       m[1][2] = 0.0;       m[1][3] = 0.0;
         m[2][0] = 0.0;      m[2][1] = 0.0;       m[2][2] = 1.0;       m[2][3] = 0.0;
@@ -79,45 +93,71 @@ struct cMatrixGL
 
 
     //-----------------------------------------------------------------------
-	/*!
-		  Creates OpenGL rotation matrix from a rotation 3x3 Matrix passed as
-          parameter.
-
-	      \param    a_rot  Rotation Matrix.
-	*/
+    /*!
+          Extract the translational component of this matrix
+    */
     //-----------------------------------------------------------------------
-	void set(const cMatrix3d& a_rot)
-	{
-        m[0][0] = a_rot.m[0][0];  m[0][1] = a_rot.m[1][0];  m[0][2] = a_rot.m[2][0];  m[0][3] = 0.0;
-        m[1][0] = a_rot.m[0][1];  m[1][1] = a_rot.m[1][1];  m[1][2] = a_rot.m[2][1];  m[1][3] = 0.0;
-        m[2][0] = a_rot.m[0][2];  m[2][1] = a_rot.m[1][2];  m[2][2] = a_rot.m[2][2];  m[2][3] = 0.0;
-        m[3][0] = 0.0;            m[3][1] = 0.0;            m[3][2] = 0.0;            m[3][3] = 1.0;
-	}
-
-
-    //-----------------------------------------------------------------------
-	/*!
-		  Creates OpenGL translation matrix from Vector giving translation.
-		  Do not use directly.
-
-	      \param    a_pos   Translation Vector.
-	      \param    a_rot   Rotation Matrix.
-	*/
-    //-----------------------------------------------------------------------
-	void set(const cVector3d& a_pos, const cMatrix3d& a_rot)
-	{
-        m[0][0] = a_rot.m[0][0];  m[0][1] = a_rot.m[1][0];  m[0][2] = a_rot.m[2][0];  m[0][3] = 0.0;
-        m[1][0] = a_rot.m[0][1];  m[1][1] = a_rot.m[1][1];  m[1][2] = a_rot.m[2][1];  m[1][3] = 0.0;
-        m[2][0] = a_rot.m[0][2];  m[2][1] = a_rot.m[1][2];  m[2][2] = a_rot.m[2][2];  m[2][3] = 0.0;
-        m[3][0] = a_pos.x;        m[3][1] = a_pos.y;        m[3][2] = a_pos.z;        m[3][3] = 1.0;
-	}
+    inline cVector3d getPos() const
+    {
+        return cVector3d(m[3][0],m[3][1],m[3][2]);
+    }
 
 
     //-----------------------------------------------------------------------
     /*!
-        Copy current matrix to an external matrix passed as parameter.
+          Extract the rotational component of this matrix
+    */
+    //-----------------------------------------------------------------------
+    inline cMatrix3d getRot() const
+    {
+        cMatrix3d mat;
+        mat.set(m[0][0],m[1][0],m[2][0],
+                m[0][1],m[1][1],m[2][1],
+                m[0][2],m[1][2],m[2][2]);
+        return mat;
+    }
 
-        \param    a_destination  Destination matrix.
+
+    //-----------------------------------------------------------------------
+    /*!
+          Createe an OpenGL rotation matrix from a 3x3 rotation matrix passed
+          as a parameter.
+
+          \param    a_rot  The source rotation matrix
+    */
+    //-----------------------------------------------------------------------
+    void set(const cMatrix3d& a_rot)
+    {
+        m[0][0] = a_rot.m[0][0];  m[0][1] = a_rot.m[1][0];  m[0][2] = a_rot.m[2][0];  m[0][3] = 0.0;
+        m[1][0] = a_rot.m[0][1];  m[1][1] = a_rot.m[1][1];  m[1][2] = a_rot.m[2][1];  m[1][3] = 0.0;
+        m[2][0] = a_rot.m[0][2];  m[2][1] = a_rot.m[1][2];  m[2][2] = a_rot.m[2][2];  m[2][3] = 0.0;
+        m[3][0] = 0.0;            m[3][1] = 0.0;            m[3][2] = 0.0;            m[3][3] = 1.0;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Create an OpenGL translation matrix from a 3-vector and a 3x3 matrix
+          passed as  a parameter.
+
+          \param    a_pos   Translational component of the transformation
+          \param    a_rot   Rotational component of the transformation
+    */
+    //-----------------------------------------------------------------------
+    void set(const cVector3d& a_pos, const cMatrix3d& a_rot)
+    {
+        m[0][0] = a_rot.m[0][0];  m[0][1] = a_rot.m[1][0];  m[0][2] = a_rot.m[2][0];  m[0][3] = 0.0;
+        m[1][0] = a_rot.m[0][1];  m[1][1] = a_rot.m[1][1];  m[1][2] = a_rot.m[2][1];  m[1][3] = 0.0;
+        m[2][0] = a_rot.m[0][2];  m[2][1] = a_rot.m[1][2];  m[2][2] = a_rot.m[2][2];  m[2][3] = 0.0;
+        m[3][0] = a_pos.x;        m[3][1] = a_pos.y;        m[3][2] = a_pos.z;        m[3][3] = 1.0;
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Copy the current matrix to an external matrix passed as a parameter
+
+        \param    a_destination  Destination matrix
     */
     //-----------------------------------------------------------------------
     inline void copyto(cMatrixGL& a_destination) const
@@ -135,10 +175,9 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Copy values from an external matrix passed as parameter to current
-        matrix.
+        Copy values from an external matrix passed as parameter to this matrix
 
-        \param    a_source  Source matrix.
+        \param    a_source  Source matrix
     */
     //-----------------------------------------------------------------------
     inline void copyfrom(const cMatrixGL& a_source)
@@ -156,7 +195,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Set the identity matrix. 
+        Set this matrix to be equal to the identity matrix. 
     */
     //-----------------------------------------------------------------------
     inline void identity()
@@ -170,8 +209,13 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Multiply current matrix with an external matrix passed as parameter.
-        Result is stored in current matrix.
+        Left-multiply the current matrix by an external matrix passed as
+        a parameter.  That is, compute :
+
+        this = a_matrix * this;
+
+        Remember that all matrices are column-major.  That's why the following
+        code looks like right-multiplication...
 
         \param    a_matrix  Matrix with which multiplication is performed.
     */
@@ -225,14 +269,19 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Multiply current matrix with an external matrix passed as parameter.
-        Result is stored in result matrix.
+        Left-multiply the current matrix by an external matrix passed as
+        a parameter, storing the result externally.  That is, compute :
 
-        \param      a_matrix  Matrix with which multiplication is performed.
-        \param      a_result  Here is where result is stored.
+        a_result = a_matrix * this;
+
+        Remember that all matrices are column-major.  That's why the following
+        code looks like right-multiplication...
+
+        \param    a_matrix  Matrix with which multiplication is performed.
+        \param    a_result  Matrix where the result is stored.
     */
     //-----------------------------------------------------------------------
-    inline void mulr(const cMatrix3d& a_matrix, cMatrix3d& a_result)
+    inline void mulr(const cMatrix3d& a_matrix, cMatrix3d& a_result) const
     {
         // compute multiplication between both matrices
         a_result.m[0][0] = m[0][0] * a_matrix.m[0][0] + m[0][1] * a_matrix.m[1][0] +
@@ -275,8 +324,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Compute the transpose of the current matrix.
-        Result is stored in current matrix.
+        Transpose this matrix.
     */
     //-----------------------------------------------------------------------
     inline void trans()
@@ -294,13 +342,12 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Compute the transpose of the current matrix.
-        Result is stored in result matrix.
+        Transpose this matrix and store the result in a_result
 
         \param      a_result  Result is stored here.
     */
     //-----------------------------------------------------------------------
-    inline void transr(cMatrixGL& a_result)
+    inline void transr(cMatrixGL& a_result) const
     {
         a_result.m[0][0] = m[0][0];
         a_result.m[0][1] = m[1][0];
@@ -326,7 +373,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Create a frustrum matrix. To be documented.
+        Create a frustrum matrix, as defined by the glFrustum function.
     */
     //-----------------------------------------------------------------------
     inline void buildFrustumMatrix(double l, double r, double b, double t,
@@ -356,15 +403,17 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Compute matrix inverse. Result is stored in current matrix
+        Invert this matrix.
 
         \return     Return \b true if operation succeeds. Otherwize \b false.
     */
     //-----------------------------------------------------------------------
     bool inline invert()
     {
-        #define SWAP_ROWS(a, b) { GLdouble *_tmp = a; (a)=(b); (b)=_tmp; }
-        #define MAT(m,r,c) (m)[(c)*4+(r)]
+
+// Macros used during inversion
+#define SWAP_ROWS(a, b) { GLdouble *_tmp = a; (a)=(b); (b)=_tmp; }
+#define MAT(m,r,c) (m)[(c)*4+(r)]
 
          double *mat = m[0];
 
@@ -485,15 +534,17 @@ struct cMatrixGL
          MAT(mat,3,0) = r3[4]; MAT(mat,3,1) = r3[5],
          MAT(mat,3,2) = r3[6]; MAT(mat,3,3) = r3[7];
 
-         return (true);
-        #undef MAT
-        #undef SWAP_ROWS
+         return true;
+
+// Macros used during inversion
+#undef MAT
+#undef SWAP_ROWS
     }
 
 
     //-----------------------------------------------------------------------
     /*!
-        Build perspective matrix. To be documented.
+        Build a perspective matrix, according to the gluPerspective function
     */
     //-----------------------------------------------------------------------
     inline void buildPerspectiveMatrix(double  fovy, double aspect,
@@ -513,8 +564,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Build a 4x4 matrix transform based on the parameters for gluLookAt.
-        To be documented.
+        Build a 4x4 matrix transform, according to the gluLookAt function
     */
     //-----------------------------------------------------------------------
     inline void buildLookAtMatrix(double eyex, double eyey, double eyez,
@@ -577,7 +627,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Build a 4x4 matrix transform based on the parameters for gluLookAt.
+        Build a 4x4 matrix transform, according to the gluLookAt function
     */
     //-----------------------------------------------------------------------
     inline void buildLookAtMatrix(cVector3d& a_eye, cVector3d&  a_lookAt, cVector3d a_up)
@@ -590,7 +640,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Push current OpenGL matrix.
+        Push the current OpenGL matrix stack
     */
     //-----------------------------------------------------------------------
     inline void glMatrixPush()
@@ -601,7 +651,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Load current OpenGL matrix with this cMatrixGL matrix.
+        Load the current OpenGL matrix with this cMatrixGL matrix
     */
     //-----------------------------------------------------------------------
     inline void glMatrixLoad()
@@ -612,7 +662,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Multiply current OpenGL matrix with this cMatrixGL matrix.
+        Multiply the current OpenGL matrix with this cMatrixGL matrix
     */
     //-----------------------------------------------------------------------
     inline void glMatrixMultiply()
@@ -623,7 +673,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Push current OpenGL on the stack and multiply with this cMatrixGL
+        Push the current OpenGL matrix stack and multiply with this cMatrixGL
         matrix.
     */
     //-----------------------------------------------------------------------
@@ -647,13 +697,13 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Convert current matric into a string.
+        Convert the current matrix into an std::string
 
-		\param    a_string   String where conversion is stored
-		\param    a_precision  Number of digits.
+        \param    a_string     String where conversion is stored
+        \param    a_precision  Number of digits
     */
     //-----------------------------------------------------------------------
-    inline void str(string a_string, int a_precision)
+    inline void str(std::string a_string, int a_precision)
     {
         a_string.append("[ ");
         for (int i=0; i<4; i++)

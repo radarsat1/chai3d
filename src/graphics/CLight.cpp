@@ -45,18 +45,16 @@ cLight::cLight(cWorld* a_world)
         m_parentWorld->addLightSource(this);
     }
 
-    // set default position and orientation
-    m_dir.set(0.0, 0.0, -1.0);
-
     // set default color parameters
     m_ambient.set(0.4f, 0.4f, 0.4f, 1.0f);
     m_diffuse.set(0.7f, 0.7f, 0.7f, 1.0f);
     m_specular.set(0.1f, 0.1f, 0.1f, 1.0f);
 
-    // set default cutoff angle
-    m_cutOffAngle   = 90.0;
+    // set default cutoff angle (no cutoff by default)
+    m_cutOffAngle   = 180.0;
 
     // set default attenuation parameters  ATT = 1 / (Kc + Kl*d + Kq*d^2)
+
     // Attenuation Constant.
     m_attConstant   = 1.0;
 
@@ -66,17 +64,23 @@ cLight::cLight(cWorld* a_world)
     // Attenuation Quadratic.
     m_attQuadratic  = 0.0;
 
-    // set default spot exponent. Repartition of Light in CutOff Angle (GAUSSIAN)
+    // set default spot exponent
     m_spotExponent = 100.0;
 
-    // Is the light source enabled?
+    // light sources are disable by default
     m_enabled = false;
+
+    // lights are purely directional by dfault
+    m_directionalLight = true;
 }
 
 
 //===========================================================================
 /*!
       Destructor of cLight.
+
+      Disables this light in OpenGL and removes it from the parent's list
+      of lights.
 
       \fn       cLight::~cLight()
 */
@@ -92,7 +96,7 @@ cLight::~cLight()
 
 //===========================================================================
 /*!
-      Set direction of light beam.
+      Set the direction of my light beam.
 
       \fn       void cLight::setDir(cVector3d& a_direction)
       \param    a_direction  Direction of light beam
@@ -100,20 +104,18 @@ cLight::~cLight()
 //===========================================================================
 void cLight::setDir(const cVector3d& a_direction)
 {
-    cVector3d curDirection = m_localRot.getCol0();
 
-    double angle = 0;//cAngle(curDirection, a_direction);
-    if (angle > 0)
-    {
-        cVector3d axis = cNormalize(cCross(curDirection, a_direction));
-        m_localRot.rotate(axis, angle);
-    }
+    // We arbitrarily point lights along the x axis of the stored
+    // rotation matrix... this allows matrix transformations
+    // to apply to lights.
+    m_localRot.setCol0(a_direction);
+    
 }
 
 
 //===========================================================================
 /*!
-      Set direction of light beam.
+      Set the direction of my light beam.
 
       \fn       void cLight::setDir(const double a_x, const double a_y,
       \         const double a_z)
@@ -130,7 +132,10 @@ void cLight::setDir(const double a_x, const double a_y, const double a_z)
 
 //===========================================================================
 /*!
-      Set the cutoff angle of the light beam.
+      Set the cutoff angle (in degrees) of my light beam.
+      
+      Should range  between 0 and 90 for spot lights.  Use 180.0 to specify
+      that there should be no cutoff.
 
       \fn       void cLight::setCutOffAngle(const GLfloat& a_value)
       \param    a_value  Cutoff angle of light beam.
@@ -151,7 +156,7 @@ void cLight::setCutOffAngle(const GLfloat& a_value)
     // check if value ranges between 0 and 90. This corresponds to a spot light.
     else if ((a_value >= 0.0) && (a_value <= 90.0)) { t_newAngle = a_value; }
 
-    // value is incorrect. Light is set to a non spot light configuration.
+    // value is incorrect. Light is set to a non-spot light configuration.
     else { t_newAngle = 180.0; }
 
     // assign new value
@@ -161,7 +166,11 @@ void cLight::setCutOffAngle(const GLfloat& a_value)
 
 //===========================================================================
 /*!
-      Render the light source in OpenGL.
+      Render this light source in OpenGL.
+
+      Note that if this light source is disabled, the corresponding GL light
+      source is disabled.  That means you can't disable your CHAI light but
+      turn on the GL light somewhere else.
 
       \fn       void cLight::renderLightSource()
 */
@@ -169,59 +178,59 @@ void cLight::setCutOffAngle(const GLfloat& a_value)
 void cLight::renderLightSource()
 {
     // check if light source enabled
-    if (m_enabled == true)
-    {
-        // enable light in OpenGL
-        glEnable(m_glLightNumber);
-
-        // set lighting components
-        glLightfv(m_glLightNumber, GL_AMBIENT,  m_ambient.pColor());
-        glLightfv(m_glLightNumber, GL_DIFFUSE, m_diffuse.pColor() );
-        glLightfv(m_glLightNumber, GL_SPECULAR, m_specular.pColor());
-
-        // set lighting model
-        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
-
-        // position light source in space
-        glPushMatrix();
-
-        float position[4];
-        position[0] = (float)m_globalPos.x;
-        position[1] = (float)m_globalPos.y;
-        position[2] = (float)m_globalPos.z;
-        position[3] = 0.0f;
-        glLightfv(m_glLightNumber, GL_POSITION, (const float *)&position);
-
-        glPopMatrix();
-
-        // set cutoff angle
-        glLightf(m_glLightNumber, GL_SPOT_CUTOFF, m_cutOffAngle);
-
-        // set direction of light beam
-        if (m_cutOffAngle != 180.0)
-        {
-            cVector3d dir = m_globalRot.getCol0();
-            float direction[4];
-            direction[0] = (float)dir.x;
-            direction[1] = (float)dir.y;
-            direction[2] = (float)dir.z;
-            direction[3] = 0.0f;
-            glLightfv(m_glLightNumber, GL_SPOT_DIRECTION, (const float *)&direction);
-        }
-
-        // set attenuation factors
-        glLightf(m_glLightNumber, GL_CONSTANT_ATTENUATION, m_attConstant);
-        glLightf(m_glLightNumber, GL_LINEAR_ATTENUATION, m_attLinear);
-        glLightf(m_glLightNumber, GL_QUADRATIC_ATTENUATION, m_attQuadratic);
-
-        // set exponent factor
-        glLightf(m_glLightNumber, GL_SPOT_EXPONENT, m_spotExponent);
-    }
-    else
+    if (m_enabled == false)
     {
         // disable OpenGL light source
         glDisable(m_glLightNumber);
-    };
+        return;
+    }
+
+    // enable this light in OpenGL
+    glEnable(m_glLightNumber);
+
+    // set lighting components
+    glLightfv(m_glLightNumber, GL_AMBIENT,  m_ambient.pColor());
+    glLightfv(m_glLightNumber, GL_DIFFUSE,  m_diffuse.pColor() );
+    glLightfv(m_glLightNumber, GL_SPECULAR, m_specular.pColor());
+
+    // position the light source in (local) space
+    float position[4];
+    
+    position[0] = (float)m_localPos.x;
+    position[1] = (float)m_localPos.y;
+    position[2] = (float)m_localPos.z;
+
+    // Directional light source...
+    if (m_directionalLight) position[3] = 0.0f;
+
+    // Positional light source...
+    else position[3] = 1.0f;
+
+    glLightfv(m_glLightNumber, GL_POSITION, (const float *)&position);
+
+    // set cutoff angle
+    glLightf(m_glLightNumber, GL_SPOT_CUTOFF, m_cutOffAngle);
+
+    // set the direction of my light beam, if I'm a directional light
+    if (m_cutOffAngle != 180.0)
+    {
+        cVector3d dir = m_globalRot.getCol0();
+        float direction[4];
+        direction[0] = (float)dir.x;
+        direction[1] = (float)dir.y;
+        direction[2] = (float)dir.z;
+        direction[3] = 0.0f;
+        glLightfv(m_glLightNumber, GL_SPOT_DIRECTION, (const float *)&direction);
+    }
+
+    // set attenuation factors
+    glLightf(m_glLightNumber, GL_CONSTANT_ATTENUATION, m_attConstant);
+    glLightf(m_glLightNumber, GL_LINEAR_ATTENUATION, m_attLinear);
+    glLightf(m_glLightNumber, GL_QUADRATIC_ATTENUATION, m_attQuadratic);
+
+    // set exponent factor
+    glLightf(m_glLightNumber, GL_SPOT_EXPONENT, m_spotExponent);    
+
 }
 
 

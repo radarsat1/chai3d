@@ -71,7 +71,7 @@ void __fastcall TForm1::MassSpringFormCreate(TObject *Sender)
     light = new cLight(world);
     camera->addChild(light);
     light->setEnabled(true);
-    light->setPos(cVector3d(0,0,0));
+    light->setPos(cVector3d(0,2,4));
     light->rotate(cVector3d(0,0,1), cDegToRad(180));
 
     // create a display for graphic rendering

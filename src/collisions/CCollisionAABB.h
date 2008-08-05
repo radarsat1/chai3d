@@ -35,9 +35,10 @@
 //===========================================================================
 /*!
       \class    cCollisionAABB
-      \brief    cCollisionAABB provides methods to create and maintain an Axis-
-                Aligned Bounding Box collision detection tree, and to use
-                this tree to check for the intersection of a line with a mesh.
+      \brief    cCollisionAABB provides methods to create an Axis-Aligned
+                Bounding Box collision detection tree, and to use
+                this tree to check for the intersection of a line segment
+                with a mesh.
 */
 //===========================================================================
 class cCollisionAABB : public cGenericCollision
@@ -54,18 +55,18 @@ class cCollisionAABB : public cGenericCollision
     void initialize();
     //! Draw the bounding boxes in OpenGL.
     void render();
-    //! Compute collision between a segment and collision tree.
+    //! Return the nearest triangle intersected by the given segment, if any.
     bool computeCollision(cVector3d& a_segmentPointA,
             cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
             cTriangle*& a_colTriangle, cVector3d& a_colPoint,
             double& a_colSquareDistance, int a_proxyCall = -1);
-    //! Returns the root node.
+    //! Return the root node of the collision tree.
     cCollisionAABBNode* getRoot() { return (m_root); }
 
   protected:
     // MEMBERS:
     //! Pointer to the list of triangles in the mesh.
-    vector<cTriangle>* m_triangles;
+    vector<cTriangle> *m_triangles;
     //! Pointer to an array of leaf nodes for the AABB Tree.
     cCollisionAABBLeaf *m_leaves;
     //! Pointer to the root of the AABB Tree.
@@ -73,8 +74,8 @@ class cCollisionAABB : public cGenericCollision
     //! The number of triangles in the mesh.
     unsigned int m_numTriangles;
     //! Triangle returned by last successful collision test.
-    cTriangle* lastCollision;
-    //! Use neighbor list to speed up collision detection?
+    cTriangle* m_lastCollision;
+    //! Use list of triangles' neighbors to speed up collision detection?
     bool m_useNeighbors;
 };
 

@@ -148,8 +148,8 @@ DWORD clock_loop(void* param) {
     while(app->time->on()) {
 		char buff[50];
 	    CEdit* edit = (CEdit*)(app->GetDlgItem(IDC_EDIT1));
-		sprintf(buff, "%d", app->time->getCurrentTime());
-		edit->SetWindowText(buff);
+		sprintf(buff, "%ld", (app->time->getCurrentTime()));
+		edit->SetWindowText(buff);    
 
 		edit = (CEdit*)(app->GetDlgItem(IDC_EDIT3));
 		if (app->time->timeoutOccured())

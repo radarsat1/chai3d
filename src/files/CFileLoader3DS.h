@@ -12,7 +12,11 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
+    The bulk of this file comes from Lev Povalahev's l3ds.h,
+    copyright (c) 2001-2002 Lev Povalahev.  Used with permission.
+
     \author:    <http://www.chai3d.org>
+    \author:    Lev Povalahev
     \author:    Dan Morris
     \version    1.0
     \date       03/2004
@@ -50,7 +54,19 @@ using std::vector;
 //! Load a 3d image by providing a filename and mesh in which object is loaded.
 bool cLoadFile3DS(cMesh* iMesh, const string& iFileName);
 
-//---------------------------------------------------------------------------
+
+
+/******
+
+  The remainder of this file comes from Lev Povalahev's l3ds.h
+  copyright (c) 2001-2002 Lev Povalahev
+
+******/
+  
+// copyright (c) 2001-2002 Lev Povalahev
+// this is a 3ds importer version 2
+//
+// Modified by Dan Morris, 2004
 
 typedef unsigned int uint;
 typedef unsigned char byte;

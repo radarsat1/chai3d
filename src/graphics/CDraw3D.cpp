@@ -25,15 +25,20 @@
 
 //===========================================================================
 /*!
-      Draw an X-Y-Z Frame. Red arrow corresponds to X-Axis, Green to Y-Axis
-      and Blue to Z-Axis. The Scale parameter defines the size of the arrows.
+      Draw an X-Y-Z Frame. The red arrow corresponds to the X-Axis,
+      green to the Y-Axis, and blue to the Z-Axis.
+      
+      The scale parameter determines the size of the arrows.
 
-      \fn       void cDrawFrame(const double a_scale)
-      \param    a_scale  Length of each arrow (x, Y and Z)
+      \fn       void cDrawFrame(const double a_scale=1.0)
+      \param    a_scale  Length of each arrow
+      \param    a_modifyMaterialState If true, this function sets GL to the preferred material state
 */
 //===========================================================================
-void cDrawFrame(const double a_scale)
+void cDrawFrame(const double a_scale, bool a_modifyMaterialState)
 {
+
+  // The vertices that make a nice frame are just hard-coded here...
   static double Vertices[25][3] =
   {{ 0.0, 0.010000, 0.0 },
   { 0.007000, 0.007000, -0.007000 },
@@ -116,10 +121,10 @@ void cDrawFrame(const double a_scale)
   {  9,12,17,12,16,12,8,12 },
   {  8,12,16,12,23,12,15,12 }};
 
-  // declare temps variables.
   int i;
 
-  // Set rotation matrices for arrows X, Y and Z:
+  // Create rotation matrices for the X, Y and Z arrows
+
   cMatrix3d rotationX;
   rotationX.identity();
   rotationX.rotate( cVector3d(0, 1, 0), -CHAI_PI / 2.0);
@@ -132,11 +137,13 @@ void cDrawFrame(const double a_scale)
   rotationZ.identity();
   rotationZ.rotate( cVector3d(1, 0, 0), CHAI_PI);
 
-  // Set OpenGL material mode
-  glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT, GL_AMBIENT);
-
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  // Set up nice color-tracking
+  if (a_modifyMaterialState)
+  {
+      glEnable(GL_COLOR_MATERIAL);
+      glColorMaterial(GL_FRONT, GL_AMBIENT);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
 
   // DRAW AXIS X:
   // Set pose
@@ -254,6 +261,7 @@ void cDrawFrame(const double a_scale)
 
   matAxis.glMatrixPop(); // Rotation Y.
 
+
   // DRAW AXIS Z:
   // set pose
   matAxis.set(rotationZ);
@@ -309,7 +317,7 @@ void cDrawFrame(const double a_scale)
 
 //===========================================================================
 /*!
-      Draw a line based box with sides parallel to the x-y-z axis.
+      Draw a line-based box with sides parallel to the x-y-z axes
 
       \fn       void cDrawWireBox(const double a_xMin, const double a_xMax,
                 const double a_yMin, const double a_yMax,
@@ -360,34 +368,34 @@ void cDrawWireBox(const double a_xMin, const double a_xMax,
 
 //===========================================================================
 /*!
-      Render an sphere given a radius.
+      Render a sphere given a radius.
 
       \fn       void cDrawSphere(const double a_radius,
-                const unsigned int a_numSlices, const unsigned int a_numStacks)
-      \param    a_radius  Radius of sphere.
+                const unsigned int a_numSlices=10, const unsigned int a_numStacks=10)
+      \param    a_radius  Radius of the sphere
       \param    a_numSlices  Specifies the number of subdivisions around the
-                             z axis (similar to lines of longitude).
+                             z axis (similar to lines of longitude)
       \param    a_numStacks  Specifies the number of subdivisions along the
-                             z axis (similar to lines of latitude).
+                             x/y axes (similar to lines of latitude)
 */
 //===========================================================================
 void cDrawSphere(const double a_radius,
                  const unsigned int a_numSlices, const unsigned int a_numStacks)
 {
-    // allocate new object in OpenGL to render a sphere
+    // allocate a new OpenGL quadric object for rendering a sphere
     GLUquadricObj *quadObj;
     quadObj = gluNewQuadric ();
 
     // set rendering style
     gluQuadricDrawStyle (quadObj, GLU_FILL);
 
-    // set normals rendering mode
+    // set normal-rendering mode
     gluQuadricNormals (quadObj, GLU_SMOOTH);
 
-    // render sphere
+    // render a sphere
     gluSphere(quadObj, a_radius, a_numSlices, a_numStacks);
 
-    // delete object
+    // delete our quadric object
     gluDeleteQuadric(quadObj);
 }
 

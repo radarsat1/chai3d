@@ -67,6 +67,16 @@
 // Default initial position for the object that will appear in the main window
 cVector3d g_initial_object_pos(1.5,0,-1.2);
 
+// The translational and rotational velocities (gl units/s and radians/s)
+// at which the object is animated when the 'toggle animation' button gets
+// clicked
+#define INITIAL_OBJECT_X_VELOCITY -0.5
+#define OBJECT_R_VELOCITY (M_PI / 4.0)
+
+// This is the point where the object will "turn around"
+// when he's being animated...
+#define MAXIMUM_ANIMATION_XVAL 1.0
+  
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -175,8 +185,14 @@ BOOL Cobject_loaderApp::InitInstance() {
   light = new cLight(world);
   camera->addChild(light);
   light->setEnabled(true);
-  light->setPos(cVector3d(-1,0,0));
-  light->rotate(cVector3d(0,0,1), cDegToRad(180));
+
+  // A purely positional light, over to the left a little
+  // and behind the camera a little...
+  light->setDirectionalLight(false);
+  light->setPos(cVector3d(-1,0,1));
+
+  // If the light was directional, we might do this...
+  // light->rotate(cVector3d(0,0,1), cDegToRad(180));
 
   // Create a mesh - we will build a pyramid manually, and later let the
   // user load 3d models
@@ -190,7 +206,7 @@ BOOL Cobject_loaderApp::InitInstance() {
 
   // Move the object over some so the Phantom will not initially be
   // inside the object.
-  //object->translate(g_initial_object_pos);
+  object->translate(g_initial_object_pos);
   object->rotate(cVector3d(0,1,0),45.0 * 3.14159 / 180.0);
 
   object->computeGlobalPositions();
@@ -325,8 +341,35 @@ int Cobject_loaderApp::render_loop() {
 
   }
 
-
+  // If the viewport is rendering in stereo, it renders a full pair here...
   viewport->render();
+
+  // If you wanted to control the stereo rendering, for example if you
+  // couldn't suspend your computation for two rendering passes, you
+  // could do:
+
+  /*
+  if (viewport->getStereoOn() == 0) {
+  
+    // Just draw the scene...
+    viewport->render();
+
+  }
+
+  else {
+
+    // Draw a stereo pair... by convention, we render left first,
+    // and the buffers are swapped when we render the _right_ image
+    // (by CHAI convention)
+    viewport->render(CHAI_STEREO_LEFT);
+
+    // Now I have time to do my business...
+
+    viewport->render(CHAI_STEREO_RIGHT);    
+
+  }
+  */
+
 
   return 0;
 
@@ -675,13 +718,15 @@ void object_loader_haptic_iteration(void* param) {
 }
 
 
-void Cobject_loaderApp::animate() {
+// We use this in our "animation" routine...
+double sgn(double a) {
+  if (a>0) return 1.0;
+  else if (a<0) return -1.0;
+  else return 0.0;
+}       
 
-  // The translational and rotational velocities (gl units/s and radians/s)
-  // at which the object is animated when the 'toggle animation' button gets
-  // clicked
-  #define OBJECT_X_VELOCITY -0.5
-  #define OBJECT_R_VELOCITY (M_PI / 4.0)
+
+void Cobject_loaderApp::animate() {
 
   if (object == 0) return;
        
@@ -702,11 +747,11 @@ void Cobject_loaderApp::animate() {
   double curtime = clock.GetTime();
     
   if (moving_object && m_last_animation_time >= 0) {
+
     double elapsed = curtime - m_last_animation_time;
 
     // Move the object...
-    double x_delta = elapsed * OBJECT_X_VELOCITY;
-    cVector3d delta(x_delta,0,0);
+    cVector3d delta = cMul(elapsed,m_animation_velocity);
     object->translate(delta);
     
     double r_delta = elapsed * OBJECT_R_VELOCITY;
@@ -716,7 +761,21 @@ void Cobject_loaderApp::animate() {
     // after object movement
     object->computeGlobalPositions(1);    
     // object->computeBoundaryBox(true);
-  }
+
+    // Turn our velocity around if we reach the end of the animation
+    // space...
+    if (
+        ( fabs(object->getPos().x) > MAXIMUM_ANIMATION_XVAL )
+        &&
+        ( sgn(m_animation_velocity.x) == sgn(object->getPos().x) )
+       )
+       {
+
+        m_animation_velocity[0] = m_animation_velocity[0] * -1.0;
+
+    } // if we need to turn around
+        
+  } // if we're animating our object
 
   m_last_animation_time = curtime;
 
@@ -738,6 +797,13 @@ void Cobject_loaderApp::toggle_animation() {
   else {
     moving_object = 1;
     m_last_animation_time = -1.0;
+
+    // Put the object at the zero position...
+    object->setPos(g_initial_object_pos);
+
+    // And reset the animation velocity to its initial
+    // default...
+    m_animation_velocity = cVector3d(INITIAL_OBJECT_X_VELOCITY,0,0);
   }
 
 }
@@ -829,7 +895,7 @@ void Cobject_loaderApp::toggle_haptics(int enable) {
       tool->rotate(cVector3d(0,0,1),-90.0*M_PI/180.0);
       tool->rotate(cVector3d(1,0,0),-90.0*M_PI/180.0);
       tool->setRadius(0.05);
-    
+          
     }
     
     // set up the device

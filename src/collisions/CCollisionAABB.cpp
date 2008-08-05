@@ -23,22 +23,20 @@
 #include "CCollisionAABB.h"
 //---------------------------------------------------------------------------
 
-// Pointer for creating new AABB tree nodes
+//! Pointer to first free location in array of AABB tree nodes.
 cCollisionAABBInternal* g_nextFreeNode;
-extern bool intersect(cCollisionAABBBox a_0, cCollisionAABBBox a_1);
 
 //===========================================================================
 /*!
     Constructor of cCollisionAABB.
 
-    \fn     cCollisionAABB::cCollisionAABB(vector<cTriangle> *a_triangles,
-                                           bool a_useNeighbors)
-    \param  a_triangle      Pointer to array of triangles.
-    \param  a_useNeighbors  Use neighbor lists to speed up collision detection?
+    \fn       cCollisionAABB::cCollisionAABB(vector<cTriangle> *a_triangles,
+              bool a_useNeighbors)
+    \param    a_triangle      Pointer to array of triangles.
+    \param    a_useNeighbors  Use neighbor lists to speed up collision detection?
 */
 //===========================================================================
-cCollisionAABB::cCollisionAABB(vector<cTriangle>* a_triangles,
-                               bool a_useNeighbors)
+cCollisionAABB::cCollisionAABB(vector<cTriangle> *a_triangles, bool a_useNeighbors)
 {
     // list of triangles used when building the tree
     m_triangles = a_triangles;
@@ -55,7 +53,7 @@ cCollisionAABB::cCollisionAABB(vector<cTriangle>* a_triangles,
 /*!
     Destructor of cCollisionAABB.
 
-    \fn     cCollisionAABB::~cCollisionAABB()
+    \fn       cCollisionAABB::~cCollisionAABB()
 */
 //===========================================================================
 cCollisionAABB::~cCollisionAABB()
@@ -70,20 +68,25 @@ cCollisionAABB::~cCollisionAABB()
 
 //===========================================================================
 /*!
-      Build the AABB Tree.
+    Build the Axis-Aligned Bounding Box collision-detection tree.  Each
+    leaf is associated with one triangle and with a bounding box of minimal
+    dimensions such that it fully encloses the triangle and is aligned with
+    the coordinate axes (no rotations).  Each internal node is associated
+    with a bounding box of minimal dimensions such that it fully encloses
+    the bounding boxes of its two children and is aligned with the axes.
 
-      \fn         void cCollisionAABB::initialize()
+    \fn       void cCollisionAABB::initialize()
 */
 //===========================================================================
 void cCollisionAABB::initialize()
 {
     unsigned int i;
-    lastCollision = NULL;
+    m_lastCollision = NULL;
 
     // if a previous tree was created, delete it
     if (m_root != NULL)
     {
-        delete m_root;
+        delete[] m_root;
     }
 
     // reset triangle counter
@@ -107,7 +110,7 @@ void cCollisionAABB::initialize()
         return;
     }
 
-    // create a leaf node for each triangles
+    // create a leaf node for each triangle
     m_leaves = new cCollisionAABBLeaf[m_numTriangles];
     for (i = 0; i < m_numTriangles; ++i)
     {
@@ -126,127 +129,154 @@ void cCollisionAABB::initialize()
       new(g_nextFreeNode++) cCollisionAABBInternal(m_numTriangles, m_leaves, 0);
     }
 
-    // there is only one triangle, so the tree in only constituted of one leaf.
+    // there is only one triangle, so the tree consists of just one leaf
     else
     {
         m_root = &m_leaves[0];
     }
+
+    // assign parent relationships in the tree
+    m_root->setParent(0,1);
 }
 
 
 //===========================================================================
 /*!
-    Check if a segment intersects any triangle of the mesh. The method uses
-    the pre computed AABB boxes.
+    Check if the given line segment intersects any triangle of the mesh.  If so,
+    return true, as well as (through the output parameters) pointers to the
+    intersected triangle, the mesh of which this triangle is a part, the point
+    of intersection, and the distance from the origin of the segment to the
+    collision point.  If more than one triangle is intersected, return the one
+    closest to the origin of the segment.  The method uses the pre-computed
+    AABB boxes, starting at the root and recursing through the tree, breaking
+    the recursion along any path in which the bounding box of the line segment
+    does not intersect the bounding box of the node.  At the leafs,
+    triangle-segment intersection testing is called.
 
-    \fn     bool cCollisionBrute::computeCollision(cVector3d& a_segmentPointA,
-            cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
-            cTriangle*& a_colTriangle, cVector3d& a_colPoint,
-            double& a_colSquareDistance, int a_num)
-
-    \param  a_rayOrigin  Point from where collision ray starts.
-    \param  a_rayDir  Direction vector of collision ray.
-    \param  a_colObject  Pointer to nearest collided object.
-    \param  a_colTriangle Pointer to nearest colided triangle.
-    \param  a_colPoint  Position of nearest collision.
-    \param  a_colSquareDistance  Distance between ray origin and nearest
-              collision point.
-    \param  a_proxyCall  If this is > 0, this is a call from a proxy, and the value
-                         of a_proxyCall specifies which call this is.  -1 for
-                         non-proxy calls.
-
-    \return  Returns \b true if a triangles was hit.
+    \fn       bool cCollisionAABB::computeCollision(cVector3d& a_segmentPointA,
+              cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
+              cTriangle*& a_colTriangle, cVector3d& a_colPoint,
+              double& a_colSquareDistance, int a_proxyCall)
+    \param    a_segmentPointA  Initial point of segment.
+    \param    a_segmentPointB  End point of segment.
+    \param    a_colObject  Returns pointer to nearest collided object.
+    \param    a_colTriangle Returns pointer to nearest colided triangle.
+    \param    a_colPoint  Returns position of nearest collision.
+    \param    a_colSquareDistance  Returns distance between ray origin and
+                                   collision point.
+    \param    a_proxyCall  If this is > 0, this is a call from a proxy, and the
+                           value of a_proxyCall specifies which call this is.
+                           When checking for the second and third constraint
+                           planes, only the neighbors of the triangle intersected
+                           in the first call need be checked, not the whole tree.
+                           Call with a_proxyCall = -1 for non-proxy calls.
+    \return   Return true if the line segment intersects a triangle.
 */
 //===========================================================================
 bool cCollisionAABB::computeCollision(cVector3d& a_segmentPointA,
-        cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
-        cTriangle*& a_colTriangle, cVector3d& a_colPoint,
-        double& a_colSquareDistance, int a_proxyCall)
+                                      cVector3d& a_segmentPointB,
+                                      cGenericObject*& a_colObject,
+                                      cTriangle*& a_colTriangle,
+                                      cVector3d& a_colPoint,
+                                      double& a_colSquareDistance,
+                                      int a_proxyCall)
 {
     // convert two point segment into a segment described by a point and
-    // a directional vector.
+    // a directional vector
     cVector3d dir;
     a_segmentPointB.subr(a_segmentPointA, dir);
 
-    // create an axis-aligned bounding box for the line
-    cCollisionAABBBox l_lineBox;
-    l_lineBox.setEmpty();
-    l_lineBox.enclose(a_segmentPointA);
-    l_lineBox.enclose(a_segmentPointB);
- 
-    // if this is a subsequent call from the proxy algorithm after a detecting
-    // an initial collision, only neighbors of the triangle from the first
-    // collision detection need to be checked
+    // if this is a subsequent call from the proxy algorithm after detecting
+    // an initial collision, and if the flag to use neighbor checking is set,
+    // only neighbors of the triangle from the first collision detection
+    // need to be checked
     if ((m_useNeighbors) && (a_proxyCall > 1) && (m_root != NULL) &&
-        (lastCollision != NULL) && (lastCollision->m_neighbors != NULL))
+        (m_lastCollision != NULL) && (m_lastCollision->m_neighbors != NULL))
     {
-      cGenericObject* colObject;
-      cTriangle* colTriangle;
-      cVector3d colPoint;
-      double colSquareDistance = dir.lengthsq();
-      bool firstHit = true;
 
-      // check each neighbor, and find the closest for which there is a
-      // collision, if any
-      for (unsigned int i=0; i<lastCollision->m_neighbors->size(); i++)
-      {
-        if (((*(lastCollision->m_neighbors))[i])->computeCollision(
-                                    a_segmentPointA,
-                                    dir,
-                                    colObject,
-                                    colTriangle,
-                                    colPoint,
-                                    colSquareDistance
-                                  ))
+        // initialize temp variables for output parameters
+        cGenericObject* colObject;
+        cTriangle* colTriangle;
+        cVector3d colPoint;
+        double colSquareDistance = dir.lengthsq();
+        bool firstHit = true;
+
+        // check each neighbor, and find the closest for which there is a
+        // collision, if any
+        for (unsigned int i=0; i<m_lastCollision->m_neighbors->size(); i++)
         {
-          if (firstHit || (colSquareDistance < a_colSquareDistance))
-          {
-            lastCollision = colTriangle;
-            a_colObject = colObject;
-            a_colTriangle = colTriangle;
-            a_colPoint = colPoint;
-            a_colSquareDistance = colSquareDistance;
-            firstHit = false;
-          }
+            if (((*(m_lastCollision->m_neighbors))[i])->computeCollision(
+                    a_segmentPointA, dir, colObject, colTriangle,
+                    colPoint, colSquareDistance))
+            {
+
+                // if this intersected triangle is closer to the segment origin
+                // than any other found so far, set the output parameters
+                if (firstHit || (colSquareDistance < a_colSquareDistance))
+                {
+                    m_lastCollision = colTriangle;
+                    a_colObject = colObject;
+                    a_colTriangle = colTriangle;
+                    a_colPoint = colPoint;
+                    a_colSquareDistance = colSquareDistance;
+                    firstHit = false;
+                }
+            }
         }
-      }
-      if (!firstHit)
-        return true;
-      lastCollision = NULL;
-      return false;
+
+        // if at least one neighbor triangle was intersected, return true
+        if (!firstHit)  return true;
+
+        // otherwise there was no collision; return false
+        m_lastCollision = NULL;
+        return false;
     }
 
     // otherwise, if this is the first call in an iteration of the proxy
-    // algorithm (or a call from any other algorithm), check the sphere
-    // tree
+    // algorithm (or a call from any other algorithm), check the AABB tree
 
-    // test for intersection between this box and the collision tree
+    // if the root is null, the tree is empty, so there can be no collision
     if (m_root == NULL)
     {
-        lastCollision = NULL;
+        m_lastCollision = NULL;
         return (false);
+    }
+
+    // create an axis-aligned bounding box for the line
+    cCollisionAABBBox lineBox;
+    lineBox.setEmpty();
+    lineBox.enclose(a_segmentPointA);
+    lineBox.enclose(a_segmentPointB);
+
+    // test for intersection between the line segment and the root of the
+    // collision tree; the root will recursively call children down the tree
+    a_colSquareDistance = dir.lengthsq();
+    bool result = m_root->computeCollision(a_segmentPointA, dir, lineBox,
+            a_colTriangle, a_colPoint, a_colSquareDistance);
+
+    // if there was a collision, set m_lastCollision to the intersected triangle
+    // returned by the call to the root of the tree, and set the output
+    // parameter for the intersected mesh to the parent of this triangle
+    if (result)
+    {
+        m_lastCollision = a_colTriangle;
+        a_colObject = a_colTriangle->getParent();
     }
     else
     {
-      a_colSquareDistance = dir.lengthsq();
-      bool result = m_root->computeCollision(a_segmentPointA, dir, l_lineBox,
-               a_colTriangle, a_colPoint, a_colSquareDistance);
-      if (result) {
-        lastCollision = a_colTriangle;
-        a_colObject = a_colTriangle->getParent();        
-      }
-      else
-        lastCollision = NULL;
-      return result;
+        m_lastCollision = NULL;
     }
+
+    // return whether there was an intersection
+    return result;
 }
 
 
 //===========================================================================
 /*!
-      Render the bounding boxes in OpenGL.
+    Render the bounding boxes of the collision tree in OpenGL.
 
-      \fn         void cCollisionAABB::render()
+    \fn       void cCollisionAABB::render()
 */
 //===========================================================================
 void cCollisionAABB::render()
@@ -258,10 +288,10 @@ void cCollisionAABB::render()
         glLineWidth(1.0);
         glColor4fv(m_material.m_ambient.pColor());
 
-        // render tree
+        // render tree by calling the root, which recursively calls the children
         m_root->render(m_displayDepth);
 
-        // restore settings
+        // restore lighting settings
         glEnable(GL_LIGHTING);
     }
 }

@@ -1,17 +1,26 @@
 //===========================================================================
-//  - UNIT -
-//
-//    Copyright (C) 2003. Stanford University - Robotics Laboratory
-/*!
-      \author     Collision detection algorithm by Joel Brown
-      \author     jbrown@cs.stanford.edu
-      \author     Based on code by Stephen Sorkin
-      \author     ssorkin@cs.stanford.edu
-      \author     Integrated into CHAI by Christopher Sewell
-      \author     csewell@stanford.edu
-      \file       CCollisionSpheresGeometry.h
-      \version    1.0
-      \date       09/2003
+/*
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License("GPL") version 2
+    as published by the Free Software Foundation.
+
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
+
+    \author     Collision detection algorithm by Joel Brown
+    \author     jbrown@cs.stanford.edu
+    \author     Based on code by Stephen Sorkin
+    \author     ssorkin@cs.stanford.edu
+    \author     Integrated into CHAI by Christopher Sewell
+    \author     csewell@stanford.edu
+    \file       CCollisionSpheresGeometry.h
+    \version    1.0
+    \date       01/2004
 */
 //===========================================================================
 
@@ -32,126 +41,42 @@ using std::map;
 using std::less;
 using std::list;
 //---------------------------------------------------------------------------
+// FORWARD DECLARATIONS:
 class cCollisionSpheresPoint;
 class cCollisionSpheresEdge;
-class cCollisionSpheresTri;
-class cCollisionSpheresLine;
 class cCollisionSpheresLeaf;
 
 // TYPEDEFS:
+//! Map of points to the edges they form.
 typedef map<cCollisionSpheresPoint *, cCollisionSpheresEdge *,
-            less<cCollisionSpheresPoint *> > PtEmap;
-typedef list<cCollisionSpheresTri *> Tlist;
+        less<cCollisionSpheresPoint *> > PtEmap;
 //---------------------------------------------------------------------------
-
-//===========================================================================
-//  - CLASS DEFINITION -
-/*!
-      \class    cCollisionSpheresGenericShape
-      \brief    cCollisionSpheresGenericShape is an abstract class for shape
-                primitives (such as triangles or lines) in the model which
-                are surrounded by spheres for the collision detector.
-*/
-//===========================================================================
-class cCollisionSpheresGenericShape
-{
-  // FRIENDS:
-  //! Leaf nodes of the collision detection sphere tree.
-  friend class cCollisionSpheresLeaf;
-
-  public:
-    // CONSTRUCTOR:
-    //! Constructor of cCollisionSpheresGenericShape.
-    cCollisionSpheresGenericShape() {sphere = NULL;}
-
-    // METHODS:
-    //! Return center.
-    virtual const cVector3d &getCenter() const = 0;
-    //! Return radius.
-    virtual double getRadius() const = 0;
-    //! Calculate distance to another primitive.
-    virtual bool dist(cCollisionSpheresGenericShape *other,
-                  cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-                  cVector3d& a_colPoint, double& a_colSquareDistance) = 0;
-    //! Axis on which to sort.
-    static int split;
-    //! Overloaded less than operator (for sorting).
-    bool operator<(cCollisionSpheresGenericShape* other);
-
-
-  protected:
-    // PROPERTIES:
-    //! Pointer to the ollision sphere surrounding the primitive.
-    cCollisionSpheresLeaf *sphere;
-};
-
 
 //===========================================================================
 //  - CLASS DEFINITION -
 /*!
       \class    cCollisionSpheresPoint
       \brief    cCollisionSpheresPoint defines points used in the primitive
-                shapes in the model.
+                shapes.
 */
 //===========================================================================
 class cCollisionSpheresPoint
 {
-  // FRIENDS:
-  //! Edges of primitive shapes.
-  friend class cCollisionSpheresEdge;
-  //! Triangles in the model.
-  friend class cCollisionSpheresTri;
-
   public:
-    // CONSTRUCTORS:
+    // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresPoint.
-    cCollisionSpheresPoint(double x = 0, double y = 0, double z = 0);
-    //! Constructor of cCollisionSpheresPoint.
-    cCollisionSpheresPoint(double x[3]);
-    //! Copy constructor.
-    cCollisionSpheresPoint &operator=(const cVector3d &other);
+    cCollisionSpheresPoint(double a_x = 0, double a_y = 0, double a_z = 0)
+        { m_pos.x = a_x;  m_pos.y = a_y;  m_pos.z = a_z; }
 
     // METHODS:
-    //! Set position of point given three doubles.
-    void set(double x, double y, double z);
-    //! Set position of one coordinate given index and value.
-    void set(int coord, double value);
-    //! Set position of point given array of three doubles.
-    void set(double x[3]);
-    //! Set index.
-    inline void setIndex(int index_)  {index = index_;}
-    //! Return the index.
-    inline int getIndex()  {return index;}
-    //! Calculate normal of the point from normals of associated triangles.
-    void procNormal();
-    //! Recalculate properties for associated edges and triangles.
-    void procChange();
     //! Return the edge, if any, from this point to the given point.
-    cCollisionSpheresEdge *getEdgeTo(cCollisionSpheresPoint *other);
+    cCollisionSpheresEdge *getEdgeTo(cCollisionSpheresPoint *a_other);
 
     // PROPERTIES:
     //! Position of the point.
-    cVector3d pos;
-    //! Map of edges from this point.
-    PtEmap edgeMap;
-    //! List of triangles for which this point is a vertex.
-    Tlist triList;
-    //! Index of the point.
-    int index;
-    //! Normal, calculated from all triangles for which the point is a vertex.
-    cVector3d normal;
-    //! Array subscript access to position of the point.
-    virtual double &operator[](int i)
-    {
-      assert((i>=0) && (i<3));
-      switch (i)
-      {
-        case 0:  return (pos.x);
-        case 1:  return (pos.y);
-        case 2:  return (pos.z);
-      }
-      return (pos.x);
-    }
+    cVector3d m_pos;
+    //! Map of edges which have this point as an endpoint.
+    PtEmap m_edgeMap;
 };
 
 
@@ -159,59 +84,78 @@ class cCollisionSpheresPoint
 //  - CLASS DEFINITION -
 /*!
       \class    cCollisionSpheresEdge
-      \brief    cCollisionSpheresEdge defines edges of shape primitives
-                in the model.
+      \brief    cCollisionSpheresEdge defines edges of shape primitives.
 */
 //===========================================================================
 class cCollisionSpheresEdge
 {
-  // FRIENDS:
-  //! Triangles in the model.
-  friend class cCollisionSpheresTri;
-
   public:
-    // CONSTRUCTORS:
+    // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresEdge.
-    cCollisionSpheresEdge(cCollisionSpheresPoint *a, cCollisionSpheresPoint *b);
-    //! Constructor of cCollisionSpheresEdge.
-    cCollisionSpheresEdge(cCollisionSpheresPoint *end_[2]);
+    cCollisionSpheresEdge(cCollisionSpheresPoint *a_a, cCollisionSpheresPoint *a_b);
 
     // METHODS:
-    //! Return the first or second point of the edge.
-    inline const cCollisionSpheresPoint &get(int coord) const
-		  {assert((coord >= 0) && (coord < 2)); return *end[coord];}
-    //! Calculate the distance to the given edge.
-    double dist(const cCollisionSpheresEdge &other) const;
-    //! Calculate the distance to the given point.
-    double dist(const cCollisionSpheresPoint &other) const;
     //! Return the center of the edge.
-    inline const cVector3d *getCenter() const  {return &center;}
+    inline const cVector3d *getCenter() const  {return &m_center;}
     //! Return the radius of the edge.
-    inline double getRadius() const  {
-    if (D <= 0.0) return 0.0; return sqrt(D)/2;}
-    //! Recalculate properties of the edge from its vertices.
-    void procChange();
-    //! Return dot product of edge with given vector divided by 2-norm.
-    double compParam(const cVector3d &diff) const;
-    //! Return whether 2-norm is zero, within tolerance.
-    bool isDegenerate() const;
-    //! Return value of given number clipped within the given range.
-    bool clipTo(double &x, const double min, const double max) const;
-    //! Enter the two vertices of the edge in the edge map.
-    void setup();
+    inline double getRadius() const
+        { if (m_D <= 0.0) return 0.0; return sqrt(m_D)/2; }
 
   private:
     // PROPERTIES:
     //! The two vertices of the edge.
-    cCollisionSpheresPoint *end[2];
+    cCollisionSpheresPoint *m_end[2];
     //! The center of the edge.
-    cVector3d center;
+    cVector3d m_center;
     //! The distance between the vertices.
-    cVector3d d;
+    cVector3d m_d;
     //! The 2-norm of the edge.
-    double D;
-    //! List of triangles bounded by the edge.
-    list<cCollisionSpheresTri *> triList;
+    double m_D;
+};
+
+
+//===========================================================================
+//  - CLASS DEFINITION -
+/*!
+      \class    cCollisionSpheresGenericShape
+      \brief    cCollisionSpheresGenericShape is an abstract class for shape
+                primitives (such as triangles or lines) which are surrounded
+                by spheres for the collision detector.
+*/
+//===========================================================================
+class cCollisionSpheresGenericShape
+{
+  public:
+    // CONSTRUCTOR:
+    //! Constructor of cCollisionSpheresGenericShape.
+    cCollisionSpheresGenericShape() { m_sphere = NULL; }
+
+    // METHODS:
+    //! Return center.
+    virtual const cVector3d &getCenter() const = 0;
+    //! Return radius.
+    virtual double getRadius() const = 0;
+    //! Determine whether this primitive intersects the given primitive.
+    virtual bool computeCollision(cCollisionSpheresGenericShape *a_other,
+            cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
+            cVector3d& a_colPoint, double& a_colSquareDistance) = 0;
+    //! Return pointer to bounding sphere of this primitive shape.
+    virtual cCollisionSpheresLeaf* getSphere()  { return m_sphere; }
+    //! Set pointer for the bounding sphere of this primitive shape.
+    virtual void setSphere(cCollisionSpheresLeaf* a_sphere)
+        { m_sphere = a_sphere; }
+    //! Overloaded less than operator (for sorting).
+    bool operator<(cCollisionSpheresGenericShape* a_other)
+        { return (getCenter().get(m_split) < a_other->getCenter().get(m_split)); }
+
+    // STATIC PROPERTIES:
+    //! Axis on which to sort.
+    static int m_split;
+
+  private:
+    // PROPERTIES:
+    //! Pointer to the collision sphere surrounding the primitive.
+    cCollisionSpheresLeaf *m_sphere;
 };
 
 
@@ -220,68 +164,43 @@ class cCollisionSpheresEdge
 /*!
       \class    cCollisionSpheresTri
       \brief    cCollisionSpheresTri defines the triangle primitives that
-                make up the model and are bounded by the collision spheres.
-                It is associated with a specific cTriangle object in the mesh.
+                make up the mesh and are bounded by the collision spheres.
+                It is essentially just a wrapper around a cTriangle object,
+                to which it has a pointer (m_original).
 */
 //===========================================================================
 class cCollisionSpheresTri : public cCollisionSpheresGenericShape
 {
   public:
-    // CONSTRUCTORS AND DESTRUCTOR:
+    // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresTri.
-    cCollisionSpheresTri(cCollisionSpheresPoint *a, cCollisionSpheresPoint *b,
-                         cCollisionSpheresPoint *c);
-    //! Constructor of cCollisionSpheresTri.
-    cCollisionSpheresTri(cCollisionSpheresPoint *corner_[3]);
-    //! Destructor of cCollisionSpheresTri.
-    ~cCollisionSpheresTri();
+    cCollisionSpheresTri(cCollisionSpheresPoint *a_a, cCollisionSpheresPoint *a_b,
+            cCollisionSpheresPoint *a_c);
 
     // METHODS:
-    //! Return the given edge of the triangle.
-    inline const cCollisionSpheresEdge &getSide(int coord) const
-		  {assert((coord >= 0) && (coord < 3)); return *side[coord];}
-    //! Return the given vertex of the triangle.
-    inline const cCollisionSpheresPoint &getCorner(int coord) const
-		  {assert((coord >= 0) && (coord < 3)); return *corner[coord];}
-    //! Calculate the distance to an edge.
-    double dist(cCollisionSpheresEdge *other);
-    //! Calculate the distance to a point.
-    double dist(cCollisionSpheresPoint *other);
     //! Return whether triangle collides with given line.
-    bool dist(cCollisionSpheresGenericShape *other,
-              cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-              cVector3d& a_colPoint, double& a_colSquareDistance);
+    bool computeCollision(cCollisionSpheresGenericShape *a_other,
+            cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
+            cVector3d& a_colPoint, double& a_colSquareDistance);
     //! Return the center of the triangle.
-    inline const cVector3d &getCenter() const  {return center;}
+    inline const cVector3d &getCenter() const  { return m_center; }
     //! Return the radius of the triangle.
-    inline double getRadius() const  {return radius;}
-    //! Return the normal of the triangle.
-    inline const cVector3d &getNormal() const  {return normal;}
-    //! Draw the triangle in OpenGL.
-    void drawGL();
-    //! Recalculate properties from triangle's edges and vertices.
-    void procChange();
-    //! Associate the triangle with its edges and vice-versa.
-    void setup();
+    inline double getRadius() const  { return m_radius; }
     //! Returns the cTriangle object in the mesh associated with this triangle.
     cTriangle* getOriginal() { return m_original; }
     //! Sets the cTriangle object in the mesh associated with this triangle.
     void setOriginal(cTriangle* a_original) { m_original = a_original; }
 
-  private:
+  protected:
     // PROPERTIES:
     //! The vertices of the triangle.
-    cCollisionSpheresPoint *corner[3];
+    cCollisionSpheresPoint *m_corner[3];
     //! The edges of the triangle.
-    cCollisionSpheresEdge *side[3];
-    //! The indices of the triangle's vertices.
-    int cornerIdx[3];
-    //! The normal vector for the triangle.
-    cVector3d normal;
+    cCollisionSpheresEdge *m_side[3];
     //! The center of the triangle.
-    cVector3d center;
+    cVector3d m_center;
     //! The radius of the triangle.
-    double radius;
+    double m_radius;
     //! The cTriangle object in the mesh associated with this triangle.
     cTriangle* m_original;
 };
@@ -298,10 +217,6 @@ class cCollisionSpheresTri : public cCollisionSpheresGenericShape
 //===========================================================================
 class cCollisionSpheresLine : public cCollisionSpheresGenericShape
 {
-  // FRIENDS:
-  //! Leaf nodes of the collision detection sphere tree.
-  friend class cCollisionSpheresLeaf;
-
   public:
     // CONSTRUCTOR:
     //! Constructor of cCollisionSpheresLine.
@@ -309,11 +224,11 @@ class cCollisionSpheresLine : public cCollisionSpheresGenericShape
 
     //! METHODS:
     //! Return the center of the line.
-    inline const cVector3d &getCenter() const {return center;}
+    inline const cVector3d &getCenter() const  { return m_center; }
     //! Return the radius of the line.
-    inline double getRadius() const {return radius;}
-    //! Return whether triangle collides with line.
-    bool dist(cCollisionSpheresGenericShape *other,
+    inline double getRadius() const  { return m_radius; }
+    //! Return whether this line intersects the given triangle.
+    bool computeCollision(cCollisionSpheresGenericShape *a_other,
                   cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
                   cVector3d& a_colPoint, double& a_colSquareDistance);
     //! Get first endpoint of the line.
@@ -324,9 +239,9 @@ class cCollisionSpheresLine : public cCollisionSpheresGenericShape
   protected:
     // PROPERTIES:
     //! The center of the line.
-    cVector3d center;
+    cVector3d m_center;
     //! The radius of the line.
-    double radius;
+    double m_radius;
     //! The first endpoint of the line.
     cVector3d m_segmentPointA;
     //! The direction vector of the line.

@@ -14,7 +14,7 @@
     <LIBFILES value=""/>
     <LIBRARIES value=""/>
     <PACKAGES value=""/>
-    <PATHCPP value=".;..\src\forces"/>
+    <PATHCPP value=".;..\src\forces;..\src\forces;..\src\forces"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>

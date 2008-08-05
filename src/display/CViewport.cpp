@@ -31,14 +31,14 @@
 
     \fn         cViewport::cViewport(HWND a_winHandle, cCamera *a_camera,
                 const bool a_stereoEnabled)
-    \param      a_winHandle    Handle to the graphical display
-    \param      a_camera       Camera inside world.
-    \param      a_useStereo    If \b true, use stereo; else use mono.
+    \param      a_winHandle    Handle to the actual win32 window
+    \param      a_camera       The camera through which this viewport should be rendered
+    \param      a_useStereo    If \b true, a stereo rendering context is created
 */
 //===========================================================================
-cViewport::cViewport(HWND a_winHandle, cCamera *a_camera, const bool a_stereoEnabled)
+cViewport::cViewport(HWND a_winHandle, cCamera *a_camera, const bool a_stereoEnabled, PIXELFORMATDESCRIPTOR* a_pixelFormat)
 {
-    // set camera of viewport
+    // set the camera through which this viewport should be rendered
     setCamera(a_camera);
 
     // stereo status
@@ -47,10 +47,53 @@ cViewport::cViewport(HWND a_winHandle, cCamera *a_camera, const bool a_stereoEna
     // update wincontrol
     m_winHandle = a_winHandle;
 
+    // No post-render callback by default (see setPostRenderCallback() for details)
+    m_postRenderCallback = 0;
+
+    // ----------------------------
+    // Initialize an OpenGL context
+    // ----------------------------
+
     m_glDC = 0;
+
+    // If the user requested a specific pixel format, use that as our
+    // requested format for initializing the display context
+    if (a_pixelFormat != 0)
+    {
+        m_pixelFormat = *a_pixelFormat;
+    }
+
+    // Otherwise use a default format descriptor...
+    else
+    {
+        PIXELFORMATDESCRIPTOR pfd = {
+          sizeof(PIXELFORMATDESCRIPTOR),       // size of this pfd
+          1,                                   // version number
+          PFD_DRAW_TO_WINDOW |                 // support window
+          PFD_SUPPORT_OPENGL |                 // support OpenGL
+          (m_stereoEnabled ? PFD_STEREO : 0) | // optionally enable stereo
+          PFD_DOUBLEBUFFER,                    // double buffered
+          PFD_TYPE_RGBA,                       // RGBA type
+          32,                                  // 32-bit color depth
+          0, 0, 0, 0, 0, 0,                    // color bits ignored
+          0,                                   // no alpha buffer
+          0,                                   // shift bit ignored
+          0,                                   // no accumulation buffer
+          0, 0, 0, 0,                          // accum bits ignored
+          32,                                  // 32-bit z-buffer
+          0,                                   // no stencil buffer
+          0,                                   // no auxiliary buffer
+          PFD_MAIN_PLANE,                      // main layer
+          0,                                   // reserved
+          0, 0, 0                              // layer masks ignored
+        };           
+
+        m_pixelFormat = pfd;
+    }
 
     if (m_winHandle != NULL)
     {
+        // This actually creates the context...
         update();
     }
 }
@@ -71,9 +114,13 @@ cViewport::~cViewport()
 
 //===========================================================================
 /*!
-        Attempt to enable stereo on the current viewport.
+      Enable or disable stereo rendering on this viewport
 
-        \fn     cViewport::setStereoOn(bool a_stereoEnabled)
+      Note that it is not possible to change the pixel format of a window
+      in Windows, so if you create a viewport that doesn't have stereo support,
+      you can't enable stereo rendering without creating a new window/viewport.
+
+      \fn     cViewport::setStereoOn(bool a_stereoEnabled)
 */
 //===========================================================================
 void cViewport::setStereoOn(bool a_stereoEnabled)
@@ -81,7 +128,7 @@ void cViewport::setStereoOn(bool a_stereoEnabled)
     // check if new mode is not already active
     if (a_stereoEnabled == m_stereoEnabled) { return; }
 
-    // update new mode
+    // update stereo rendering state
     m_stereoEnabled = a_stereoEnabled;
 
     // See whether stereo is _really_ enabled
@@ -124,7 +171,7 @@ bool cViewport::cleanup()
 
 //===========================================================================
 /*!
-        If the winControl handle has been modified, call this function
+        If the window has been modified, or just created, call this function
         to update the OpenGL display context.
 
         \fn         bool cViewport::update()
@@ -154,30 +201,7 @@ bool cViewport::update()
     if (GetWindowRect(m_winHandle, &sizeWin) == 0) { return (false); }
     m_width   = sizeWin.right  - sizeWin.left;
     m_height  = sizeWin.bottom - sizeWin.top;
-
-    // set up pixel format descriptor
-    PIXELFORMATDESCRIPTOR pfd = {
-      sizeof(PIXELFORMATDESCRIPTOR),       // size of this pfd
-      1,                                   // version number
-      PFD_DRAW_TO_WINDOW |                 // support window
-      PFD_SUPPORT_OPENGL |                 // support OpenGL
-      (m_stereoEnabled ? PFD_STEREO : 0) | // optionally enable stereo
-      PFD_DOUBLEBUFFER,               // double buffered
-      PFD_TYPE_RGBA,                  // RGBA type
-      32,                             // 24-bit color depth
-      0, 0, 0, 0, 0, 0,               // color bits ignored
-      0,                              // no alpha buffer
-      0,                              // shift bit ignored
-      0,                              // no accumulation buffer
-      0, 0, 0, 0,                     // accum bits ignored
-      32,                             // 32-bit z-buffer
-      0,                              // no stencil buffer
-      0,                              // no auxiliary buffer
-      PFD_MAIN_PLANE,                 // main layer
-      0,                              // reserved
-      0, 0, 0                         // layer masks ignored
-    };           
-
+    
     // retrieve handle of the display device context
     m_glDC = GetDC(m_winHandle);
 
@@ -187,26 +211,26 @@ bool cViewport::update()
     }
 
     // find pixel format supported by the device context. If error return false.
-    formatIndex = ChoosePixelFormat(m_glDC, &pfd);
+    formatIndex = ChoosePixelFormat(m_glDC, &m_pixelFormat);
     if (formatIndex == 0)
     {
         return(false);
     }
 
     // sets the specified device context's pixel format. If error return false
-    if (!SetPixelFormat(m_glDC, formatIndex, &pfd))
+    if (!SetPixelFormat(m_glDC, formatIndex, &m_pixelFormat))
     {
         return(false);
     }
 
     formatIndex = GetPixelFormat (m_glDC);
-    DescribePixelFormat (m_glDC, formatIndex, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+    DescribePixelFormat (m_glDC, formatIndex, sizeof(PIXELFORMATDESCRIPTOR), &m_pixelFormat);
 
-    // openGL is now ready for rendering
+    // OpenGL is now ready for rendering
     m_glReady = true;
 
     // if stereo was enabled but can not be displayed, switch over to mono.
-    if (((pfd.dwFlags & PFD_STEREO) == 0) && m_stereoEnabled)
+    if (((m_pixelFormat.dwFlags & PFD_STEREO) == 0) && m_stereoEnabled)
     {
         m_stereoEnabled = false;
     }
@@ -230,28 +254,58 @@ bool cViewport::update()
 /*!
     Call this method to render the OpenGL world inside the viewport.
 
+    The default rendering option (CHAI_STEREO_DEFAULT) tells the
+    viewport to decide whether it's rendering in stereo, and - if so - to
+    render a full stereo pair.  The other rendering options let you specify a
+    specific image index (mono, left, or right).
+
+    The actual rendering is done in the renderView() function, once this 
+    function decides which frame to render.
+
+    Usually you want to use CHAI_STEREO_DEFAULT.  The best reasons not to are:
+
+    (1) I have a stereo context, but sometimes I want to render in mono for
+        a while.  Alternatively, I could just disable stereo rendering
+        temporarily.
+
+    (2) I have a stereo context, but I have a lot of computation to do and I
+        want to get control back between the left and right frames.    
+
     \fn         bool cViewport::render()
+    \param      int imageIndex Either CHAI_STEREO_DEFAULT, CHAI_MONO, CHAI_STEREO_LEFT, or CHAI_STEREO_RIGHT
     \return     Return \b true if operation succeded.
 */
 //===========================================================================
-bool cViewport::render()
+bool cViewport::render(int imageIndex)
 {
     bool result;
 
-    // render mono mode
-    if (m_stereoEnabled)
+    // The default rendering option tells the viewport to decide
+    // whether it's rendering in stereo, and - if so - to render
+    // a full stereo pair.
+    if (imageIndex == CHAI_STEREO_DEFAULT)
     {
-        result = renderView(CHAI_STEREO_LEFT);
-        if (!result) return (false);
+      // render mono mode
+      if (m_stereoEnabled)
+      {
+          result = renderView(CHAI_STEREO_LEFT);
+          if (!result) return (false);
 
-        result = renderView(CHAI_STEREO_RIGHT);
-        return (result);
+          result = renderView(CHAI_STEREO_RIGHT);
+          return (result);
+      }
+      // render stereo mode
+      else
+      {
+          result = renderView(CHAI_MONO);
+          return (result);
+      }
     }
-    // render stereo mode
+
     else
     {
-        result = renderView(CHAI_MONO);
-        return (result);
+      result = renderView(imageIndex);
+      return (result);
     }
 
 }
@@ -259,7 +313,7 @@ bool cViewport::render()
 
 //===========================================================================
 /*!
-    Renders the OpenGL image in the a_imageIndex related buffer
+    Renders the OpenGL scene in the buffer specified by a_imageIndex
 
     \fn         void cViewport::render()
     \param      a_imageIndex  CHAI_MONO, CHAI_STEREO_LEFT or CHAI_STEREO_RIGHT
@@ -319,6 +373,7 @@ bool cViewport::renderView(const int a_imageIndex)
         // If stereo is enabled, we only swap after the _right_ image is drawn
         if (m_stereoEnabled == 0 || a_imageIndex == CHAI_STEREO_RIGHT)
         {
+            if (m_postRenderCallback) m_postRenderCallback->renderSceneGraph();
             SwapBuffers(m_glDC);
         }
 
@@ -339,11 +394,16 @@ bool cViewport::renderView(const int a_imageIndex)
 
 //===========================================================================
 /*!
-     Select an object on displayed in the viewport. By calling this method
-     the computer searches for the selected object, triangle and exact
-     intersection position point on that triangle.
-     Use getLastSelectedObject(), getLastSelectedTriangle() and
-     getLastSelectedPoint() to extract information about the objects
+     Select an object on displayed in the viewport. This method casts a 
+     virtual ray through the viewport and asks the world for the first
+     object hit by that ray.
+     
+     It's most useful if you want to allow the user to use the mouse to
+     click on objects in your virtual scene.
+     
+     Use getLastSelectedObject(), getLastSelectedTriangle(), and
+     getLastSelectedPoint() to extract information about the results of
+     this operation.
 
      \fn        bool cViewport::select(const unsigned int& a_windowPosX,
                 const unsigned int& a_windowPosY, const bool a_selectVisibleObjectsOnly)

@@ -131,6 +131,9 @@ public:
   // last iteration ran
   double m_last_animation_time;
   
+  // The current velocity at which the object is moving (units/s)
+  cVector3d m_animation_velocity;
+
   // Reinitializes the CHAI viewport
   void reinitialize_viewport(int stereo_enabled=0);
 

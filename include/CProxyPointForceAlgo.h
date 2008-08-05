@@ -33,15 +33,15 @@ class cWorld;
 //---------------------------------------------------------------------------
 
 // The position/rotation state of an object
-struct position_data {
-  cVector3d pos;
-  cMatrix3d rot;
+struct positionData
+{
+    cVector3d pos;
+    cMatrix3d rot;
 };
 
 
-// A mapping from mesh to their positions at the previous
-// proxy iteration
-typedef std::map<cGenericObject*,position_data> mesh_position_map;
+// A mapping from meshes to their positions at the previous proxy iteration
+typedef std::map<cGenericObject*,positionData> meshPositionMap;
 
 //===========================================================================
 /*!
@@ -54,19 +54,16 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
 {
   public:
     // CONSTRUCTOR:
-    //! Constructor of cProxy.
+    //! Constructor of cProxyPointForceAlgo.
     cProxyPointForceAlgo();
 
-    //! A mapping from meshes in the world to position/rotation information
-    //!
-    //! To be used for handling detection of collisions with moving objects.
-    mesh_position_map last_iteration_positions;    
-
-    // METHODS:
+    // METHODS - BASIC PROXY:
     //! Initialize the algorithm.
     void initialize(cWorld* a_world, const cVector3d& a_initialPos);
-    //! Calculate interaction forces between device and mesh
+    //! Calculate interaction forces between device and meshes.
     cVector3d computeForces(const cVector3d& a_nextDevicePos);
+
+    // METHODS - GETTER AND SETTER FUNCTIONS:
     //! Set radius of proxy.
     void setProxyRadius(const double a_radius) { m_radius = a_radius; }
     //! Read radius of proxy.
@@ -78,73 +75,77 @@ class cProxyPointForceAlgo : public cGenericPointForceAlgo
     //! Get last computed global force vector
     virtual inline cVector3d getLastGlobalForce() const { return (m_lastGlobalForce); }
 
-    //! Returns the number of current contacts and the associated triangles
-    virtual inline unsigned int getContacts(cTriangle*& t0, cTriangle*& t1, cTriangle*& t2);
-    
+    // METHODS - DYNAMIC PROXY (TO HANDLE MOVING OBJECTS):
+    //! Return the number of current contacts and the associated triangles
+    virtual inline unsigned int getContacts(cTriangle*& a_t0, cTriangle*& a_t1,
+            cTriangle*& a_t2);
+    //! Return a pointer to the object with which device is currently in contact.
     virtual inline const cGenericObject* getContactObject() { return m_touchingObject; }
-
-    virtual inline void getContactObjectLastGlobalPos(cVector3d& pos) { pos = m_last_object_global_pos; }
-    virtual inline void getContactObjectLastGlobalRot(cMatrix3d& rot) { rot = m_last_object_global_rot; }
-
-    //! If "dynamic proxy'ing" is enabled, all proxy contacts are computed
-    //! in object-local space, so moving objects can be handled correctly.
-    void enableDynamicProxy(int enable) { m_dynamic_proxy = enable; }
-    int getDynamicProxyEnabled() { return m_dynamic_proxy; }
+    //! Return global position of object with which device last contacted.
+    virtual inline void getContactObjectLastGlobalPos(cVector3d& a_pos)
+        { a_pos = m_lastObjectGlobalPos; }
+    //! Return global rotation of object with which device last contacted.
+    virtual inline void getContactObjectLastGlobalRot(cMatrix3d& a_rot)
+        { a_rot = m_lastObjectGlobalRot; }
+    //! Set dynamic proxy flag, (if on, all contacts are computed in object-local space).
+    void enableDynamicProxy(int a_enable) { m_dynamicProxy = a_enable; }
+    //! Return whether the dynamic proxy flag is on.
+    int getDynamicProxyEnabled() { return m_dynamicProxy; }
 
   protected:
-    // METHODS:
+    // METHODS - BASIC PROXY:
     //! Compute the next goal position of the proxy.
     virtual void computeNextBestProxyPosition();
-    //! Compute force applied to device.
+    //! Compute force to apply to device.
     virtual void computeForce();
 
-    // MEMBERS:
-    //! Position of the proxy.
+    // METHODS - DYNAMIC PROXY (TO HANDLE MOVING OBJECTS):
+    //! Let proxy move along with the object it's touching, if object has moved.
+    void correctProxyForObjectMotion();
+    //! Set the dynamic proxy state to reflect new contact information.
+    void updateDynamicContactState();
+
+    // MEMBERS - POSTIONS AND ROTATIONS:
+    //! Global position of the proxy.
     cVector3d m_proxyGlobalPos;
-    //! Position of device.
+    //! Global position of device.
     cVector3d m_deviceGlobalPos;
-    //! Last computed force.
+    //! Last computed force (in global coordinate frame).
     cVector3d m_lastGlobalForce;
-    //! Next best position for the proxy.
+    //! Next best position for the proxy (in global coordinate frame).
     cVector3d m_nextBestProxyGlobalPos;
 
-    //! Number of contacts between proxy and triangles (0, 1, 2 or 3)
+    // MEMBERS - POINTERS TO INTERSECTED OBJECTS:
+    //! Number of contacts between proxy and triangles (0, 1, 2 or 3).
     unsigned int m_numContacts;
-    //! Triangle 0 with wich proxy is in contact
+    //! Pointer to first triangle with which proxy is in contact.
     cTriangle* m_triangle0;
-    //! Triangle 1 with wich proxy is in contact
+    //! Pointer to second triangle with which proxy is in contact.
     cTriangle* m_triangle1;
-    //! Triangle 2 with wich proxy is in contact
+    //! Pointer to third triangle with which proxy is in contact.
     cTriangle* m_triangle2;
+    //! Pointer to the object (if any) with which the proxy is currently in contact.
+    cGenericObject* m_touchingObject;
 
-    //! The object (if any) with which the proxy is currently in contact
-   	cGenericObject *m_touchingObject;
-	  
-    //! color of rendered proxy
+    // MEMBERS - DISPLAY PROPERTIES:
+    //! Color of rendered proxy.
     cColorf m_colorProxy;
-    //! color of rendered line.
+    //! Color of rendered line.
     cColorf m_colorLine;
-    //! radius used to display device position
+    //! Radius used to display device position.
     double m_radius;
-    //! radius used to display the proxy position
+    //! Radius used to display the proxy position.
     double m_displayRadius;
 
-    //! If "dynamic proxy'ing" is enabled, all proxy contacts are computed
-    //! in object-local space, so moving objects can be handled correctly.
-    int m_dynamic_proxy;
-
-    //! The "dynamic proxy" needs to track the last position of the object
-    //! it's touching at each call to the proxy
-    cVector3d m_last_object_global_pos;
-    cMatrix3d m_last_object_global_rot;
-
-    //! Lets the proxy move along with the object it's touching, if
-    //! the object has moved since the previous proxy iteration.
-    void correct_proxy_for_object_motion();
-
-    //! Lets the dynamic proxy state reflect new contact information
-    void update_dynamic_contact_state();
-    
+    // MEMBERS - DYNAMIC PROXY (TO HANDLE MOVING OBJECTS):
+    //! Dynamic proxy flag (if on, all contacts are computed in object-local space).
+    int m_dynamicProxy;
+    //! Mapping from meshes to position/rotation info for handling moving objects.
+    meshPositionMap lastIterationPositions;
+    //! Dynamic proxy tracks last position of object it's touching at each call.
+    cVector3d m_lastObjectGlobalPos;
+    //! Dynamic proxy tracks last rotation of object it's touching at each call.
+    cMatrix3d m_lastObjectGlobalRot;
 };
 
 //---------------------------------------------------------------------------

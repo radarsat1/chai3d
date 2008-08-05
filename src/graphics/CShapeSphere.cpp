@@ -21,6 +21,7 @@
 
 //---------------------------------------------------------------------------
 #include "CShapeSphere.h"
+#include "CDraw3D.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -41,22 +42,10 @@ cShapeSphere::cShapeSphere(double a_radius)
     }
 
     // set material properties
-	m_material.setShininess(100);
+    m_material.setShininess(100);
     m_material.m_ambient.set((float)0.3, (float)0.3, (float)0.3);
     m_material.m_diffuse.set((float)0.1, (float)0.7, (float)0.8);
     m_material.m_specular.set((float)1.0, (float)1.0, (float)1.0);
-};
-
-
-//===========================================================================
-/*!
-    Destructor of cShapeSphere.
-
-    \fn       cShapeSphere::~cShapeSphere()
-*/
-//===========================================================================
-cShapeSphere::~cShapeSphere()
-{
 };
 
 
@@ -72,21 +61,8 @@ void cShapeSphere::render(const int a_renderMode)
     // render material properties
     m_material.render();
 
-    // allocate new object in OpenGL to render a sphere
-    GLUquadricObj *quadObj;
-    quadObj = gluNewQuadric ();
-
-    // set rendering style
-    gluQuadricDrawStyle (quadObj, GLU_FILL);
-
-    // set normals rendering mode
-    gluQuadricNormals (quadObj, GLU_SMOOTH);
-
-    // render sphere
-    gluSphere(quadObj, m_radius, 36, 36);
-
-    // delete object
-    gluDeleteQuadric(quadObj);
+    cDrawSphere(m_radius,36,36);
+    
 }
 
 

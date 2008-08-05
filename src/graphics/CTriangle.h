@@ -31,8 +31,8 @@
 //===========================================================================
 /*!
       \struct   cTriangle
-      \brief    cTriangle defines the triangle. the triangle represents a
-                small surface described by three vertices.
+      \brief    cTriangle defines a triangle, typically bound to a mesh for
+                graphic rendering.
 */
 //===========================================================================
 class cTriangle
@@ -137,6 +137,15 @@ class cTriangle
     };
 
 
+    //-----------------------------------------------------------------------
+    /*!
+        Access a pointer to the specified vertex of this triangle
+
+        \param      int vi  The triangle (0, 1, or 2) to access
+        \return     Returns a pointer to the requested triangle, or 0 for an
+                    illegal index
+    */
+    //-----------------------------------------------------------------------
     inline cVertex* getVertex(int vi) const
     {
         switch (vi)
@@ -152,7 +161,8 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Read index number of vertex 0.
+        Read index number of vertex 0 (defines a location in my owning
+        mesh's vertex array)
 
         \return     Return index number.
     */
@@ -165,7 +175,8 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Read index number of vertex 1.
+        Read index number of vertex 1 (defines a location in my owning
+        mesh's vertex array)
 
         \return     Return index number.
     */
@@ -178,7 +189,8 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Read index number of vertex 2.
+        Read index number of vertex 2 (defines a location in my owning
+        mesh's vertex array)
 
         \return     Return index number.
     */
@@ -191,7 +203,8 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Read index number of triangle.
+        Read the index of this triangle (defines a location in my owning
+        mesh's triangle array)
 
         \return     Return index number.
     */
@@ -204,7 +217,7 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Read pointer to mesh parent of triangle.
+        Retrieve a pointer to the mesh that owns this triangle
 
         \return     Return pointer to parent mesh.
     */
@@ -227,7 +240,7 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Read if the triangle is allocated to an existing mesh.
+        Is this triangle allocated to an existing mesh?
 
         \return     Return \b true if triangle is allocated to an existing
                     mesh, otherwize return \b false.
@@ -242,17 +255,17 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Check if a ray intersects this current triangle. The ray is described
-        by its position or origin (/e a_origin) and its direction
-        (/e a_direction). \n
+        Check if a ray intersects this triangle. The ray is described
+        by its origin (/e a_origin) and its direction (/e a_direction).
 
-        If a collision occures, the square distance between the ray origin
-        and collision point in measured and compared to any previous collision
+        If a collision occure, the square distance between the ray origin
+        and the collision point in measured and compared to any previous collision
         information stored in parameters \e a_colObject, \e a_colTriangle,
-        \e a_colPoint, and \e a_colSquareDistance. If the new collision is located
-        nearer to ray origin than previous collision point, it is stored
-        in the corresponding parameters \e a_colObject, \e a_colTriangle,
         \e a_colPoint, and \e a_colSquareDistance.
+        
+        If the new collision is located nearer to the ray origin than the previous
+        collision point, it is stored in the corresponding parameters \e a_colObject,
+        \e a_colTriangle, \e a_colPoint, and \e a_colSquareDistance.
 
         \param  a_rayOrigin  Point from where collision ray starts.
         \param  a_rayDir  Direction vector of collision ray.
@@ -268,6 +281,12 @@ class cTriangle
                 cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
                 cVector3d& a_colPoint, double& a_colSquareDistance)
     {
+
+// This value controls how close rays can be to parallel to the triangle
+// surface before we discard them
+#define INTERSECT_EPSILON 10e-10f
+
+ 
         // Get the position of the triangle's vertices
         cVector3d t_vertex0 = m_parent->m_vertices[m_indexVertex0].getPos();
         cVector3d t_vertex1 = m_parent->m_vertices[m_indexVertex1].getPos();
@@ -286,9 +305,7 @@ class cTriangle
         
         double t_T = cDot(t_N, cSub(t_vertex0,a_rayOrigin)) / cDot(t_N, a_rayDir);
 
-#define INTERSECT_EPSILON 10e-10f
-
-        //
+       //
         if (t_T + INTERSECT_EPSILON < 0) return (false);
         
         cVector3d t_Q = cSub(cAdd(a_rayOrigin, cMul(t_T, a_rayDir)), t_vertex0);
@@ -335,6 +352,7 @@ class cTriangle
         
     }
 
+
     //-----------------------------------------------------------------------
     /*!
         Compute and return the area of this triangle
@@ -358,18 +376,19 @@ class cTriangle
     //! For custom use. No specific purpose.
     int m_tag;
 
+    //! A mesh can be organized into a network of neighboring triangles, which are stored here...
     std::vector<cTriangle*>* m_neighbors;
 
   protected:
-    //! Index number of vertex 0.
+    //! Index number of vertex 0 (defines a location in my owning mesh's vertex array)
     unsigned int m_indexVertex0;
-    //! Index number of vertex 1.
+    //! Index number of vertex 1 (defines a location in my owning mesh's vertex array)
     unsigned int m_indexVertex1;
-    //! Index number of vertex 2.
+    //! Index number of vertex 2 (defines a location in my owning mesh's vertex array)
     unsigned int m_indexVertex2;
-    //! Index number of triangle.
+    //! Index number of this triangle (defines a location in my owning mesh's triangle array)
     unsigned int m_index;
-    //! Parent mesh.
+    //! The mesh that owns me
     cMesh* m_parent;
     //! Is this triangle still active?
     bool m_allocated;

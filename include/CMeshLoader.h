@@ -38,8 +38,7 @@
 #include "CFileLoaderOBJ.h"
 #include "CFileLoader3DS.h"
 
-// Global function to load a file into a mesh.  Returns true if the file
-// is loaded successfully, false if there's an error.
+//! Global function to load a file into a mesh (CHAI currently supports .3ds and .obj files).
 bool cLoadMeshFromFile(cMesh* iMesh, const string& iFileName);
 
 #endif

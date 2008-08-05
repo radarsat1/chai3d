@@ -14,6 +14,7 @@
 
     \author:    <http://www.chai3d.org>
     \author:    Francois Conti
+    \author:    Dan Morris
     \version    1.1
     \date       01/2004
 */
@@ -33,8 +34,8 @@
 //===========================================================================
 /*!
       \class      cTexture2D
-      \brief      cTexture2D describes a 2D bitmap texture which can projected
-                  onto triangles of a solid.
+      \brief      cTexture2D describes a 2D bitmap texture used for OpenGL
+                  texture-mapping
 */
 //===========================================================================
 class cTexture2D
@@ -47,16 +48,22 @@ class cTexture2D
     //! Destructor of cTexture2D.
     ~cTexture2D();
 
-    //! Load image file
+    //! Load an image file (CHAI currently supports 24-bit .bmp and 32-bit .tga files)
     bool loadFromFile(char* a_fileName);
 
-    //! Render texture object
+    //! Enable texturing and set this texture as the current texture
     void render();
         
+    //! Call this to force texture re-initialization
+    void markForUpdate() { m_update_texture_flag = 1; }
+
+    //! OpenGL texture mode (GL_MODULATE, GL_DECAL, GL_BLEND, or GL_REPLACE)
+    GLint texture_environment_mode;
+
   private:
     // METHODS:
 
-    //! Reset internal variables. This function is called by the constructor.
+    //! Reset internal variables. This function should be called only by constructors/
     void reset();
 
     //! copy texture to memory video graphics card.

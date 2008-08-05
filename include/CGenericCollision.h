@@ -37,7 +37,7 @@ using std::vector;
 /*!
       \class    cCollision
       \brief    cCollision is an abstract class for collision-detection
-                algorithms for meshes.
+                algorithms for meshes with line segments.
 */
 //===========================================================================
 class cGenericCollision
@@ -52,28 +52,27 @@ class cGenericCollision
     // VIRTUAL METHODS:
     //! Do any necessary initialization, such as building trees.
     virtual void initialize() {};
-    //! Maintain the collision tree in any topological changes have occured in the mesh
-    virtual void maintain() {};
     //! Provide a visual representation of the method.
     virtual void render() {};
-    //! Return the nearest triangle intersected by the given line.
+    //! Return the nearest triangle intersected by the given segment, if any.
     virtual bool computeCollision(cVector3d& a_segmentPointA,
         cVector3d& a_segmentPointB, cGenericObject*& a_colObject,
-        cTriangle*& a_colTriangle, cVector3d& a_colPoint, double& a_colSquareDistance, int a_proxyCall = -1)
+        cTriangle*& a_colTriangle, cVector3d& a_colPoint,
+        double& a_colSquareDistance, int a_proxyCall = -1)
         { return (false); }
 
     // METHODS:
-    //! Set Level
+    //! Set level of collision tree to display.
     void setDisplayDepth(unsigned int a_depth) { m_displayDepth = a_depth; }
-    //! Read level
+    //! Read level of collision tree being displayed.
     double getDisplayDepth() const { return (m_displayDepth); } 
-    //! Color properties of object
+    //! Color properties of the collision object
     cMaterial m_material;
 
   protected:
     // MEMBERS:
-    //! Depth inside tree to render
-    unsigned int m_displayDepth;
+    //! Level of collision tree to render
+    int m_displayDepth;
 };
 
 //---------------------------------------------------------------------------
