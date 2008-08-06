@@ -245,7 +245,7 @@ int cFreedom6SDevice::command(int a_command, void* a_data)
 
     // workspace is approximately from -0.1 to 0.1 meters.
     if (a_command == CHAI_CMD_GET_POS_NORM_3D) {
-      v->div(0.1);
+      v->div(0.02);
     }
 
     // convert to mm
