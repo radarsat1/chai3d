@@ -13,6 +13,7 @@ SOURCES = $(OBJECTS:.o=.cpp)
 INCLUDE = -I../src/graphics -I../src/collisions -I../src/devices -I../src/display -I../src/files -I../src/forces -I../src/math -I../src/scenegraph -I../src/timers -I../src/tools -I../src/widgets  
 
 LOCALOBJS = $(notdir $(OBJECTS) )
+LOCALSRCS = $(notdir $(SOURCES) )
 
 # Optionally add -D_DISABLE_PHANTOM_SUPPORT to compile away SensAble's libraries
 DEFS = -D_POSIX -D_MAX_PATH=260 -D_WIN32 -DNOMINMAX
@@ -24,13 +25,16 @@ AR   = ar rc
 RANLIB = ranlib
 LIBS = -L. -L../../../lib/cygwin -lglut32 -lopengl32 -lglu32 
 
-all: chai3d
+all: localsrc chai3d
+
+localsrc: $(SOURCES)
+	for i in $+; do if ! [ -h $$(basename $$i) ]; then ln -s $$i .; fi; done
 
 %.o: %.cpp 
 	$(CC) $(CFLAGS) $<
   
 # Actual target and dependencies
-chai3d: $(OBJECTS)
+chai3d: $(LOCALOBJS)
 	$(AR) libchai3d_cygwin.a $(LOCALOBJS) 
 	$(RANLIB) libchai3d_cygwin.a
 	mv libchai3d_cygwin.a ../lib/cygwin
