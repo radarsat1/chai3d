@@ -74,6 +74,15 @@ cCollisionSpheres::cCollisionSpheres(vector<cTriangle> *a_triangles,
 cCollisionSpheres::~cCollisionSpheres()
 {
     // delete array of internal nodes
+
+    // do it carefully: apparently if it was allocated as a subclass,
+    // segfault here! (SS)
+    cCollisionSpheresNode* node =
+        dynamic_cast<cCollisionSpheresNode*>(m_root);
+    if (node)
+        delete [] node;
+    else
+
     if (m_root != NULL)
         delete [] m_root;
 

@@ -59,6 +59,15 @@ cCollisionAABB::~cCollisionAABB()
 {
 
     // clear collision tree
+
+    // do it carefully: apparently if it was allocated as a subclass,
+    // segfault here! (SS)
+    cCollisionAABBInternal* internal =
+        dynamic_cast<cCollisionAABBInternal*>(m_root);
+    if (internal)
+        delete [] internal;
+    else
+
     if (m_root != NULL) delete [] m_root;
 
     // Delete the allocated array of leaf nodes
