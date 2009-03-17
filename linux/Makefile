@@ -27,7 +27,8 @@ OBJECTS = ../src/collisions/CCollisionAABB.o ../src/collisions/CCollisionAABBTre
 ../src/tools/CGeneric3dofPointer.o ../src/tools/CGenericTool.o ../src/tools/CMeta3dofPointer.o ../src/tools/CPhantom3dofPointer.o \
 ../src/tools/CDelta3dofPointer.o ../src/widgets/CBitmap.o ../src/widgets/CFont.o ../src/widgets/CLabelPanel.o \
 ../src/widgets/CPanel.o ../src/devices/PhantomDriverLinux.o ../src/devices/CDeltaDevices.o ../src/tools/CFreedom6S3dofPointer.o \
-../src/devices/CFreedom6SDevice.o 
+../src/devices/CFreedom6SDevice.o \
+../src/devices/CLibNIFalconDevice.o
 
 SOURCES = $(OBJECTS:.o=.cpp)
 INCLUDE = -I../src/graphics -I../src/collisions -I../src/devices -I../src/display -I../src/files -I../src/forces -I../src/math -I../src/scenegraph -I../src/timers -I../src/tools -I../src/widgets -I../include/dhd
@@ -48,6 +49,10 @@ AR   = ar rc
 RANLIB = ranlib
 
 LIBS = -L. -L../lib/linux -lglut -lgl -lglu -ldhd
+
+INCLUDE += -I$(HOME)/.local/include \
+	-I$(HOME)/.local/include/libusb-1.0 \
+	-I$(HOME)/.local/include/falcon
 
 all: localsrc chai3d
 

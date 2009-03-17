@@ -25,7 +25,7 @@
 //---------------------------------------------------------------------------
 #include "CGenericDevice.h"
 //---------------------------------------------------------------------------
-#include <falcon/core/FalconCore.h"
+#include <falcon/core/FalconDevice.h>
 
 //===========================================================================
 /*!
@@ -55,6 +55,11 @@ class cLibNIFalconDevice : public cGenericDevice
     virtual int command(int a_command, void* a_data);
 
   protected:
+
+    //! Reference count used to control access to the dhd dll
+    static int m_activeLibNIFalconDevices;
+
+    libnifalcon::FalconDevice m_device;
 };
 
 //---------------------------------------------------------------------------

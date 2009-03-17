@@ -27,6 +27,14 @@
 #endif
 #include "CVector3d.h"
 //---------------------------------------------------------------------------
+#include <falcon/comm/FalconCommLibUSB.h>
+#include <falcon/firmware/FalconFirmwareNovintSDK.h>
+#include <falcon/util/FalconFirmwareBinaryNvent.h>
+#include <falcon/kinematic/FalconKinematicStamper.h>
+//---------------------------------------------------------------------------
+
+// Initialize reference count
+int cLibNIFalconDevice::m_activeLibNIFalconDevices = 0;
 
 //===========================================================================
 /*!
@@ -63,7 +71,8 @@ cLibNIFalconDevice::~cLibNIFalconDevice()
     Open connection to LibNIFalcon device.
 
     \fn     int cLibNIFalconDevice::open()
-    \return Return 0 is operation succeeds, -1 if an error occurs.
+    \return Return 0 is operation succeeds, -1 if an error
+ occurs.
 */
 //===========================================================================
 int cLibNIFalconDevice::open()
@@ -96,21 +105,39 @@ int cLibNIFalconDevice::close()
 //===========================================================================
 int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
 {
-    if (m_hf6s != 0)
+    m_device.setFalconFirmware<libnifalcon::FalconFirmwareNovintSDK>();
+    m_device.setFalconComm<libnifalcon::FalconCommLibUSB>();
+    if (!m_device.open(0)) {
+        printf("Couldn't open device 0.\n");
         return -1;
-
-    F6SRC rc = f6s_Initialize(&m_hf6s);
-    if (m_hf6s && rc == F6SRC_NOERROR)
-    {  
-        // Joint velocity computation:
-        //   timestep = 1ms
-        //   sample buffer size = 15
-        f6s_ComputeJointVel(m_hf6s, 0.001f, 15);
-        return 0;
     }
 
-    m_hf6s = 0;
-    return -1;
+    printf("Uploading firmware.\n");
+    int i;
+    for (i=0; i<10 && !m_device.isFirmwareLoaded(); i++) {
+        if (m_device.getFalconFirmware()->loadFirmware(
+                true, libnifalcon::NOVINT_FALCON_NVENT_FIRMWARE_SIZE,
+                const_cast<uint8_t*>(libnifalcon::NOVINT_FALCON_NVENT_FIRMWARE))
+            && m_device.isFirmwareLoaded())
+            break;
+        printf(".");
+        fflush(stdout);
+    }
+
+    if (i==10) {
+        printf("Couldn't upload device firmware.\n");
+
+        printf("Error Code: %d\n", m_device.getErrorCode());
+        if (m_device.getErrorCode() == 2000)
+            printf("Device Error Code: %d\n",
+                   m_device.getFalconComm()->getDeviceErrorCode());
+
+        return -1;
+    }
+
+    m_device.setFalconKinematic<libnifalcon::FalconKinematicStamper>();
+
+    return 0;
 }
 
 //===========================================================================
@@ -125,67 +152,35 @@ int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
 //===========================================================================
 int cLibNIFalconDevice::command(int a_command, void* a_data)
 {
-  if (m_hf6s==0)
+  if (!m_device.isOpen())
     return CHAI_MSG_SYSTEM_NOT_READY;
 
-  cVector3d *v;
-  double kinemat[16];
-  double force[3];
-  double torque[3];
-  double velLinear[3], velAngular[3];
-  torque[0] = torque[1] = torque[2] = 0;
+  double *pos=0;
+  double force[3] = {0.0, 0.0, 0.0};
+  cVector3d *v = (cVector3d*)a_data;
 
   switch (a_command)
   {
   case CHAI_CMD_GET_POS_3D:
   case CHAI_CMD_GET_POS_NORM_3D:
-    f6s_UpdateKinematics(m_hf6s);
-    f6s_GetPositionMatrixGL(m_hf6s, kinemat);
-
-    // kinemat is a row-major 4x4 rotation/translation matrix
-
-    v = (cVector3d*)a_data;
-
-    v->x = kinemat[14];
-    v->y = kinemat[12];
-    v->z = kinemat[13];
-
-    // workspace is approximately from -0.1 to 0.1 meters.
-    if (a_command == CHAI_CMD_GET_POS_NORM_3D) {
-      v->div(0.02);
-    }
-
-    // convert to mm
-    else {
-      v->mul(1000.0);
-    }
-
+    m_device.runIOLoop();
+    pos = m_device.getPosition();
+    v->y = pos[0];
+    v->z = pos[1];
+    v->x = pos[2] - 0.1;
+    if (a_command == CHAI_CMD_GET_POS_NORM_3D)
+        *v *= 40.0;
     break;
 
   case CHAI_CMD_SET_FORCE_3D:
-    v = (cVector3d*)a_data;
-
-    // coordinates need to be changed for the LibNIFalcon API
-    // torque is assumed to be zero
-
     force[0] = v->y;
-    force[1] = -v->x;
-    force[2] = v->z;
-    f6s_SetForceTorque(m_hf6s, force, torque);
-
+    force[1] = v->z;
+    force[2] = v->x;
+    m_device.setForce(force);
     break;
 
   case CHAI_CMD_GET_VEL_3D:
-    f6s_GetVelocityGL(m_hf6s, velLinear, velAngular);
-
-    v = (cVector3d*)a_data;
-    v->x = velLinear[2];
-    v->y = velLinear[0];
-    v->z = velLinear[1];
-
-    // Now convert from m/s to mm/s
-    v->mul(1000.0);
-
+    // TODO
     break;
 
   // read scale factor from normalized coords to mm
@@ -193,11 +188,7 @@ int cLibNIFalconDevice::command(int a_command, void* a_data)
     {
     double* scale = (double*)a_data;
 
-    // Multiply .1 to get meters back
-    *scale = 0.1;
-
-    // Then multiply by 1000 to get millimeters
-    *scale *= 1000.0;
+    *scale = 40.0;
     }
     break;
 

@@ -136,6 +136,24 @@ cMeta3dofPointer::cMeta3dofPointer(cWorld* a_world, unsigned int a_deviceNumber,
     }
 #endif
 
+#ifndef _DISABLE_LIBNIFALCON_DEVICE_SUPPORT
+    // try to open Libnifalcon device
+    m_device = new cLibNIFalconDevice();
+    systemAvailable = m_device->isSystemAvailable();
+
+    if (systemAvailable)
+    {
+      m_device->open();
+      m_physicalDevice = DEVICE_LIBNIFALCON;
+      return;
+    }
+    else
+    {
+      delete m_device;
+      m_device = NULL;
+    }
+#endif
+
 // No Linux virtual device yet...
 #ifdef _WIN32
     // try to open a virtual haptic device
