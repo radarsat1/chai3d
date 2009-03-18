@@ -12,19 +12,23 @@ SOURCES = $(OBJECTS:.o=.cpp)
 INCLUDE = -I../src/graphics -I../src/collisions -I../src/devices -I../src/display -I../src/files -I../src/forces -I../src/math -I../src/scenegraph -I../src/timers -I../src/tools -I../src/widgets -I../include/dhd -IGL -IGLUT
 
 LOCALOBJS = $(notdir $(OBJECTS) )
+LOCALSRCS = $(notdir $(SOURCES) )
 
 # Optionally add -D_DISABLE_PHANTOM_SUPPORT to compile away SensAble's libraries
+# Optionally add -D_DISABLE_DELTA_SUPPORT to compile away Force Dimension's libraries
+# Optionally add -D_DISABLE_FALCON_DEVICE_SUPPORT to compile away Novint's libraries
+# Optionally add -D_DISABLE_FREEDOM6S_SUPPORT to compile away MPBT's Freedom 6S libraries
 # We exclude the Delta device because libdhd.a is not available on Darwin
-DEFS = -D_POSIX -D_MAX_PATH=260 -D_DISABLE_PHANTOM_SUPPORT -D_DISABLE_DELTA_SUPPORT -D_DISABLE_FALCON_DEVICE_SUPPORT
+DEFS = -D_POSIX -D_MAX_PATH=260 -D_DISABLE_PHANTOM_SUPPORT -D_DISABLE_DELTA_SUPPORT -D_DISABLE_FALCON_DEVICE_SUPPORT -D_DISABLE_FREEDOM6S_SUPPORT
 
 CC   = g++ -c $(DEFS)
 CFLAGS = -O3 $(INCLUDE)
 LD   = g++ -o
 AR   = ar rc
 RANLIB = ranlib
-LIBS = -L. -L../lib/darwin -lglut -lgl -lglu -ldhd -framework OpenGL
+LIBS = -L. -L../lib/darwin -lglut -lgl -lglu -framework OpenGL
 
-all: chai3d
+all: localsrc chai3d
 
 # On Darwin, the OpenGL and GLUT headers are in the corresponding frameworks' Headers folder.
 # However, since the headers do not reside in a folder called "GL", this causes a problem.
@@ -38,11 +42,14 @@ headers:
 		ln -s /System/Library/Frameworks/GLUT.framework/Headers GLUT/GL; \
 	fi
 
+localsrc: $(SOURCES)
+	for i in $+; do if ! [ -h $$(basename $$i) ]; then ln -s $$i .; fi; done
+
 %.o: %.cpp 
 	$(CC) $(CFLAGS) $<
   
 # Actual target and dependencies
-chai3d: headers $(OBJECTS)
+chai3d: headers $(LOCALOBJS)
 	$(AR) libchai3d_darwin.a $(LOCALOBJS) 
 	$(RANLIB) libchai3d_darwin.a
 	-mkdir ../lib/darwin
