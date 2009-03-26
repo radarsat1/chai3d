@@ -22,6 +22,11 @@
 //---------------------------------------------------------------------------
 #ifndef CFreedom6SDeviceH
 #define CFreedom6SDeviceH
+/*!
+    \file CFreedom6SDevice.h
+*/
+// Allow Freedom 6S support to be compiled out
+#ifndef _DISABLE_FREEDOM6S_SUPPORT
 //---------------------------------------------------------------------------
 #include "CGenericDevice.h"
 //---------------------------------------------------------------------------
@@ -60,6 +65,8 @@ class cFreedom6SDevice : public cGenericDevice
 
     void* m_hf6s;
 };
+
+#endif // #ifndef _DISABLE_FREEDOM6S_SUPPORT
 
 //---------------------------------------------------------------------------
 #endif

@@ -21,6 +21,9 @@
 
 //---------------------------------------------------------------------------
 #include "CFreedom6SDevice.h"
+
+#ifndef _DISABLE_FREEDOM6S_SUPPORT
+
 //---------------------------------------------------------------------------
 #ifdef WIN32
 #include <windows.h>
@@ -300,3 +303,5 @@ int cFreedom6SDevice::command(int a_command, void* a_data)
 
   return CHAI_MSG_OK;
 }
+
+#endif // _DISABLE_FREEDOM6S_SUPPORT
