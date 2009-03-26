@@ -21,6 +21,9 @@
 
 //---------------------------------------------------------------------------
 #include "CLibNIFalconDevice.h"
+
+#ifndef _DISABLE_LIBNIFALCON_DEVICE_SUPPORT
+
 //---------------------------------------------------------------------------
 #ifdef WIN32
 #include <windows.h>
@@ -198,3 +201,5 @@ int cLibNIFalconDevice::command(int a_command, void* a_data)
 
   return CHAI_MSG_OK;
 }
+
+#endif // _DISABLE_LIBNIFALCON_DEVICE_SUPPORT

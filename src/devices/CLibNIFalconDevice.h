@@ -22,6 +22,11 @@
 //---------------------------------------------------------------------------
 #ifndef CLibNIFalconDeviceH
 #define CLibNIFalconDeviceH
+/*!
+    \file CLibNIFalconDevice.h
+*/
+// Allow libnifalcon support to be compiled out
+#ifndef _DISABLE_LIBNIFALCON_DEVICE_SUPPORT
 //---------------------------------------------------------------------------
 #include "CGenericDevice.h"
 //---------------------------------------------------------------------------
@@ -61,6 +66,8 @@ class cLibNIFalconDevice : public cGenericDevice
 
     libnifalcon::FalconDevice m_device;
 };
+
+#endif // #ifndef _DISABLE_LIBNIFALCON_DEVICE_SUPPORT
 
 //---------------------------------------------------------------------------
 #endif
