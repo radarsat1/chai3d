@@ -181,7 +181,7 @@ int cLibNIFalconDevice::command(int a_command, void* a_data)
     v->z = pos[1];
     v->x = pos[2] - 0.1;
     if (a_command == CHAI_CMD_GET_POS_NORM_3D)
-        *v *= 40.0;
+        *v *= 60.0;
     break;
 
   case CHAI_CMD_SET_FORCE_3D:
@@ -200,7 +200,7 @@ int cLibNIFalconDevice::command(int a_command, void* a_data)
     {
     double* scale = (double*)a_data;
 
-    *scale = 40.0;
+    *scale = 60.0;
     }
     break;
 
