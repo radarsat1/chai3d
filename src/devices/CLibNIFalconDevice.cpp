@@ -31,6 +31,7 @@
 #include "CVector3d.h"
 //---------------------------------------------------------------------------
 #include <falcon/comm/FalconCommLibUSB.h>
+#include <falcon/comm/FalconCommLibFTDI.h>
 #include <falcon/firmware/FalconFirmwareNovintSDK.h>
 #include <falcon/util/FalconFirmwareBinaryNvent.h>
 #include <falcon/kinematic/FalconKinematicStamper.h>
@@ -109,13 +110,13 @@ int cLibNIFalconDevice::close()
 int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
 {
     m_device.setFalconFirmware<libnifalcon::FalconFirmwareNovintSDK>();
-    m_device.setFalconComm<libnifalcon::FalconCommLibUSB>();
+    m_device.setFalconComm<libnifalcon::FalconCommLibFTDI>();
     if (!m_device.open(0)) {
-        printf("Couldn't open device 0.\n");
+        printf("libnifalcon: Couldn't open device 0 (libftdi).\n");
         return -1;
     }
 
-    printf("Uploading firmware.\n");
+    printf("libnifalcon: Uploading firmware.\n");
     int i;
     for (i=0; i<10 && !m_device.isFirmwareLoaded(); i++) {
         if (m_device.getFalconFirmware()->loadFirmware(
@@ -128,13 +129,21 @@ int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
     }
 
     if (i==10) {
-        printf("Couldn't upload device firmware.\n");
+        printf("libnifalcon: Couldn't upload device firmware.\n");
 
-        printf("Error Code: %d\n", m_device.getErrorCode());
+        printf("libnifalcon: Error Code: %d\n", m_device.getErrorCode());
         if (m_device.getErrorCode() == 2000)
-            printf("Device Error Code: %d\n",
+            printf("libnifalcon: Device Error Code: %d\n",
                    m_device.getFalconComm()->getDeviceErrorCode());
 
+        return -1;
+    }
+
+	m_device.close();
+
+    m_device.setFalconComm<libnifalcon::FalconCommLibUSB>();
+    if (!m_device.open(0)) {
+        printf("libnifalcon: Couldn't open device 0 (libusb).\n");
         return -1;
     }
 
