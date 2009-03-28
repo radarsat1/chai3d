@@ -27,10 +27,11 @@
 #include "CPhantomDevices.h"
 #include "CDeltaDevices.h"
 #include "CFalconDevice.h"
+#include "CFreedom6S3dofPointer.h"
+#include "CLibNIFalconDevice.h"
 
 #ifdef _WIN32
 #include "CVirtualDevice.h"
-#include "CFreedom6S3dofPointer.h"
 #endif
 
 //---------------------------------------------------------------------------
@@ -43,6 +44,7 @@
 #define DEVICE_VIRTUAL 2
 #define DEVICE_MPB     3
 #define DEVICE_FALCON  4
+#define DEVICE_LIBNIFALCON  5
 #define DEVICE_UNINITIALIZED -1
 
 //===========================================================================
