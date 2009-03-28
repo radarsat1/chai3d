@@ -50,9 +50,15 @@ RANLIB = ranlib
 
 LIBS = -L. -L../lib/linux -lglut -lgl -lglu -ldhd
 
-INCLUDE += -I$(HOME)/.local/include \
-	-I$(HOME)/.local/include/libusb-1.0 \
-	-I$(HOME)/.local/include/falcon
+INCLUDE += -I$(HOME)/.local/include
+
+HAVE_LIBNIFALCON=$(shell pkg-config --libs libnifalcon >/dev/null 2>&1; echo $$?)
+
+ifeq ($(HAVE_LIBNIFALCON),0)
+INCLUDE += $(shell pkg-config --cflags libnifalcon)
+else
+DEFS += -D_DISABLE_LIBNIFALCON_DEVICE_SUPPORT
+endif
 
 all: localsrc chai3d
 
