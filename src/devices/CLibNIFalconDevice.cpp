@@ -109,20 +109,22 @@ int cLibNIFalconDevice::close()
 //===========================================================================
 int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
 {
-    m_device.setFalconFirmware<libnifalcon::FalconFirmwareNovintSDK>();
-    m_device.setFalconComm<libnifalcon::FalconCommLibFTDI>();
-    if (!m_device.open(0)) {
+	m_device = new libnifalcon::FalconDevice();
+	libnifalcon::FalconDevice *device = (libnifalcon::FalconDevice*)m_device;
+    device->setFalconFirmware<libnifalcon::FalconFirmwareNovintSDK>();
+    device->setFalconComm<libnifalcon::FalconCommLibFTDI>();
+    if (!device->open(0)) {
         printf("libnifalcon: Couldn't open device 0 (libftdi).\n");
         return -1;
     }
 
     printf("libnifalcon: Uploading firmware.\n");
     int i;
-    for (i=0; i<10 && !m_device.isFirmwareLoaded(); i++) {
-        if (m_device.getFalconFirmware()->loadFirmware(
+    for (i=0; i<10 && !device->isFirmwareLoaded(); i++) {
+        if (device->getFalconFirmware()->loadFirmware(
                 true, libnifalcon::NOVINT_FALCON_NVENT_FIRMWARE_SIZE,
                 const_cast<uint8_t*>(libnifalcon::NOVINT_FALCON_NVENT_FIRMWARE))
-            && m_device.isFirmwareLoaded())
+            && device->isFirmwareLoaded())
             break;
         printf(".");
         fflush(stdout);
@@ -131,23 +133,23 @@ int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
     if (i==10) {
         printf("libnifalcon: Couldn't upload device firmware.\n");
 
-        printf("libnifalcon: Error Code: %d\n", m_device.getErrorCode());
-        if (m_device.getErrorCode() == 2000)
+        printf("libnifalcon: Error Code: %d\n", device->getErrorCode());
+        if (device->getErrorCode() == 2000)
             printf("libnifalcon: Device Error Code: %d\n",
-                   m_device.getFalconComm()->getDeviceErrorCode());
+                   device->getFalconComm()->getDeviceErrorCode());
 
         return -1;
     }
 
-	m_device.close();
+	device->close();
 
-    m_device.setFalconComm<libnifalcon::FalconCommLibUSB>();
-    if (!m_device.open(0)) {
+    device->setFalconComm<libnifalcon::FalconCommLibUSB>();
+    if (!device->open(0)) {
         printf("libnifalcon: Couldn't open device 0 (libusb).\n");
         return -1;
     }
 
-    m_device.setFalconKinematic<libnifalcon::FalconKinematicStamper>();
+    device->setFalconKinematic<libnifalcon::FalconKinematicStamper>();
 
     return 0;
 }
@@ -164,8 +166,10 @@ int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
 //===========================================================================
 int cLibNIFalconDevice::command(int a_command, void* a_data)
 {
-  if (!m_device.isOpen())
+  if (!device->isOpen())
     return CHAI_MSG_SYSTEM_NOT_READY;
+
+  libnifalcon::FalconDevice *device = (libnifalcon::FalconDevice*)m_device;
 
   double *pos=0;
   double force[3] = {0.0, 0.0, 0.0};
@@ -175,8 +179,8 @@ int cLibNIFalconDevice::command(int a_command, void* a_data)
   {
   case CHAI_CMD_GET_POS_3D:
   case CHAI_CMD_GET_POS_NORM_3D:
-    m_device.runIOLoop();
-    pos = m_device.getPosition();
+    device->runIOLoop();
+    pos = device->getPosition();
     v->y = pos[0];
     v->z = pos[1];
     v->x = pos[2] - 0.1;
@@ -188,7 +192,7 @@ int cLibNIFalconDevice::command(int a_command, void* a_data)
     force[0] = v->y;
     force[1] = v->z;
     force[2] = v->x;
-    m_device.setForce(force);
+    device->setForce(force);
     break;
 
   case CHAI_CMD_GET_VEL_3D:

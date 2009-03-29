@@ -30,7 +30,6 @@
 //---------------------------------------------------------------------------
 #include "CGenericDevice.h"
 //---------------------------------------------------------------------------
-#include <falcon/core/FalconDevice.h>
 
 //===========================================================================
 /*!
@@ -64,7 +63,7 @@ class cLibNIFalconDevice : public cGenericDevice
     //! Reference count used to control access to the dhd dll
     static int m_activeLibNIFalconDevices;
 
-    libnifalcon::FalconDevice m_device;
+    void* m_device;
 };
 
 #endif // #ifndef _DISABLE_LIBNIFALCON_DEVICE_SUPPORT
