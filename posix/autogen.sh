@@ -1,12 +1,12 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
-srcdir=`dirname $0`
+srcdir=$(readlink -f $(dirname $0)/..)
 test -z "$srcdir" && srcdir=.
 
 DIE=0
 
-(test -f $srcdir/configure.ac) || {
+(test -f $srcdir/posix/configure.ac) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
     echo " top-level package directory"
     exit 1
@@ -20,7 +20,7 @@ DIE=0
   DIE=1
 }
 
-(grep "^AM_PROG_LIBTOOL" $srcdir/configure.ac >/dev/null) && {
+(grep "^AM_PROG_LIBTOOL" configure.ac >/dev/null) && {
   (libtoolize --version) < /dev/null > /dev/null 2>&1 \
 	  && LIBTOOLIZE=libtoolize || {
 	(glibtoolize --version) < /dev/null > /dev/null 2>&1 \
@@ -113,9 +113,9 @@ done
 conf_flags="--enable-maintainer-mode"
 
 if test x$NOCONFIGURE = x; then
-  echo Running $srcdir/configure $conf_flags "$@" ...
-  $srcdir/configure $conf_flags "$@" \
-  && echo Now type \`make\' to compile. || exit 1
+  echo Running $srcdir/posix/configure $conf_flags "$@" ...
+  $srcdir/posix/configure $conf_flags "$@" \
+
 else
   echo Skipping configure process.
 fi

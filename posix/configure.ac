@@ -32,7 +32,7 @@ if test "$want_ipv6" = "yes"; then
 fi
 
 # Checks for programs.
-AC_PROG_CC
+AC_PROG_CXX
 AM_PROG_LIBTOOL
 AM_PROG_CC_C_O
 AC_CHECK_PROG([DOXYGEN], [doxygen], [doc], [])
