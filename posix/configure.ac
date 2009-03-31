@@ -25,12 +25,6 @@ AC_ENABLE_STATIC(no)
 AC_ENABLE_SHARED(yes)
 AC_SUBST(SO_VERSION)
 
-# disable support for ipv6.
-AC_ARG_ENABLE(ipv6, [  --enable-ipv6           Enable ipv6 support],want_ipv6=yes,)
-if test "$want_ipv6" = "yes"; then
-	AC_DEFINE(ENABLE_IPV6, 1, Define this to enable ipv6.)
-fi
-
 # Checks for programs.
 AC_PROG_CXX
 AM_PROG_LIBTOOL
