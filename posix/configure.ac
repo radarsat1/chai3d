@@ -33,7 +33,9 @@ AC_CHECK_PROG([DOXYGEN], [doxygen], [doc], [])
 AC_SUBST(DOXYGEN)
 
 # Checks for libraries.
-AC_CHECK_LIB([gl], [glBegin])
+AC_CHECK_HEADERS([OpenGL/gl.h GL/gl.h])
+AC_CHECK_HEADERS([OpenGL/glu.h GL/glu.h])
+AC_CHECK_HEADERS([GLUT/glut.h GL/glut.h])
 AC_CHECK_FUNC([log], [], [AC_CHECK_LIB([m],[log])])
 
 # Checks for header files.
