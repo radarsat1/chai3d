@@ -1,7 +1,7 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
-srcdir=$(readlink -f $(dirname $0)/..)
+srcdir=$(cd $(dirname $0)/..; pwd)
 test -z "$srcdir" && srcdir=.
 
 DIE=0
