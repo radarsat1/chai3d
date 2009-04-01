@@ -30,6 +30,7 @@
 #endif
 #include "CVector3d.h"
 //---------------------------------------------------------------------------
+#include <falcon/core/FalconDevice.h>
 #include <falcon/comm/FalconCommLibUSB.h>
 #include <falcon/comm/FalconCommLibFTDI.h>
 #include <falcon/firmware/FalconFirmwareNovintSDK.h>
@@ -166,10 +167,10 @@ int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
 //===========================================================================
 int cLibNIFalconDevice::command(int a_command, void* a_data)
 {
+  libnifalcon::FalconDevice *device = (libnifalcon::FalconDevice*)m_device;
+
   if (!device->isOpen())
     return CHAI_MSG_SYSTEM_NOT_READY;
-
-  libnifalcon::FalconDevice *device = (libnifalcon::FalconDevice*)m_device;
 
   double *pos=0;
   double force[3] = {0.0, 0.0, 0.0};
