@@ -113,25 +113,8 @@ int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
 	m_device = new libnifalcon::FalconDevice();
 	libnifalcon::FalconDevice *device = (libnifalcon::FalconDevice*)m_device;
     device->setFalconFirmware<libnifalcon::FalconFirmwareNovintSDK>();
-    device->setFalconComm<libnifalcon::FalconCommLibFTDI>();
-    if (!device->open(0)) {
-        printf("libnifalcon: Couldn't open device 0 (libftdi).\n");
-        return -1;
-    }
 
-    printf("libnifalcon: Uploading firmware.\n");
     int i;
-    for (i=0; i<10 && !device->isFirmwareLoaded(); i++) {
-        if (device->getFalconFirmware()->loadFirmware(
-                true, libnifalcon::NOVINT_FALCON_NVENT_FIRMWARE_SIZE,
-                const_cast<uint8_t*>(libnifalcon::NOVINT_FALCON_NVENT_FIRMWARE))
-            && device->isFirmwareLoaded())
-            break;
-        printf(".");
-        fflush(stdout);
-    }
-
-	device->close();
 
     device->setFalconComm<libnifalcon::FalconCommLibUSB>();
     if (!device->open(0)) {
@@ -149,15 +132,46 @@ int cLibNIFalconDevice::initialize(const bool a_resetEncoders)
         fflush(stdout);
     }
 
-    if (i==10) {
-        printf("libnifalcon: Couldn't upload device firmware.\n");
+    if (i==10)
+    {
+        // Didn't successfully upload firmware with libusb, so close
+        // it and try with libftdi.
 
-        printf("libnifalcon: Error Code: %d\n", device->getErrorCode());
-        if (device->getErrorCode() == 2000)
-            printf("libnifalcon: Device Error Code: %d\n",
-                   device->getFalconComm()->getDeviceErrorCode());
+        device->close();
+        device->setFalconComm<libnifalcon::FalconCommLibFTDI>();
+        if (!device->open(0)) {
+            printf("libnifalcon: Couldn't open device 0 (libftdi).\n");
+            return -1;
+        }
 
-        return -1;
+        for (i=0; i<10 && !device->isFirmwareLoaded(); i++) {
+            if (device->getFalconFirmware()->loadFirmware(
+                    true, libnifalcon::NOVINT_FALCON_NVENT_FIRMWARE_SIZE,
+                    const_cast<uint8_t*>(libnifalcon::NOVINT_FALCON_NVENT_FIRMWARE))
+                && device->isFirmwareLoaded())
+                break;
+            printf(".");
+            fflush(stdout);
+        }
+
+        if (i==10) {
+            printf("libnifalcon: Couldn't upload device firmware.\n");
+            
+            printf("libnifalcon: Error Code: %d\n", device->getErrorCode());
+            if (device->getErrorCode() == 2000)
+                printf("libnifalcon: Device Error Code: %d\n",
+                       device->getFalconComm()->getDeviceErrorCode());
+            
+            return -1;
+        }
+
+        // Switch back to libusb for running servo
+        device->close();
+        device->setFalconComm<libnifalcon::FalconCommLibUSB>();
+        if (!device->open(0)) {
+            printf("libnifalcon: Couldn't open device 0 (libusb).\n");
+            return -1;
+        }
     }
 
     device->setFalconKinematic<libnifalcon::FalconKinematicStamper>();
