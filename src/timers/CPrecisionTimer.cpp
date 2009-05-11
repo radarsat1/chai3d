@@ -381,6 +381,7 @@ bool cPrecisionTimer::stop()
 #else
 
   m_cancelThread = true;
+  pthread_join(m_threadID, NULL);
 
   return true;
 
