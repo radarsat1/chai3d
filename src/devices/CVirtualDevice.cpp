@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,19 +12,17 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 244 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CVirtualDevice.h"
-#include "CVector3d.h"
-#include "CMatrix3d.h"
+#include "extras/CGlobals.h"
+#include "devices/CVirtualDevice.h"
 //---------------------------------------------------------------------------
-const double DEVICE_WORKSPACE_HALF_SIZE = 0.1;
+#if defined(_ENABLE_VIRTUAL_DEVICE_SUPPORT)
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -36,6 +34,25 @@ const double DEVICE_WORKSPACE_HALF_SIZE = 0.1;
 //===========================================================================
 cVirtualDevice::cVirtualDevice()
 {
+    // settings:
+    m_specifications.m_manufacturerName              = "CHAI 3D";
+    m_specifications.m_modelName                     = "virtual";
+    m_specifications.m_maxForce                      = 10.0;    // [N]
+    m_specifications.m_maxForceStiffness             = 2000.0;  // [N/m]
+    m_specifications.m_maxTorque                     = 0.0;     // [N*m]
+    m_specifications.m_maxTorqueStiffness            = 0.0;     // [N*m/Rad]
+    m_specifications.m_maxGripperTorque              = 0.0;     // [N]
+    m_specifications.m_maxGripperTorqueStiffness     = 0.0;     // [N/m]
+    m_specifications.m_workspaceRadius               = 0.15;    // [m]
+    m_specifications.m_sensedPosition                = true;
+    m_specifications.m_sensedRotation                = false;
+    m_specifications.m_sensedGripper                 = false;
+    m_specifications.m_actuatedPosition              = true;
+    m_specifications.m_actuatedRotation              = false;
+    m_specifications.m_actuatedGripper               = false;
+    m_specifications.m_leftHand                      = true;
+    m_specifications.m_rightHand                     = true;
+
     m_systemAvailable = false;
     m_systemReady = false;
 
@@ -151,101 +168,144 @@ int cVirtualDevice::initialize(const bool a_resetEncoders)
 
 //===========================================================================
 /*!
-    Set command to the virtual device
+    Returns the number of devices available from this class of device.
 
-    \fn         int cVirtualDevice::command(int a_command, void* a_data)
-    \param      a_command  Selected command.
-    \param      a_data  Pointer to the corresponding data structure.
-    \return     Return status of command.
+    \fn      unsigned int cVirtualDevice::getNumDevices()
+    \return  Returns the result
 */
 //===========================================================================
-int cVirtualDevice::command(int a_command, void* a_data)
+unsigned int cVirtualDevice::getNumDevices()
 {
-    int result = CHAI_MSG_OK;
-    double x,y,z;
-
-    if (m_systemReady)
+    // only one device can be enabled
+    int result;
+    if (m_systemAvailable)
     {
-        switch (a_command)
-        {
-            // read position of delta device
-            case CHAI_CMD_GET_POS_3D:
-            {
-                x = (double)(*m_pDevice).PosX;
-                y = (double)(*m_pDevice).PosY;
-                z = (double)(*m_pDevice).PosZ;
-
-                cVector3d* position = (cVector3d *) a_data;
-                position->set(x, y, z);
-            }
-            break;
-
-            case CHAI_CMD_GET_POS_NORM_3D:
-            {
-                x = (double)(*m_pDevice).PosX;
-                y = (double)(*m_pDevice).PosY;
-                z = (double)(*m_pDevice).PosZ;
-
-                cVector3d* position = (cVector3d *) a_data;
-                position->set(x, y, z);
-
-                position->div(DEVICE_WORKSPACE_HALF_SIZE);
-            }
-            break;
-
-            // read orientation angles
-            case CHAI_CMD_GET_ROT_ANGLES:
-            {
-                cVector3d* angles = (cVector3d *) a_data;
-                angles->set(0, 0, 0);
-            }
-            break;
-
-            // read orientation matrix of wrist
-            case CHAI_CMD_GET_ROT_MATRIX:
-            {
-                cMatrix3d* matrix = (cMatrix3d *) a_data;
-                matrix->identity();
-            }
-            break;
-
-            // set normalized force to device
-            case CHAI_CMD_SET_FORCE_3D:
-            {
-                cVector3d* force = (cVector3d *) a_data;
-
-                ((*m_pDevice).ForceX) = force->x;
-                ((*m_pDevice).ForceY) = force->y;
-                ((*m_pDevice).ForceZ) = force->z;
-            }
-            break;
-
-            // set torque to delta wrist
-            case CHAI_CMD_SET_TORQUE_3D:
-            {
-            }
-            break;
-
-            // read user switch from wrist
-            case CHAI_CMD_GET_SWITCH_MASK:
-            case CHAI_CMD_GET_SWITCH_0:
-            {
-                int* result = (int *) a_data;
-                *result = ((bool)(*m_pDevice).Button0) ? 1 : 0;
-            }
-            break;
-
-            // function is not implemented
-            default:
-                result = CHAI_MSG_NOT_IMPLEMENTED;
-        }
+        result = 1;
     }
     else
     {
-        result = CHAI_MSG_SYSTEM_NOT_READY;
+        result = 0;
     }
-
     return (result);
 }
+
+
+//===========================================================================
+/*!
+    Read the position of the device. Units are meters [m].
+
+    \fn     int cVirtualDevice::getPosition(cVector3d& a_position)
+    \param  a_position  Return value.
+*/
+//===========================================================================
+int cVirtualDevice::getPosition(cVector3d& a_position)
+{
+    if (!m_systemReady)
+    {
+        a_position.set(0, 0, 0);
+        return (-1);
+    }
+
+    double x,y,z;
+    x = (double)(*m_pDevice).PosX;
+    y = (double)(*m_pDevice).PosY;
+    z = (double)(*m_pDevice).PosZ;
+    a_position.set(x, y, z);
+
+    return (0);
+}
+
+
+//===========================================================================
+/*!
+    Read the orientation frame of the device end-effector.
+
+    \fn     int cVirtualDevice::getRotation(cMatrix3d& a_rotation)
+    \param  a_rotation  Return value.
+*/
+//===========================================================================
+int cVirtualDevice::getRotation(cMatrix3d& a_rotation)
+{
+    if (!m_systemReady)
+    {
+        a_rotation.identity();
+        return (-1);
+    }
+
+    a_rotation.identity();
+
+    return (0);
+}
+
+
+//===========================================================================
+/*!
+    Send a force [N] to the haptic device.
+
+    \fn     int cVirtualDevice::setForce(cVector3d& a_force)
+    \param  a_force  Force command to be applied to device.
+*/
+//===========================================================================
+int cVirtualDevice::setForce(cVector3d& a_force)
+{
+    if (!m_systemReady) return (-1);
+
+    ((*m_pDevice).ForceX) = a_force.x;
+    ((*m_pDevice).ForceY) = a_force.y;
+    ((*m_pDevice).ForceZ) = a_force.z;
+
+    return (0);
+}
+
+
+//===========================================================================
+/*!
+    Return the last force sent to the device.
+
+    \fn     int cVirtualDevice::getForce(cVector3d& a_force)
+    \param  a_force  Return value.
+*/
+//===========================================================================
+int cVirtualDevice::getForce(cVector3d& a_force)
+{
+    if (!m_systemReady)
+    {
+        a_force.set(0,0,0);
+        return (-1);
+    }
+
+    a_force.x = ((*m_pDevice).ForceX);
+    a_force.y = ((*m_pDevice).ForceY);
+    a_force.z = ((*m_pDevice).ForceZ);
+
+    return (0);
+}
+
+//===========================================================================
+/*!
+    Read the status of the user switch [\b true = \e ON / \b false = \e OFF].
+
+    \fn     int cVirtualDevice::getUserSwitch(int a_switchIndex, bool& a_status)
+    \param  a_switchIndex  index number of the switch.
+    \param  a_status result value from reading the selected input switch.
+*/
+//===========================================================================
+int cVirtualDevice::getUserSwitch(int a_switchIndex, bool& a_status)
+{
+    if (!m_systemReady)
+    {
+        a_status = false;
+        return (-1);
+    }
+
+    a_status = ((bool)(*m_pDevice).Button0);
+
+    return (0);
+}
+
+
+//---------------------------------------------------------------------------
+#endif  // _ENABLE_VIRTUAL_DEVICE_SUPPORT
+//---------------------------------------------------------------------------
 
 

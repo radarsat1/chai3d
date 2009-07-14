@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,27 +12,26 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 245 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CLight.h"
-#include "CMacrosGL.h"
-#include "CWorld.h"
+#include "scenegraph/CLight.h"
+//---------------------------------------------------------------------------
+#include "scenegraph/CWorld.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-      When creating an OpenGL light source, an identity number between 0 and 7
-      is attributed to the light. This number is used during the
-      rendering process. Lights are automatically created inside class cWorld.
+    When creating an OpenGL light source, an identity number between 0 and 7
+    is attributed to the light. This number is used during the
+    rendering process. Lights are automatically created inside class cWorld.
 
-      \fn       cLight::cLight(cWorld* a_world)
-      \param    a_world parent world in which light source will be located
+    \fn       cLight::cLight(cWorld* a_world)
+    \param    a_world parent world in which light source will be located
 */
 //===========================================================================
 cLight::cLight(cWorld* a_world)
@@ -82,12 +81,11 @@ cLight::cLight(cWorld* a_world)
 
 //===========================================================================
 /*!
-      Destructor of cLight.
+    Destructor of cLight.
+    Disables this light in OpenGL and removes it from the parent's list
+    of lights.
 
-      Disables this light in OpenGL and removes it from the parent's list
-      of lights.
-
-      \fn       cLight::~cLight()
+    \fn       cLight::~cLight()
 */
 //===========================================================================
 cLight::~cLight()
@@ -101,10 +99,10 @@ cLight::~cLight()
 
 //===========================================================================
 /*!
-      Set the direction of my light beam.
+    Set the direction of my light beam.
 
-      \fn       void cLight::setDir(const cVector3d& a_direction)
-      \param    a_direction  Direction of light beam
+    \fn       void cLight::setDir(const cVector3d& a_direction)
+    \param    a_direction  Direction of light beam
 */
 //===========================================================================
 void cLight::setDir(const cVector3d& a_direction)
@@ -135,19 +133,18 @@ void cLight::setDir(const cVector3d& a_direction)
 
     // update rotation matrix
     m_localRot.setCol(c0,c1,c2);
-    
 }
 
 
 //===========================================================================
 /*!
-      Set the direction of my light beam.
+    Set the direction of my light beam.
 
-      \fn       void cLight::setDir(const double a_x, const double a_y,
-                const double a_z)
-      \param    a_x   X Coordinate of light beam.
-      \param    a_y   Y Coordinate of light beam.
-      \param    a_z   Z Coordinate of light beam.
+    \fn       void cLight::setDir(const double a_x, const double a_y,
+            const double a_z)
+    \param    a_x   X Coordinate of light beam.
+    \param    a_y   Y Coordinate of light beam.
+    \param    a_z   Z Coordinate of light beam.
 */
 //===========================================================================
 void cLight::setDir(const double a_x, const double a_y, const double a_z)
@@ -158,13 +155,13 @@ void cLight::setDir(const double a_x, const double a_y, const double a_z)
 
 //===========================================================================
 /*!
-      Set the cutoff angle (in degrees) of my light beam.
-      
-      Should range  between 0 and 90 for spot lights.  Use 180.0 to specify
-      that there should be no cutoff.
+    Set the cutoff angle (in degrees) of my light beam.
+    
+    Should range  between 0 and 90 for spot lights.  Use 180.0 to specify
+    that there should be no cutoff.
 
-      \fn       void cLight::setCutOffAngle(const GLfloat& a_value)
-      \param    a_value  Cutoff angle of light beam.
+    \fn       void cLight::setCutOffAngle(const GLfloat& a_value)
+    \param    a_value  Cutoff angle of light beam.
 */
 //===========================================================================
 void cLight::setCutOffAngle(const GLfloat& a_value)
@@ -192,13 +189,13 @@ void cLight::setCutOffAngle(const GLfloat& a_value)
 
 //===========================================================================
 /*!
-      Render this light source in OpenGL.
+    Render this light source in OpenGL.
 
-      Note that if this light source is disabled, the corresponding GL light
-      source is disabled.  That means you can't disable your CHAI light but
-      turn on the GL light somewhere else.
+    Note that if this light source is disabled, the corresponding GL light
+    source is disabled.  That means you can't disable your CHAI light but
+    turn on the GL light somewhere else.
 
-      \fn       void cLight::renderLightSource()
+    \fn       void cLight::renderLightSource()
 */
 //===========================================================================
 void cLight::renderLightSource()
@@ -262,7 +259,6 @@ void cLight::renderLightSource()
 
     // set exponent factor
     glLightf(m_glLightNumber, GL_SPOT_EXPONENT, m_spotExponent);    
-
 }
 
 

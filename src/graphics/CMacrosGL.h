@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,75 +12,78 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \author:    Dan Morris
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \author    Dan Morris
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
-/*!
-    \file CMacrosGL.h
-*/
+
 //---------------------------------------------------------------------------
 #ifndef CMacrosGLH
 #define CMacrosGLH
 //---------------------------------------------------------------------------
-#include "CVector3d.h"
-#include "CMatrix3d.h"
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#include <GL/gl.h>
+#include "math/CMaths.h"
+#include "extras/CGlobals.h"
 //---------------------------------------------------------------------------
-
-#ifdef _MSVC
-#include <conio.h>
-#define CHAI_DEBUG_PRINT _cprintf
-#else 
-#define CHAI_DEBUG_PRINT printf
-#endif
-
-//! Align the current -z axis with a reference frame; a la gluLookAt
-void cLookAt(const cVector3d& a_eye, const cVector3d& a_at, const cVector3d& a_up);
 
 //===========================================================================
 /*!
-      \struct   cMatrixGL
-      \brief    CHAI describes rotations using 3x3 rotation matrices (cMatrix3d)
-                and 3D vectors (cVector3d) to express position or translation.
-                On the OpenGL side 4x4 matrices are required to perform all
-                geometrical transformations. cMatrixGL provides a structure
-                which encapsulates all the necessary functionality to generate 4x4
-                OpenGL transformation matrices from 3D position vectors and rotation
-                matrices.
+    \file       CMacrosGL.h
 
-                cMatrixGL also provides OpenGL calls to push, multiply and pop
-                matrices off the OpenGL stack.
-                
-                Note that OpenGL Matrices are COLUMN major, but CHAI matrices
-                (and all other matrices in the universe) are ROW major.
+    \brief
+    <b> Graphics </b> \n 
+    OpenGL Macros.
+*/
+//===========================================================================
+
+//---------------------------------------------------------------------------
+// GENERAL PUPOSE FUNCTIONS:
+//---------------------------------------------------------------------------
+
+//! Align the current -z axis with a reference frame; à la gluLookAt.
+void cLookAt(const cVector3d& a_eye, const cVector3d& a_at, const cVector3d& a_up);
+
+
+//===========================================================================
+/*!
+    \struct   cMatrixGL
+    \ingroup    graphics
+
+    \brief    
+    CHAI describes rotations using 3x3 rotation matrices (cMatrix3d)
+    and 3D vectors (cVector3d) to express position or translation.
+    On the OpenGL side 4x4 matrices are required to perform all
+    geometric transformations. cMatrixGL provides a structure
+    which encapsulates all the necessary functionality to generate 4x4
+    OpenGL transformation matrices from 3D position vectors and rotation
+    matrices. \n
+
+    cMatrixGL also provides OpenGL calls to push, multiply and pop
+    matrices off the OpenGL stack. \n
+
+    Note that OpenGL Matrices are COLUMN major, but CHAI matrices
+    (and all other matrices in the universe) are ROW major.
 */
 //===========================================================================
 struct cMatrixGL
 {
-  private:
-    //! array of type \e double, defining the actual transformation
-    double  m[4][4];
-
   public:
 
     //-----------------------------------------------------------------------
+    // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------
     /*!
-          Default constructor
+          Default constructor of cMatrixGL.
     */
     //-----------------------------------------------------------------------
     cMatrixGL()
     {
         identity();
     }
+
 
     //-----------------------------------------------------------------------
     /*!
@@ -111,7 +114,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-          Extract the translational component of this matrix
+          Extract the translational component of this matrix.
     */
     //-----------------------------------------------------------------------
     inline cVector3d getPos() const
@@ -122,7 +125,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-          Extract the rotational component of this matrix
+          Extract the rotational component of this matrix.
     */
     //-----------------------------------------------------------------------
     inline cMatrix3d getRot() const
@@ -140,7 +143,7 @@ struct cMatrixGL
           Create an OpenGL rotation matrix from a 3x3 rotation matrix passed
           as a parameter.
 
-          \param    a_rot  The source rotation matrix
+          \param    a_rot  The source rotation matrix.
     */
     //-----------------------------------------------------------------------
     void set(const cMatrix3d& a_rot)
@@ -157,8 +160,8 @@ struct cMatrixGL
           Create an OpenGL translation matrix from a 3-vector and a 3x3 matrix
           passed as  a parameter.
 
-          \param    a_pos   Translational component of the transformation
-          \param    a_rot   Rotational component of the transformation
+          \param    a_pos   Translational component of the transformation.
+          \param    a_rot   Rotational component of the transformation.
     */
     //-----------------------------------------------------------------------
     void set(const cVector3d& a_pos, const cMatrix3d& a_rot)
@@ -172,9 +175,9 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Copy the current matrix to an external matrix passed as a parameter
+        Copy the current matrix to an external matrix passed as a parameter.
 
-        \param    a_destination  Destination matrix
+        \param    a_destination  Destination matrix.
     */
     //-----------------------------------------------------------------------
     inline void copyto(cMatrixGL& a_destination) const
@@ -192,9 +195,9 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Copy values from an external matrix passed as parameter to this matrix
+        Copy values from an external matrix passed as parameter to this matrix.
 
-        \param    a_source  Source matrix
+        \param    a_source  Source matrix.
     */
     //-----------------------------------------------------------------------
     inline void copyfrom(const cMatrixGL& a_source)
@@ -212,7 +215,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Set this matrix to be equal to the identity matrix. 
+        Set this matrix to be equal to the identity matrix.
     */
     //-----------------------------------------------------------------------
     inline void identity()
@@ -227,9 +230,9 @@ struct cMatrixGL
     //-----------------------------------------------------------------------
     /*!
         Left-multiply the current matrix by an external matrix passed as
-        a parameter.  That is, compute :
+        a parameter.  That is, compute: \n
 
-        this = a_matrix * this;
+        \e this = \e a_matrix * \e this \n
 
         Remember that all matrices are column-major.  That's why the following
         code looks like right-multiplication...
@@ -287,9 +290,9 @@ struct cMatrixGL
     //-----------------------------------------------------------------------
     /*!
         Left-multiply the current matrix by an external matrix passed as
-        a parameter, storing the result externally.  That is, compute :
+        a parameter, storing the result externally.  That is, compute: \n
 
-        a_result = a_matrix * this;
+        \e a_result = \e a_matrix * \e this;
 
         Remember that all matrices are column-major.  That's why the following
         code looks like right-multiplication...
@@ -333,7 +336,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Transpose this matrix and store the result in a_result
+        Transpose this matrix and store the result in a_result.
 
         \param      a_result  Result is stored here.
     */
@@ -396,146 +399,148 @@ struct cMatrixGL
     /*!
         Invert this matrix.
 
-        \return     Return \b true if operation succeeds. Otherwise \b false.
+        \return     Returns \b true if operation succeeds. Otherwise \b false.
     */
     //-----------------------------------------------------------------------
     bool inline invert()
     {
 
-// Macros used during inversion
-#define SWAP_ROWS(a, b) { GLdouble *_tmp = a; (a)=(b); (b)=_tmp; }
-#define MAT(m,r,c) (m)[(c)*4+(r)]
+        // Macros used during inversion
+        #ifndef DOXYGEN_SHOULD_SKIP_THIS
+        #define SWAP_ROWS(a, b) { GLdouble *_tmp = a; (a)=(b); (b)=_tmp; }
+        #define MAT(m,r,c) (m)[(c)*4+(r)]
+        #endif  // DOXYGEN_SHOULD_SKIP_THIS 
+            
+        double *mat = m[0];
 
-         double *mat = m[0];
+        GLdouble wtmp[4][8];
+        GLdouble m0, m1, m2, m3, s;
+        GLdouble *r0, *r1, *r2, *r3;
 
-         GLdouble wtmp[4][8];
-         GLdouble m0, m1, m2, m3, s;
-         GLdouble *r0, *r1, *r2, *r3;
+        r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
 
-         r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
+        r0[0] = MAT(mat,0,0), r0[1] = MAT(mat,0,1),
+        r0[2] = MAT(mat,0,2), r0[3] = MAT(mat,0,3),
+        r0[4] = 1.0, r0[5] = r0[6] = r0[7] = 0.0,
 
-         r0[0] = MAT(mat,0,0), r0[1] = MAT(mat,0,1),
-         r0[2] = MAT(mat,0,2), r0[3] = MAT(mat,0,3),
-         r0[4] = 1.0, r0[5] = r0[6] = r0[7] = 0.0,
+        r1[0] = MAT(mat,1,0), r1[1] = MAT(mat,1,1),
+        r1[2] = MAT(mat,1,2), r1[3] = MAT(mat,1,3),
+        r1[5] = 1.0, r1[4] = r1[6] = r1[7] = 0.0,
 
-         r1[0] = MAT(mat,1,0), r1[1] = MAT(mat,1,1),
-         r1[2] = MAT(mat,1,2), r1[3] = MAT(mat,1,3),
-         r1[5] = 1.0, r1[4] = r1[6] = r1[7] = 0.0,
+        r2[0] = MAT(mat,2,0), r2[1] = MAT(mat,2,1),
+        r2[2] = MAT(mat,2,2), r2[3] = MAT(mat,2,3),
+        r2[6] = 1.0, r2[4] = r2[5] = r2[7] = 0.0,
 
-         r2[0] = MAT(mat,2,0), r2[1] = MAT(mat,2,1),
-         r2[2] = MAT(mat,2,2), r2[3] = MAT(mat,2,3),
-         r2[6] = 1.0, r2[4] = r2[5] = r2[7] = 0.0,
+        r3[0] = MAT(mat,3,0), r3[1] = MAT(mat,3,1),
+        r3[2] = MAT(mat,3,2), r3[3] = MAT(mat,3,3),
+        r3[7] = 1.0, r3[4] = r3[5] = r3[6] = 0.0;
 
-         r3[0] = MAT(mat,3,0), r3[1] = MAT(mat,3,1),
-         r3[2] = MAT(mat,3,2), r3[3] = MAT(mat,3,3),
-         r3[7] = 1.0, r3[4] = r3[5] = r3[6] = 0.0;
+        // choose pivot
+        if (fabs(r3[0])>fabs(r2[0])) SWAP_ROWS(r3, r2);
+        if (fabs(r2[0])>fabs(r1[0])) SWAP_ROWS(r2, r1);
+        if (fabs(r1[0])>fabs(r0[0])) SWAP_ROWS(r1, r0);
+        if (0.0 == r0[0])
+        {
+        return false;
+        }
 
-         // choose pivot
-         if (fabs(r3[0])>fabs(r2[0])) SWAP_ROWS(r3, r2);
-         if (fabs(r2[0])>fabs(r1[0])) SWAP_ROWS(r2, r1);
-         if (fabs(r1[0])>fabs(r0[0])) SWAP_ROWS(r1, r0);
-         if (0.0 == r0[0])
-         {
-          return false;
-         }
+        // eliminate first variable
+        m1 = r1[0]/r0[0]; m2 = r2[0]/r0[0]; m3 = r3[0]/r0[0];
+        s = r0[1]; r1[1] -= m1 * s; r2[1] -= m2 * s; r3[1] -= m3 * s;
+        s = r0[2]; r1[2] -= m1 * s; r2[2] -= m2 * s; r3[2] -= m3 * s;
+        s = r0[3]; r1[3] -= m1 * s; r2[3] -= m2 * s; r3[3] -= m3 * s;
+        s = r0[4];
+        if (s != 0.0) { r1[4] -= m1 * s; r2[4] -= m2 * s; r3[4] -= m3 * s; }
+        s = r0[5];
+        if (s != 0.0) { r1[5] -= m1 * s; r2[5] -= m2 * s; r3[5] -= m3 * s; }
+        s = r0[6];
+        if (s != 0.0) { r1[6] -= m1 * s; r2[6] -= m2 * s; r3[6] -= m3 * s; }
+        s = r0[7];
+        if (s != 0.0) { r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
-         // eliminate first variable
-         m1 = r1[0]/r0[0]; m2 = r2[0]/r0[0]; m3 = r3[0]/r0[0];
-         s = r0[1]; r1[1] -= m1 * s; r2[1] -= m2 * s; r3[1] -= m3 * s;
-         s = r0[2]; r1[2] -= m1 * s; r2[2] -= m2 * s; r3[2] -= m3 * s;
-         s = r0[3]; r1[3] -= m1 * s; r2[3] -= m2 * s; r3[3] -= m3 * s;
-         s = r0[4];
-         if (s != 0.0) { r1[4] -= m1 * s; r2[4] -= m2 * s; r3[4] -= m3 * s; }
-         s = r0[5];
-         if (s != 0.0) { r1[5] -= m1 * s; r2[5] -= m2 * s; r3[5] -= m3 * s; }
-         s = r0[6];
-         if (s != 0.0) { r1[6] -= m1 * s; r2[6] -= m2 * s; r3[6] -= m3 * s; }
-         s = r0[7];
-         if (s != 0.0) { r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s; }
+        // choose pivot
+        if (fabs(r3[1])>fabs(r2[1])) SWAP_ROWS(r3, r2);
+        if (fabs(r2[1])>fabs(r1[1])) SWAP_ROWS(r2, r1);
+        if (0.0 == r1[1])
+        {
+        return false;
+        }
 
-         // choose pivot
-         if (fabs(r3[1])>fabs(r2[1])) SWAP_ROWS(r3, r2);
-         if (fabs(r2[1])>fabs(r1[1])) SWAP_ROWS(r2, r1);
-         if (0.0 == r1[1])
-         {
-          return false;
-         }
+        // eliminate second variable
+        m2 = r2[1]/r1[1]; m3 = r3[1]/r1[1];
+        r2[2] -= m2 * r1[2]; r3[2] -= m3 * r1[2];
+        r2[3] -= m2 * r1[3]; r3[3] -= m3 * r1[3];
+        s = r1[4]; if (0.0 != s) { r2[4] -= m2 * s; r3[4] -= m3 * s; }
+        s = r1[5]; if (0.0 != s) { r2[5] -= m2 * s; r3[5] -= m3 * s; }
+        s = r1[6]; if (0.0 != s) { r2[6] -= m2 * s; r3[6] -= m3 * s; }
+        s = r1[7]; if (0.0 != s) { r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
-         // eliminate second variable
-         m2 = r2[1]/r1[1]; m3 = r3[1]/r1[1];
-         r2[2] -= m2 * r1[2]; r3[2] -= m3 * r1[2];
-         r2[3] -= m2 * r1[3]; r3[3] -= m3 * r1[3];
-         s = r1[4]; if (0.0 != s) { r2[4] -= m2 * s; r3[4] -= m3 * s; }
-         s = r1[5]; if (0.0 != s) { r2[5] -= m2 * s; r3[5] -= m3 * s; }
-         s = r1[6]; if (0.0 != s) { r2[6] -= m2 * s; r3[6] -= m3 * s; }
-         s = r1[7]; if (0.0 != s) { r2[7] -= m2 * s; r3[7] -= m3 * s; }
+        // choose pivot
+        if (fabs(r3[2])>fabs(r2[2])) SWAP_ROWS(r3, r2);
+        if (0.0 == r2[2])
+        {
+        return false;
+        }
 
-         // choose pivot
-         if (fabs(r3[2])>fabs(r2[2])) SWAP_ROWS(r3, r2);
-         if (0.0 == r2[2])
-         {
-          return false;
-         }
+        // eliminate third variable
+        m3 = r3[2]/r2[2];
+        r3[3] -= m3 * r2[3], r3[4] -= m3 * r2[4],
+        r3[5] -= m3 * r2[5], r3[6] -= m3 * r2[6],
+        r3[7] -= m3 * r2[7];
 
-         // eliminate third variable
-         m3 = r3[2]/r2[2];
-         r3[3] -= m3 * r2[3], r3[4] -= m3 * r2[4],
-         r3[5] -= m3 * r2[5], r3[6] -= m3 * r2[6],
-         r3[7] -= m3 * r2[7];
+        // last check
+        if (0.0 == r3[3])
+        {
+        return false;
+        }
 
-         // last check
-         if (0.0 == r3[3])
-         {
-          return false;
-         }
+        s = 1.0/r3[3];
+        r3[4] *= s; r3[5] *= s; r3[6] *= s; r3[7] *= s;
 
-         s = 1.0/r3[3];
-         r3[4] *= s; r3[5] *= s; r3[6] *= s; r3[7] *= s;
+        m2 = r2[3];
+        s  = 1.0/r2[2];
+        r2[4] = s * (r2[4] - r3[4] * m2), r2[5] = s * (r2[5] - r3[5] * m2),
+        r2[6] = s * (r2[6] - r3[6] * m2), r2[7] = s * (r2[7] - r3[7] * m2);
+        m1 = r1[3];
+        r1[4] -= r3[4] * m1, r1[5] -= r3[5] * m1,
+        r1[6] -= r3[6] * m1, r1[7] -= r3[7] * m1;
+        m0 = r0[3];
+        r0[4] -= r3[4] * m0, r0[5] -= r3[5] * m0,
+        r0[6] -= r3[6] * m0, r0[7] -= r3[7] * m0;
 
-         m2 = r2[3];
-         s  = 1.0/r2[2];
-         r2[4] = s * (r2[4] - r3[4] * m2), r2[5] = s * (r2[5] - r3[5] * m2),
-         r2[6] = s * (r2[6] - r3[6] * m2), r2[7] = s * (r2[7] - r3[7] * m2);
-         m1 = r1[3];
-         r1[4] -= r3[4] * m1, r1[5] -= r3[5] * m1,
-         r1[6] -= r3[6] * m1, r1[7] -= r3[7] * m1;
-         m0 = r0[3];
-         r0[4] -= r3[4] * m0, r0[5] -= r3[5] * m0,
-         r0[6] -= r3[6] * m0, r0[7] -= r3[7] * m0;
+        m1 = r1[2];
+        s  = 1.0/r1[1];
+        r1[4] = s * (r1[4] - r2[4] * m1), r1[5] = s * (r1[5] - r2[5] * m1),
+        r1[6] = s * (r1[6] - r2[6] * m1), r1[7] = s * (r1[7] - r2[7] * m1);
+        m0 = r0[2];
+        r0[4] -= r2[4] * m0, r0[5] -= r2[5] * m0,
+        r0[6] -= r2[6] * m0, r0[7] -= r2[7] * m0;
 
-         m1 = r1[2];
-         s  = 1.0/r1[1];
-         r1[4] = s * (r1[4] - r2[4] * m1), r1[5] = s * (r1[5] - r2[5] * m1),
-         r1[6] = s * (r1[6] - r2[6] * m1), r1[7] = s * (r1[7] - r2[7] * m1);
-         m0 = r0[2];
-         r0[4] -= r2[4] * m0, r0[5] -= r2[5] * m0,
-         r0[6] -= r2[6] * m0, r0[7] -= r2[7] * m0;
+        m0 = r0[1];
+        s  = 1.0/r0[0];
+        r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
+        r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
 
-         m0 = r0[1];
-         s  = 1.0/r0[0];
-         r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
-         r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
+        MAT(mat,0,0) = r0[4]; MAT(mat,0,1) = r0[5],
+        MAT(mat,0,2) = r0[6]; MAT(mat,0,3) = r0[7],
+        MAT(mat,1,0) = r1[4]; MAT(mat,1,1) = r1[5],
+        MAT(mat,1,2) = r1[6]; MAT(mat,1,3) = r1[7],
+        MAT(mat,2,0) = r2[4]; MAT(mat,2,1) = r2[5],
+        MAT(mat,2,2) = r2[6]; MAT(mat,2,3) = r2[7],
+        MAT(mat,3,0) = r3[4]; MAT(mat,3,1) = r3[5],
+        MAT(mat,3,2) = r3[6]; MAT(mat,3,3) = r3[7];
 
-         MAT(mat,0,0) = r0[4]; MAT(mat,0,1) = r0[5],
-         MAT(mat,0,2) = r0[6]; MAT(mat,0,3) = r0[7],
-         MAT(mat,1,0) = r1[4]; MAT(mat,1,1) = r1[5],
-         MAT(mat,1,2) = r1[6]; MAT(mat,1,3) = r1[7],
-         MAT(mat,2,0) = r2[4]; MAT(mat,2,1) = r2[5],
-         MAT(mat,2,2) = r2[6]; MAT(mat,2,3) = r2[7],
-         MAT(mat,3,0) = r3[4]; MAT(mat,3,1) = r3[5],
-         MAT(mat,3,2) = r3[6]; MAT(mat,3,3) = r3[7];
+        return true;
 
-         return true;
-
-// Macros used during inversion
-#undef MAT
-#undef SWAP_ROWS
+        // Macros used during inversion
+        #undef MAT
+        #undef SWAP_ROWS
     }
 
 
     //-----------------------------------------------------------------------
     /*!
-        Build a perspective matrix, according to the gluPerspective function
+        Build a perspective matrix, according to the gluPerspective function.
     */
     //-----------------------------------------------------------------------
     inline void buildPerspectiveMatrix(double  fovy, double aspect,
@@ -555,7 +560,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Build a 4x4 matrix transform, according to the gluLookAt function
+        Build a 4x4 matrix transform, according to the gluLookAt function.
     */
     //-----------------------------------------------------------------------
     inline void buildLookAtMatrix(double eyex, double eyey, double eyez,
@@ -618,7 +623,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Build a 4x4 matrix transform, according to the gluLookAt function
+        Build a 4x4 matrix transform, according to the gluLookAt function.
     */
     //-----------------------------------------------------------------------
     inline void buildLookAtMatrix(cVector3d& a_eye, cVector3d&  a_lookAt, cVector3d a_up)
@@ -631,7 +636,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Push the current OpenGL matrix stack
+        Push the current OpenGL matrix stack.
     */
     //-----------------------------------------------------------------------
     inline void glMatrixPush()
@@ -642,7 +647,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Load the current OpenGL matrix with this cMatrixGL matrix
+        Load the current OpenGL matrix with this cMatrixGL matrix.
     */
     //-----------------------------------------------------------------------
     inline void glMatrixLoad()
@@ -653,7 +658,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Multiply the current OpenGL matrix with this cMatrixGL matrix
+        Multiply the current OpenGL matrix with this cMatrixGL matrix.
     */
     //-----------------------------------------------------------------------
     inline void glMatrixMultiply()
@@ -688,7 +693,7 @@ struct cMatrixGL
 
     //-----------------------------------------------------------------------
     /*!
-        Convert the current matrix into an std::string
+        Convert the current matrix into an std::string.
 
         \param    a_string     String where conversion is stored
         \param    a_precision  Number of digits
@@ -712,8 +717,17 @@ struct cMatrixGL
         }
         a_string.append("]");
     }
-};
 
+
+  private:
+
+	//-----------------------------------------------------------------------
+    // MEMBERS:
+    //-----------------------------------------------------------------------
+
+    //! array of type \e double, defining the actual transformation
+    double  m[4][4];
+};
 
 //---------------------------------------------------------------------------
 #endif

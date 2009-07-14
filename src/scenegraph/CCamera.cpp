@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,18 +12,18 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \author:    Dan Morris
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \author    Dan Morris
+    \version   2.0.0 $Rev: 201 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CCamera.h"
-#include "CWorld.h"
-#include "CLight.h"
+#include "scenegraph/CCamera.h"
+//---------------------------------------------------------------------------
+#include "scenegraph/CWorld.h"
+#include "scenegraph/CLight.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -81,8 +81,9 @@ cCamera::cCamera(cWorld* a_parentWorld)
 
       These vectors are used in the usual gluLookAt sense.
 
-      \fn         bool cCamera::set(const cVector3d& a_localPosition,
-                  const cVector3d& a_localLookAt, const cVector3d& a_localUp)
+      \fn         bool cCamera::set(const cVector3d& a_localPosition, 
+				  const cVector3d& a_localLookAt,
+                  const cVector3d& a_localUp)
 
       \param      a_localPosition  The position of the camera in local coordinates
       \param      a_localLookAt  The Point in local space at which the camera looks
@@ -90,7 +91,8 @@ cCamera::cCamera(cWorld* a_parentWorld)
                   the top of the image)
 */
 //===========================================================================
-bool cCamera::set(const cVector3d& a_localPosition, const cVector3d& a_localLookAt,
+bool cCamera::set(const cVector3d& a_localPosition, 
+				  const cVector3d& a_localLookAt,
                   const cVector3d& a_localUp)
 {
     // copy new values to temp variables
@@ -206,39 +208,34 @@ void cCamera::setClippingPlanes(const double a_distanceNear, const double a_dist
     Check for collision detection between an x-y position (typically a mouse
     click) and an object in the scene
 
-    \fn         bool cCamera::select(const int a_windowPosX, const int a_windowPosY,
-                const int a_windowWidth, const int a_windowHeight, cGenericObject*& a_selectedObject,
-                cTriangle*& a_selectedTriangle, cVector3d& a_selectedPoint, double a_selectedDistance,
-                const bool a_visibleObjectsOnly);
+    \fn         bool cCamera::select(const int a_windowPosX,
+                     const int a_windowPosY,
+                     const int a_windowWidth,
+                     const int a_windowHeight,
+                     cCollisionRecorder& a_collisionRecorder,
+                     cCollisionSettings& a_collisionSettings)
      
      \param     a_windowPosX        X coordinate position of mouse click.
      \param     a_windowPosY        Y coordinate position of mouse click.
      \param     a_windowWidth       Width of window display (pixels)
      \param     a_windowHeight      Height of window display (pixels)
-     \param     a_selectedObject    Returns a pointer to the selected object (if any)
-     \param     a_selectedTriangle  Returns a pointer to selected triangle (if any)
-     \param     a_selectedPoint     Returns the point is space where a collision was found (if any)
-     \param     a_selectedDistance  Returns the distance between the camera and the collision point (if any)
-     \param     a_visibleObjectsOnly Should we ignore invisible objects?
-
+     \param     a_collisionRecorder Recorder used to store all collisions between mouse and objects
+     \param     a_collisionSettings Settings related to collision detection
      \return    Returns \b true if an object has been hit, else false
 */
 //===========================================================================
-bool cCamera::select(const int a_windowPosX, const int a_windowPosY,
-     const int a_windowWidth, const int a_windowHeight, cGenericObject*& a_selectedObject,
-     cTriangle*& a_selectedTriangle, cVector3d& a_selectedPoint, double& a_selectedDistance,
-     const bool a_visibleObjectsOnly)
+bool cCamera::select(const int a_windowPosX,
+                     const int a_windowPosY,
+                     const int a_windowWidth,
+                     const int a_windowHeight,
+                     cCollisionRecorder& a_collisionRecorder,
+                     cCollisionSettings& a_collisionSettings)
 {
-    // initialize variables
-    bool result;
-
-    a_selectedObject = NULL;
-    a_selectedTriangle = NULL;
-    a_selectedPoint.set(0.0, 0.0, 0.0);
-    a_selectedDistance = CHAI_LARGE;
+    // clear collision recorder
+    a_collisionRecorder.clear();
 
     // update my m_globalPos and m_globalRot variables
-    computeGlobalCurrentObjectOnly(true);
+    m_parentWorld->computeGlobalPositions(false);
 
     // make sure we have a legitimate field of view
     if (fabs(m_fieldViewAngle) < 0.001f) { return (false); }
@@ -260,15 +257,13 @@ bool cCamera::select(const int a_windowPosX, const int a_windowPosY,
     cVector3d selectPoint = cAdd(m_globalPos, cMul(100000, selectRay));
 
     // search for intersection between the ray and objects in the world
-    result = m_parentWorld->computeCollisionDetection(
+    bool result = m_parentWorld->computeCollisionDetection(
                                 m_globalPos,
                                 selectPoint,
-                                a_selectedObject,
-                                a_selectedTriangle,
-                                a_selectedPoint,
-                                a_selectedDistance,
-                                a_visibleObjectsOnly, -1);
-    
+                                a_collisionRecorder,
+                                a_collisionSettings);
+
+    // return result
     return result;
 }
 
@@ -297,7 +292,17 @@ bool cCamera::select(const int a_windowPosX, const int a_windowPosY,
 void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
                          const int a_imageIndex)
 {
-  
+    // store most recent size of display
+    m_lastDisplayWidth = a_windowWidth;
+    m_lastDisplayHeight = a_windowHeight;
+
+    // set background color
+    cColorf color = getParentWorld()->getBackgroundColor();
+    glClearColor(color.getR(), color.getG(), color.getB(), color.getA());
+
+    // clear the color and depth buffers
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     // compute global pose
     computeGlobalCurrentObjectOnly(true);
 
@@ -425,15 +430,48 @@ void cCamera::renderView(const int a_windowWidth, const int a_windowHeight,
       m_parentWorld->renderSceneGraph(CHAI_RENDER_MODE_TRANSPARENT_BACK_ONLY);
       m_parentWorld->renderSceneGraph(CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY);
     }
-
-    else {
+    else
+    {
       m_parentWorld->renderSceneGraph(CHAI_RENDER_MODE_RENDER_ALL);
     }        
 
     // render the 'front' 2d object layer; it will set up its own
     // projection matrix
     if (m_front_2Dscene.getNumChildren())
-      render2dSceneGraph(&m_front_2Dscene,a_windowWidth,a_windowHeight);     
+      render2dSceneGraph(&m_front_2Dscene,a_windowWidth,a_windowHeight);
+}
+
+
+//===========================================================================
+/*!
+      Copies the opengl image buffer to a cImageLoader class structure.
+
+      \fn         void cCamera::copyImageData(cImageLoader* a_image)
+      \param      a_image  Destination image
+*/
+//===========================================================================
+void cCamera::copyImageData(cImageLoader* a_image)
+{
+    // check image structure
+    if (a_image == NULL) { return; }
+
+    // check size
+    if ((m_lastDisplayWidth  != a_image->getWidth()) ||
+        (m_lastDisplayHeight != a_image->getHeight()))
+    {
+        a_image->allocate(m_lastDisplayWidth, m_lastDisplayHeight);
+    }
+
+    // copy pixel data if required
+    glReadPixels(
+    0,
+    0,
+    m_lastDisplayWidth,
+    m_lastDisplayHeight,
+    GL_RGBA,
+    GL_UNSIGNED_BYTE,
+    a_image->getData()
+    );
 }
 
 

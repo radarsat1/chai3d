@@ -1,0 +1,11 @@
+LIBRARY   hdFalcon
+DESCRIPTION "CHAI 3D interface to the Falcon haptic device"
+EXPORTS
+   hdFalconGetNumDevices
+   hdFalconOpen
+   hdFalconClose
+   hdFalconGetPosition
+   hdFalconGetRotation
+   hdFalconGetButtons
+   hdFalconSetForce
+

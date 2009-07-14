@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,10 +12,9 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Federico Barbagli
-    \version    1.2
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Federico Barbagli
+    \version   2.0.0 $Rev: 256 $
 */
 //===========================================================================
 
@@ -23,25 +22,48 @@
 #ifndef cDriverSensoray626H
 #define cDriverSensoray626H
 //---------------------------------------------------------------------------
-#include "CGenericDevice.h"
-#include "Win626.h"
+#include "devices/CGenericDevice.h"
+//---------------------------------------------------------------------------
+#if defined(_ENABLE_SENSORAY626_DEVICE_SUPPORT)
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-      \file       CDriverSensoray626.h
-      \class      cDriverSensoray626
-      \brief      cDriverSensoray626 offers an interface to the Sensoray 626 boards.
+    \file       CDriverSensoray626.h
+
+    \brief
+    <b> Devices </b> \n 
+    Sensoray 626 IO Board.
+*/
+//===========================================================================
+
+//===========================================================================
+/*!
+    \class      cDriverSensoray626
+    \ingroup    devices  
+
+    \brief      
+    cDriverSensoray626 offers an interface to the Sensoray 626 boards.
 */
 //===========================================================================
 class cDriverSensoray626 : public cGenericDevice
 {
   public:
+
+    //-----------------------------------------------------------------------
     // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+
     //! Constructor of cDriverSensoray626
     cDriverSensoray626();
+
     //! Destructor of cDriverSensoray626
     ~cDriverSensoray626();
+
+
+    //-----------------------------------------------------------------------
+    // METHODS:
+    //-----------------------------------------------------------------------
 
     //! Open connection to Sensoray626 board
     int open();
@@ -68,11 +90,18 @@ class cDriverSensoray626 : public cGenericDevice
     int command(int iCommand, void* iData);
 
   private:
+    
+    //-----------------------------------------------------------------------
     // METHODS:
-    //! Set encoders to the right operation mode
+    //-----------------------------------------------------------------------
+    
+      //! Set encoders to the right operation mode
     void encoderInit();
 
+    //-----------------------------------------------------------------------
     // MEMBERS:
+    //-----------------------------------------------------------------------
+
     //! Handle to current board.
     int m_boardHandle;
 
@@ -89,5 +118,7 @@ class cDriverSensoray626 : public cGenericDevice
 
 //---------------------------------------------------------------------------
 #endif
+//---------------------------------------------------------------------------
+#endif //_ENABLE_SENSORAY626_DEVICE_SUPPORT
 //---------------------------------------------------------------------------
 

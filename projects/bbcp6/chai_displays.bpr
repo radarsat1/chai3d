@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="..\..\lib\bbcp6\chai_displays.lib"/>
+    <OBJFILES value="obj\CViewport.obj"/>
+    <RESFILES value=""/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..\src\display"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="_DEBUG;_WIN32;_BBCP"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
+    <MAINSOURCE value="chai_displays.bpf"/>
+    <INCLUDEPATH value="..\..\src\display;..\..\external\opengl\bbcp;$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\math;..\..\src\tools;..\..\src\files;..\..\src\collisions;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp6"/>
+    <LIBPATH value="..\..\src\display;..\src\display;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par -w-8027"/>
+    <LISTFILE value=""/>
+    <OTHERFILES value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <PFLAGS value="-N2obj -N0obj -$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value=""/>
+    <OTHERFILES value=""/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+    <OTHERFILES value=""/>
+  </LINKER>
+  <FILELIST>
+      <FILE FILENAME="chai_displays.bpf" FORMNAME="" UNITNAME="chai_displays" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\display\CViewport.cpp" FORMNAME="" UNITNAME="CViewport" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=13
+Item0=..\..\external\opengl\bbcp;$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\math;..\..\src\tools;..\..\src\files;..\..\src\collisions;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp6
+Item1=..\..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\math;..\..\src\tools;..\..\src\files;..\..\src\collisions;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp6
+Item2=..\..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\math;..\..\src\tools;..\..\src\files;..\..\src\collisions;..\..\src\scenegraph;..\..\src
+Item3=..\..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\math;..\..\src\tools;..\..\src\files;..\..\src\collisions;..\..\src\scenegraph;..\..\src\
+Item4=..\..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\math;..\..\src\tools;..\..\src\files;..\..\src\collisions;..\..\src\scenegraph
+Item5=..\..\src\display;..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions;..\src\scenegraph
+Item6=..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions;..\src\scenegraph
+Item7=..\src\display;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
+Item8=..\src\display;..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
+Item9=..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools;..\src\files;..\src\collisions
+Item10=..\src\displays;$(BCB)\include;$(BCB)\include\vcl;..\src\graphics;..\src\math;..\src\tools
+Item11=..\src\displays;$(BCB)\include;$(BCB)\include\vcl
+Item12=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=5
+Item0=..\..\src\display;..\src\display;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\src\display;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\src\display;..\src\displays;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\src\displays;$(BCB)\lib\obj;$(BCB)\lib
+Item4=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=3
+Item0=_DEBUG;_WIN32;_BBCP
+Item1=_WIN32
+Item2=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=obj
+
+[HistoryLists\hlFinalOutputDir]
+Count=4
+Item0=..\..\lib\bbcp6\
+Item1=..\lib\bbcp6\
+Item2=..\lib\bbcp\
+Item3=..\lib\bbcp
+
+[HistoryLists\hIBPIOutputDir]
+Count=1
+Item0=..\lib\bbcp
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteLauncher=
+RemoteCWD=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

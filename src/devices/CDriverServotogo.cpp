@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,17 +12,18 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Federico Barbagli
-    \author:    Francois Conti
-    \version    1.2
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Federico Barbagli
+    \version   2.0.0 $Rev: 244 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CDriverServotogo.h"
+#include "devices/CDriverServotogo.h"
 //---------------------------------------------------------------------------
+#if defined(_ENABLE_SERVOTOGO_DEVICE_SUPPORT)
+//---------------------------------------------------------------------------
+
 #define CNT0_D     0x00
 #define CNT1_D     0x01
 #define CNT0_C     0x02
@@ -89,6 +90,7 @@
 #define IDL        0x40d
 #define CNTRL1     0x40f
 
+
 //---------------------------------------------------------------------------
 // Some bit masks for various registers
 //---------------------------------------------------------------------------
@@ -133,6 +135,7 @@
 #define BRDTST_EOC       0x08
 #define IRQSL            0x84
 
+
 //---------------------------------------------------------------------------
 // Input Output redefinitions
 //---------------------------------------------------------------------------
@@ -156,8 +159,9 @@ inline unsigned short fInPW(unsigned short port)
     return (DlPortReadPortUshort(port));
 }
 
+
 //---------------------------------------------------------------------------
-// hardware direction bit definitions
+// Hardware direction bit definitions
 //---------------------------------------------------------------------------
 #define A_DIR_BIT      0x10
 #define B_DIR_BIT      0x02
@@ -167,8 +171,9 @@ inline unsigned short fInPW(unsigned short port)
 #define D_LOW_DIR_BIT  0x01
 #define D_HI_DIR_BIT   0x08
 
+
 //---------------------------------------------------------------------------
-// parameters to the SelectInterruptPeriod Command
+// Parameters to the SelectInterruptPeriod Command
 //---------------------------------------------------------------------------
 #define _500_MICROSECONDS        500
 #define _1_MILLISECOND           1000
@@ -243,8 +248,6 @@ int cDriverServotogo::open()
         return (-1);
     }
 
-
-
     // initialize motors to zero.
     for (int i = 0; i<m_wAxesInSys; i++)
     {
@@ -262,12 +265,12 @@ int cDriverServotogo::open()
 
 //==========================================================================
 /*!
-      Set volt value dVolts for the i-th dac channel. If a_num is out of the range
-      of DACs for the board no action is taken.
+    Set volt value dVolts for the i-th dac channel. If a_num is out of the range
+    of DACs for the board no action is taken.
 
-      \fn       void cDriverServotogo::setDac(int a_num, double a_volts)
-      \param    a_num  dac number.
-      \param    a_volts  value to be applied to dacs
+    \fn       void cDriverServotogo::setDac(int a_num, double a_volts)
+    \param    a_num  dac number.
+    \param    a_volts  value to be applied to dacs
 */
 //===========================================================================
 void cDriverServotogo::setDac(int a_num, double a_volts)
@@ -295,10 +298,10 @@ void cDriverServotogo::setDac(int a_num, double a_volts)
 
 //==========================================================================
 /*!
-      Checks if board is present and what is its model number
+    Checks if board is present and what is its model number
 
-      \fn       unsigned short cDriverServotogo::brdtstOK(unsigned short a_baseAddress)
-      \param    a_baseAddress  The address of the board in I/O space
+    \fn       unsigned short cDriverServotogo::brdtstOK(unsigned short a_baseAddress)
+    \param    a_baseAddress  The address of the board in I/O space
 
 */
 //===========================================================================
@@ -341,10 +344,10 @@ unsigned short cDriverServotogo::brdtstOK(unsigned short a_baseAddress)
 
 //==========================================================================
 /*!
-      Initializes various aspects of the board
+    Initializes various aspects of the board
 
-      \fn       void cDriverServotogo::stg_Init(unsigned short a_wAdd)
-      \param    a_wAdd Address of the board in I/O space.
+    \fn       void cDriverServotogo::stg_Init(unsigned short a_wAdd)
+    \param    a_wAdd Address of the board in I/O space.
 
 */
 //===========================================================================
@@ -381,10 +384,9 @@ void cDriverServotogo::stg_Init(unsigned short a_wAdd)
 
 //==========================================================================
 /*!
-      Initializes the encoder chips of the board
+    Initializes the encoder chips of the board.
 
-      \fn       void cDriverServotogo::encoderInit()
-
+    \fn       void cDriverServotogo::encoderInit()
 */
 //===========================================================================
 void cDriverServotogo::encoderInit()
@@ -483,10 +485,10 @@ void cDriverServotogo::encoderInit()
 
 //==========================================================================
 /*!
-      Latches and reads all encoders at once
+    Latches and reads all encoders at once.
 
-      \fn       void cDriverServotogo::encReadAll(LONGBYTE * a_lbEnc)
-      \param    a_lbEnc  array of the encoder values
+    \fn       void cDriverServotogo::encReadAll(LONGBYTE * a_lbEnc)
+    \param    a_lbEnc  array of the encoder values
 */
 //===========================================================================
 void cDriverServotogo::encReadAll(LONGBYTE* a_lbEnc)
@@ -565,9 +567,9 @@ void cDriverServotogo::encReadAll(LONGBYTE* a_lbEnc)
 
 //==========================================================================
 /*!
-      Latches all encoders
+    Latches all encoders.
 
-      \fn       void cDriverServotogo::encoderLatch()
+    \fn       void cDriverServotogo::encoderLatch()
 
 */
 //===========================================================================
@@ -589,10 +591,9 @@ void cDriverServotogo::encoderLatch()
 
 //==========================================================================
 /*!
-      Finds the base address for the board
+    Finds the base address for the board.
 
-      \fn       unsigned short cDriverServotogo::findBaseAddress()
-
+    \fn       unsigned short cDriverServotogo::findBaseAddress()
 */
 //===========================================================================
 unsigned short cDriverServotogo::findBaseAddress()
@@ -613,10 +614,9 @@ unsigned short cDriverServotogo::findBaseAddress()
 
 //==========================================================================
 /*!
-      Returns board base address.
+    Returns board base address.
 
-      \fn       int cDriverServotogo::getBaseAddress()
-
+    \fn       int cDriverServotogo::getBaseAddress()
 */
 //===========================================================================
 int cDriverServotogo::getBaseAddress()
@@ -627,12 +627,12 @@ int cDriverServotogo::getBaseAddress()
 
 //==========================================================================
 /*!
-      Read the value of encoder iNum. Returns -1 if the encoder doesn't exist, 1 if read was OK
+    Read the value of encoder iNum. Returns \e -1 if the encoder doesn't exist, 
+    returns \e 1 if read was OK
 
-      \fn       int cDriverServotogo::getEncoder(int a_num, long *a_value)
-      \param    a_num number of encoder to be read
-      \param    a_value pointer to value read
-
+    \fn       int cDriverServotogo::getEncoder(int a_num, long *a_value)
+    \param    a_num number of encoder to be read.
+    \param    a_value pointer to value read.
 */
 //===========================================================================
 int cDriverServotogo::getEncoder(int a_num, long *a_value)
@@ -655,16 +655,16 @@ int cDriverServotogo::getEncoder(int a_num, long *a_value)
 
 //==========================================================================
 /*!
-      Writes to DAC nAxis value lCounts
+    Writes to DAC nAxis value lCounts
 
-      \fn       void cDriverServotogo::rawDAC(unsigned short nAxis, long lCounts)
-      \param    nAxis    value of DAC to which to write
-      \param    lCounts  value to be written to the DAC
-
+    \fn       void cDriverServotogo::rawDAC(unsigned short nAxis, long lCounts)
+    \param    nAxis    value of DAC to which to write
+    \param    lCounts  value to be written to the DAC
 */
 //===========================================================================
 void cDriverServotogo::rawDAC(unsigned short nAxis, long lCounts)
 {
+    //--------------------------------------------------------------------
     // input / output:
     //
     //    lCounts (decimal) ... -lCounts ... +0x1000 ... volts
@@ -672,10 +672,11 @@ void cDriverServotogo::rawDAC(unsigned short nAxis, long lCounts)
     //     0x1000  (4096)     0xfffff000           0       +10
     //          0                      0      0x1000         0
     // 0xfffff001 (-4095)          0xfff      0x1fff       -10
-
+    //--------------------------------------------------------------------
     // So, the domain might be different than you expected. I expected:
     //     0xf000 (-4096)  to  0xfff (4095), rather than
     //     0xf001 (-4095)  to 0x1000 (4096)
+    //--------------------------------------------------------------------
 
     // reverse slope so positive counts give positive voltage
     lCounts = - lCounts;
@@ -698,7 +699,7 @@ void cDriverServotogo::rawDAC(unsigned short nAxis, long lCounts)
 
 //==========================================================================
 /*!
-      Sets all DACs to zero
+    Sets all DACs to zero
 
     \fn       void cDriverServotogo::close()
     \return Return 0 is operation succeeds, -1 if an error occurs.
@@ -716,14 +717,13 @@ int cDriverServotogo::close()
 }
 
 
-
 //===========================================================================
 /*!
-    Set command to the Servotogo board
+    Set command to the Servotogo board.
 
-    \fn     int cDriverServotogo::command(int iCommand, void* iData)
-    \param  iCommand    Selected command.
-    \param  iData       Pointer to the corresponding data structure.
+    \fn     int cDriverServotogo::command(int a_command, void* a_data)
+    \param  a_command    Selected command.
+    \param  a_data       Pointer to the corresponding data structure.
     \return Return status of command.
 */
 //===========================================================================
@@ -864,7 +864,7 @@ int cDriverServotogo::command(int a_command, void* a_data)
                setDac(7, *iVolts);
             }
             break;
-            // function is not implemented for phantom devices
+            // function is not implemented
             default:
             retval = CHAI_MSG_NOT_IMPLEMENTED;
         }
@@ -884,7 +884,6 @@ int cDriverServotogo::command(int a_command, void* a_data)
 
     \fn     void cDriverServotogo::initialize(const bool a_resetEncoders=false)
     \return Return 0 is operation succeeds, -1 if an error occurs.
-
 */
 //===========================================================================
 int cDriverServotogo::initialize(const bool a_resetEncoders)
@@ -899,3 +898,6 @@ int cDriverServotogo::initialize(const bool a_resetEncoders)
     }
 }
 
+//---------------------------------------------------------------------------
+#endif //_ENABLE_SERVOTOGO_DEVICE_SUPPORT
+//---------------------------------------------------------------------------

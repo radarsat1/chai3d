@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,52 +12,32 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Dan Morris
-    \author:    Francois Conti
-    \version    1.0
-    \date       03/2004
+    \author    <http://www.chai3d.org>
+    \author    Dan Morris
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#include "CImageLoader.h"
-#include "CFileLoaderBMP.h"
-#include "CFileLoaderTGA.h"
-#include "CMacrosGL.h"
-#include <GL/gl.h>
+#include "files/CImageLoader.h"
+#include "files/CFileLoaderTGA.h"
+#include "files/CFileLoaderBMP.h"
 //---------------------------------------------------------------------------
-
-#if (defined(_WIN32) && !defined(_POSIX) )
+#if defined(_WIN32)
 
 // Don't let the ATL headers decide for themselves which lib file to
 // link against; let us link here or in client applications...
 #define _ATL_NO_DEFAULT_LIBS
 
 // Borland and MSVC put the atl headers in different places
-#ifdef _MSVC
-#include <atlbase.h>
+#if defined(_MSVC)
+#include <olectl.h>
 #else
 #include <atl/atlbase.h>
 #endif
-
 #endif
-
 //---------------------------------------------------------------------------
-
-// For gl image formats...
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#include <GL/gl.h>
-
-//---------------------------------------------------------------------------
-
 
 //===========================================================================
 /*!
@@ -314,11 +294,11 @@ void cImageLoader::allocate(const unsigned int a_width, const unsigned int a_hei
     
     Always converts the resulting image to RGBA.    
 
-    \fn     int cImageLoader::loadFromFile(const char* a_filename)
+    \fn     bool cImageLoader::loadFromFile(const char* a_filename)
     \param  a_filename  Image filename
 */
 //===========================================================================
-int cImageLoader::loadFromFile(const char* filename)
+bool cImageLoader::loadFromFile(const char* filename)
 {
     // Sometimes we'll make a one-level recursive call into this
     // function; this is an extra safety check to avoid extra
@@ -328,8 +308,8 @@ int cImageLoader::loadFromFile(const char* filename)
     // cleanup previous image
     cleanup();
 
-    strncpy(m_filename,filename,_MAX_PATH);
-    m_filename[_MAX_PATH-1] = '\0';
+    strncpy(m_filename,filename,CHAI_SIZE_PATH);
+    m_filename[CHAI_SIZE_PATH-1] = '\0';
 
     char* extension = find_extension(filename);
 
@@ -337,7 +317,7 @@ int cImageLoader::loadFromFile(const char* filename)
     if (extension == 0)
     {
         cleanup();
-        return -1;
+        return (false);
     }
 
     char lower_extension[1024];
@@ -351,13 +331,14 @@ int cImageLoader::loadFromFile(const char* filename)
         cFileLoaderTGA targa_image;
 
         // Load the targa file from disk
-        int result = targa_image.LoadFromFile(m_filename);
-        if (result == 0)
+        bool result = targa_image.LoadFromFile(m_filename);
+        if (!result)
         {
             cleanup();
 
             // Try again using the windows native loader...
-            return loadFromFileOLE(filename);
+            result = loadFromFileOLE(filename);
+            return (result);
         }
 
         m_width = targa_image.GetImageWidth();
@@ -384,7 +365,8 @@ int cImageLoader::loadFromFile(const char* filename)
             cleanup();
 
             // Try again using the windows native loader...
-            return loadFromFileOLE(filename);
+            bool result = loadFromFileOLE(filename);
+            return (result);
         }
 
         m_data = new unsigned char[m_width*m_height*(m_bits_per_pixel/8)];
@@ -401,20 +383,19 @@ int cImageLoader::loadFromFile(const char* filename)
 
         cFileLoaderBMP bmp_image;
 
-        int result = bmp_image.loadBMP(m_filename);
-        if (result == 0)
+        bool result = bmp_image.loadBMP(m_filename);
+        if (!result)
         {
             cleanup();
 
             // Try again using the windows native loader...
-            return loadFromFileOLE(filename);
+            result = loadFromFileOLE(filename);
+            return (result);
         }
 
         m_width = bmp_image.getWidth();
         m_height = bmp_image.getHeight();
 
-        // The bitmap loader forces everything into 24-bit RGB
-        GLenum format = GL_RGB;
         m_bits_per_pixel = 24;
 
         m_data = new unsigned char[m_width*m_height*(m_bits_per_pixel/8)];
@@ -423,15 +404,15 @@ int cImageLoader::loadFromFile(const char* filename)
         memcpy(m_data,bmp_image.pBitmap(),(m_bits_per_pixel/8)*m_width*m_height);
     }
 
-#if (defined(_WIN32) && !defined(_POSIX))
+#if defined(_WIN32)
 
     //--------------------------------------------------------------------
     // Unrecognized file format - use win32 loader
     //--------------------------------------------------------------------
     else
     {
-      return loadFromFileOLE(filename);
-
+        bool result = loadFromFileOLE(filename);
+        return (result);
     }
       
 #else
@@ -451,22 +432,22 @@ int cImageLoader::loadFromFile(const char* filename)
         if (extension == 0)
         {
             m_initialized = 0;
-            return -1;
+            return (false);
         }
         // Extra sanity check to avoid deep recursion
         recursive_call = 1;
 
-        char new_filename[_MAX_PATH];
+        char new_filename[CHAI_SIZE_PATH];
 
         // Replace the extension
         strcpy(new_filename,filename);
         strcpy(new_filename+(extension-filename),"bmp");
 
         // Try again...
-        int result = loadFromFile(new_filename);
+        bool result = loadFromFile(new_filename);
 
         recursive_call = 0;
-        return result;
+        return (result);
     }
 
     //--------------------------------------------------------------------
@@ -475,7 +456,7 @@ int cImageLoader::loadFromFile(const char* filename)
     else
     {
         m_initialized = false;
-        return -1;
+        return (false);
     }
 
 #endif
@@ -487,7 +468,7 @@ int cImageLoader::loadFromFile(const char* filename)
 
     convertToRGBA();
 
-    return 0;
+    return (true);
 }
 
 
@@ -507,8 +488,8 @@ void replace_extension(char* a_dest, const char* a_input, const char* a_extensio
     int chars_to_copy = strlen(a_input);
 
     // Copy only the non-extension portion of a_input if he has an extension
-    char* input_extension = 0;
-    if (input_extension = find_extension(a_input,1))
+    char* input_extension = find_extension(a_input,1);
+    if (input_extension)
       chars_to_copy = input_extension - a_input;
 
     strncpy(a_dest,a_input,chars_to_copy);
@@ -688,13 +669,11 @@ void string_tolower(char* a_dest, const char* a_source)
     \param  szPathName    filename
 */
 //===========================================================================
-int cImageLoader::loadFromFileOLE(const char* szPathName)
+bool cImageLoader::loadFromFileOLE(const char* szPathName)
 {
 
-#if (!defined(_WIN32) || defined(_POSIX))
-  
-    return -1;
-
+#if (!defined(_WIN32))
+    return (false);
 #else
 
     // From: http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=41
@@ -723,14 +702,14 @@ int cImageLoader::loadFromFileOLE(const char* szPathName)
       // for folks with binary model formats...
 
       char* extension = find_extension(szPath);
-      if (extension == 0) return -1;
+      if (extension == 0) return (false);
       strcpy(extension,"jpg");
       MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, _MAX_PATH);
       hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
 
       if(FAILED(hr)) {
         char* extension = find_extension(szPath);
-        if (extension == 0) return -1;
+        if (extension == 0) return (false);
         strcpy(extension,"bmp");
         MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, _MAX_PATH);
         hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
@@ -738,7 +717,7 @@ int cImageLoader::loadFromFileOLE(const char* szPathName)
 
       if(FAILED(hr)) {
         //CHAI_DEBUG_PRINT("Warning: could not load image file %s...\n",szPathName);
-        return -1;
+        return (false);
       }
     }
 
@@ -748,7 +727,7 @@ int cImageLoader::loadFromFileOLE(const char* szPathName)
     if(!hdcTemp)														
     {
       pPicture->Release();
-      return -1;
+      return (false);
     }
 
     pPicture->get_Width(&lWidth);
@@ -776,7 +755,7 @@ int cImageLoader::loadFromFileOLE(const char* szPathName)
     {
       DeleteDC(hdcTemp);
       pPicture->Release();
-      return -1;
+      return (false);
     }
 
     // Get ready to render to memory
@@ -810,7 +789,7 @@ int cImageLoader::loadFromFileOLE(const char* szPathName)
     m_format = GL_RGBA;
     m_initialized = 1;    
 
-    return 0;
+    return (true);
 #endif
 
 }

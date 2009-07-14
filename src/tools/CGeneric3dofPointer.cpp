@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,75 +12,120 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \author:    Federico Barbagli
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \author    Federico Barbagli
+    \version   2.0.0 $Rev: 270 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CGeneric3dofPointer.h"
-#include "CWorld.h"
+#include "tools/CGeneric3dofPointer.h"
+#include "graphics/CTriangle.h"
 //---------------------------------------------------------------------------
-
-// The radius used for proxy collision detection is equal to 
-// CHAI_SCALE_PROXY_RADIUS * the radius that's rendered
-#define CHAI_SCALE_PROXY_RADIUS 0.001f
 
 //==========================================================================
 /*!
-      Constructor of cGeneric3dofPointer.
+    Constructor of cGeneric3dofPointer.
 
-      \fn       cGeneric3dofPointer::cGeneric3dofPointer(cWorld* a_world)
-      \param    a_world  World in which the tool will operate.
+    \fn       cGeneric3dofPointer::cGeneric3dofPointer(cWorld* a_world)
+    \param    a_world  World in which the tool will operate.
 */
 //===========================================================================
 cGeneric3dofPointer::cGeneric3dofPointer(cWorld* a_world)
 {
+    // this makes sure that we do not send a huge force to the device
+    // as soon as the demo starts.
     m_waitForSmallForce = true;
+
+    // default radius of tip of tool
+    m_displayRadius = 0.001;
 
     // set world
     m_world = a_world;
 
+    // set a default device for the moment
+    m_device = new cGenericHapticDevice();
+
+
+    //-------------------------------------------------------------------
+    // FORCE MODELS SUPPORTED BY THE TOOL
+    //-------------------------------------------------------------------
+
     // create a default proxy algorithm force renderer
-    cProxyPointForceAlgo* default_proxy = new cProxyPointForceAlgo;
-    m_pointForceAlgos.push_back(default_proxy);
+    m_proxyPointForceModel = new cProxyPointForceAlgo();
+
+    // initialize proxy model
+    m_proxyPointForceModel->initialize(m_world, cVector3d(0,0,0));
+    m_proxyPointForceModel->setProxyRadius(m_displayRadius);
 
     // create a default potential field force renderer
-    cPotentialFieldForceAlgo* potentialFields = new cPotentialFieldForceAlgo();
-    m_pointForceAlgos.push_back(potentialFields);
+    m_potentialFieldsForceModel = new cPotentialFieldForceAlgo();
 
-    // set up the default proxy
-    default_proxy->initialize(m_world, cVector3d(0,0,0));
-    default_proxy->setProxyRadius(m_displayRadius * CHAI_SCALE_PROXY_RADIUS);
-
-    // set a default device for the moment
-    m_device = new cGenericDevice();
-
-    // default tool rendering settings
-    m_colorDevice.set(1.0f, 0.2f, 0.0);
-    m_colorProxyButtonOn.set(1.0f, 0.4f, 0.0);
-    m_colorProxy.set(0.8f, 0.6f, 0.0);
-    m_colorLine.set(0.7f, 0.7f, 0.7f);
-    m_render_mode = RENDER_PROXY_AND_DEVICE;
-
-    // This sets both the rendering radius and the actual proxy radius
-    setRadius(0.05f);
-    
-    // tool frame settings
-    m_showToolFrame = false;   // toggle tool frame off
-    m_toolFrameSize = 0.2;      // default value for the tool frame size
+    // initialize potential field model
+    m_potentialFieldsForceModel->initialize(m_world, cVector3d(0,0,0));
 
     // force settings
-    m_forceON = true;           // forces are ON at first
+    m_forceON = true;
     m_forceStarted = false;
 
-		// set workspace size
-    m_halfWorkspaceAxisX = 0.1;
-    m_halfWorkspaceAxisY = 0.1;
-    m_halfWorkspaceAxisZ = 0.1;
+
+    //-------------------------------------------------------------------
+    // GRAPHICAL MODEL OF THE TOOL
+    //-------------------------------------------------------------------
+
+    // set the default material properties for the sphere representing  the proxy
+    m_materialProxy.m_ambient.set(0.7, 0.7, 0.7);
+    m_materialProxy.m_diffuse.set(0.9, 0.9, 0.9);
+    m_materialProxy.m_specular.set(1.0, 1.0, 1.0);
+
+    // set the default material properties for proxy when the user switch is engaged
+    m_materialProxyButtonPressed.m_ambient.set(0.3, 0.3, 0.3);
+    m_materialProxyButtonPressed.m_diffuse.set(0.5, 0.5, 0.5);
+    m_materialProxyButtonPressed.m_specular.set(1.0, 1.0, 1.0);
+
+    // set the default material properties for the sphere representing the device
+    cMaterial materialDevice;
+    materialDevice.m_ambient.set(0.6, 0.6, 0.6);
+    materialDevice.m_diffuse.set(0.8, 0.8, 0.8);
+    materialDevice.m_specular.set(1.0, 1.0, 1.0);
+
+    // Sphere representing the device
+    m_deviceSphere = new cShapeSphere(0.019);
+    m_deviceSphere->m_material = materialDevice;
+    m_deviceSphere->setHapticEnabled(false);
+    addChild(m_deviceSphere);
+
+    // Sphere representing the proxy
+    m_proxySphere = new cShapeSphere(0.020);
+    m_proxySphere->setHapticEnabled(false);
+    m_proxySphere->m_material = m_materialProxy;
+    addChild(m_proxySphere);
+
+    // Mesh representing the device
+    m_deviceMesh = new cMesh(m_world);
+    m_deviceMesh->setHapticEnabled(false);
+    m_deviceSphere->addChild(m_deviceMesh);
+
+    // Mesh representing the proxy
+    m_proxyMesh = new cMesh(m_world);
+    m_proxyMesh->setHapticEnabled(false);
+    m_proxySphere->addChild(m_proxyMesh);
+
+    // Default color of the line which connects the device and the proxy spheres
+    m_colorLine.set(0.7f, 0.7f, 0.7f);
+
+    // This sets both the rendering radius and the actual proxy radius
+    setRadius(0.05);
+
+
+    //-------------------------------------------------------------------
+    // WORKSPACE AND POSITION
+    //-------------------------------------------------------------------
+
+    // set workspace size
+    m_workspaceRadius = 1.0;
+    m_workspaceScaleFactor = 1.0;
 
     // init device related variables
     m_deviceGlobalPos.zero();
@@ -89,17 +134,14 @@ cGeneric3dofPointer::cGeneric3dofPointer(cWorld* a_world)
     m_lastComputedGlobalForce.zero();
     m_deviceLocalVel.zero();
     m_deviceGlobalVel.zero();
-
-    // Use normalized positions by default
-    m_useNormalizedPositions = true;
 }
 
 
 //==========================================================================
 /*!
-      Destructor of cGeneric3dofPointer.
+    Destructor of cGeneric3dofPointer.
 
-      \fn       cGeneric3dofPointer::~cGeneric3dofPointer()
+    \fn       cGeneric3dofPointer::~cGeneric3dofPointer()
 */
 //===========================================================================
 cGeneric3dofPointer::~cGeneric3dofPointer()
@@ -116,83 +158,81 @@ cGeneric3dofPointer::~cGeneric3dofPointer()
 
 //==========================================================================
 /*!
-    Define a haptic device driver for this tool.
-
-    \fn       void cGeneric3dofPointer::setDevice(cGenericDevice *a_device);
-    \param    a_device  This is the device that should be associated with
-                        this tool.
-*/
-//===========================================================================
-void cGeneric3dofPointer::setDevice(cGenericDevice *a_device)
-{
-    m_device = a_device;
-}
-
-
-//==========================================================================
-/*!
     Initialize device
 
     \fn       void cGeneric3dofPointer::initialize(const bool a_resetEncoders=false)
     \param    a_resetEncoders  If true, this resets the device's 0 position
-              to the current position (if this device supports re-zero'ing).
-              That means that if your device supports re-zero'ing (e.g. Phantom
-              premiums), you should be careful about calling this function
-              in the middle of your program with a_resetEncoders set to 'true'.
-              Or if you do call it with a_resetEncoders set to true, you should 
-              make sure your user knows to hold the Phantom in place.
+                to the current position (if this device supports re-zero'ing).
+                That means that if your device supports re-zero'ing (e.g. Phantom
+                premiums), you should be careful about calling this function
+                in the middle of your program with a_resetEncoders set to 'true'.
+                Or if you do call it with a_resetEncoders set to true, you should
+                make sure your user knows to hold the Phantom in place.
     \return   0 indicates success, non-zero indicates an error
 */
 //===========================================================================
 int cGeneric3dofPointer::initialize(const bool a_resetEncoders)
 {
     // check if device is available
-    if (m_device == NULL) { return -1; }
-
-    // initialize (calibrate) device
-    if (m_device->open() != 0) return -1;
-    if (m_device->initialize(a_resetEncoders) != 0) return -1;
-    updatePose();
-    if (m_device->close() != 0) return -1;
-
-    // initialize all force models
-    unsigned int i;
-    for (i=0; i<m_pointForceAlgos.size(); i++)
+    if (m_device == NULL)
     {
-        if (m_pointForceAlgos[i] != NULL)
-        {
-            m_pointForceAlgos[i]->initialize(m_world, m_deviceGlobalPos);
-        }
+        return (-1);
     }
 
+    // initialize all force models
+    m_proxyPointForceModel->initialize(m_world, m_deviceGlobalPos);
+    m_potentialFieldsForceModel->initialize(m_world, m_deviceGlobalPos);
+
+	// if device encoders need to be initialize, call initialize function here.
+	// otherwise normal initialization is perform in the start() function
+	if (a_resetEncoders)
+	{
+		m_device->initialize(true);
+	}
+
+    // exit
     return 0;
 }
 
 
 //==========================================================================
 /*!
-      Starts communication with the haptic device.
+    Starts communication with the haptic device.
 
-      \fn       void cGeneric3dofPointer::start()
-      \return   0 indicates success, non-zero indicates an error
+    \fn       void cGeneric3dofPointer::start()
+    \return   0 indicates success, non-zero indicates an error
 */
 //===========================================================================
 int cGeneric3dofPointer::start()
 {
     // check if device is available
-    if (m_device == NULL) { return -1; }
+    if (m_device == NULL)
+    {
+        return -1;
+    }
+
+	int result = 0;
 
     // open connection to device
-    return m_device->open();
+    result = m_device->open();
+
+	// initialize device
+	if (result == 0)
+	{
+		result = m_device->initialize();
+	}
+
+	// resturn result
+	return (result);
 }
 
 
 //==========================================================================
 /*!
-      Stop system. Apply zero force to device
+    Stop system. Apply zero force to device
 
-      \fn       void cGeneric3dofPointer::stop()
-      \return   0 indicates success, non-zero indicates an error
+    \fn       void cGeneric3dofPointer::stop()
+    \return   0 indicates success, non-zero indicates an error
 */
 //===========================================================================
 int cGeneric3dofPointer::stop()
@@ -207,78 +247,93 @@ int cGeneric3dofPointer::stop()
 
 //==========================================================================
 /*!
-      Sets the virtual volume in which the virtual tool will be moving.
+    Sets the virtual volume in which the virtual tool will be moving.
 
-      Normalized coordinates received from the device (ranging from
-      -1.0 --> 1.0) are multiplied by half of the workspace edges to get
-      the values that are used to position the pointer.
-
-      \fn       void cGeneric3dofPointer::setWorkspace(const double& a_width,
-                const double& a_height, const double& a_depth)
-      \param    a_width   Width of workspace.
-      \param    a_height  Height of workspace.
-      \param    a_depth   Depth of workspace.
+    \fn       void cGeneric3dofPointer::setWorkspaceRadius(const double& a_workspaceRadius)
+    \param    a_workspaceRadius   Radius of the workspace.
 */
 //===========================================================================
-void cGeneric3dofPointer::setWorkspace(const double& a_workspaceAxisX,
-    const double& a_workspaceAxisY, const double& a_workspaceAxisZ)
+void cGeneric3dofPointer::setWorkspaceRadius(const double& a_workspaceRadius)
 {
-    m_halfWorkspaceAxisX = a_workspaceAxisX / 2.0;
-    m_halfWorkspaceAxisY = a_workspaceAxisY / 2.0;
-    m_halfWorkspaceAxisZ = a_workspaceAxisZ / 2.0;    
+    // update new workspace size
+    m_workspaceRadius = a_workspaceRadius;
+
+    // compute the new scale factor between the workspace of the tool
+    // and one of the haptic device
+    if (m_device != NULL)
+    {
+        m_workspaceScaleFactor = m_workspaceRadius / m_device->getSpecifications().m_workspaceRadius;
+    }
+    else
+    {
+        m_workspaceScaleFactor = 1.0;
+    }
 }
 
 
 //==========================================================================
 /*!
-      Update position of pointer and orientation of wrist.
+    Define a scale factor between the physical workspace of the haptic device
+    and the workspace span by the virtual tool.
 
-      \fn       void cGeneric3dofPointer::updatePose()
+    \fn       void cGeneric3dofPointer::setWorkspaceScaleFactor(const double& a_workspaceScaleFactor)
+    \param    a_workspaceScaleFactor   Workspace scale factor.
+*/
+//===========================================================================
+void cGeneric3dofPointer::setWorkspaceScaleFactor(const double& a_workspaceScaleFactor)
+{
+    // make sure that input value is bigger than zero
+    double value = cAbs(a_workspaceScaleFactor);
+    if (value == 0) { return; }
+
+    // update scale factor
+    m_workspaceScaleFactor = value;
+
+    // compute the new scale factor between the workspace of the tool
+    // and one of the haptic device
+    m_workspaceRadius =  m_workspaceScaleFactor * m_device->getSpecifications().m_workspaceRadius;
+}
+
+
+//==========================================================================
+/*!
+    Update position of pointer and orientation of wrist.
+
+    \fn       void cGeneric3dofPointer::updatePose()
 */
 //===========================================================================
 void cGeneric3dofPointer::updatePose()
 {
-    cVector3d pos;
+    cVector3d pos, vel;
 
     // check if device is available
     if (m_device == NULL) { return; }
 
-    // read local position of device in normalized units or mm
-    int result;
-    if (m_useNormalizedPositions)
-        result = m_device->command(CHAI_CMD_GET_POS_NORM_3D, &pos);
-    else
-        result = m_device->command(CHAI_CMD_GET_POS_3D, &pos);
+    // read device position
+    m_device->getPosition(pos);
 
-    if (result != CHAI_MSG_OK) { return; }
-
-    if (m_useNormalizedPositions == true)
-    {
-      // scale position from device into virtual workspace of tool
-      m_deviceLocalPos.set( m_halfWorkspaceAxisX * pos.x,
-                            m_halfWorkspaceAxisY * pos.y,
-                            m_halfWorkspaceAxisZ * pos.z);
-    }
-    else {
-      m_deviceLocalPos.set(pos.x,pos.y,pos.z);
-    }
+    // adjust for tool workspace scale factor
+    m_deviceLocalPos = m_workspaceScaleFactor * pos;
 
     // update global position of tool
     cVector3d tPos;
     m_globalRot.mulr(m_deviceLocalPos, tPos);
     tPos.addr(m_globalPos, m_deviceGlobalPos);
 
-    // read orientation of wrist
-    m_device->command(CHAI_CMD_GET_ROT_MATRIX, &m_deviceLocalRot);
+    // read device orientation
+    m_device->getRotation(m_deviceLocalRot);
 
     // update global orientation of tool
     m_deviceLocalRot.mulr(m_globalRot, m_deviceGlobalRot);
 
     // read switches
-    m_device->command(CHAI_CMD_GET_SWITCH_MASK, &m_button);
-    
+    m_userSwitch0 = getUserSwitch(0);
+
     // read velocity of the device in local coordinates
-    m_device->command(CHAI_CMD_GET_VEL_3D, &m_deviceLocalVel);
+    m_device->getLinearVelocity(vel);
+
+    // adjust for tool workspace scale factor
+    m_deviceLocalVel = m_workspaceScaleFactor * vel;
 
     // update global velocity of tool
     m_globalRot.mulr(m_deviceLocalVel, m_deviceGlobalVel);
@@ -287,28 +342,21 @@ void cGeneric3dofPointer::updatePose()
 
 //===========================================================================
 /*!
-      Compute the interaction forces between the tool and the virtual
-      object inside the virtual world.
+    Compute the interaction forces between the tool and the virtual
+    object inside the virtual world.
 
-      \fn       void cGeneric3dofPointer::computeForces()
+    \fn       void cGeneric3dofPointer::computeInteractionForces()
 */
 //===========================================================================
-void cGeneric3dofPointer::computeForces()
+void cGeneric3dofPointer::computeInteractionForces()
 {
-    unsigned int i;
-
     // temporary variable to store forces
     cVector3d force;
     force.zero();
-  
+
     // compute forces in world coordinates for each point force algorithm
-    for (i=0; i<m_pointForceAlgos.size(); i++)
-    {
-        if (m_pointForceAlgos[i] != NULL)
-        {
-            force.add(m_pointForceAlgos[i]->computeForces(m_deviceGlobalPos));
-        }
-    }
+    force.add(m_potentialFieldsForceModel->computeForces(m_deviceGlobalPos, m_deviceGlobalVel));
+    force.add(m_proxyPointForceModel->computeForces(m_deviceGlobalPos, m_deviceGlobalVel));
 
     // copy result
     m_lastComputedGlobalForce.copyfrom(force);
@@ -317,15 +365,18 @@ void cGeneric3dofPointer::computeForces()
 
 //==========================================================================
 /*!
-      Apply the latest computed force to the device.
+    Apply the latest computed force to the device.
 
-      \fn       void cGeneric3dofPointer::applyForces()
+    \fn       void cGeneric3dofPointer::applyForces()
 */
 //===========================================================================
 void cGeneric3dofPointer::applyForces()
 {
     // check if device is available
-    if (m_device == NULL) { return; }
+    if (m_device == NULL)
+    {
+        return;
+    }
 
     // convert force into device local coordinates
     cMatrix3d tRot;
@@ -333,31 +384,32 @@ void cGeneric3dofPointer::applyForces()
     tRot.mulr(m_lastComputedGlobalForce, m_lastComputedLocalForce);
 
     if (
-      (m_waitForSmallForce == false)
-      ||
-      ((!m_forceStarted) && (m_lastComputedLocalForce.lengthsq() <0.000001))
+        (m_waitForSmallForce == false)  ||
+        ((!m_forceStarted) && (m_lastComputedLocalForce.lengthsq() <0.000001))
       )
+    {
         m_forceStarted = true;
+    }
 
     // send force to device
     if ((m_forceON) && (m_forceStarted))
     {
-        m_device->command(CHAI_CMD_SET_FORCE_3D, &m_lastComputedLocalForce);
+        m_device->setForce(m_lastComputedLocalForce);
     }
     else
     {
-        cVector3d ZeroForce = cVector3d(0.0, 0.0, 0.0);
-        m_device->command(CHAI_CMD_SET_FORCE_3D, &ZeroForce);
+        cVector3d zeroForce(0.0, 0.0, 0.0);
+        m_device->setForce(zeroForce);
     }
 }
 
 
 //==========================================================================
 /*!
-      Render the current tool in OpenGL.
+    Render the current tool in OpenGL.
 
-      \fn       void cGeneric3dofPointer::render(const int a_renderMode=0)
-      \param    a_renderMode  rendering mode; see cGenericObject.cpp.
+    \fn       void cGeneric3dofPointer::render(const int a_renderMode=0)
+    \param    a_renderMode  rendering mode; see cGenericObject.cpp.
 */
 //===========================================================================
 void cGeneric3dofPointer::render(const int a_renderMode)
@@ -365,158 +417,58 @@ void cGeneric3dofPointer::render(const int a_renderMode)
     // If multipass transparency is enabled, only render on a single
     // pass...
     if (a_renderMode != CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY && a_renderMode != CHAI_RENDER_MODE_RENDER_ALL)
-      return;   
-
-    // render small sphere representing tip of tool
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-    // OpenGL matrix
-    cMatrixGL frameGL;
+    return;
 
     // compute local position of proxy
-    cProxyPointForceAlgo* default_proxy = getProxy();
     cVector3d proxyLocalPos;
-    if (default_proxy != NULL)
+    cMatrix3d tRot;
+    proxyLocalPos = m_proxyPointForceModel->getProxyGlobalPosition();
+    proxyLocalPos.sub(m_globalPos);
+    m_globalRot.transr(tRot);
+    tRot.mul(proxyLocalPos);
+
+    // update position information of graphic entity for the device
+    m_deviceSphere->setPos(m_deviceLocalPos);
+    m_deviceSphere->setRot(m_deviceLocalRot);
+
+    // update position information of graphic entity for the proxy
+    m_proxySphere->setPos(proxyLocalPos);
+    m_proxySphere->setRot(m_deviceLocalRot);
+
+    // Button 0 determines the color of the proxy
+    if (m_userSwitch0)
     {
-        proxyLocalPos = default_proxy->getProxyGlobalPosition();
-        proxyLocalPos.sub(m_globalPos);
-        cMatrix3d tRot;
-        m_globalRot.transr(tRot);
-        tRot.mul(proxyLocalPos);
+        m_proxySphere->m_material = m_materialProxyButtonPressed;
+    }
+    else
+    {
+        m_proxySphere->m_material = m_materialProxy;
     }
 
-    if ((m_render_mode != RENDER_DEVICE) && (default_proxy != NULL))
+    // if proxy and device sphere are enabled, draw
+    if ((m_proxySphere->getShowEnabled()) && (m_deviceSphere->getShowEnabled()))
     {
-      // render proxy
-
-      // Button 0 determines the color of the proxy
-      if (m_button & 1)
-      {
-          glColor4fv(m_colorProxyButtonOn.pColor());        
-      }
-      else
-      {
-          glColor4fv(m_colorProxy.pColor());          
-      }
-
-      frameGL.set(proxyLocalPos);
-      frameGL.glMatrixPushMultiply();
-          cDrawSphere(m_displayRadius, 16, 16);
-      frameGL.glMatrixPop();
+        glDisable(GL_LIGHTING);
+        glLineWidth(1.0);
+        glColor4fv(m_colorLine.pColor());
+        glBegin(GL_LINES);
+            glVertex3d(m_deviceLocalPos.x, m_deviceLocalPos.y, m_deviceLocalPos.z);
+            glVertex3d(proxyLocalPos.x, proxyLocalPos.y, proxyLocalPos.z);
+        glEnd();
+        glEnable(GL_LIGHTING);
     }
-
-    if (m_render_mode != RENDER_PROXY)
-    {
-        // render device position
-        if (m_button & 1) {
-          glColor4fv(m_colorProxyButtonOn.pColor());
-        }
-        else {
-          glColor4fv(m_colorDevice.pColor());
-        }
-        frameGL.set(m_deviceLocalPos);
-        frameGL.glMatrixPushMultiply();
-            cDrawSphere(m_displayRadius, 16, 16);
-        frameGL.glMatrixPop();
-
-        if (m_showToolFrame)
-        {
-            // render device orientation
-            frameGL.set(m_deviceLocalPos, m_deviceLocalRot);
-            frameGL.glMatrixPushMultiply();
-                cDrawFrame(m_toolFrameSize);
-            frameGL.glMatrixPop();
-        }
-    }
-
-    if ((m_render_mode == RENDER_PROXY_AND_DEVICE) && (default_proxy != NULL))
-    {
-      // render line between device and proxy
-      glDisable(GL_LIGHTING);
-      glLineWidth(1.0);
-      glColor4fv(m_colorLine.pColor());
-      glBegin(GL_LINES);
-          glVertex3d(m_deviceLocalPos.x, m_deviceLocalPos.y, m_deviceLocalPos.z);
-          glVertex3d(proxyLocalPos.x, proxyLocalPos.y, proxyLocalPos.z);
-      glEnd();
-      glEnable(GL_LIGHTING);
-    }    
-
-    // Really useful debugging code for showing which triangles the proxy is
-    // in contact with...
-
-// #define RENDER_PROXY_CONTACT_TRIANGLES
-#ifdef RENDER_PROXY_CONTACT_TRIANGLES
-    if ((m_proxyPointForceAlgo.getContactObject()) && (default_proxy != NULL)) {
-      
-      cTriangle *t0, *t1, *t2;
-
-      cGenericObject* obj = default_proxy->getContactObject(); //m_proxyPointForceAlgo.getContactObject();
-      obj->computeGlobalCurrentObjectOnly();
-      
-      int result = default_proxy->getContactObject(); //m_proxyPointForceAlgo.getContacts(t0,t1,t2);
-    
-      glDisable(GL_DEPTH_TEST);
-      glDisable(GL_CULL_FACE);
-      glPushMatrix();
-      glLoadMatrixd(m_world->m_worldModelView);
-      glBegin(GL_TRIANGLES);
-
-      if (t0) {
-
-        glColor3f(1.0,0,0);
-        t0->getVertex0()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-        t0->getVertex1()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-        t0->getVertex2()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-
-        glVertex3d(t0->getVertex0()->m_globalPos.x,t0->getVertex0()->m_globalPos.y,t0->getVertex0()->m_globalPos.z);
-        glVertex3d(t0->getVertex1()->m_globalPos.x,t0->getVertex1()->m_globalPos.y,t0->getVertex1()->m_globalPos.z);
-        glVertex3d(t0->getVertex2()->m_globalPos.x,t0->getVertex2()->m_globalPos.y,t0->getVertex2()->m_globalPos.z);        
-      }
-
-      if (t1) {
-
-        glColor3f(0,1.0,0);
-        t1->getVertex0()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-        t1->getVertex1()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-        t1->getVertex2()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-
-        glVertex3d(t1->getVertex0()->m_globalPos.x,t1->getVertex0()->m_globalPos.y,t1->getVertex0()->m_globalPos.z);
-        glVertex3d(t1->getVertex1()->m_globalPos.x,t1->getVertex1()->m_globalPos.y,t1->getVertex1()->m_globalPos.z);
-        glVertex3d(t1->getVertex2()->m_globalPos.x,t1->getVertex2()->m_globalPos.y,t1->getVertex2()->m_globalPos.z);        
-      }
-
-      if (t2) {
-
-        glColor3f(0,0,1.0);
-        t2->getVertex0()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-        t2->getVertex1()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-        t2->getVertex2()->computeGlobalPosition(obj->getGlobalPos(),obj->getGlobalRot());
-
-        glVertex3d(t2->getVertex0()->m_globalPos.x,t2->getVertex0()->m_globalPos.y,t2->getVertex0()->m_globalPos.z);
-        glVertex3d(t2->getVertex1()->m_globalPos.x,t2->getVertex1()->m_globalPos.y,t2->getVertex1()->m_globalPos.z);
-        glVertex3d(t2->getVertex2()->m_globalPos.x,t2->getVertex2()->m_globalPos.y,t2->getVertex2()->m_globalPos.z);        
-      }
-
-      glEnd();
-      glPopMatrix();
-      glEnable(GL_DEPTH_TEST);
-    }
-#endif
-
 }
 
 
 //==========================================================================
 /*!
-      Set the radius of the proxy. The value passed as parameter corresponds
-      to the size of the sphere which is rendered graphically. The physical
-      size of the proxy, one which collides with the triangles is set to
-      CHAI_SCALE_PROXY_RADIUS * a_radius.
+    Set the radius of the proxy. The value passed as parameter corresponds
+    to the size of the sphere which is rendered graphically. The physical
+    size of the proxy, one which collides with the triangles is set to
+    CHAI_SCALE_PROXY_RADIUS * a_radius.
 
-      \fn       void cGeneric3dofPointer::setRadius(const double& a_radius)
-      \param    a_radius  radius of pointer.
+    \fn       void cGeneric3dofPointer::setRadius(const double& a_radius)
+    \param    a_radius  radius of pointer.
 */
 //===========================================================================
 void cGeneric3dofPointer::setRadius(const double& a_radius)
@@ -525,59 +477,19 @@ void cGeneric3dofPointer::setRadius(const double& a_radius)
     m_displayRadius = a_radius;
 
     // update the radius used for collision detection
-		cProxyPointForceAlgo* default_proxy = getProxy();
-		if (default_proxy != NULL)
-			default_proxy->setProxyRadius(a_radius * CHAI_SCALE_PROXY_RADIUS);
+    m_proxyPointForceModel->setProxyRadius(a_radius);
+
+    // update radius of display sphere.
+    // make the device sphere slightly smaller to avoid
+    // graphical artifacts.
+    m_proxySphere->setRadius(1.00 * a_radius);
+    m_deviceSphere->setRadius(0.99 * a_radius);
 }
 
 
 //==========================================================================
 /*!
-      This function searches the vector of point force algorithms and
-			returns the first proxy (instance of cProxyPointForceAlgo) that
-			it can find.  If it does not find any, it returns NULL.  By default,
-			a proxy was entered into this list in the constructor, so it should
-			return this default proxy unless you have removed it.
-
-      This is a convenience function.  If you want to find all the available
-      proxies or all the available force-rendering algorithms, you should
-      search the m_pointForceAlgos list.
-
-      \fn       void cGeneric3dofPointer::getProxy()
-*/
-//===========================================================================
-cProxyPointForceAlgo* cGeneric3dofPointer::getProxy()
-{
-	  for (unsigned int i=0; i<m_pointForceAlgos.size(); i++)
-		{
-		  cProxyPointForceAlgo* default_proxy = dynamic_cast<cProxyPointForceAlgo*>(m_pointForceAlgos[i]);
-		  if (default_proxy != NULL)
-			  return default_proxy;
-		}
-	  return NULL;
-}
-
-
-//==========================================================================
-/*!
-      Toggles on and off the visualization of a reference frame
-      located on the tool's point.
-
-      \fn       void cGeneric3dofPointer::setToolFrame(const bool& a_showToolFrame, const double& a_toolFrameSize)
-      \param    a_showToolFrame Flag which controls the tool frame display.
-      \param    a_toolFrameSize Size of the tool frame.
-*/
-//===========================================================================
-void cGeneric3dofPointer::setToolFrame(const bool& a_showToolFrame, const double& a_toolFrameSize)
-{
-    m_showToolFrame = a_showToolFrame;
-    m_toolFrameSize = a_toolFrameSize;
-}
-
-
-//==========================================================================
-/*!
-    Turns forces ON
+    Turns forces \b ON.
 
     \fn     void cGeneric3dofPointer::setForcesON()
     \return   0 indicates success, non-zero indicates an error
@@ -597,7 +509,7 @@ int cGeneric3dofPointer::setForcesON()
 
 //==========================================================================
 /*!
-    Turns forces OFF
+    Turns forces \b OFF.
 
     \fn       void cGeneric3dofPointer::setForcesOFF()
     \return   0 indicates success, non-zero indicates an error
@@ -606,31 +518,66 @@ int cGeneric3dofPointer::setForcesON()
 int cGeneric3dofPointer::setForcesOFF()
 {
     m_forceON = false;
+    m_lastComputedLocalForce.zero();
+    m_lastComputedGlobalForce.zero();
+    applyForces();
     return 0;
 }
 
 
 //==========================================================================
 /*!
-    Returns scale factors from normalized coordinates to millimeters.  I.e., if
-    you take pointer position and multiply by these values, you get millimeters.
-    
-    If a device does not provide this information, zeros are returned.
+    Check if the tool is currently interacting with the given object.
 
-    By default, cGeneric3dofPointer accesses the _normalized_ device position;
-    this lets you convert back to absolute coordinates.
-
-    \fn       cVector3d cGeneric3dofPointer::getWorkspaceScaleFactors()
-    \return   Scale factors: coordinates * scale = mm
+    \fn       bool cGeneric3dofPointer::isInContact(cGenericObject* a_object)
+    \return   Return \e true if the tool is interacting with the object
 */
 //===========================================================================
-cVector3d cGeneric3dofPointer::getWorkspaceScaleFactors() {
-    double scale;
-    int result = m_device->command(CHAI_CMD_GET_NORMALIZED_SCALE_FACTOR, &scale);
-    if (result != CHAI_MSG_OK) { return cVector3d(0.0,0.0,0.0); }  
-  
-    cVector3d toReturn(1.0/m_halfWorkspaceAxisX,1.0/m_halfWorkspaceAxisY,1.0/m_halfWorkspaceAxisZ);
-    toReturn *= scale;
-    return toReturn;
+bool cGeneric3dofPointer::isInContact(cGenericObject* a_object)
+{
+    //-------------------------------------------------------------------
+    // CHECK PROXY ALGORITHM
+    //-------------------------------------------------------------------
+
+    // contact 0
+    if (m_proxyPointForceModel->m_contactPoint0->m_object == a_object)
+    {
+        return (true);
+    }
+
+    // contact 1
+    if ((m_proxyPointForceModel->m_contactPoint0->m_object != NULL) &&
+        (m_proxyPointForceModel->m_contactPoint1->m_object == a_object))
+    {
+        return (true);
+    }
+
+    // contact 2
+    if ((m_proxyPointForceModel->m_contactPoint0->m_object != NULL) &&
+        (m_proxyPointForceModel->m_contactPoint1->m_object != NULL) &&
+        (m_proxyPointForceModel->m_contactPoint2->m_object == a_object))
+    {
+        return (true);
+    }
+
+    //-------------------------------------------------------------------
+    // CHECK POTENTIAL FIELD ALGORITHM
+    //-------------------------------------------------------------------
+    unsigned int num = m_potentialFieldsForceModel->m_interactionRecorder.m_interactions.size();
+    unsigned int i = 0;
+    while (i < num)
+    {
+        // check next interaction
+        if (m_potentialFieldsForceModel->m_interactionRecorder.m_interactions[i].m_object == a_object)
+        {
+            return (true);
+        }
+
+        // increment counter
+        i++;
+    }
+
+    // no object in contact
+    return (false);
 }
 

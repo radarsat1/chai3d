@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,39 +12,29 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Dan Morris
-    \version    1.0
-    \date       12/2005
+    \author    <http://www.chai3d.org>
+    \author    Dan Morris
+    \version   2.0.0 $Rev: 245 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CFont.h"
-#include "GL/gl.h"
+#include "widgets/CFont.h"
+//---------------------------------------------------------------------------
+#if defined(_WIN32)
+#include "display/CViewport.h"
+#endif
+#include "extras/CGlobals.h"
+//---------------------------------------------------------------------------
 #include <ctype.h>
-
-// Different compilers like slightly different GLUT's 
-#ifdef _MSVC
-#include "../../external/OpenGL/msvc6/glut.h"
-#else
-  #ifdef _POSIX
-    #include <GL/glut.h>
-  #else
-    #include "../../external/OpenGL/bbcp6/glut.h"
-  #endif
-#endif
-
-#ifdef _WIN32
-#include "CViewport.h"
-#endif
-
 #include <string.h>
+//---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-Default constructor for abstract class cFont
-\fn         cFont::cFont()
+    Default constructor for abstract class cFont.
+
+    \fn         cFont::cFont()
 */
 //===========================================================================
 cFont::cFont()
@@ -57,7 +47,8 @@ cFont::cFont()
 
 //===========================================================================
 /*!
-    Use this to obtain an actual, non-virtual font object
+    Use this to obtain an actual, non-virtual font object.
+
     \fn         static cFont* cFont::createFont()
     \return     Returns a pointer to an actual cFont object that you can
                 use for rendering.  The caller is responsible for deleting
@@ -66,12 +57,17 @@ cFont::cFont()
 //===========================================================================
 cFont* cFont::createFont()
 {
-#if (defined(_WIN32) && !defined(_POSIX))
+#if defined(_WIN32)
     // Only return a bitmap font if we have an active viewport,
     // implying that we can get a GL context
     if (cViewport::getLastActiveViewport())
-      return new cWin32BitmapFont();
-    else return new cGLUTBitmapFont();
+    {
+        return new cWin32BitmapFont();
+    }
+    else
+    {
+        return new cGLUTBitmapFont();
+    }
 #else
     return new cGLUTBitmapFont();
 #endif
@@ -80,11 +76,12 @@ cFont* cFont::createFont()
 
 //===========================================================================
 /*!
-    Use this to copy data from an existing font object
+    Use this to copy data from an existing font object.
+
     \fn         static cFont* cFont::createFont(const cFont* oldFont);
     \return     Returns a pointer to an actual cFont object that you can
-    use for rendering.  The caller is responsible for deleting
-    this object.  Returns 0 if no font can be constructed.
+                use for rendering.  The caller is responsible for deleting
+                this object.  Returns 0 if no font can be constructed.
 */
 //===========================================================================
 cFont* cFont::createFont(const cFont* oldFont)
@@ -105,7 +102,8 @@ cFont* cFont::createFont(const cFont* oldFont)
 
 //===========================================================================
 /*!
-    Get the width of a particular character
+    Get the width of a particular character.
+
     \fn         int cFont::getCharacterWidth(const unsigned char& a_char)
     \return     Returns the width of this character in pixels, or -1 for an error
     \param      a_char    The character (e.g. 'a') to look up.  Characters less than
@@ -122,7 +120,8 @@ int cFont::getCharacterWidth(const unsigned char& a_char)
 
 //===========================================================================
 /*!
-    Change the font face, possibly marking the font for re-initialization
+    Change the font face, possibly marking the font for re-initialization.
+
     \fn         void cFont::setFontFace(const char* a_faceName)
     \param      a_faceName The new face name
 */
@@ -136,7 +135,6 @@ void cFont::setFontFace(const char* a_faceName)
     for(int i=0; i<len; i++) m_fontFace[i] = tolower(m_fontFace[i]);
 }
 
-
 // Constants needed for GLUT fonts
 void* glut_bitmap_fonts[7] = {
     GLUT_BITMAP_9_BY_15,
@@ -145,7 +143,7 @@ void* glut_bitmap_fonts[7] = {
     GLUT_BITMAP_TIMES_ROMAN_24,
     GLUT_BITMAP_HELVETICA_10,
     GLUT_BITMAP_HELVETICA_12,
-    GLUT_BITMAP_HELVETICA_18     
+    GLUT_BITMAP_HELVETICA_18
 };
 
 const char* glut_bitmap_font_names[7] = {
@@ -176,7 +174,8 @@ const char* glut_stroke_font_names[2] = {
 
 //===========================================================================
 /*!
-    Return the index of the current font in the table of font name
+    Return the index of the current font in the table of font name.
+
     \fn         int cGLUTBitmapFont::getBestFontMatch()
     \return     -1 for error or an index into glut_bitmap_fonts
 */
@@ -229,6 +228,7 @@ int cGLUTBitmapFont::getBestFontMatch()
 //===========================================================================
 /*!
     Renders an actual string of text, initializing the font if necessary.
+
     \fn         int cGLUTBitmapFont::renderString(const char* a_str)
     \param      a_str The string to render; should not include newlines
     \return     0 for success, -1 for error
@@ -248,7 +248,8 @@ int cGLUTBitmapFont::renderString(const char* a_str)
 
 //===========================================================================
 /*!
-  Get the width of a particular character
+  Get the width of a particular character.
+
   \fn         int cGLUTBitmapFont::getCharacterWidth(const unsigned char& a_char)
   \return     Returns the width of this character in pixels, or -1 for an error
   \param      a_char    The character (e.g. 'a') to look up.  Characters less than
@@ -262,11 +263,12 @@ int cGLUTBitmapFont::getCharacterWidth(const unsigned char& a_char)
 }
 
 
-#if (defined(_WIN32) & !defined(_POSIX))
+#if defined(_WIN32)
 
 //===========================================================================
 /*!
-    Constructor for cWin32BitmapFont
+    Constructor for cWin32BitmapFont.
+
     \fn         cWin32BitmapFont::cWin32BitmapFont()
 */
 //===========================================================================
@@ -300,7 +302,8 @@ cWin32BitmapFont::cWin32BitmapFont()
 
 //===========================================================================
 /*!
-  Destructor for cWin32BitmapFont
+  Destructor for cWin32BitmapFont.
+
   \fn         cWin32BitmapFont::~cWin32BitmapFont()
 */
 //===========================================================================
@@ -313,9 +316,10 @@ cWin32BitmapFont::~cWin32BitmapFont()
 //===========================================================================
 /*!
     Renders an actual string of text, initializing the font if necessary.
+
     \fn         int cWin32BitmapFont::renderString(const char* a_str)
-    \param      a_str The string to render; should not include newlines
-    \return     0 for success, -1 for error
+    \param      a_str  The string to render; should not include newlines.
+    \return     return 0 for success, -1 for error.
 */
 //===========================================================================
 int cWin32BitmapFont::renderString(const char* a_str)
@@ -344,9 +348,10 @@ int cWin32BitmapFont::renderString(const char* a_str)
 
 //===========================================================================
 /*!
-    Change the font face, possibly marking the font for re-initialization
+    Change the font face, possibly marking the font for re-initialization.
+
     \fn         void cWin32BitmapFont::setFontFace(const char* a_faceName)
-    \param      a_faceName The new face name
+    \param      a_faceName  The new face name.
 */
 //===========================================================================
 void cWin32BitmapFont::setFontFace(const char* a_faceName)
@@ -361,9 +366,10 @@ void cWin32BitmapFont::setFontFace(const char* a_faceName)
 
 //===========================================================================
 /*!
-    Change the font size, possibly marking the font for re-initialization
+    Change the font size, possibly marking the font for re-initialization.
+
     \fn         void cWin32BitmapFont::setPointSize(const float& a_pointSize)
-    \param      a_pointSize The new font size
+    \param      a_pointSize  The new font size.
 */
 //===========================================================================
 void cWin32BitmapFont::setPointSize(const float& a_pointSize)
@@ -411,7 +417,7 @@ int cWin32BitmapFont::initialize()
     // Create a windows font
     font = CreateFontIndirect(&m_logfont);
 
-    if (font == NULL) return -1;  
+    if (font == NULL) return -1;
 
     // Select the font we want
     oldfont = (HFONT)SelectObject(hdc, font);
@@ -421,79 +427,82 @@ int cWin32BitmapFont::initialize()
     
     if (m_solidFont)
     {
-      result = (bool)(wglUseFontBitmaps(hdc, 32, 96, m_bitmap_font_base));
+        result = (bool)(wglUseFontBitmaps(hdc, 32, 96, m_bitmap_font_base));
     }
 
     else
     {
-      result = (bool)(wglUseFontOutlines(hdc, 32, 96, m_bitmap_font_base,
-        m_outlineFontDeviation, m_outlineFontExtrusion,
-        m_usePolygonsForOutlineFonts?WGL_FONT_POLYGONS:WGL_FONT_LINES,0));
+        result = (bool)(wglUseFontOutlines(hdc, 32, 96, m_bitmap_font_base,
+            m_outlineFontDeviation, m_outlineFontExtrusion,
+            m_usePolygonsForOutlineFonts?WGL_FONT_POLYGONS:WGL_FONT_LINES,0));
     }
 
     if (result == false)
     {
-      /*
-      // Useful for debugging font problems...
-      DWORD err = GetLastError();
-      char buf[1000];
-      FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,0,err,0,buf,1000,0);
-      if (buf[strlen(buf)-1] == '\n') buf[strlen(buf)-1] = '\0';
-      if (buf[strlen(buf)-1] == '\r') buf[strlen(buf)-1] = '\0';
-      _cprintf("Error %d (%s) creating GL font bitmaps...\n",err,buf);    
-      */
-      return -1;
+        /*
+        // Useful for debugging font problems...
+        DWORD err = GetLastError();
+        char buf[1000];
+        FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,0,err,0,buf,1000,0);
+        if (buf[strlen(buf)-1] == '\n') buf[strlen(buf)-1] = '\0';
+        if (buf[strlen(buf)-1] == '\r') buf[strlen(buf)-1] = '\0';
+        _cprintf("Error %d (%s) creating GL font bitmaps...\n",err,buf);
+        */
+        return -1;
     }
-    
+
     // Try first as a non-truettype font...
     if (!GetCharWidth32(hdc, 32, 96+32, m_char_widths))
     {
+        // Try a as truetype font...
+        ABC abcs[98];
 
-      // Try a as truetype font...
-      ABC abcs[98];
-
-      if (GetCharABCWidths(hdc, 32, 96+32+1, abcs))
-      {
-        unsigned int i;
-        for(i=32; i<=97; i++)
+        if (GetCharABCWidths(hdc, 32, 96+32+1, abcs))
         {
-          m_char_widths[i-32] = abcs[i].abcA + abcs[i].abcB + abcs[i].abcC;
+            unsigned int i;
+            for(i=32; i<=97; i++)
+            {
+                m_char_widths[i-32] = abcs[i].abcA + abcs[i].abcB + abcs[i].abcC;
+            }
         }
-      }       
     }
 
     // Restore the global font state
     SelectObject(hdc, oldfont);
     DeleteObject(font);
 
-    return 0;
+    return (0);
 }
 
 
 //===========================================================================
 /*!
     Clean up a win32 bitmapped font
+
     \fn         int cWin32BitmapFont::uninitialize()
-    \return     0 for success, -1 for error
+    \return     Returns 0 for success, -1 for error.
 */
 //===========================================================================
 int cWin32BitmapFont::uninitialize()
 {
-    if (m_bitmap_font_base != -1) {
-      glDeleteLists(m_bitmap_font_base, 96);
-      m_bitmap_font_base = -1;
+    if (m_bitmap_font_base != -1)
+    {
+        glDeleteLists(m_bitmap_font_base, 96);
+        m_bitmap_font_base = -1;
     } 
     memset(m_char_widths,0,sizeof(m_char_widths));
-    return 0;
+    return (0);
 }
+
 
 //===========================================================================
 /*!
     Get the width of a particular character
+
     \fn         int cWin32BitmapFont::getCharacterWidth(const unsigned char& a_char)
-    \return     Returns the width of this character in pixels, or -1 for an error
     \param      a_char    The character (e.g. 'a') to look up.  Characters less than
                           32 ('A') will generate errors.
+    \return     Returns the width of this character in pixels, or -1 for an error.
 */
 //===========================================================================
 int cWin32BitmapFont::getCharacterWidth(const unsigned char& a_char)
@@ -502,7 +511,7 @@ int cWin32BitmapFont::getCharacterWidth(const unsigned char& a_char)
     if (m_bitmap_font_base == -1) return -1;
     if (a_char < 32) return -1;
     int w = m_char_widths[a_char-32];   
-    return w;
+    return (w);
 }
 
-#endif // _WIN32
+#endif // defined _WIN32

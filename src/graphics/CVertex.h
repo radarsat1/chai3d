@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,10 +12,9 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
@@ -23,24 +22,41 @@
 #ifndef CVertexH
 #define CVertexH
 //---------------------------------------------------------------------------
-#include "CVector3d.h"
-#include "CMatrix3d.h"
-#include "CColor.h"
+#include "math/CVector3d.h"
+#include "math/CMatrix3d.h"
+#include "graphics/CColor.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-      \file       CVertex.h
-      \struct     cVertex
-      \brief      cVertex defines a point in 3 dimensional space and the
-                  associated rendering properties (position, color, texture
-                  coordinate, and surface normal)                  
+    \file       CVertex.h
+    
+    \brief  
+    <b> Graphics </b> \n 
+    3D Vertex Point.
+*/
+//===========================================================================
+
+//===========================================================================
+/*!
+    \struct     cVertex
+    \ingroup    graphics
+
+    \brief      
+    cVertex defines a point in 3 dimensional space and the associated 
+    rendering properties (position, color, texture coordinate, 
+    and surface normal)                  
 */
 //===========================================================================
 class cVertex
 {
 
   public:
+
+    //-----------------------------------------------------------------------
+    // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+
     //-----------------------------------------------------------------------
     /*!
         Constructor of cVertex.
@@ -64,7 +80,10 @@ class cVertex
     ~cVertex() {};
 
 
+	//-----------------------------------------------------------------------
     // METHODS:
+    //-----------------------------------------------------------------------
+
     //-----------------------------------------------------------------------
     /*!
         Set the position coordinates of vertex.
@@ -83,9 +102,9 @@ class cVertex
 
     //-----------------------------------------------------------------------
     /*!
-        Set local position of vertex
+        Set local position of vertex.
 
-        \param      a_pos  Local position of vertex
+        \param      a_pos  Local position of vertex.
     */
     //-----------------------------------------------------------------------
     inline void setPos(const cVector3d& a_pos)
@@ -109,7 +128,7 @@ class cVertex
 
     //-----------------------------------------------------------------------
     /*!
-        Read local position of vertex
+        Read local position of vertex.
 
         \return     Return position of vertex.
     */
@@ -144,7 +163,7 @@ class cVertex
     //-----------------------------------------------------------------------
     /*!
         Set normal vector of vertex by passing its X,Y and Z components
-        as parameters
+        as parameters.
 
         \param	a_x	 X component.
         \param  a_y	 Y component.
@@ -159,7 +178,7 @@ class cVertex
 
     //-----------------------------------------------------------------------
     /*!
-        Set normal vector of vertex
+        Set normal vector of vertex.
 
         \return     Return normal vector.
     */
@@ -215,7 +234,7 @@ class cVertex
         \param      a_color  Color.
     */
     //-----------------------------------------------------------------------
-    inline void setColor(const cColorb& a_color) { m_color = a_color; }
+    inline void setColor(const cColorf& a_color) { m_color = a_color; }
 
 
     //-----------------------------------------------------------------------
@@ -231,10 +250,20 @@ class cVertex
     inline void setColor(const float& a_red, const float& a_green,
                          const float& a_blue, const float a_alpha=1.0 )
     {
-        m_color.set( (GLubyte)(a_red   * (GLfloat)0xff),
-                     (GLubyte)(a_green * (GLfloat)0xff),
-                     (GLubyte)(a_blue  * (GLfloat)0xff),
-                     (GLubyte)(a_alpha * (GLfloat)0xff) );
+        m_color.set(a_red, a_green, a_blue, a_alpha);
+    }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+        Set color of vertex.
+
+        \param    a_color  Color component to be set to vertex.
+    */
+    //-----------------------------------------------------------------------
+    inline void setColor(const cColorb& a_color)
+    {
+        m_color = a_color.getColorf();
     }
 
 
@@ -253,25 +282,36 @@ class cVertex
         m_globalPos.add(a_globalPos);
     }
 
-    // MEMBERS:
 
-    //! Local position of this vertex
+	//-----------------------------------------------------------------------
+    // MEMBERS:
+    //-----------------------------------------------------------------------
+
+    //! Local position of this vertex.
     cVector3d m_localPos;
+
     //! Global position of this vertex in world coordinates.
     cVector3d m_globalPos;
-    //! Surface normal
+
+    //! Surface normal.
     cVector3d m_normal;
-    //! Texture coordinate (uvw)
+
+    //! Texture coordinate (uvw).
     cVector3d m_texCoord;
-    //! Color
-    cColorb m_color;
-    //! My index in the vertex list of the mesh that owns me
+
+    //! Color.
+    cColorf m_color;
+
+    //! My index in the vertex list of the mesh that owns me.
     int m_index;
+
     //! Is this vertex allocated?
     bool m_allocated;
+
     //! How many triangles use this vertex?
     int m_nTriangles;
-	//! User data
+
+	//! User data.
 	int m_tag;
 };
 

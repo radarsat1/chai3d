@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="generator" content="Adobe GoLive 6">
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="description"  content="CHAI3D: The Open Source Haptics Project">
+  		<title>CHAI 3D</title>
+		<link href="resources/style/chai3d.css" rel="stylesheet" media="screen">
+		<csscriptdict>
+			<script type="text/javascript"><!--
+function newImage(arg) {
+	if (document.images) {
+		rslt = new Image();
+		rslt.src = arg;
+		return rslt;
+	}
+}
+userAgent = window.navigator.userAgent;
+browserVers = parseInt(userAgent.charAt(userAgent.indexOf("/")+1),10);
+mustInitImg = true;
+function initImgID() {di = document.images; if (mustInitImg && di) { for (var i=0; i<di.length; i++) { if (!di[i].id) di[i].id=di[i].name; } mustInitImg = false;}}
+function findElement(n,ly) {
+	d = document;
+	if (browserVers < 4)		return d[n];
+	if ((browserVers >= 6) && (d.getElementById)) {initImgID; return(d.getElementById(n))}; 
+	var cd = ly ? ly.document : d;
+	var elem = cd[n];
+	if (!elem) {
+		for (var i=0;i<cd.layers.length;i++) {
+			elem = findElement(n,cd.layers[i]);
+			if (elem) return elem;
+		}
+	}
+	return elem;
+}
+function changeImages() {
+	d = document;
+	if (d.images) {
+		var img;
+		for (var i=0; i<changeImages.arguments.length; i+=2) {
+			img = null;
+			if (d.layers) {img = findElement(changeImages.arguments[i],0);}
+			else {img = d.images[changeImages.arguments[i]];}
+			if (img) {img.src = changeImages.arguments[i+1];}
+		}
+	}
+}
+
+// --></script>
+		</csscriptdict>
+		<csactiondict>
+			<script type="text/javascript"><!--
+var preloadFlag = false;
+function preloadImages() {
+	if (document.images) {
+		over_menuM1a = newImage(/*URL*/'resources/images/menuM1b.png');
+		over_menuM2a = newImage(/*URL*/'resources/images/menuM2b.png');
+		over_menuM3a = newImage(/*URL*/'resources/images/menuM3b.png');
+		over_menuM4a = newImage(/*URL*/'resources/images/menuM4b.png');
+		over_menuM4a2 = newImage(/*URL*/'resources/images/menuM5b.png');
+		preloadFlag = true;
+	}
+}
+
+// --></script>
+		</csactiondict>
+	</head>
+
+	<body onload="preloadImages();" bgcolor="#ffffff">
+		<div align="center">
+			<table width="743" border="0" cellspacing="0" cellpadding="0" cool gridx="2" gridy="2" height="1203" showgridx showgridy usegridx usegridy>
+				<tr height="36">
+					<td width="742" height="36" colspan="16"></td>
+					<td width="1" height="36"><spacer type="block" width="1" height="36"></td>
+				</tr>
+				<tr height="40">
+					<td width="1" height="347" rowspan="3"></td>
+					<td width="74" height="40" valign="top" align="left" xpos="1"><a onmouseover="changeImages( /*CMP*/'menuM1a',/*URL*/'resources/images/menuM1b.png');return true" onmouseout="changeImages( /*CMP*/'menuM1a',/*URL*/'resources/images/menuM1a.png');return true" href="http://www.chai3d.org/concept.html"><img src="resources/images/menuM1a.png" alt="" name="menuM1a" height="36" width="74" border="0"></a></td>
+					<td width="103" height="40" colspan="5" valign="top" align="left" xpos="75"><a onmouseover="changeImages( /*CMP*/'menuM2a',/*URL*/'resources/images/menuM2b.png');return true" onmouseout="changeImages( /*CMP*/'menuM2a',/*URL*/'resources/images/menuM2a.png');return true" href="http://www.chai3d.org/download.html"><img src="resources/images/menuM2a.png" alt="" name="menuM2a" height="36" width="102" border="0"></a></td>
+					<td width="74" height="40" valign="top" align="left" xpos="178"><a onmouseover="changeImages( /*CMP*/'menuM3a',/*URL*/'resources/images/menuM3b.png');return true" onmouseout="changeImages( /*CMP*/'menuM3a',/*URL*/'resources/images/menuM3a.png');return true" href="http://www.chai3d.org/people.html"><img src="resources/images/menuM3a.png" alt="" name="menuM3a" height="36" width="74" border="0"></a></td>
+					<td width="84" height="40" valign="top" align="left" xpos="252"><a onmouseover="changeImages( /*CMP*/'menuM4a',/*URL*/'resources/images/menuM4b.png');return true" onmouseout="changeImages( /*CMP*/'menuM4a',/*URL*/'resources/images/menuM4a.png');return true" href="http://www.chai3d.org/project.html"><img src="resources/images/menuM4a.png" alt="" name="menuM4a" height="36" width="84" border="0"></a></td>
+					<td width="86" height="40" valign="top" align="left" xpos="336"><a onmouseover="changeImages( /*CMP*/'menuM4a2',/*URL*/'resources/images/menuM5b.png');return true" onmouseout="changeImages( /*CMP*/'menuM4a2',/*URL*/'resources/images/menuM5a.png');return true" href="http://www.chai3d.org/support.html"><img src="resources/images/menuM5a.png" alt="" name="menuM4a2" height="36" width="86" border="0"></a></td>
+					<td width="320" height="40" colspan="6" valign="top" align="left" xpos="422"><a href="http://www.chai3d.org/index.html"><img src="resources/images/menuMLogo.png" alt="" height="36" width="320" border="0"></a></td>
+					<td width="1" height="40"><spacer type="block" width="1" height="40"></td>
+				</tr>
+				<tr height="86">
+					<td width="740" height="86" colspan="14" valign="top" align="left" xpos="1"><img src="resources/images/barGettingStarted.png" alt="" height="54" width="740" border="0"></td>
+					<td width="1" height="86"></td>
+					<td width="1" height="86"><spacer type="block" width="1" height="86"></td>
+				</tr>
+				<tr height="221">
+					<td content csheight="142" width="737" height="221" colspan="13" valign="top" xpos="1">
+						<div class="codestyle">
+							<p><span class="mainbody"><b>API DOCUMENTATION</b></span></p>
+							<p><span class="mainbody">The source code has been commented for auto-generation of class hierarchy documentation with Doxygen. This <a href="API-DOCUMENTATION.html">documentation</a> can be generated by anyone who has the CHAI 3D source code and the <a href="http://www.doxygen.org">Doxygen</a> utility. Information about the CHAI 3D coding style can be found <a href="API-CODE-STYLE.html">here</a>.<br>
+								</span><span class="mainbody">The best way to learn about using CHAI 3D is to explore the various <a href="API-EXAMPLES.html">examples</a> provided with the framework. Each example is labeled by a unique name and a two digit number that indicates its relative level of complexity. For instance, the foundations of CHAI 3D are mostly covered in examples 01-30, while the more advanced topics including rigid and deformable dynamic simulation are presented in examples 40&#x2018;s and higher. </span></p>
+							<div class="codestyle"></div>
+						</div>
+					</td>
+					<td width="4" height="221" colspan="2"></td>
+					<td width="1" height="221"><spacer type="block" width="1" height="221"></td>
+				</tr>
+				<tr height="40">
+					<td content csheight="18" width="612" height="40" colspan="11" valign="top" xpos="0">
+						<div class="codestyle">
+							<p><span class="mainbody"><b>API ORGANIZATION</b></span></p>
+						</div>
+					</td>
+					<td width="130" height="40" colspan="5"></td>
+					<td width="1" height="40"><spacer type="block" width="1" height="40"></td>
+				</tr>
+				<tr height="2">
+					<td content csheight="236" width="136" height="330" colspan="3" rowspan="2" valign="top" xpos="0"><span class="mainbody"><b>Directory Name:<br>
+							</b><br>
+							projects<br>
+							<br>
+							<br>
+							src<br>
+							modules<br>
+							external<br>
+							lib<br>
+							examples<br>
+							<br>
+							bin<br>
+							doc<br>
+						</span></td>
+					<td width="606" height="2" colspan="13"></td>
+					<td width="1" height="2"><spacer type="block" width="1" height="2"></td>
+				</tr>
+				<tr height="328">
+					<td width="33" height="328" colspan="2"></td>
+					<td content csheight="232" width="573" height="328" colspan="11" valign="top" xpos="169">
+						<p><span class="mainbody"><b>Description:<br>
+									<br>
+								</b>CHAI 3D Windows project files - Subdirectories include MSVC7, MSVC8, MSVC9 for Visual<br>
+								Studio 2003, 2005, and 2008 respectively. For the Apple edition, please refer to the <i>chai3d.xcodeproj</i> project file. For the Linux Edition, please refer to the makefiles.<br>
+								
+								
+								CHAI 3D source code.<br>
+								
+								CHAI 3D third party modules.<br>
+								
+								External resource libraries (Haptic Devices, BASS, ODE, OpenGL, etc.)<br>
+								
+								CHAI 3D libraries - Product from compiling the CHAI 3D source code.<br>
+								
+								CHAI 3D examples - Subdirectories include MSVC7, MSVC8, MSVC9 for Visual Studio 2003, 2005, and 2008 respectively.<br>
+								
+								Compiled executable and resource files for all examples.<br>
+								
+								CHAI&nbsp;3D documentation.</span></p>
+					</td>
+					<td width="1" height="328"><spacer type="block" width="1" height="328"></td>
+				</tr>
+				<tr height="47">
+					<td content csheight="18" width="612" height="47" colspan="11" valign="top" xpos="0">
+						<div class="codestyle">
+							<p><span class="mainbody"><b>HAPTIC&nbsp;DEVICES</b></span></p>
+						</div>
+					</td>
+					<td width="130" height="47" colspan="5"></td>
+					<td width="1" height="47"><spacer type="block" width="1" height="47"></td>
+				</tr>
+				<tr height="369">
+					<td content csheight="211" width="158" height="369" colspan="4" valign="top" xpos="0"><span class="mainbody"><b>Device Type:<br>
+								<br>
+							</b><a href="http://www.forcedimension.com"><b>Force Dimension</b></a><b><br>
+							</b>delta.x<br>
+							omega.x<br>
+							<br>
+							<b><a href="http://www.novint.com">Novint Technologies</a></b><br>
+							falcon<br>
+							<br>
+							<br>
+							<b><a href="http://www.mpb-technologies.ca/mpbt/haptics/hand_controllers/haptics_index.html">MPB Technologies</a></b><br>
+							freedom.6<br>
+							<br>
+							<b><a href="http://www.sensable.com/">Sensable Technologies</a><br>
+							</b>phantom</span></td>
+					<td width="16" height="369" colspan="2"></td>
+					<td content csheight="225" width="552" height="369" colspan="7" valign="top" xpos="174"><span class="mainbody"><b>Remarks:<br>
+								<br>
+								<br>
+							</b>Supported on Windows, Linux and Max OS-X.<br>
+							Resource files are included with CHAI&nbsp;3D.<br>
+							<br>
+							<font color="white"><br>
+							</font>Supported on Windows [32-bit] edition.<br>
+							Requires <a href="http://home.novint.com/support/download.php">drivers</a> 3.1 or higher.<br>
+							<font color="white"><br>
+								<br>
+							</font>Supported on Windows [32-bit] edition.<br>
+							<br>
+							<br>
+							Supported on Windows [32/64-bit] editions.<br>
+							Requires <a href="http://www.sensable.com/products-openhaptics-toolkit.htm">OpenHaptics</a> 3.0 or higher.</span></td>
+					<td width="16" height="369" colspan="3"></td>
+					<td width="1" height="369"><spacer type="block" width="1" height="369"></td>
+				</tr>
+				<tr height="1">
+					<td width="741" height="1" colspan="15" valign="top" align="left" xpos="0"><img src="resources/images/line.png" alt="" height="1" width="740" border="0"></td>
+					<td width="1" height="33" rowspan="2"></td>
+					<td width="1" height="1"><spacer type="block" width="1" height="1"></td>
+				</tr>
+				<tr height="32">
+					<td width="638" height="32" colspan="12"></td>
+					<td content csheight="32" width="103" height="32" colspan="3" valign="top" xpos="638">
+						<div align="right">
+							<span class="copyright">copyright 2009</span></div>
+					</td>
+					<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+				</tr>
+				<tr height="1" cntrlrow>
+					<td width="1" height="1"><spacer type="block" width="1" height="1"></td>
+					<td width="74" height="1"><spacer type="block" width="74" height="1"></td>
+					<td width="61" height="1"><spacer type="block" width="61" height="1"></td>
+					<td width="22" height="1"><spacer type="block" width="22" height="1"></td>
+					<td width="11" height="1"><spacer type="block" width="11" height="1"></td>
+					<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+					<td width="4" height="1"><spacer type="block" width="4" height="1"></td>
+					<td width="74" height="1"><spacer type="block" width="74" height="1"></td>
+					<td width="84" height="1"><spacer type="block" width="84" height="1"></td>
+					<td width="86" height="1"><spacer type="block" width="86" height="1"></td>
+					<td width="190" height="1"><spacer type="block" width="190" height="1"></td>
+					<td width="26" height="1"><spacer type="block" width="26" height="1"></td>
+					<td width="88" height="1"><spacer type="block" width="88" height="1"></td>
+					<td width="12" height="1"><spacer type="block" width="12" height="1"></td>
+					<td width="3" height="1"><spacer type="block" width="3" height="1"></td>
+					<td width="1" height="1"><spacer type="block" width="1" height="1"></td>
+					<td width="1" height="1"></td>
+				</tr>
+			</table>
+			<a href="images/menuCLogo.png"> </a>
+			<p></p>
+		</div>
+	</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

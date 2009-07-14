@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,16 +12,15 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \author:    Dan Morris
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \author    Dan Morris
+    \version   2.0.0 $Rev: 201 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CTexture2D.h"
+#include "graphics/CTexture2D.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -95,7 +94,7 @@ void cTexture2D::reset()
     m_useSphericalMapping = false;
 
     // use mipmaps
-    m_useMipmaps = true;
+    m_useMipmaps = false;
 }
 
 
@@ -181,16 +180,7 @@ void cTexture2D::render()
 //===========================================================================
 bool cTexture2D::loadFromFile(const char* a_fileName)
 {
-    if (m_image.loadFromFile(a_fileName) < 0)
-    {
-        // Failure
-        return false;
-    }
-    else
-    {
-        // Success
-        return true;
-    }
+    return (m_image.loadFromFile(a_fileName));
 }
 
 
@@ -205,11 +195,10 @@ void cTexture2D::update()
 {
     if (m_textureID != (unsigned int)-1)
     {
-        // Deletion makes for all kinds of new hassles, particularly
+        // Deletion can make for all kinds of new hassles, particularly
         // when re-initializing a whole display context, since opengl
-        // automatically starts re-assigning texture ID's.  Not worth it.
-        // glDeleteTextures(1,&m_textureID);
-
+        // automatically starts re-assigning texture ID's.
+        glDeleteTextures(1,&m_textureID);
         m_textureID = (unsigned int)-1;
     }
 

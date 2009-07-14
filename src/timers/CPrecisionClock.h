@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,10 +12,9 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
@@ -23,90 +22,109 @@
 #ifndef CPrecisionClockH
 #define CPrecisionClockH
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-#include "windows.h"
-#endif
+#include "extras/CGlobals.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-    \file   CPrecisionClock.h
-	\class	cPrecisionClock
-	\brief	cPrecisionClock provides a class to manage high precision
-			time measurments. Units are micro seconds.
+    \file       CPrecisionClock.h
+
+    \brief
+    <b> Timers </b> \n 
+    High Precision Clock.
+*/
+//===========================================================================
+
+//===========================================================================
+/*!
+	\class	    cPrecisionClock
+    \ingroup    timers  
+
+	\brief	
+    cPrecisionClock provides a class to manage high-precision time 
+    measurements.  All measurements are in seconds unless
+    otherwise-specified.
 */
 //===========================================================================
 class cPrecisionClock
 {
   public:
+
+    //-----------------------------------------------------------------------
     // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+    
     //! Constructor of cPrecisionClock.
     cPrecisionClock();
 
     //! Destructor of cPrecisionClock.
     ~cPrecisionClock();
 
+
+    //-----------------------------------------------------------------------
     // METHODS:
-    //! reset clock to zero.
-    void initialize();
+    //-----------------------------------------------------------------------
 
-    //! start counting from current time of clock.
-    long start();
+    //! Reset clock to zero.
+    void reset();
 
-    //! stop clock counting.
-    long stop();
+    //! Start counting time; optionally reset the clock to zero.
+    double start(bool a_resetClock = false);
 
-    //! return \b true if timer is currently \b on, else return \b false.
+    //! Stop counting time; return the elapsed time.
+    double stop();
+
+    //! Return \b true if timer is currently \b on, else return \b false.
     bool on() { return (m_on); };
 
-    //! set current time of clock. Units are \e microseconds.
-    void setCurrentTime(long a_currentTime);
+    //! Read the current clock time (seconds) (the time that has elapsed since the last call to "start").
+    double getCurrentTimeSeconds();
 
-    //! read current time of clock. Units are \e microseconds.
-    long getCurrentTime();
+    //! Set the period before a "timeout" occurs (you need to poll for this).
+    void setTimeoutPeriodSeconds(double a_timeoutPeriod);
 
-    //! set the period in microseconds before timeout occurs.
-    void setTimeoutPeriod(long a_timeoutPeriod);
+    //! Read the programmed timeout period
+    double getTimeoutPeriodSeconds() { return (m_timeoutPeriod); }
 
-    //! Read the programmed timeout period.
-    long getTimeoutPeriod() { return (m_timeoutPeriod); }
-
-    //! return \b true if timeout has occurred.
+    //! Returns \b true if a timeout has occurred.
     bool timeoutOccurred();
 
-    //! return \b true if high resolution timers are available on this computer.
+    //! Returns \b true if high resolution timers are available on this computer.
     bool highResolution() { return (m_highres); };
 
     //! If all you want is something that tells you the time, this is your function...
-    double getCPUtime();
+    double getCPUTimeSeconds();
+
+    //! For backwards-compatibility...
+    double getCPUTime() { return getCPUTimeSeconds(); }
+
+    //! For backwards-compatibility...
+    double getCPUtime() { return getCPUTimeSeconds(); }
 
   private:
 
-#ifndef _POSIX
+#if defined(_WIN32)
     //! Stores information about CPU high precision clock.
     LARGE_INTEGER m_freq;
 #endif
 
-    //! Current time of clock.
-    long m_timeCurrent;
+    //! Time accumulated between previous calls to "start" and "stop".
+    double m_timeAccumulated;
 
     //! CPU time when clock was started.
-    long m_timeStart;
+    double m_timeStart;
 
-    //! Timeout period
-    long m_timeoutPeriod;
+    //! Timeout period.
+    double m_timeoutPeriod;
 
-    //! CPU time when timer was started.
-    long m_timeoutStart;
+    //! clock time when timer was started.
+    double m_timeoutStart;
 
-    //! If \b true, then high precision CPU clock is available.
+    //! If \b true, a  high precision CPU clock is available.
     bool m_highres;
-    
-    //! If \b true, clock is \b on.
-    bool m_on;
 
-    //! Read CPU clock in microseconds.
-    long getCount();
+    //! If \b true, the clock is \b on.
+    bool m_on;
 };
 
 //---------------------------------------------------------------------------

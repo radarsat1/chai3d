@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,16 +12,16 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       06/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CShapeSphere.h"
-#include "CDraw3D.h"
+#include "scenegraph/CShapeSphere.h"
+//---------------------------------------------------------------------------
+typedef GLUquadric GLUquadricObj;
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -56,13 +56,28 @@ cShapeSphere::cShapeSphere(const double& a_radius)
 //===========================================================================
 void cShapeSphere::render(const int a_renderMode)
 {
-    // render material properties
-    m_material.render();
+    //-----------------------------------------------------------------------
+    // Conditions for object to be rendered
+    //-----------------------------------------------------------------------
 
-    // render texture property if defined
-    if (m_texture != NULL)
+    if(((a_renderMode == CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY) &&
+        (m_useTransparency == true)) ||
+       ((a_renderMode == CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY) &&
+        (m_useTransparency == false)) ||
+       ((a_renderMode == CHAI_RENDER_MODE_TRANSPARENT_BACK_ONLY) &&
+        (m_useTransparency == false)))
+        {
+            return;
+        }
+
+    //-----------------------------------------------------------------------
+    // Rendering code here
+    //-----------------------------------------------------------------------
+
+    // render material properties
+    if (m_useMaterialProperty)
     {
-        m_texture->render();
+        m_material.render();
     }
 
     // allocate a new OpenGL quadric object for rendering a sphere
@@ -75,8 +90,14 @@ void cShapeSphere::render(const int a_renderMode)
     // set normal-rendering mode
     gluQuadricNormals (sphere, GLU_SMOOTH);
 
-    // generate texture coordinates
-    gluQuadricTexture(sphere, GL_TRUE);
+    // render texture property if defined
+    if ((m_texture != NULL) && (m_useTextureMapping))
+    {
+        m_texture->render();
+
+        // generate texture coordinates
+        gluQuadricTexture(sphere, GL_TRUE);
+    }
 
     // render a sphere
     gluSphere(sphere, m_radius, 36, 36);
@@ -91,55 +112,45 @@ void cShapeSphere::render(const int a_renderMode)
 
 //===========================================================================
 /*!
-    Compute forces between tool and sphere shape
+    From the position of the tool, search for the nearest point located
+    at the surface of the current object. Decide if the point is located inside
+    or outside of the object
 
-    \fn       cVector3d cShapeSphere::computeLocalForce(const cVector3d& a_localPosition)
-    \param    a_localPosition    position of tool in world coordinates
-    \return   return reaction force if tool is located inside sphere
+    \fn     void cShapeSphere::computeLocalInteraction(const cVector3d& a_toolPos,
+                                                      const cVector3d& a_toolVel,
+                                                      const unsigned int a_IDN)
+    \param  a_toolPos  Position of the tool.
+    \param  a_toolVel  Velocity of the tool.
+    \param  a_IDN  Identification number of the force algorithm.
 */
 //===========================================================================
-cVector3d cShapeSphere::computeLocalForce(const cVector3d& a_localPosition)
+void cShapeSphere::computeLocalInteraction(const cVector3d& a_toolPos,
+                                          const cVector3d& a_toolVel,
+                                          const unsigned int a_IDN)
 {
-	
-    // In the following we compute the reaction forces between the tool and the
-    // sphere.
-    cVector3d localForce;
+    // compute distance from center of sphere to tool
+    double distance = a_toolPos.length();
 
-    if (a_localPosition.length() > m_radius)
+    // from the position of the tool, search for the nearest point located
+    // on the surface of the sphere
+    if (distance > 0)
     {
-        // Here the tool is located outside the sphere
-        localForce.set(0, 0, 0);
+        m_interactionProjectedPoint = cMul( (m_radius/distance), a_toolPos);
     }
     else
     {
-        // Here the tool is located inside the sphere; we need to compute
-        // the reaction force.
-
-        // compute penetration distance between tool and surface of sphere
-        double penetrationDistance = m_radius - a_localPosition.length();
-
-        // get the material stiffness defined by the material properties of the object
-        double materialStiffness = m_material.getStiffness();
-
-        // if the pointer is located at the center of the tool, we reach
-        // a singularity point
-        if (a_localPosition.length() < CHAI_SMALL)
-        {
-            localForce.set(0, 0, 0);
-        }
-
-        // compute the direction of the reaction force. For the sphere its pretty
-        // simple since it can be described by a vector going from the center of
-        // the sphere towards the position tool.
-        else
-        {
-            // compute a reaction force proportional to the penetration distance
-            cVector3d forceDirection = cNormalize(a_localPosition);
-            localForce = cMul( penetrationDistance * materialStiffness, forceDirection);
-        }
+        m_interactionProjectedPoint = a_toolPos;
     }
 
-    return (localForce);
+    // check if tool is located inside or outside of the sphere
+    if (distance <= m_radius)
+    {
+        m_interactionInside = true;
+    }
+    else
+    {
+        m_interactionInside = false;
+    }
 }
 
 

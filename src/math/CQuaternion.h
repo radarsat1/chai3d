@@ -1,89 +1,114 @@
 //===========================================================================
 /*
-This file is part of the CHAI 3D visualization and haptics libraries.
-Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
-This library is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License("GPL") version 2
-as published by the Free Software Foundation.
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License("GPL") version 2
+    as published by the Free Software Foundation.
 
-For using the CHAI 3D libraries with software that can not be combined
-with the GNU GPL, and for taking advantage of the additional benefits
-of our support services, please contact CHAI 3D about acquiring a
-Professional Edition License.
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
 
-\author:    <http://www.chai3d.org>
-\author:    Phil Fong
-\version    1.0
-\date       4/15/2007
+    \author    <http://www.chai3d.org>
+    \author    Phil Fong
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
+
+//---------------------------------------------------------------------------
 #ifndef CQuaternionH
 #define CQuaternionH
-
+//---------------------------------------------------------------------------
 #include "CMatrix3d.h"
 #include "CVector3d.h"
+//---------------------------------------------------------------------------
+
 //===========================================================================
 /*!
-      \file     CQuaternion.h
-      \class    cQuaternion
-      \brief    cQuaternion represents rotations in quaternion form
+    \file       CQuaternion.h
+
+    \brief  
+    <b> Math </b> \n 
+    Quaternions.
 */
 //===========================================================================
-class cQuaternion {
-    public:
+
+//===========================================================================
+/*!
+    \struct     cQuaternion
+    \ingroup    math
+    
+    \brief    
+    cQuaternion can be used to represents rotations in quaternion form.
+    Simple floating point arithmetic operations are provided too.
+*/
+//===========================================================================
+struct cQuaternion 
+{
+  public:
+
+    //-----------------------------------------------------------------------
     // MEMBERS:
+    //-----------------------------------------------------------------------
     //! Component w of quaternion
     double w;
+
     //! Component x of quaternion
-    double x;
+	double x;
+
     //! Component y of quaternion
-    double y;
-    //! Component z of quaternion
+	double y;
+
+	//! Component z of quaternion
     double z;
-    
+
+
+    //-----------------------------------------------------------------------
     // CONSTRUCTOR & DESTRUCTOR:
     //-----------------------------------------------------------------------
-    /*!
-      Constructors of cVector3d.
-
-      You can initialize a cVector3d from any of the following:
-
-      double,double,double,double
-      double*
-
-      Also the default copy constructor will work
-    */
-    //-----------------------------------------------------------------------
+    //! Constructor of cQuaternion.
     cQuaternion() {}
-    cQuaternion(double nw, double nx, double ny, double nz) : w(nw), x(nx), y(ny),
-        z(nz) {}
+
+    //! Constructor of cQuaternion.
+    cQuaternion(double nw, double nx, double ny, double nz) : w(nw), x(nx), y(ny), z(nz) {}
+
+    //! Constructor of cQuaternion.
     cQuaternion(double const* in) : w(in[0]), x(in[1]), y(in[2]), z(in[3]) {}
 
+
+    //-----------------------------------------------------------------------
     // OVERLOADED CAST OPERATORS:
     //-----------------------------------------------------------------------
-    //! Cast to a double*
+    //! Cast quaternion to a double*
     operator double*() {return &w;}
+
+    //! Cast quaternion to a double const*
     operator double const*() const { return &w;}
 
-    //! Clear vector with zeros.
+    //! Clear quaternion with zeros.
     void zero() { w=0.0; x=0.0; y=0.0; z=0.0; }
 
     //! Negate current quaternion. \n Result is stored in current quaternion.
     void negate() { w=-w; x=-x; y=-y; z=-z; }
   
-    //! Returns magnitude squared
+    //! Returns quaternion magnitude squared.
     double magsq() const { return (w*w) + (x*x) + (y*y) + (z*z); }
-    //! Returns magnitude squared
+
+    //! Returns quaternion magnitude squared.
     double lengthsq() const { return magsq(); }
 
-    //! Returns magnitude
+    //! Returns quaternion magnitude.
     double mag() const { return sqrt(magsq()); }
-    //! Returns magnitude
+
+    //! Returns quaternion magnitude.
     double length() const { return mag(); }
 
-    //! Normalize
-    void normalize() {
+    //! Normalize quaternion.
+    void normalize()
+    {
         double m = mag();
         w /= m;
         x /= m;
@@ -91,11 +116,14 @@ class cQuaternion {
         z /= m;
     }
 
-    //! Convert to rotation matrix
+    //---------------------------------------------------------------
+    //! Convert quaternion to rotation matrix.
     /*!
-        \param   a_mat The matrix to store the result into
+        \param   a_mat The matrix to store the result into.
     */
-    void toRotMat(cMatrix3d& a_mat) const {
+    //---------------------------------------------------------------
+    void toRotMat(cMatrix3d& a_mat) const
+    {
         double x2 = 2.0*x*x;
         double y2 = 2.0*y*y;
         double z2 = 2.0*z*z;
@@ -117,14 +145,19 @@ class cQuaternion {
         a_mat.m[2][2] = 1.0 - x2 - y2;
     }
 
-    //! Convert rotation matrix to quaternion
-    /*!
-        \param   a_mat The rotation matrix to convert
-    */
-    void fromRotMat(cMatrix3d const& a_mat) {
-        double trace = 1 + a_mat[0][0] + a_mat[1][1] + a_mat[2][2];
 
-        if (trace>1e-6) {
+    //---------------------------------------------------------------
+    /*!
+        Convert rotation matrix to quaternion.
+
+        \param   a_mat The rotation matrix to convert.
+    */
+    //---------------------------------------------------------------
+    void fromRotMat(cMatrix3d const& a_mat)
+    {
+        double trace = 1.0 + a_mat[0][0] + a_mat[1][1] + a_mat[2][2];
+
+        if (trace>0.00000001) {
             double s = 2.0*sqrt(trace);
             x = (a_mat[2][1] - a_mat[1][2])/s;
             y = (a_mat[0][2] - a_mat[2][0])/s;
@@ -154,12 +187,17 @@ class cQuaternion {
         }
     }
 
-    //! Convert from axis and angle (in radians)
+
+    //---------------------------------------------------------------
     /*!
-        \param  a_axis  The axis
-        \param  a_angle The angle in radians
+        Convert from axis and angle (in radians).
+
+        \param  a_axis  The axis.
+        \param  a_angle The angle in radians.
     */
-    void fromAxisAngle(cVector3d a_axis, double a_angle) {
+    //---------------------------------------------------------------
+    void fromAxisAngle(cVector3d a_axis, double a_angle)
+    {
         // not that axis is passed by value so that we can normalize it
         a_axis.normalize();
         double sina = sin(a_angle/2.0);
@@ -170,27 +208,35 @@ class cQuaternion {
         z = a_axis[2]*sina;
     }
 
-    //! Convert to axis (not normalized) and angle
-    /*!
-        \param a_axis  Where to store the axis
-        \param a_angle Where to store the angle
+
+    //---------------------------------------------------------------
+    /*! 
+        Convert to axis (not normalized) and angle.
+    
+        \param a_axis  Where to store the axis.
+        \param a_angle Where to store the angle.
     */
-    void toAxisAngle(cVector3d& a_axis, double& a_angle) const {
+    //---------------------------------------------------------------
+    void toAxisAngle(cVector3d& a_axis, double& a_angle) const
+    {
         double cosa = w/mag();
         a_angle = acos(cosa);
         a_axis[0] = x;
         a_axis[1] = y;
         a_axis[2] = z;
     }
-    //! Conjugate
-    void conj() {
+
+    //! Conjugate of quaternion
+    void conj()
+    {
         x = -x;
         y = -y;
         z = -z;
     }
 
-    //! Invert ( inverse is conjugate/magsq )
-    void invert() {
+    //! Invert quaternion ( inverse is conjugate/magsq )
+    void invert()
+    {
         double m2 = magsq();
         w = w/m2;
         x = -x/m2;
@@ -199,7 +245,8 @@ class cQuaternion {
     }
 
     //! Multiply operator (grassman product)
-    cQuaternion& operator*= (cQuaternion const& a_otherQ) {
+    cQuaternion& operator*= (cQuaternion const& a_otherQ)
+    {
         double neww = w*a_otherQ.w - x*a_otherQ.x - y*a_otherQ.y - z*a_otherQ.z;
         double newx = w*a_otherQ.x + x*a_otherQ.w + y*a_otherQ.z - z*a_otherQ.y;
         double newy = w*a_otherQ.y - x*a_otherQ.z + y*a_otherQ.w + z*a_otherQ.x;
@@ -211,75 +258,93 @@ class cQuaternion {
 
         return *this;
     }
-    //! Quaternion multiplication
-    /*! 
-        Multiply this quaternion with another and store result here
 
-        \param  a_otherQ The other quaternion
+
+    //---------------------------------------------------------------
+    /*!
+        Quaternion multiplication \n
+        Multiply this quaternion with another and store result here.
+
+        \param  a_otherQ The other quaternion.
     */
-    void mul(cQuaternion const& a_otherQ) {
+    //---------------------------------------------------------------
+    void mul(cQuaternion const& a_otherQ)
+    {
         operator*=(a_otherQ);
     }
 
+
     //! Scale operator
-    cQuaternion& operator*= (double a_scale) {
+    cQuaternion& operator*= (double a_scale)
+    {
         w *= a_scale; x *= a_scale; y *= a_scale; z *= a_scale;
         return *this;
     }
-    //! Scale
-    /*! Scale this quaternion by a scalar
-        
-        \param a_scale The scalar
-    */
-    void mul(double s) {
+
+    //! Scale this quaternion by a scalar
+    void mul(double s)
+    {
         operator*=(s);
     }
 
     //! Equality operator
-    bool operator==(cQuaternion const& a_otherQ) const {
+    bool operator==(cQuaternion const& a_otherQ) const
+    {
         return (w==a_otherQ.w && x==a_otherQ.x && y==a_otherQ.y && z==a_otherQ.z);
     }
 
-    //! Dot product
-    /*! 
-        Take the dot product with another quaternion and store the result here
+    //---------------------------------------------------------------
+    /*!
+        Dot product. \n
+        Take the dot product with another quaternion and store the result here.
 
-        \param  a_otherQ The other quaternion
-        \return The result of the dot product
+        \param  a_otherQ The other quaternion.
+        \return The result of the dot product.
     */
-    double dot(cQuaternion const& a_otherQ) const {
+    //---------------------------------------------------------------
+    double dot(cQuaternion const& a_otherQ) const
+    {
         return (w*a_otherQ.w + x*a_otherQ.x + y*a_otherQ.y + z*a_otherQ.z);
     }
 
     //! Addition
-    cQuaternion& operator+= (cQuaternion const& a_otherQ) {
+    cQuaternion& operator+= (cQuaternion const& a_otherQ)
+    {
         w+=a_otherQ.w; x+=a_otherQ.x; y+=a_otherQ.y; z+=a_otherQ.z;
         return *this;
     }
 
-    //! Addition
+    //---------------------------------------------------------------
     /*! 
-        Add another quaternion to this one and store here
+        Addition \n
+        Add another quaternion to this one and store here.
 
-        \param a_otherQ The other quaternion
+        \param a_otherQ The other quaternion.
     */
-    void add(cQuaternion const& a_otherQ) {
+    //---------------------------------------------------------------
+    void add(cQuaternion const& a_otherQ)
+    {
         operator+=(a_otherQ);
     }
 
-    //! Spherical linear interpolation
+    //---------------------------------------------------------------
     /*! 
-        Spherically linearly interpolate between quaternions and store the result here
+        Spherical linear interpolation. \n
+        Spherically linearly interpolate between quaternions and store 
+        the result here.
         
         \param a_level Parameter between 0 (fully at a_q1) and 1.0 (fully at a_q2).
-        \param a_q1    Starting quaternion
-        \param a_q2    Ending quaternion
+        \param a_q1    Starting quaternion.
+        \param a_q2    Ending quaternion.
     */
-    void slerp(double a_level, cQuaternion const& a_q1, cQuaternion a_q2) {
+    //---------------------------------------------------------------
+    void slerp(double a_level, cQuaternion const& a_q1, cQuaternion a_q2)
+    {
         // a_q2 is passed by value so that we can scale it, etc.
         // compute angle between a_q1 and a_q2
         double costheta = a_q1.dot(a_q2);
-        if ((costheta-1.0) < 1e-4 && (costheta-1.0) > -1e-4) {
+        if ((costheta-1.0) < 1e-4 && (costheta-1.0) > -1e-4)
+        {
             // quarternions are parallel
             // linearly interpolate and normalize
             *this = a_q1;
@@ -287,7 +352,9 @@ class cQuaternion {
             a_q2.mul(a_level);
             this->operator +=(a_q2);
             this->normalize();
-        } else {
+        }
+        else
+        {
             double ratio1, ratio2;
             if ((costheta+1.0) > -1e-4 && (costheta+1.0) < 1e-4) {
                 // a_q1 and a_q2 are 180 degrees apart
@@ -317,4 +384,7 @@ class cQuaternion {
     }
 };
 
+
+//---------------------------------------------------------------------------
 #endif
+//---------------------------------------------------------------------------

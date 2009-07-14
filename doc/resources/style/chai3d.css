@@ -1,0 +1,63 @@
+
+body {
+	FONT-SIZE: 12px;  LINE-HEIGHT: 16px; FONT-FAMILY: tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+} 
+
+TABLE {
+
+	FONT-SIZE: 12px;  LINE-HEIGHT: 16px; FONT-FAMILY: tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+
+}
+
+
+.copyright{
+	FONT-SIZE: 11px;  LINE-HEIGHT: 15px; FONT-FAMILY: arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+} 
+
+
+TD {
+
+	FONT-SIZE: 12px;  LINE-HEIGHT: 16px; FONT-FAMILY: tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+
+}
+
+
+.mainbody {
+	FONT-SIZE: 12px;  LINE-HEIGHT: 22px; FONT-FAMILY: verdana, tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+} 
+
+
+.mainbody2 {
+	FONT-SIZE: 12px;  LINE-HEIGHT: 16px; FONT-FAMILY: verdana, tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+} 
+
+.codestyle {
+	FONT-SIZE: 10px;  LINE-HEIGHT: 14px; FONT-FAMILY: courier, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+}
+
+.description {
+	FONT-SIZE: 11px;  LINE-HEIGHT: 16px; FONT-FAMILY: verdana, tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+} 
+
+.DATE {
+
+	FONT-SIZE: 12px;  LINE-HEIGHT: 16px; FONT-FAMILY: tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #888888;
+
+}
+
+.TITLE { 
+	FONT-SIZE: 11px;  LINE-HEIGHT: 11px; FONT-FAMILY: verdana, tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+}
+
+.TITLE2 { 
+	FONT-SIZE: 12px;  LINE-HEIGHT: 36px; FONT-FAMILY: verdana, tahoma, arial, sans-serif; TEXT-ALIGN: Justify; COLOR: #000000;
+}
+
+a:link { 
+	FONT-SIZE: 12px; COLOR: #CF0029; LINE-HEIGHT: 22px; TEXT-DECORATION: none; FONT-FAMILY: verdana, tahoma, arial, sans-serif 
+}
+
+a:visited { 
+	FONT-SIZE: 12px; COLOR: #CF0029; LINE-HEIGHT: 22px; TEXT-DECORATION: none; FONT-FAMILY: verdana, tahoma, arial, sans-serif
+}
+

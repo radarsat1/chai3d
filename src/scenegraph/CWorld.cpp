@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,28 +12,27 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CWorld.h"
-#include "CLight.h"
+#include "scenegraph/CWorld.h"
 //---------------------------------------------------------------------------
-
+#include "scenegraph/CLight.h"
+//---------------------------------------------------------------------------
 #ifndef _MSVC
 #include <float.h>
 #endif
-
+//---------------------------------------------------------------------------
 
 //==========================================================================
 /*!
-      Constructor of cWorld.
+    Constructor of cWorld.
 
-      \fn       cWorld::cWorld()
+    \fn       cWorld::cWorld()
 */
 //===========================================================================
 cWorld::cWorld()
@@ -55,10 +54,10 @@ cWorld::cWorld()
 
 //===========================================================================
 /*!
-      Destructor of cWorld.  Deletes the world, all his children, and all
-      his textures.
+    Destructor of cWorld.  Deletes the world, all his children, and all
+    his textures.
 
-      \fn       cWorld::~cWorld()
+    \fn       cWorld::~cWorld()
 */
 //===========================================================================
 cWorld::~cWorld()
@@ -235,7 +234,7 @@ void cWorld::setBackgroundColor(const cColorf& a_color)
 bool cWorld::addLightSource(cLight* a_light)
 {
     // check if number of lights already equal to 8.
-    if (m_lights.size() >= MAXIMUM_OPENGL_LIGHT_COUNT)
+    if (m_lights.size() >= CHAI_MAXIMUM_OPENGL_LIGHT_COUNT)
     {
         return (false);
     }
@@ -244,7 +243,7 @@ bool cWorld::addLightSource(cLight* a_light)
     int light_id = GL_LIGHT0;
     bool found = false;
 
-    while (light_id < GL_LIGHT0+MAXIMUM_OPENGL_LIGHT_COUNT)
+    while (light_id < GL_LIGHT0+CHAI_MAXIMUM_OPENGL_LIGHT_COUNT)
     {
         
         // check if ID is not already used
@@ -385,127 +384,40 @@ void cWorld::render(const int a_renderMode)
     for all objects in this world.  If there is more than one collision,
     the one closest to a_segmentPointA is the one returned.
 
-    For any dynamic objects in the world with valid position and rotation
-    histories (as indicated by the m_historyValid member of cGenericObject), the
-    first endpoint of the segment is adjusted so that it is in the same location
-    relative to the moved object as it was at the previous haptic iteration
-    (provided the object's m_lastRot and m_lastPos were updated), so that
-    collisions between the segment and the moving object can be properly detected.
-    If the returned collision is with a moving object, the actual parameter
-    corresponding to a_segmentPointA is set to the adjusted position for
-    that object.
-
-    If a collision(s) is located, information about the (closest) collision is
-    stored in the corresponding parameters \e a_colObject, \e a_colTriangle,
-    \e a_colPoint, and \e a_colDistance.
-
+	\fn	bool cWorld::computeCollisionDetection(cVector3d& a_segmentPointA,
+                                       cVector3d& a_segmentPointB,
+                                       cCollisionRecorder& a_recorder,
+                                       cCollisionSettings& a_settings)
     \param  a_segmentPointA  Start point of segment.  Value may be changed if
                              returned collision is with a moving object.
     \param  a_segmentPointB  End point of segment.
-    \param  a_colObject      Pointer to nearest collided object.
-    \param  a_colTriangle    Pointer to nearest collided triangle.
-    \param  a_colPoint       Position of nearest collision.
-    \param  a_colDistance    Distance between segment origin and nearest collision point.
-    \param  a_visibleObjectsOnly  Should we ignore invisible objects?
-    \param  a_proxyCall      If this is > 0, this is a call from a proxy, and the value
-                             of a_proxyCall specifies which call this is.  -1 for
-                             non-proxy calls.
+    \param  a_recorder  Stores all collision events
+    \param  a_settings  Contains collision settings information.
 */
 //===========================================================================
-bool cWorld::computeCollisionDetection(
-        cVector3d& a_segmentPointA, const cVector3d& a_segmentPointB,
-        cGenericObject*& a_colObject, cTriangle*& a_colTriangle, cVector3d& a_colPoint,
-        double& a_colDistance, const bool a_visibleObjectsOnly, int a_proxyCall)
+bool cWorld::computeCollisionDetection(cVector3d& a_segmentPointA,
+                                       cVector3d& a_segmentPointB,
+                                       cCollisionRecorder& a_recorder,
+                                       cCollisionSettings& a_settings)
 {
-    // initialize objects for collision detection calls
-    cGenericObject* t_colObject;
-    cTriangle *t_colTriangle;
-    cVector3d t_colPoint;
+    // temp variable
     bool hit = false;
-    double colSquareDistance = CHAI_LARGE;
-    double t_colSquareDistance = colSquareDistance;
-
-    // get the transpose of the local rotation matrix
-    cMatrix3d transLocalRot;
-    m_localRot.transr(transLocalRot);
-
-    // convert second endpoint of the segment into local coordinate frame
-    cVector3d localSegmentPointB = a_segmentPointB;
-    localSegmentPointB.sub(m_localPos);
-    transLocalRot.mul(localSegmentPointB);
-
-    // r_segmentPointA is the value that we will return in a_segmentPointA
-    // at the end; it should be unchanged from the received value of
-    // a_segmentPointA, unless the collision that will be returned is with
-    // a moving object, in which case it will be adjusted so that it is in the
-    // same location relative to the moving object as it was at the previous
-    // haptic iteration; this is necessary so that the proxy algorithm gets the
-    // correct new proxy position
-    cVector3d r_segmentPointA = a_segmentPointA;
+    cVector3d segmentPointA = a_segmentPointA;
+    cVector3d segmentPointB = a_segmentPointB;
 
     // check for collisions with all children of this world
     unsigned int nChildren = m_children.size();
     for (unsigned int i=0; i<nChildren; i++)
-		{
-        // start with the first segment point as it was received
-        cVector3d l_segmentPointA = a_segmentPointA;
+    {
+        hit = hit | m_children[i]->computeCollisionDetection(a_segmentPointA,
+                                                       a_segmentPointB,
+                                                       a_recorder,
+                                                       a_settings);
+    }
 
-        // convert first endpoint of the segment into local coordinate frame
-        cVector3d localSegmentPointA = l_segmentPointA;
-        localSegmentPointA.sub(m_localPos);
-				transLocalRot.mul(localSegmentPointA);
-
-        // if this is a first call from the proxy algorithm, and the current
-        // child is a dynamic object, adjust the first segment endpoint so that
-        // it is in the same position relative to the moving object as it was
-        // at the previous haptic iteration
-        if ((a_proxyCall == 1) && (m_children[i]->m_historyValid))
-            AdjustCollisionSegment(l_segmentPointA,localSegmentPointA,m_children[i]);
-
-        // call this child's collision detection function to see if it (or any
-        // of its descendants) are intersected by the segment
-				int coll = m_children[i]->computeCollisionDetection(localSegmentPointA, localSegmentPointB,
-                      t_colObject, t_colTriangle, t_colPoint, t_colSquareDistance, a_visibleObjectsOnly, a_proxyCall);
-
-        // if a collision was found with this child, and this collision is
-        // closer than any others found so far...
-        if ((coll == 1) && (t_colSquareDistance < colSquareDistance))
-        {
-            // record that there has been a collision
-            hit = true;
-
-            // set the return parameters with information about this collision
-            // (they may be overwritten if a closer collision is found later
-            // on in this loop)
-            a_colObject = t_colObject;
-            a_colTriangle = t_colTriangle;
-            a_colPoint = t_colPoint;
-
-            // this is now the shortest distance to a collision found so far
-            colSquareDistance = t_colSquareDistance;
-
-            // convert collision point into parent coordinate frame
-            m_localRot.mul(a_colPoint);
-            a_colPoint.add(m_localPos);
-
-            // localSegmentPointA's position (as possibly modified in the
-            // call to the child's collision detector), converted back to
-            // the global coordinate frame, is currently the proxy position
-            // we will want to return (unless we find a closer collision later on)
-            r_segmentPointA = cAdd(cMul(m_localRot,localSegmentPointA), m_localPos);
-        }
-		}
-
-    // for optimization reasons, the collision detectors only computes the
-    // squared distance between a_segmentA and collision point; this
-    // computes a square root to obtain the actual distance.
-    a_colDistance = sqrt(colSquareDistance);
-
-    // set the value of the actual parameter for the first segment point; this
-    // is the proxy position when called by the proxy algorithm, and may be
-    // different from the value passed in this parameter if the closest collision
-    // was with a moving object
-    a_segmentPointA = r_segmentPointA;
+    // restore values.
+    a_segmentPointA = segmentPointA;
+    a_segmentPointB = segmentPointB;
 
     // return whether there was a collision between the segment and this world
     return (hit);

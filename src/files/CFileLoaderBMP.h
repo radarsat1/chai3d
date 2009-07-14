@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,10 +12,9 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
@@ -23,7 +22,22 @@
 #ifndef CFileLoaderBMPH
 #define CFileLoaderBMPH
 //---------------------------------------------------------------------------
-#ifdef _WIN32
+
+//===========================================================================
+/*!
+	\file     CFileLoaderBMP.h
+
+	\brief    
+	<b> Files </b> \n 
+    BMP Format Image Loader.
+*/
+//===========================================================================
+
+//---------------------------------------------------------------------------
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//---------------------------------------------------------------------------
+
+#if defined(_WIN32)
 
 #include <windows.h>
 
@@ -31,10 +45,10 @@
 
 #pragma pack(push,1)
 
-typedef unsigned char BYTE;
-typedef short WORD;
-typedef int DWORD;
-typedef long LONG;
+typedef unsigned char  BYTE;
+typedef unsigned short WORD;
+typedef unsigned int   DWORD;
+typedef int            LONG;
 
 typedef struct tagRGBQUAD {
   BYTE    rgbBlue; 
@@ -80,77 +94,117 @@ using std::string;
 const short BITMAP_MAGIC_NUMBER = 19778;
 const int   RGB_BYTE_SIZE       = 3;
 
+//---------------------------------------------------------------------------
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
+//---------------------------------------------------------------------------
+
 //===========================================================================
 /*!
-      \file     CFileLoaderBMP.h
-      \class    cFileLoaderBMP
-      \brief    cFileLoaderBMP provides a class to load BMp bitmap
-                images into memory.
+    \class      cFileLoaderBMP
+    \ingroup    files 
+    
+    \brief    
+    cFileLoaderBMP provides a class to load BMP bitmap images into memory.
 */
 //===========================================================================
 class cFileLoaderBMP
 {
   public:
-      // CONSTRUCTOR & DESTRUCTOR:
-      //! Constructor of cFileLoaderBMP.
-      cFileLoaderBMP();
-      //! Constructor of cFileLoaderBMP. Load a bitmap file.
-      cFileLoaderBMP(char* a_fileName);
-      //! Destructor of cFileLoaderBMP.
-      ~cFileLoaderBMP();
+    
+    //-----------------------------------------------------------------------
+    // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
 
-      // METHODS:
-      //! Load bitmap image file.
-      bool loadBMP(char* iFileName);
-      //! Get pinter to bitmap
-      unsigned char* pBitmap() const { return (m_pBitmap); }
-      //! Get width of image.
-      unsigned int getWidth() { return (m_width); }
-      //! Get height of image.
-      unsigned int getHeight() { return (m_height); }
-      //! Get the number of bits per pixels
-      unsigned short getBpp() { return (m_bpp); }
-      //! Read last error message.
-      string getLastErrorMesg(void) { return (m_errorMsg); }
-      //! Has any image been loaded?
-      bool isLoaded() { return (m_loaded); }
+    //! Constructor of cFileLoaderBMP.
+    cFileLoaderBMP();
+
+    //! Constructor of cFileLoaderBMP. Load a bitmap file.
+    cFileLoaderBMP(char* a_fileName);
+
+    //! Destructor of cFileLoaderBMP.
+    ~cFileLoaderBMP();
+
+
+    //-----------------------------------------------------------------------
+    // METHODS:
+    //-----------------------------------------------------------------------
+    
+    //! Load bitmap image file.
+    bool loadBMP(char* iFileName);
+
+    //! Get pinter to bitmap.
+    unsigned char* pBitmap() const { return (m_pBitmap); }
+
+    //! Get width of image.
+    unsigned int getWidth() { return (m_width); }
+
+    //! Get height of image.
+    unsigned int getHeight() { return (m_height); }
+
+    //! Get the number of bits per pixels.
+    unsigned short getBpp() { return (m_bpp); }
+
+    //! Read last error message.
+    string getLastErrorMesg(void) { return (m_errorMsg); }
+
+    //! Has any image been loaded?
+    bool isLoaded() { return (m_loaded); }
+
 
   private:
-      //variables
-      //! Header file information
-      BITMAPFILEHEADER m_bmfh;
-      //! Header file information
-      BITMAPINFOHEADER m_bmih;
-      /// The width in bytes of the image
-      unsigned int m_byteWidth;
-      // The width in bytes of the added image
-      unsigned int m_padWidth;
-      // Size of the data in the file
-      unsigned int m_dataSize;
 
-      // MEMBERS:
-      //! color data
-      RGBQUAD *m_colors;
-      //! Has image been loaded correctly?
-      bool m_loaded;
-      //! Width of image.
-      unsigned int m_width;
-      //! Height of image.
-      unsigned int m_height;
-      //! Bits per pixel.
-      unsigned short m_bpp;
-      //! Last error message.
-      string m_errorMsg;
-      //! pixel data
-      unsigned char* m_pBitmap;
+    //-----------------------------------------------------------------------
+    // MEMBERS:
+    //-----------------------------------------------------------------------
 
-      // METHODS:
-      //! Reset internal variables. This function is called by the constructor.
-      void reset(void);
-      //! convert bitmap from GBR to RGB. 24 bits images.
-      bool convert24(char *);
-      //! convert bitmap from GBR to RGB. 8 bits images.
-      bool convert8(char *);
+    //! Header file information.
+    BITMAPFILEHEADER m_bmfh;
+
+    //! Header file information.
+    BITMAPINFOHEADER m_bmih;
+
+    /// The width in bytes of the image.
+    unsigned int m_byteWidth;
+
+    // The width in bytes of the added image.
+    unsigned int m_padWidth;
+
+    // Size of the data in the file.
+    unsigned int m_dataSize;
+
+    //! color data.
+    RGBQUAD *m_colors;
+
+    //! Has image been loaded correctly?
+    bool m_loaded;
+
+    //! Width of image.
+    unsigned int m_width;
+
+    //! Height of image.
+    unsigned int m_height;
+
+    //! Bits per pixel.
+    unsigned short m_bpp;
+
+    //! Last error message.
+    string m_errorMsg;
+
+    //! pixel data
+    unsigned char* m_pBitmap;
+
+    //-----------------------------------------------------------------------
+    // METHODS:
+    //-----------------------------------------------------------------------
+
+    //! Reset internal variables. This function is called by the constructor.
+    void reset(void);
+
+    //! convert bitmap from GBR to RGB. 24 bits images.
+    bool convert24(char *);
+
+    //! convert bitmap from GBR to RGB. 8 bits images.
+    bool convert8(char *);
 };
 
 //---------------------------------------------------------------------------

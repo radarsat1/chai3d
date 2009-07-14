@@ -1,0 +1,14 @@
+LIBRARY   phantomHD
+DESCRIPTION "OpenHaptics implementation of the CHAI/phantom interface"
+EXPORTS
+   hdPhantomGetNumDevices
+   hdPhantomOpen
+   hdPhantomClose
+   hdPhantomGetPosition
+   hdPhantomGetLinearVelocity
+   hdPhantomGetRotation
+   hdPhantomGetButtons
+   hdPhantomSetForce
+   hdPhantomSetTorque
+   hdPhantomGetWorkspaceRadius
+   hdPhantomGetType

@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,47 +12,40 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    This TGA loader was written by Lev Povalahev and was 
-    downloaded from:
-    
-    http://www.levp.de/3d/index.html
-
-    Used with permission.
-
-    \author:    <http://www.chai3d.org>
-    \author:    Lev Povalahev
-    \author:    Dan Morris
-    \version    1.0
-    \date       03/2004
+    \author    <http://www.chai3d.org>
+    \author    Lev Povalahev
+    \author    Dan Morris
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CFileLoaderTGA.h"
+#include "files/CFileLoaderTGA.h"
 #include <stdlib.h>
 //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
+// GLOBAL UTILITY FUNCTIONS:
+//--------------------------------------------------------------------------- 
 
-//---------------------------------------------------------------------------
-// global functions
-//---------------------------------------------------------------------------
 static int TGAReadError = 0;
 
 static void ReadData(std::ifstream &file, char* data, uint size)
 {
     if (!file.is_open())
         return;
-    uint a = file.tellg();
+    int a = (int)file.tellg();
     a+= size;
     file.read(data, size);
 
-    uint g = file.tellg();
+    int g = (int)file.tellg();
 
     if (a != g)
     {
         TGAReadError = 1;
     }
 }
+
 
 //---------------------------------------------------------------------------
 cFileLoaderTGA::cFileLoaderTGA()

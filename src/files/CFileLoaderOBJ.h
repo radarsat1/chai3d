@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,11 +12,10 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Tim Schröder
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Tim SchrË†der
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
@@ -24,76 +23,105 @@
 #ifndef CFileLoaderOBJH
 #define CFileLoaderOBJH
 //---------------------------------------------------------------------------
-#include "CMatrix3d.h"
-#include "CVector3d.h"
-#include "CVertex.h"
-#include "CTriangle.h"
-#include "CMesh.h"
-#include "CMaterial.h"
-#include "CTexture2D.h"
-#include "CWorld.h"
-#include "CLight.h"
+#include "math/CMatrix3d.h"
+#include "math/CVector3d.h"
+#include "graphics/CVertex.h"
+#include "graphics/CTriangle.h"
+#include "graphics/CMaterial.h"
+#include "graphics/CTexture2D.h"
+#include "scenegraph/CMesh.h"
+#include "scenegraph/CWorld.h"
+#include "scenegraph/CLight.h"
 #include <string>
 #include <stdio.h>
+#include <map>
+//---------------------------------------------------------------------------
 
-// Clients can use this to tell the obj loader how to behave in terms
-// of vertex merging.
-//
-// If 'true' (default), loaded obj files will have three _distinct_ vertices
-// per triangle, with no vertex re-use.
+//===========================================================================
+/*!
+    \file       CFileLoaderOBJ.h
+
+    \brief    
+    <b> Files </b> \n 
+    OBJ Format 3D Model Loader.
+*/
+//===========================================================================
+
+//---------------------------------------------------------------------------
+// GLOBAL UTILITY FUNCTIONS:
+//--------------------------------------------------------------------------- 
+
+/*!
+    \ingroup    files
+    \brief
+    Loads a OBJ image by providing a filename and mesh in which object is loaded.
+*/
+bool cLoadFileOBJ(cMesh* iMesh, const string& iFileName);
+
+/*!
+    Clients can use this to tell the obj loader how to behave in terms
+    of vertex merging. \n
+    If \b true (default), loaded obj files will have three _distinct_ vertices
+    per triangle, with no vertex re-use.
+*/
 extern bool g_objLoaderShouldGenerateExtraVertices;
 
 
-// A face vertex, as defined in an .obj file (a vertex/normal/texture set)
-struct vertexIndexSet {
-  int vIndex;
-  int nIndex;
-  int tIndex;
-  vertexIndexSet() {
-    vIndex = nIndex = tIndex = 0;
-  }
-  vertexIndexSet(int vIndex, int nIndex, int tIndex) {
-    this->vIndex = vIndex;
-    this->nIndex = nIndex;
-    this->tIndex = tIndex;
-  }
-  vertexIndexSet(int vIndex) {
-    this->vIndex = vIndex;
-    nIndex = tIndex = 0;
-  }
+//---------------------------------------------------------------------------
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//---------------------------------------------------------------------------
+
+//===========================================================================
+// INTERNAL DEFINITIONS FOR OBJ LOADER:
+//=========================================================================== 
+
+//! A face vertex, as defined in an .obj file (a vertex/normal/texture set)
+struct vertexIndexSet 
+{
+    int vIndex;
+    int nIndex;
+    int tIndex;
+
+    vertexIndexSet() 
+    {
+        vIndex = nIndex = tIndex = 0;
+    }
+    vertexIndexSet(int vIndex, int nIndex, int tIndex) 
+    {
+        this->vIndex = vIndex;
+        this->nIndex = nIndex;
+        this->tIndex = tIndex;
+    }
+    vertexIndexSet(int vIndex) 
+    {
+        this->vIndex = vIndex;
+        nIndex = tIndex = 0;
+    }
 };
+
+//---------------------------------------------------------------------------
 
 struct ltVertexIndexSet
 {
-  bool operator()(vertexIndexSet v1, vertexIndexSet v2) const
-  {
-    if (v1.vIndex < v2.vIndex) return 1;
-    if (v2.vIndex < v1.vIndex) return 0;
-    if (v1.nIndex < v2.nIndex) return 1;
-    if (v2.nIndex < v1.nIndex) return 0;
-    if (v1.tIndex < v2.tIndex) return 1;
-    return 0;
-  }
+    bool operator()(vertexIndexSet v1, vertexIndexSet v2) const
+    {
+        if (v1.vIndex < v2.vIndex) return 1;
+        if (v2.vIndex < v1.vIndex) return 0;
+        if (v1.nIndex < v2.nIndex) return 1;
+        if (v2.nIndex < v1.nIndex) return 0;
+        if (v1.tIndex < v2.tIndex) return 1;
+        return 0;
+    }
 };
 
-#include <map>
+//---------------------------------------------------------------------------
+
 typedef std::map<vertexIndexSet,unsigned int,ltVertexIndexSet> vertexIndexSet_uint_map;
 
 //---------------------------------------------------------------------------
 
 //===========================================================================
-/*!
-      \file     CFileLoaderOBJ.h
-      \brief    The following file provides a parser to load 3d images
-                supporting the alias/wavefront file format.
-*/
-//===========================================================================
-
-//! Load a 3d image by providing a filename and mesh in which object is loaded.
-bool cLoadFileOBJ(cMesh* iMesh, const string& iFileName);
-
-//===========================================================================
-//  The following code is only used by the parser.
+//  INTERNAL IMPLEMENTATION
 //===========================================================================
 
 // OBJ File string identifiers
@@ -105,6 +133,7 @@ bool cLoadFileOBJ(cMesh* iMesh, const string& iFileName);
 #define CHAI_OBJ_MTL_LIB_ID   "mtllib"
 #define CHAI_OBJ_USE_MTL_ID   "usemtl"
 #define CHAI_OBJ_NAME_ID      "g"
+
 // MTL File string identifiers
 #define CHAI_OBJ_NEW_MTL_ID       "newmtl"
 #define CHAI_OBJ_MTL_TEXTURE_ID   "map_Kd"
@@ -152,7 +181,7 @@ struct cFace
 struct cMaterialInfo
 {
     char m_name[1024];
-    char m_texture[_MAX_PATH];
+    char m_texture[CHAI_SIZE_PATH];
     int	m_textureID;
     float m_diffuse[3];
     float m_ambient[3];
@@ -174,62 +203,98 @@ struct cMaterialInfo
     }
 };
 
-//    Main class for OBJ parser.
 
+//===========================================================================
+/*!
+    \class      cOBJModel
+    \ingroup    files  
 
+    \brief      
+    Implenentation of an OBJ file loader.
+*/
+//===========================================================================
 class cOBJModel
 {
   public:
-    // CONSTRUCTOR & DESTRUCTOR
-    // constructor
+    
+    //-----------------------------------------------------------------------
+    // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+
+    //! Constructor of cOBJModel.
     cOBJModel();
-    // destructor
+    
+    //! Destructor of cOBJModel.
     ~cOBJModel();
 
+    //-----------------------------------------------------------------------
     // METHODS:
-    // Load model file.
+    //-----------------------------------------------------------------------
+
+    //! Load model file.
     bool LoadModel(const char szFileName[]);
 
+
+    //-----------------------------------------------------------------------
     // MEMBERS:
-    // List of vertices.
+    //-----------------------------------------------------------------------
+    
+    //! List of vertices.
   	cVector3d* m_pVertices;
-    // List of faces.
+    
+    //! List of faces.
 	cFace* m_pFaces;
-    // List of normals
+    
+    //! List of normals.
 	cVector3d* m_pNormals;
-    // List of texture coordinates
+    
+    //! List of texture coordinates.
 	cVector3d* m_pTexCoords;
-    // List of material and texture properties
+    
+    //! List of material and texture properties.
 	cMaterialInfo* m_pMaterials;
-    // Information about image file.
+    
+    //! Information about image file.
 	cOBJFileInfo m_OBJInfo;
 
-  // List of names obtained from 'g' commands, with the most
-  // recent at the back...
-  vector<char*> m_groupNames;
+    //! List of names obtained from 'g' commands, with the most recent at the back...
+    vector<char*> m_groupNames;
+
 
   private:
-    //METHODS:
-    // Read next string of file.
+    //-----------------------------------------------------------------------
+    // METHODS:
+    //-----------------------------------------------------------------------
+
+    //! Read next string of file.
     void  readNextString(char a_string[], FILE *hStream);
-    // Get next token from file.
+    
+    //! Get next token from file.
     void  getTokenParameter(char a_string[], const unsigned int a_strSize, FILE *a_hFile);
-    // File path
+    
+    //! File path.
     void  makePath(char a_fileAndPath[]);
-    // Load material file [mtl]
+    
+    //! Load material file [mtl].
     bool  loadMaterialLib(const char a_fFileName[], cMaterialInfo *a_pMaterials,
           unsigned int *a_curMaterialIndex, char a_basePath[]);
-    // Parse information about face.
+    
+    //! Parse information about face.
     void  parseFaceString(char a_faceString[], cFace *a_faceOut, const cVector3d *a_pVertices,
         const cVector3d *a_pNormals, const cVector3d *a_pTexCoords, const unsigned int a_materialIndex);
-    // Read information about file.
+    
+    //! Read information about file.
     void  getFileInfo(FILE *a_hStream, cOBJFileInfo *a_stat, const char a_constBasePath[]);    
 };
 
-// Internal: get a (possibly new) vertex index for a vertex
-unsigned int getVertexIndex(cMesh* a_Mesh, cOBJModel* a_model, 
-                            vertexIndexSet_uint_map* a_VertexMap, vertexIndexSet& vis);
+//! Internal: get a (possibly new) vertex index for a vertex.
+unsigned int getVertexIndex(cMesh* a_Mesh, 
+                            cOBJModel* a_model, 
+                            vertexIndexSet_uint_map* a_VertexMap, 
+                            vertexIndexSet& vis);
 
+//---------------------------------------------------------------------------
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
 //---------------------------------------------------------------------------
 #endif
 //---------------------------------------------------------------------------

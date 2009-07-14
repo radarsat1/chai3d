@@ -1,2 +1,0 @@
-cd earth; make; cd ..; cd reflections; make; cd ..; cd viewmesh; make; cd ..;
-

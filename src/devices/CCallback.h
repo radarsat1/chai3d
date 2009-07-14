@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,21 +12,35 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Dan Morris
-    \version    1.0
-    \date       03/2006
+    \author    <http://www.chai3d.org>
+    \author    Dan Morris
+    \version   2.0.0 $Rev: 250 $
 */
 //===========================================================================
 
+//---------------------------------------------------------------------------
 #ifndef CCallbackH
 #define CCallbackH
+//---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-    \file   CCallback.h
-    \class  cCallback
-    \brief  cCallback is an abstract class that allows subclasses
+    \file       CCallback.h
+    
+    \brief  
+    <b> Devices </b> \n 
+    Device Callbacks.
+*/
+//===========================================================================
+
+
+//===========================================================================
+/*!
+    \class      cCallback
+    \ingroup    devices  
+    
+    \brief  
+    cCallback is an abstract class that allows subclasses
     to define a single callback function, for example to be called by
     a device when it's time to compute haptic forces.  This feature is _not_
     supported by all devices; see cGenericDevice::setCallback().
@@ -34,12 +48,19 @@
 //===========================================================================
 class cCallback
 {
-public:
+  public:
+    //! Constructor of  cCallback.
     cCallback() {}
+
+    //! Destructor of  cCallback.
     virtual ~cCallback() {}
+
+    //! Call back function.
     virtual void callback() = 0;
 };
 
+//---------------------------------------------------------------------------
 #endif
+//---------------------------------------------------------------------------
 
 

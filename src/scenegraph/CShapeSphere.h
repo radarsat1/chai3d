@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,10 +12,9 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       06/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 251 $
 */
 //===========================================================================
 
@@ -23,54 +22,77 @@
 #ifndef CShapeSphereH
 #define CShapeSphereH
 //---------------------------------------------------------------------------
-#include "CGenericPotentialField.h"
-#include "CMaterial.h"
-#include "CTexture2D.h"
+#include "scenegraph/CGenericObject.h"
+#include "graphics/CMaterial.h"
+#include "graphics/CTexture2D.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-      \file       CShapeSphere.h
-      \class      cShapeSphere
-      \brief      cShapeSphere describes a simple spherical potential field
+    \file       CShapeSphere.h
+
+    \brief 
+    <b> Scenegraph </b> \n 
+    Virtual Shape - Sphere.
 */
 //===========================================================================
-class cShapeSphere : public cGenericPotentialField
+
+//===========================================================================
+/*!
+    \class      cShapeSphere
+    \ingroup    scenegraph
+
+    \brief      
+    Implementation of a virtual sphere shape.
+*/
+//===========================================================================
+class cShapeSphere : public cGenericObject
 {
   public:
+    
+    //-----------------------------------------------------------------------
     // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+
     //! Constructor of cShapeSphere.
     cShapeSphere(const double& a_radius);
+    
     //! Destructor of cSphere.
     virtual ~cShapeSphere() {};
 
-    // MEMBERS:
-    //! Material properties
-    cMaterial m_material;
-    //! Texture property
-    cTexture2D* m_texture;
 
+    //-----------------------------------------------------------------------
     // METHODS:
+    //-----------------------------------------------------------------------
+
     //! Render object in OpenGL.
     virtual void render(const int a_renderMode=0);
 
-    //! Update bounding box of current object
+    //! Update bounding box of current object.
     virtual void updateBoundaryBox();
 
-    //! Object scaling
+    //! Object scaling.
     virtual void scaleObject(const cVector3d& a_scaleFactors);
 
-    //! Compute interaction force for current object in local frame
-    virtual cVector3d computeLocalForce(const cVector3d& a_localPosition);
+    //! Update the geometric relationship between the tool and the current object.
+    virtual void computeLocalInteraction(const cVector3d& a_toolPos,
+                                         const cVector3d& a_toolVel,
+                                         const unsigned int a_IDN);
 
-    //! Set radius of sphere
-    void setRadius(double a_radius) { m_radius = cAbs(a_radius); }
+    //! Set radius of sphere.
+    void setRadius(double a_radius) { m_radius = cAbs(a_radius); updateBoundaryBox();}
 
-    //! Get radius of sphere
+    //! Get radius of sphere.
     double getRadius() { return (m_radius); }
 
+
   protected:
-    //! radius of sphere
+    
+    //-----------------------------------------------------------------------
+    // MEMBERS:
+    //-----------------------------------------------------------------------
+
+    //! radius of sphere.
     double m_radius;
 };
 

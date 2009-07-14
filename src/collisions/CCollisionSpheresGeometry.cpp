@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,24 +12,19 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author     Chris Sewell
-    \file       CCollisionSpheresGeometry.cpp
-    \version    1.0
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Chris Sewell
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 244 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CVertex.h"
-#include "CTriangle.h"
-#include "CCollisionSpheresGeometry.h"
-#include "CCollisionSpheres.h"
+#include "collisions/CCollisionSpheresGeometry.h"
 //---------------------------------------------------------------------------
-
-//! STATIC VARIABLES:
 // Initialize m_split, axis on which to sort triangle primitives.
 int cCollisionSpheresGenericShape::m_split = 0;
-
+//---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
@@ -67,28 +62,24 @@ void cCollisionSpheresEdge::initialize(cCollisionSpheresPoint *a_a, cCollisionSp
 
 //===========================================================================
 /*!
-
-Destructor of cCollisionSpheresTri.
-
-*/
-//===========================================================================
-cCollisionSpheresTri::~cCollisionSpheresTri() { }
-
-
-//===========================================================================
-/*!
     Constructor of cCollisionSpheresTri, to enclose a single triangle in 
     a sphere.
 
     \fn       cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a,
-              cVector3d b, cVector3d c);
+                                           cVector3d b,
+                                           cVector3d c,
+                                           double a_extendedRadius)
     \param    a     First vertex of the triangle.
     \param    b     Second vertex of the triangle.
     \param    c     Third vertex of the triangle.
+    \param    a_extendedRadius  Additional radius to add to sphere.
     \return   Return a pointer to new cCollisionSpheresTri instance.
 */
 //===========================================================================
-cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a, cVector3d b, cVector3d c)
+cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a,
+                                           cVector3d b,
+                                           cVector3d c,
+                                           double a_extendedRadius)
 {
     // Calculate the center of the circumscribing sphere for this triangle:
     // First compute the normal to the plane of this triangle
@@ -167,6 +158,9 @@ cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a, cVector3d b, cVector3d c
             }
         }
     }
+
+    // add external radius to sphere
+    m_radius = m_radius + a_extendedRadius;
 }
 
 
@@ -177,22 +171,16 @@ cCollisionSpheresTri::cCollisionSpheresTri(cVector3d a, cVector3d b, cVector3d c
     method of the cTriangle object associated with this triangle primitive.
 
     \fn       bool cCollisionSpheresTri::computeCollision(cCollisionSpheresGenericShape *a_other,
-              cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-              cVector3d& a_colPoint, double& a_colSquareDistance)
+                                            cCollisionRecorder& a_recorder,
+                                            cCollisionSettings& a_settings)
     \param    a_other  The line primitive to check for intersection.
-    \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle  Returns pointer to nearest collided triangle.
-    \param    a_colPoint  Returns position of nearest collision.
-    \param    a_colSquareDistance  Returns distance between ray origin and
-                                   collision point.
-    \return   Return whether the given line intersects this triangle.
+    \param    a_recorder  Stores all collision events.
+    \param    a_settings  Contains collision settings information.
 */
 //===========================================================================
 bool cCollisionSpheresTri::computeCollision(cCollisionSpheresGenericShape *a_other,
-                                            cGenericObject*& a_colObject,
-                                            cTriangle*& a_colTriangle,
-                                            cVector3d& a_colPoint,
-                                            double& a_colSquareDistance)
+                                            cCollisionRecorder& a_recorder,
+                                            cCollisionSettings& a_settings)
 {
     // cast the "other" shape to a line primitive; collision detection is
     // currently only set up to handle line segment - triangle intersections
@@ -204,9 +192,16 @@ bool cCollisionSpheresTri::computeCollision(cCollisionSpheresGenericShape *a_oth
     // it will only return true if the distance between the segment origin and
     // the triangle is less than the current closest intersecting triangle
     // (whose distance squared is kept in a_colSquareDistance)
-    return (m_original->computeCollision(line->getSegmentPointA(),
-            line->getDir(), a_colObject, a_colTriangle, a_colPoint,
-            a_colSquareDistance));
+
+    // Don't create these as temporary variables in the function call; this 
+    // is not technically a C++-allowable thing to do, since they're passed
+    // by reference.
+    cVector3d segA = line->getSegmentPointA();
+    cVector3d segB = line->getSegmentPointB();
+
+    return (m_original->computeCollision(segA, segB,
+                                         a_recorder,
+                                         a_settings));
 }
 
 
@@ -224,22 +219,15 @@ cCollisionSpheresLine::cCollisionSpheresLine(cVector3d& a_segmentPointA,
                                              cVector3d& a_segmentPointB)
 {
     // calculate the center of the line segment
-    m_center = cAdd(a_segmentPointA, a_segmentPointB);
-    m_center.x *= 0.5;
-    m_center.y *= 0.5;
-    m_center.z *= 0.5;
+    m_center = cMul(0.5, cAdd(a_segmentPointA, a_segmentPointB));
 
     // calculate the radius of the bounding sphere as the distance from the
     // center of the segment (calculated above) to an endpoint
-    cVector3d rad = cSub(m_center, a_segmentPointA);
-    m_radius = sqrt(rad.x*rad.x + rad.y*rad.y + rad.z*rad.z);
+    m_radius = cDistance(m_center, a_segmentPointA);
 
-    // set origin and direction of the line segment; i.e., redefine the segment
-    // as a ray from the first endpoint (presumably the proxy position when
-    // the collision detection is being used with the proxy force algorithm) to
-    // the second endpoint (presumably the goal position)
+    // store segment
     m_segmentPointA = a_segmentPointA;
-    a_segmentPointB.subr(a_segmentPointA, m_dir);
+    m_segmentPointB = a_segmentPointB;
 }
 
 
@@ -249,22 +237,18 @@ cCollisionSpheresLine::cCollisionSpheresLine(cVector3d& a_segmentPointA,
     (this line and the given triangle) by calling the collision detection
     method of the triangle primitive.
 
-    \fn       bool cCollisionSpheresLine::computeCollision(
-              cCollisionSpheresGenericShape *a_other,
-              cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-              cVector3d& a_colPoint, double& a_colSquareDistance)
+    \fn       bool cCollisionSpheresLine::computeCollision(cCollisionSpheresGenericShape *a_other,
+                                             cCollisionRecorder& a_recorder,
+                                             cCollisionSettings& a_settings)
     \param    a_other  The triangle primitive to check for intersection.
-    \param    a_colObject  Returns pointer to nearest collided object.
-    \param    a_colTriangle  Returns pointer to nearest collided triangle.
-    \param    a_colPoint  Returns position of nearest collision.
-    \param    a_colSquareDistance  Returns distance between ray origin and
-                                   collision point.
+    \param    a_recorder  Stores all collision events.
+    \param    a_settings  Contains collision settings information.
     \return   Return whether the given triangle intersects this line.
 */
 //===========================================================================
 bool cCollisionSpheresLine::computeCollision(cCollisionSpheresGenericShape *a_other,
-          cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-          cVector3d& a_colPoint, double& a_colSquareDistance)
+                                             cCollisionRecorder& a_recorder,
+                                             cCollisionSettings& a_settings)
 {
     // check for a collision between the primitives (one a triangle and the
     // other a line segment, we assume) by calling the collision detection
@@ -272,8 +256,7 @@ bool cCollisionSpheresLine::computeCollision(cCollisionSpheresGenericShape *a_ot
     // distance between the segment origin and the triangle is less than the
     // current closest intersecting triangle (whose distance squared is kept
     // in a_colSquareDistance)
-    return a_other->computeCollision(this, a_colObject, a_colTriangle,
-            a_colPoint, a_colSquareDistance);
+    return a_other->computeCollision(this, a_recorder, a_settings);
 }
 
 

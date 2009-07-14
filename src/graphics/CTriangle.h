@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,10 +12,9 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 270 $
 */
 //===========================================================================
 
@@ -23,23 +22,40 @@
 #ifndef CTriangleH
 #define CTriangleH
 //---------------------------------------------------------------------------
-#include "CMaths.h"
-#include "CVertex.h"
-#include "CMesh.h"
+#include "math/CMaths.h"
+#include "graphics/CVertex.h"
+#include "scenegraph/CMesh.h"
+#include "collisions/CCollisionBasics.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-      \file     CTriangle.h
-      \struct   cTriangle
-      \brief    cTriangle defines a triangle, typically bound to a mesh for
-                graphic rendering.
+    \file   CTriangle.h
+    
+    \brief  
+    <b> Graphics </b> \n 
+    3D triangle.
+*/
+//===========================================================================
+
+//===========================================================================
+/*!
+    \struct     cTriangle
+    \ingroup    graphics
+
+    \brief    
+    cTriangle defines a triangle, typically bound to a mesh for graphic 
+    rendering.
 */
 //===========================================================================
 class cTriangle
 {
   public:
+    
+    //-----------------------------------------------------------------------
     // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+
     //-----------------------------------------------------------------------
     /*!
         Constructor of cTriangle.
@@ -52,7 +68,7 @@ class cTriangle
     //-----------------------------------------------------------------------
     cTriangle(cMesh* a_parent, const unsigned int a_indexVertex0,
         const unsigned int a_indexVertex1, const unsigned int a_indexVertex2) :
-        m_indexVertex0(a_indexVertex0), m_indexVertex1(a_indexVertex1), 
+        m_indexVertex0(a_indexVertex0), m_indexVertex1(a_indexVertex1),
         m_indexVertex2(a_indexVertex2), m_parent(a_parent), m_allocated(false),
         m_tag(0), m_neighbors(0), m_index(0)
     { }
@@ -81,7 +97,10 @@ class cTriangle
     }
 
 
+	//-----------------------------------------------------------------------
     // METHODS:
+    //-----------------------------------------------------------------------
+
     //-----------------------------------------------------------------------
     /*!
         Set the vertices of the triangle by passing the index numbers of
@@ -93,17 +112,18 @@ class cTriangle
     */
     //-----------------------------------------------------------------------
     inline void setVertices(const unsigned int a_indexVertex0,
-                const unsigned int a_indexVertex1, const unsigned int a_indexVertex2)
+							const unsigned int a_indexVertex1, 
+							const unsigned int a_indexVertex2)
     {
         m_indexVertex0 = a_indexVertex0;
         m_indexVertex1 = a_indexVertex1;
         m_indexVertex2 = a_indexVertex2;
     }
 
-    
+
     //-----------------------------------------------------------------------
     /*!
-        Read pointer to vertex 0 of triangle
+        Read pointer to vertex 0 of triangle.
 
         \return     Return pointer to vertex 0.
     */
@@ -119,7 +139,7 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Read pointer to vertex 1 of triangle
+        Read pointer to vertex 1 of triangle.
 
         \return     Return pointer to vertex 1.
     */
@@ -135,7 +155,7 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Read pointer to vertex 2 of triangle
+        Read pointer to vertex 2 of triangle.
 
         \return     Return pointer to vertex 2.
     */
@@ -151,9 +171,9 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Access a pointer to the specified vertex of this triangle
+        Access a pointer to the specified vertex of this triangle.
 
-        \param      vi  The triangle (0, 1, or 2) to access
+        \param      vi  The triangle (0, 1, or 2) to access.
         \return     Returns a pointer to the requested triangle, or 0 for an
                     illegal index
     */
@@ -169,7 +189,7 @@ class cTriangle
         {
           case 0 : return vertex_array+m_indexVertex0;
           case 1 : return vertex_array+m_indexVertex1;
-          case 2 : return vertex_array+m_indexVertex2;          
+          case 2 : return vertex_array+m_indexVertex2;
         }
         return NULL;
     }
@@ -177,28 +197,27 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Access the index of the specified vertex of this triangle
+        Access the index of the specified vertex of this triangle.
 
-        \param      vi  The triangle (0, 1, or 2) to access
-        \return     Returns the index of the specified triangle
+        \param      vi  The triangle (0, 1, or 2) to access.
+        \return     Returns the index of the specified triangle.
     */
     //-----------------------------------------------------------------------
     inline unsigned int getVertexIndex(int vi) const
     {
-
-      switch (vi)
-      {
-      case 0 : return m_indexVertex0;
-      case 1 : return m_indexVertex1;
-      case 2 : return m_indexVertex2;          
-      }
-      return 0;
+		switch (vi)
+		{
+			case 0 : return m_indexVertex0;
+			case 1 : return m_indexVertex1;
+			case 2 : return m_indexVertex2;
+		}
+		return 0;
     }
 
     //-----------------------------------------------------------------------
     /*!
         Read index number of vertex 0 (defines a location in my owning
-        mesh's vertex array)
+        mesh's vertex array).
 
         \return     Return index number.
     */
@@ -212,7 +231,7 @@ class cTriangle
     //-----------------------------------------------------------------------
     /*!
         Read index number of vertex 1 (defines a location in my owning
-        mesh's vertex array)
+        mesh's vertex array).
 
         \return     Return index number.
     */
@@ -226,7 +245,7 @@ class cTriangle
     //-----------------------------------------------------------------------
     /*!
         Read index number of vertex 2 (defines a location in my owning
-        mesh's vertex array)
+        mesh's vertex array).
 
         \return     Return index number.
     */
@@ -240,7 +259,7 @@ class cTriangle
     //-----------------------------------------------------------------------
     /*!
         Read the index of this triangle (defines a location in my owning
-        mesh's triangle array)
+        mesh's triangle array).
 
         \return     Return index number.
     */
@@ -253,7 +272,7 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Retrieve a pointer to the mesh that owns this triangle
+        Retrieve a pointer to the mesh that owns this triangle.
 
         \return     Return pointer to parent mesh.
     */
@@ -265,12 +284,12 @@ class cTriangle
 
     //-----------------------------------------------------------------------
     /*!
-        Set pointer to mesh parent of triangle.        
+        Set pointer to mesh parent of triangle.
     */
     //-----------------------------------------------------------------------
     inline void setParent(cMesh* parent)
     {
-      m_parent = parent;
+        m_parent = parent;
     };
 
 
@@ -292,215 +311,390 @@ class cTriangle
     //-----------------------------------------------------------------------
     /*!
         Check if a ray intersects this triangle. The ray is described
-        by its origin (/e a_origin) and its direction (/e a_direction).
+        by its origin (\e a_origin) and its direction (\e a_direction). \n
 
-        If a collision occurs, the square distance between the ray origin
-        and the collision point in measured and compared to any previous collision
-        information stored in parameters \e a_colObject, \e a_colTriangle,
-        \e a_colPoint, and \e a_colSquareDistance.
-        
-        If the new collision is located nearer to the ray origin than the previous
-        collision point, it is stored in the corresponding parameters \e a_colObject,
-        \e a_colTriangle, \e a_colPoint, and \e a_colSquareDistance.
-
-        \param  a_rayOrigin   Point from where collision ray starts (in local frame).
-        \param  a_rayDir      Direction vector of collision ray (in local frame).
-        \param  a_colObject   Pointer to nearest collided object.
-        \param  a_colTriangle Pointer to nearest collided triangle.
-        \param  a_colPoint    Position of nearest collision.
-        \param  a_colSquareDistance Distance between ray origin and nearest
-                collision point.
-
-        Code adapted from:
-        http://www.cs.lth.se/home/Tomas_Akenine_Moller/raytri/raytri.c
+        If a collision occurs, this information is stored in the collision
+        recorder \e a_recorder. \n
 
         This is one of the most performance-critical routines in CHAI,
         so we have code here for a couple different approaches that may
         become useful in different scenarios.
+
+        \param   a_segmentPointA  Point from where collision ray starts (in local frame).
+        \param   a_segmentPointB  Direction vector of collision ray (in local frame).
+        \param   a_recorder  Stores collision events
+        \param   a_settings  Settings related to collision detection process.
+        \return  Returns \b true if a collision occured, otherwise \b false.    
+
     */
     //-----------------------------------------------------------------------
-    inline bool computeCollision(
-                const cVector3d& a_rayOrigin, const cVector3d& a_rayDir,
-                cGenericObject*& a_colObject, cTriangle*& a_colTriangle,
-                cVector3d& a_colPoint, double& a_colSquareDistance) const
+    inline bool computeCollision(cVector3d& a_segmentPointA,
+                                 cVector3d& a_segmentPointB,
+                                 cCollisionRecorder& a_recorder,
+                                 cCollisionSettings& a_settings) const
     {
-
-// Determines which version of this function we'll use
-// #define USE_MOLLER_1_TRIANGLE_INTERSECT_TEST
-
-// This value controls how close rays can be to parallel to the triangle
-// surface before we discard them
-#define INTERSECT_EPSILON 10e-14f
-
-      // Where does the vertex array live?
-      vector<cVertex>* vertex_vector = m_parent->pVertices();
-      cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
-
-#ifdef USE_MOLLER_1_TRIANGLE_INTERSECT_TEST
-        cVector3d t_vertex0, t_vertex1, t_vertex2, edge1, edge2, pvec, tvec, qvec;
-        double u, v, t, t_squared, det, inv_det;
+        // temp variables
+        bool hit = false;
+        cVector3d collisionPoint;
+        cVector3d collisionNormal;
+        double collisionDistanceSq = CHAI_LARGE;
 
         // Get the position of the triangle's vertices
-        t_vertex0 = vertex_array[m_indexVertex0].getPos();
-        t_vertex1 = vertex_array[m_indexVertex1].getPos();
-        t_vertex2 = vertex_array[m_indexVertex2].getPos();
-                
-        // Compute the two edges of the triangle and his normal
-        t_vertex1.subr(t_vertex0, edge1);
-        t_vertex2.subr(t_vertex0, edge2);
-        a_rayDir.crossr(edge2, pvec);
+        vector<cVertex>* vertex_vector = m_parent->pVertices();
+        cVertex* vertex_array = (cVertex*) &((*vertex_vector)[0]);
+        cVector3d vertex0 = vertex_array[m_indexVertex0].getPos();
+        cVector3d vertex1 = vertex_array[m_indexVertex1].getPos();
+        cVector3d vertex2 = vertex_array[m_indexVertex2].getPos();
 
-        // If the ray is parallel to the triangle, there's no collision
-        det = edge1.dot(pvec);
+        // If m_collisionRadius == 0, we search for a possible intersection between
+        // the segment AB and the triangle defined by its three vertices V0, V1, V2.
+        if (a_settings.m_collisionRadius == 0)
+        {
+            // check for collision between segment and triangle only
+            if (cIntersectionSegmentTriangle(a_segmentPointA,
+                                            a_segmentPointB,
+                                            vertex0,
+                                            vertex1,
+                                            vertex2,
+                                            collisionPoint,
+                                            collisionNormal))
+            {
+                hit = true;
+                collisionDistanceSq = cDistanceSq(a_segmentPointA, collisionPoint);
+            }
+        }
 
-        if ( (det < INTERSECT_EPSILON) && (det > -INTERSECT_EPSILON) )
-          return false;
-        
-        // We're going to use the inverse more than once, so compute it
-        // here...
-        inv_det = 1.0 / det;
 
-        // A vector from vertex 0 to the ray origin
-        a_rayOrigin.subr(t_vertex0,tvec);
+        // If m_collisionRadius > 0, we search for a possible intersection between
+        // the segment AB and the shell of the current triangle which is described
+        // by its three vertices and m_collisionRadius.
+        else
+        {
+            cVector3d t_collisionPoint, t_collisionNormal;
+            double t_collisionDistanceSq;
+            cVector3d normal = cComputeSurfaceNormal(vertex0, vertex1, vertex2);
+            cVector3d offset; normal.mulr(a_settings.m_collisionRadius, offset);
+            cVector3d t_vertex0, t_vertex1, t_vertex2;
 
-        // Calculate U parameter and test bounds
-        u = cDot(tvec, pvec) * inv_det;
-        if (u < 0.0 || u > 1.0)
-          return false;
+            // check for collision between segment and triangle upper shell
+            vertex0.addr(offset, t_vertex0);
+            vertex1.addr(offset, t_vertex1);
+            vertex2.addr(offset, t_vertex2);
+            if (cIntersectionSegmentTriangle(a_segmentPointA,
+                                            a_segmentPointB,
+                                            t_vertex0,
+                                            t_vertex1,
+                                            t_vertex2,
+                                            collisionPoint,
+                                            collisionNormal))
+            {
+                hit = true;
+                collisionDistanceSq = cDistanceSq(a_segmentPointA, collisionPoint);
+            }
 
-        // Prepare to test V parameter
-        tvec.crossr(edge1,qvec);
+            // check for collision between segment and triangle lower shell
+            vertex0.subr(offset, t_vertex0);
+            vertex1.subr(offset, t_vertex1);
+            vertex2.subr(offset, t_vertex2);
+            if (cIntersectionSegmentTriangle(a_segmentPointA,
+                                            a_segmentPointB,
+                                            t_vertex0,
+                                            t_vertex1,
+                                            t_vertex2,
+                                            t_collisionPoint,
+                                            t_collisionNormal))
+            {
+                hit = true;
+                t_collisionDistanceSq = cDistanceSq(a_segmentPointA, t_collisionPoint);
+                if (t_collisionDistanceSq < collisionDistanceSq)
+                {
+                    collisionPoint = t_collisionPoint;
+                    collisionNormal = t_collisionNormal;
+                    collisionDistanceSq = t_collisionDistanceSq;
+                }
+            }
 
-        // Calculate V parameter and test bounds
-        v = cDot(a_rayDir, qvec) * inv_det;
+            // check for collision between sphere located at vertex 0
+            cVector3d t_p, t_n;
+            if (cIntersectionSegmentSphere(a_segmentPointA,
+                                           a_segmentPointB,
+                                           vertex0,
+                                           a_settings.m_collisionRadius,
+                                           t_collisionPoint,
+                                           t_collisionNormal,
+                                           t_p,
+                                           t_n) > 0)
+            {
+                hit = true;
+                t_collisionDistanceSq = cDistanceSq(a_segmentPointA, t_collisionPoint);
+                if (t_collisionDistanceSq < collisionDistanceSq)
+                {
+                    collisionPoint = t_collisionPoint;
+                    collisionNormal = t_collisionNormal;
+                    collisionDistanceSq = t_collisionDistanceSq;
+                }
+            }
 
-        if ((v < 0.0) || (u + v > 1.0))
-          return false;
+            // check for collision between sphere located at vertex 1
+            if (cIntersectionSegmentSphere(a_segmentPointA,
+                                           a_segmentPointB,
+                                           vertex1,
+                                           a_settings.m_collisionRadius,
+                                           t_collisionPoint,
+                                           t_collisionNormal,
+                                           t_p,
+                                           t_n) > 0)
+            {
+                hit = true;
+                t_collisionDistanceSq = cDistanceSq(a_segmentPointA, t_collisionPoint);
+                if (t_collisionDistanceSq < collisionDistanceSq)
+                {
+                    collisionPoint = t_collisionPoint;
+                    collisionNormal = t_collisionNormal;
+                    collisionDistanceSq = t_collisionDistanceSq;
+                }
+            }
 
-        // Ray does intersect triangle...
-        t = cDot(edge2, qvec) * inv_det;        
-        t_squared = t*t;
+            // check for collision between sphere located at vertex 2
+            if (cIntersectionSegmentSphere(a_segmentPointA,
+                                           a_segmentPointB,
+                                           vertex2,
+                                           a_settings.m_collisionRadius,
+                                           t_collisionPoint,
+                                           t_collisionNormal,
+                                           t_p,
+                                           t_n) > 0)
+            {
+                hit = true;
+                t_collisionDistanceSq = cDistanceSq(a_segmentPointA, t_collisionPoint);
+                if (t_collisionDistanceSq < collisionDistanceSq)
+                {
+                    collisionPoint = t_collisionPoint;
+                    collisionNormal = t_collisionNormal;
+                    collisionDistanceSq = t_collisionDistanceSq;
+                }
+            }
 
-        // Collision has occurred
+            // check for collision between segment and triangle edge01 shell
+            if (cIntersectionSegmentToplessCylinder(a_segmentPointA,
+                                           a_segmentPointB,
+                                           vertex0,
+                                           vertex1,
+                                           a_settings.m_collisionRadius,
+                                           t_collisionPoint,
+                                           t_collisionNormal,
+                                           t_p,
+                                           t_n) > 0)
+            {
+                hit = true;
+                t_collisionDistanceSq = cDistanceSq(a_segmentPointA, t_collisionPoint);
+                if (t_collisionDistanceSq < collisionDistanceSq)
+                {
+                    collisionPoint = t_collisionPoint;
+                    collisionNormal = t_collisionNormal;
+                    collisionDistanceSq = t_collisionDistanceSq;
+                }
+            }
 
-        // If we've already seen a closer collision, don't report
-        // this one...
-        if (t_squared >= a_colSquareDistance) return(false);
+            // check for collision between segment and triangle edge02 shell
+            if (cIntersectionSegmentToplessCylinder(a_segmentPointA,
+                                           a_segmentPointB,
+                                           vertex0,
+                                           vertex2,
+                                           a_settings.m_collisionRadius,
+                                           t_collisionPoint,
+                                           t_collisionNormal,
+                                           t_p,
+                                           t_n) > 0)
+            {
+                hit = true;
+                t_collisionDistanceSq = cDistanceSq(a_segmentPointA, t_collisionPoint);
+                if (t_collisionDistanceSq < collisionDistanceSq)
+                {
+                    collisionPoint = t_collisionPoint;
+                    collisionNormal = t_collisionNormal;
+                    collisionDistanceSq = t_collisionDistanceSq;
+                }
+            }
 
-        // Okay, we want to report this collision
-        a_colObject = m_parent;
-        a_colTriangle = (cTriangle*)this;
-        a_colPoint = cAdd(a_rayOrigin, cMul(t, a_rayDir));
-        a_colSquareDistance = t_squared;
+            // check for collision between segment and triangle edge12 shell
+            if (cIntersectionSegmentToplessCylinder(a_segmentPointA,
+                                           a_segmentPointB,
+                                           vertex1,
+                                           vertex2,
+                                           a_settings.m_collisionRadius,
+                                           t_collisionPoint,
+                                           t_collisionNormal,
+                                           t_p,
+                                           t_n) > 0)
+            {
+                hit = true;
+                t_collisionDistanceSq = cDistanceSq(a_segmentPointA, t_collisionPoint);
+                if (t_collisionDistanceSq < collisionDistanceSq)
+                {
+                    collisionPoint = t_collisionPoint;
+                    collisionNormal = t_collisionNormal;
+                    collisionDistanceSq = t_collisionDistanceSq;
+                }
+            }
+        }
 
-        // Tell the caller that we found a new collision
-        return(true);
+        // report collision
+        if (hit)
+        {
+            // before reporting the new collision, we need to check if
+            // the collision settings require us to verify the side of the
+            // triangle which has been hit.
+            bool hit_confirmed;
+            if (a_settings.m_checkBothSidesOfTriangles)
+            {
+                // settings specify that a collision can occur on both sides
+                // of the triangle, so the new collision is reported.
+                hit_confirmed = true;
+            }
+            else
+            {
+                // we need check on which side of the triangle the collision occurred
+                // and see it needs to be reported.
+                cVector3d segmentAB;
+                a_segmentPointB.subr(a_segmentPointA, segmentAB);
 
-#else
+                cVector3d v01, v02, triangleNormal;
+                vertex2.subr(vertex0, v02);
+                vertex1.subr(vertex0, v01);
+                v01.crossr(v02, triangleNormal);
 
-      // Get the position of the triangle's vertices
-      cVector3d t_vertex0 = vertex_array[m_indexVertex0].getPos();
-      cVector3d t_vertex1 = vertex_array[m_indexVertex1].getPos();
-      cVector3d t_vertex2 = vertex_array[m_indexVertex2].getPos();
-      cVector3d t_E0, t_E1, t_N;
+                double value = cCosAngle(segmentAB, triangleNormal);
+                if (value <= 0.0)
+                {
+                    hit_confirmed = true;
+                }
+                else
+                {
+                    hit_confirmed = false;
+                }
+            }
 
-      // Compute the triangle's normal
-      t_vertex1.subr(t_vertex0, t_E0);
-      t_vertex2.subr(t_vertex0, t_E1);
-      t_E0.crossr(t_E1, t_N);
 
-      // If the ray is parallel to the triangle (perpendicular to the
-      // normal), there's no collision
-      if (fabs(t_N.dot(a_rayDir))<10E-15f) return (false);
+            // here we finally report the new collision to the collision event handler.
+            if (hit_confirmed)
+            {
+                // we verify if anew collision needs to be created or if we simply
+                // need to update the nearest collision.
+                if (a_settings.m_checkForNearestCollisionOnly)
+                {
+                    // no new collision event is create. We just check if we need
+                    // to update the nearest collision
+                    if(collisionDistanceSq < a_recorder.m_nearestCollision.m_squareDistance)
+                    {
+                        // report basic collision data
+                        a_recorder.m_nearestCollision.m_object = m_parent;
+                        a_recorder.m_nearestCollision.m_triangle = (cTriangle*)this;
+                        a_recorder.m_nearestCollision.m_localPos = collisionPoint;
+                        a_recorder.m_nearestCollision.m_localNormal = collisionNormal;
+                        a_recorder.m_nearestCollision.m_squareDistance = collisionDistanceSq;
+                        a_recorder.m_nearestCollision.m_adjustedSegmentAPoint = a_segmentPointA;
 
-      double t_T = cDot(t_N, cSub(t_vertex0,a_rayOrigin)) / cDot(t_N, a_rayDir);
+                        // report advanced collision data
+                        if (!a_settings.m_returnMinimalCollisionData)
+                        {
+                            a_recorder.m_nearestCollision.m_globalPos = cAdd(m_parent->getGlobalPos(),
+                                                                        cMul(m_parent->getGlobalRot(),
+                                                                        a_recorder.m_nearestCollision.m_localPos));
+                            a_recorder.m_nearestCollision.m_globalNormal = cMul(m_parent->getGlobalRot(),
+                            a_recorder.m_nearestCollision.m_localNormal);
+                        }
 
-      //
-      if (t_T + INTERSECT_EPSILON < 0) return (false);
+                    }
+                }
+                else
+                {
+                    cCollisionEvent newCollisionEvent;
 
-      cVector3d t_Q = cSub(cAdd(a_rayOrigin, cMul(t_T, a_rayDir)), t_vertex0);
-      double t_Q0 = cDot(t_E0,t_Q);
-      double t_Q1 = cDot(t_E1,t_Q);
-      double t_E00 = cDot(t_E0,t_E0);
-      double t_E01 = cDot(t_E0,t_E1);
-      double t_E11 = cDot(t_E1,t_E1);
-      double t_D = (t_E00 * t_E11) - (t_E01 * t_E01);
+                    // report basic collision data
+                    newCollisionEvent.m_object = m_parent;
+                    newCollisionEvent.m_triangle = (cTriangle*)this;
+                    newCollisionEvent.m_localPos = collisionPoint;
+                    newCollisionEvent.m_localNormal = collisionNormal;
+                    newCollisionEvent.m_squareDistance = collisionDistanceSq;
+                    newCollisionEvent.m_adjustedSegmentAPoint = a_segmentPointA;
 
-      //
-      if ((t_D > -INTERSECT_EPSILON) && (t_D < INTERSECT_EPSILON)) return(false);        
+                    // report advanced collision data
+                    if (!a_settings.m_returnMinimalCollisionData)
+                    {
+                        newCollisionEvent.m_globalPos = cAdd(m_parent->getGlobalPos(),
+                                                        cMul(m_parent->getGlobalRot(),
+                                                        newCollisionEvent.m_localPos));
+                        newCollisionEvent.m_globalNormal = cMul(m_parent->getGlobalRot(),
+                        newCollisionEvent.m_localNormal);
+                    }
 
-      double t_S0 = ((t_E11 * t_Q0) - (t_E01 * t_Q1)) / t_D;
-      double t_S1 = ((t_E00 * t_Q1) - (t_E01 * t_Q0)) / t_D;
+                    // add new collision even to collision list
+                    a_recorder.m_collisions.push_back(newCollisionEvent);
 
-      // 
-      if (
-        (t_S0 >= 0.0 - INTERSECT_EPSILON) &&
-        (t_S1 >= 0.0 - INTERSECT_EPSILON) &&
-        ((t_S0 + t_S1) <= 1.0 + INTERSECT_EPSILON)
-        )
-      {
-        cVector3d t_I = cAdd(t_vertex0, cMul(t_S0,t_E0), cMul(t_S1, t_E1));
-        double t_squareDistance = a_rayOrigin.distancesq(t_I);
+                    // check if this new collision is a candidate for "nearest one"
+                    if(collisionDistanceSq < a_recorder.m_nearestCollision.m_squareDistance)
+                    {
+                        a_recorder.m_nearestCollision = newCollisionEvent;
+                    }
+                }
+            }
 
-        // Collision has occurred
-
-        // If we've already seen a closer collision, don't report
-        // this one
-        if (t_squareDistance >= a_colSquareDistance) return(false);
-
-        // Okay, we want to report this collision
-        a_colObject = m_parent;
-        a_colTriangle = (cTriangle*)this;
-        a_colPoint = cAdd(a_rayOrigin, cMul(t_T, a_rayDir));
-        a_colSquareDistance = t_squareDistance;
-
-        // Tell the caller that we found a new collision
-        return(true);            
-
-      }
-      else return(false);
-#endif
+            // return result
+            return (hit_confirmed);
+        }
+        else
+        {
+            return (false);
+        }
     }
+
 
     //-----------------------------------------------------------------------
     /*!
-        Compute and return the area of this triangle
+        Compute and return the area of this triangle.
 
-        \return     Returns the area of this triangle
+        \return     Returns the area of this triangle.
     */
     //-----------------------------------------------------------------------
-    double compute_area()
+    double computeArea()
     {
-
-      // A = 0.5 * | u x v |
-
-      cVector3d u = cSub(getVertex(1)->getPos(),getVertex(0)->getPos());
-      cVector3d v = cSub(getVertex(2)->getPos(),getVertex(0)->getPos());    
-
-      return 0.5 * (cCross(u,v).length());
-
+        // A = 0.5 * | u x v |
+        cVector3d u = cSub(getVertex(1)->getPos(),getVertex(0)->getPos());
+        cVector3d v = cSub(getVertex(2)->getPos(),getVertex(0)->getPos());
+        return (0.5 * (cCross(u,v).length()));
     }
 
+
+  public:
+    
+    //-----------------------------------------------------------------------
     // MEMBERS:
+    //-----------------------------------------------------------------------
+      
+    //! Index number of vertex 0 (defines a location in my owning mesh's vertex array).
+    unsigned int m_indexVertex0;
+
+    //! Index number of vertex 1 (defines a location in my owning mesh's vertex array).
+    unsigned int m_indexVertex1;
+
+    //! Index number of vertex 2 (defines a location in my owning mesh's vertex array).
+    unsigned int m_indexVertex2;
+
+    //! Index number of this triangle (defines a location in my owning mesh's triangle array).
+    unsigned int m_index;
+
+    //! The mesh that owns me.
+    cMesh* m_parent;
+
+    //! Is this triangle still active?
+    bool m_allocated;
+
     //! For custom use. No specific purpose.
     int m_tag;
 
     //! A mesh can be organized into a network of neighboring triangles, which are stored here...
     std::vector<cTriangle*>* m_neighbors;
-
-  public:
-    //! Index number of vertex 0 (defines a location in my owning mesh's vertex array)
-    unsigned int m_indexVertex0;
-    //! Index number of vertex 1 (defines a location in my owning mesh's vertex array)
-    unsigned int m_indexVertex1;
-    //! Index number of vertex 2 (defines a location in my owning mesh's vertex array)
-    unsigned int m_indexVertex2;
-    //! Index number of this triangle (defines a location in my owning mesh's triangle array)
-    unsigned int m_index;
-    //! The mesh that owns me
-    cMesh* m_parent;
-    //! Is this triangle still active?
-    bool m_allocated;
 };
 
 //---------------------------------------------------------------------------

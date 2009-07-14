@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="description"  content="CHAI3D: The Open Source Haptics Project">
+		<title>CHAI 3D</title>
+		<link href="resources/style/chai3d.css" rel="stylesheet" media="screen">
+		<csscriptdict>
+			<script type="text/javascript"><!--
+function newImage(arg) {
+	if (document.images) {
+		rslt = new Image();
+		rslt.src = arg;
+		return rslt;
+	}
+}
+userAgent = window.navigator.userAgent;
+browserVers = parseInt(userAgent.charAt(userAgent.indexOf("/")+1),10);
+mustInitImg = true;
+function initImgID() {di = document.images; if (mustInitImg && di) { for (var i=0; i<di.length; i++) { if (!di[i].id) di[i].id=di[i].name; } mustInitImg = false;}}
+function findElement(n,ly) {
+	d = document;
+	if (browserVers < 4)		return d[n];
+	if ((browserVers >= 6) && (d.getElementById)) {initImgID; return(d.getElementById(n))}; 
+	var cd = ly ? ly.document : d;
+	var elem = cd[n];
+	if (!elem) {
+		for (var i=0;i<cd.layers.length;i++) {
+			elem = findElement(n,cd.layers[i]);
+			if (elem) return elem;
+		}
+	}
+	return elem;
+}
+function changeImages() {
+	d = document;
+	if (d.images) {
+		var img;
+		for (var i=0; i<changeImages.arguments.length; i+=2) {
+			img = null;
+			if (d.layers) {img = findElement(changeImages.arguments[i],0);}
+			else {img = d.images[changeImages.arguments[i]];}
+			if (img) {img.src = changeImages.arguments[i+1];}
+		}
+	}
+}
+
+// --></script>
+		</csscriptdict>
+		<csactiondict>
+			<script type="text/javascript"><!--
+var preloadFlag = false;
+function preloadImages() {
+	if (document.images) {
+		over_menuM1a = newImage(/*URL*/'resources/images/menuM1b.png');
+		over_menuM2a = newImage(/*URL*/'resources/images/menuM2b.png');
+		over_menuM3a = newImage(/*URL*/'resources/images/menuM3b.png');
+		over_menuM4a = newImage(/*URL*/'resources/images/menuM4b.png');
+		over_menuM4a2 = newImage(/*URL*/'resources/images/menuM5b.png');
+		preloadFlag = true;
+	}
+}
+
+// --></script>
+		</csactiondict>
+	</head>
+
+	<body onload="preloadImages();" bgcolor="#ffffff">
+		<div align="center">
+			<table width="744" border="0" cellspacing="0" cellpadding="0" cool gridx="2" gridy="2" height="2631" showgridx showgridy usegridx usegridy>
+				<tr height="36">
+					<td width="743" height="36" colspan="9"></td>
+					<td width="1" height="36"><spacer type="block" width="1" height="36"></td>
+				</tr>
+				<tr height="40">
+					<td width="3" height="122" rowspan="2"></td>
+					<td width="74" height="40" valign="top" align="left" xpos="3"><a onmouseover="changeImages( /*CMP*/'menuM1a',/*URL*/'resources/images/menuM1b.png');return true" onmouseout="changeImages( /*CMP*/'menuM1a',/*URL*/'resources/images/menuM1a.png');return true" href="http://www.chai3d.org/concept.html"><img src="resources/images/menuM1a.png" alt="" name="menuM1a" height="36" width="74" border="0"></a></td>
+					<td width="102" height="40" valign="top" align="left" xpos="77"><a onmouseover="changeImages( /*CMP*/'menuM2a',/*URL*/'resources/images/menuM2b.png');return true" onmouseout="changeImages( /*CMP*/'menuM2a',/*URL*/'resources/images/menuM2a.png');return true" href="http://www.chai3d.org/download.html"><img src="resources/images/menuM2a.png" alt="" name="menuM2a" height="36" width="102" border="0"></a></td>
+					<td width="74" height="40" valign="top" align="left" xpos="179"><a onmouseover="changeImages( /*CMP*/'menuM3a',/*URL*/'resources/images/menuM3b.png');return true" onmouseout="changeImages( /*CMP*/'menuM3a',/*URL*/'resources/images/menuM3a.png');return true" href="http://www.chai3d.org/people.html"><img src="resources/images/menuM3a.png" alt="" name="menuM3a" height="36" width="74" border="0"></a></td>
+					<td width="84" height="40" valign="top" align="left" xpos="253"><a onmouseover="changeImages( /*CMP*/'menuM4a',/*URL*/'resources/images/menuM4b.png');return true" onmouseout="changeImages( /*CMP*/'menuM4a',/*URL*/'resources/images/menuM4a.png');return true" href="http://www.chai3d.org/project.html"><img src="resources/images/menuM4a.png" alt="" name="menuM4a" height="36" width="84" border="0"></a></td>
+					<td width="86" height="40" valign="top" align="left" xpos="337"><a onmouseover="changeImages( /*CMP*/'menuM4a2',/*URL*/'resources/images/menuM5b.png');return true" onmouseout="changeImages( /*CMP*/'menuM4a2',/*URL*/'resources/images/menuM5a.png');return true" href="http://www.chai3d.org/support.html"><img src="resources/images/menuM5a.png" alt="" name="menuM4a2" height="36" width="86" border="0"></a></td>
+					<td width="320" height="40" colspan="3" valign="top" align="left" xpos="423"><a href="http://www.chai3d.org/"><img src="resources/images/menuMLogo.png" alt="" height="36" width="320" border="0"></a></td>
+					<td width="1" height="40"><spacer type="block" width="1" height="40"></td>
+				</tr>
+				<tr height="82">
+					<td width="740" height="82" colspan="8" valign="top" align="left" xpos="3"><img src="resources/images/barCoding.png" alt="" height="54" width="740" border="0"></td>
+					<td width="1" height="82"><spacer type="block" width="1" height="82"></td>
+				</tr>
+				<tr height="2438">
+					<td content csheight="2426" width="743" height="2438" colspan="9" valign="top" xpos="0">
+						<p class="mainbody"><span class="TEXT"><span class="body">Rather than enumerate the format of every possible line you might write in C++, we'll point out specific aspects of the CHAI 3D coding conventions that might not be considered 'standard' C++ style. And of course, the best reference is the code itself; if you start from an existing CHAI 3D file as a stencil, you'll find it hard _not_ to stick to the conventions.</span></span></p>
+						<p class="mainbody"><span class="TEXT"><span class="body"><b>Whitespace and Indents:</b><br>
+								</span></span></p>
+						<ul>
+							<li class="mainbody">Tabs and indents should be _four_ spaces... and NO TABS! Even if your tabstops in your favorite editor are set to four spaces, Jimbo's might not be, so use spaces, not tabs.
+							<li class="mainbody">Other than one-line functions in header files, function bodies should be delimited by a bracket appearing on the line _after_ the function name, and the function body should be indented two spaces. The same convention applies to conditional statements and loops... e.g.:<br>
+								<br>
+							<pre><tt><span class="codestyle">void cGenericObject::onDisplayReset(const bool a_affectChildren)
+{
+    // Forward this call to my children...
+
+    // update children
+    if (a_affectChildren)
+    {
+        for (unsigned int i=0; i&lt;m_children.size(); i++)
+        {
+            m_children[i]-&gt;onDisplayReset(true);
+        }
+    }
+} // void onDisplayReset(...)
+</span></tt></pre>
+							<li class="mainbody">Wherever it might not be obvious what a closing bracket means (e.g. because it's the end of a long function and the function name is probably a page or more away), include a one-line comment after the closing bracket... this really helps when loops are heavily nested. The above example is clearly unnecessary, but it illustrates the point.<br>
+								<br>
+							<li class="mainbody">Skip two lines between the end of one function and the start of another; this prevents files from getting crazy-crammed and makes it easier to quickly scan through code.
+						</ul>
+						<p class="mainbody"></p>
+						<p class="mainbody"><span class="TITLE2"><span class="mainbody"><b>File, Class, Variable, and Function Names:</b></span></span></p>
+						<ul>
+							<li class="mainbody"><span class="TITLE2"><span class="mainbody">All symbols should start new words with a captial letter, e.g. selectedObject<br>
+									</span></span>
+							<li class="mainbody">Class names always begin with a lowercase 'c' followed by a capital letter, e.g. cCamera<br>
+							<li class="mainbody">The files that define the class cObject are typically called CObject.h and CObject.cpp (with capital C's)<br>
+							<li class="mainbody">Function parameter names begin with a_, followed by a lowercase letter, e.g. a_selectedObject<br>
+							<li class="mainbody">Member variable names begin with m_, followed by a lowercase letter, e.g. m_myPrivateVariable<br>
+							<li class="mainbody">Local variables and function names begin with a lowercase letter, e.g. selectedObject or getGlobalPos(...)
+							<li class="mainbody">Functions that represent callbacks should begin with 'on', e.g. onDisplayReset()
+							<li class="mainbody">Global variable names begin with g_, followed by a lowercase letter, e.g. g_myGlobalVariable
+						</ul>
+						<p class="mainbody"></p>
+						<p class="mainbody"><span class="TITLE2"><b>Comments:</b></span><br>
+						</p>
+						<ul>
+							<li class="mainbody">Every file that is to be incorporated into CHAI 3D should have the big CHAI 3D header on it, and www.chai3d.org should always be listed as an author... it's at the top of every file, but for completeness I'm pasting it at the end of this file.<br>
+								<br>
+							<li class="mainbody">All inline comments (comments you sprinkle in your code, as opposed to function or file header comments) should use C++-type comments... i.e. '//' comments, not '/*' comments. So a multi-line comment should look like this:<br>
+							<pre><tt>// I'm using a lot of words right now
+// to tell you that I'm incrementing
+// a variable called 'i'...
+i++;
+</tt></pre>
+							<li class="mainbody">We use doxygen, so we need to mark header comments in the doxygen-ish style. Every function gets one &quot;brief&quot; description and one &quot;long&quot; description... we typically put a brief description before a function declaration (in a header file) and a long description before a function definition (in a .cpp file).<br>
+								<br>
+								Brief descriptions look like this:<br>
+							<pre><tt><span class="codestyle">//! Set the local position of this object
+inline void setPos(const cVector3d&amp; a_pos) { m_localPos = a_pos; }
+</span></tt></pre>
+							<span class="mainbody">...and cannot exceed one line (otherwise doxygen treats them as long descriptions)</span>.<br>
+							Long descriptions look like this:<br>
+							<pre><tt><span class="codestyle">//===========================================================================
+/*!
+    Create a new vertex and add it to the vertex list.
+
+    \fn         unsigned int cMesh::newVertex(const double a_x, const double
+                a_y, const double a_z)
+    \param      a_x  X coordinate of vertex.
+    \param      a_y  Y coordinate of vertex.
+    \param      a_z  Z coordinate of vertex.
+    \return     Return index position of new vertex.
+*/
+//===========================================================================
+</span>unsigned int cMesh::newVertex(const double a_x, const double a_y, const double a_z)
+{
+...
+</tt></pre>
+							<span class="mainbody">Note the exclamation point, which tells doxygen that a description is coming. Also note the \fn tag to delimit the function name, the \param tag to delimit parameters, and the \return tag to delimit return values. </span>
+							<li><span class="mainbody">Similarly, each class should have an associated doxygen description wherever it's declared, a la:<br>
+									<br>
+								</span>
+							<pre><tt><span class="codestyle">//===========================================================================
+/*!
+      \class      cCamera
+      \brief      cCamera describes a virtual Camera located inside the world.
+                  Its job in life is to set up the OpenGL projection matrix
+                  for the current OpenGL rendering context...
+*/
+//===========================================================================
+
+</span></tt></pre>
+						</ul>
+						<p><span class="mainbody"><b>Header Files:</b></span></p>
+						<ul>
+							<li><span class="mainbody">Don't let inline or one-line functions take up tons of space... i.e., please do this:<br>
+									<br>
+								</span>
+							<pre><tt><span class="codestyle">//! Set the local position of this object
+inline void setPos(const cVector3d&amp; a_pos) { m_localPos = a_pos; </span>}
+</tt></pre>
+							<span class="mainbody">Not this...</span><br>
+							<pre><tt><span class="codestyle">//---------------------------------------
+//! Set the local position of this object
+//---------------------------------------
+inline void setPos(const cVector3d&amp; a_pos)
+{
+  m_localPos = a_pos;
+}
+</span></tt></pre>
+							<span class="mainbody">Particularly when a lot of these functions come one after another (often set/get functions), doing the latter can make header files really difficult to read.</span>
+							<li><span class="mainbody">Include a blank line between each function in a header file... this makes your headers much more readable. Alternatively, place a blank line after a few closely-related functions to delimit a new category of function. </span>
+						</ul>
+						<p></p>
+						<p><span class="TITLE2"><span class="mainbody"><b>Coding / Performance Tips:</b></span></span></p>
+						<ul>
+							<li><span class="TITLE2"><span class="mainbody">Remember to declare functions inline if they hardly do anything (e.g. setPos())<br>
+									</span></span>
+							<li><span class="mainbody">Remember to declare functions const if they don't modify any member variables<br>
+								</span>
+							<li><span class="mainbody">Remember to take parameters by reference if all you're going to do is copy them (i.e. if they're const), to avoid extra stack copies. This is particularly relevant for complex types being passed as parameters.<br>
+								</span>
+							<li><span class="mainbody">Remember to declare parameters const if you don't need to modify them<br>
+								</span>
+							<li><span class="mainbody">Always set pointers to NULL immediately after you delete them<br>
+								</span>
+							<li><span class="mainbody">Remember to (almost) always declare your destructors virtual<br>
+								</span>
+							<li><span class="mainbody">Any time you change an OpenGL state variable, be nice and put the state back to where it was when you're finished, unless you have a specific reason to do otherwise. Use glGet to get the state beforehand for any state variables you're going to futz with. Similarly, always leave the GL matrix mode set to modelview when you're finished with any matrix strack manipulations you might be doing.<br>
+								</span>
+							<li><span class="mainbody">Avoid using namespace std;, particularly in header files. This makes supporting multiple compilers more difficult, as difficult compilers place different things in different namespaces.<br>
+								</span>
+							<li><span class="mainbody">Avoid using friend and typeid wherever possible; they make extending CHAI more difficult in most cases. </span>
+						</ul>
+						<p></p>
+						<p><span class="TITLE2"><b>As Promised, The Big CHAI 3D Header Comment to be Included at The Top of Every File:<br>
+								</b></span></p>
+						<pre><tt><span class="codestyle">//===========================================================================
+/*
+    This file is part of the CHAI 3D visualization and haptics libraries.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License(&quot;GPL&quot;) version 2
+    as published by the Free Software Foundation.
+
+    For using the CHAI 3D libraries with software that can not be combined
+    with the GNU GPL, and for taking advantage of the additional benefits
+    of our support services, please contact CHAI 3D about acquiring a
+    Professional Edition License.
+
+    \author:    &lt;http://www.chai3d.org&gt;
+    \author:    John Lennon 
+    \version    2.0.0
+*/
+//===========================================================================</span>
+
+</tt></pre>
+						<p></p>
+					</td>
+					<td width="1" height="2438"><spacer type="block" width="1" height="2438"></td>
+				</tr>
+				<tr height="2">
+					<td width="3" height="2"></td>
+					<td width="740" height="2" colspan="8" valign="top" align="left" xpos="3"><img src="resources/images/line.png" alt="" height="1" width="740" border="0"></td>
+					<td width="1" height="2"><spacer type="block" width="1" height="2"></td>
+				</tr>
+				<tr height="32">
+					<td width="639" height="32" colspan="7"></td>
+					<td content csheight="32" width="103" height="32" valign="top" xpos="639">
+						<div align="right">
+							<span class="copyright">copyright 2009</span></div>
+					</td>
+					<td width="1" height="32"></td>
+					<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+				</tr>
+				<tr height="1" cntrlrow>
+					<td width="3" height="1"><spacer type="block" width="3" height="1"></td>
+					<td width="74" height="1"><spacer type="block" width="74" height="1"></td>
+					<td width="102" height="1"><spacer type="block" width="102" height="1"></td>
+					<td width="74" height="1"><spacer type="block" width="74" height="1"></td>
+					<td width="84" height="1"><spacer type="block" width="84" height="1"></td>
+					<td width="86" height="1"><spacer type="block" width="86" height="1"></td>
+					<td width="216" height="1"><spacer type="block" width="216" height="1"></td>
+					<td width="103" height="1"><spacer type="block" width="103" height="1"></td>
+					<td width="1" height="1"><spacer type="block" width="1" height="1"></td>
+					<td width="1" height="1"></td>
+				</tr>
+			</table>
+			<p></p>
+		</div>
+	</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

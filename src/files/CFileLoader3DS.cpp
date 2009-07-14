@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,31 +12,39 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    The bulk of this file comes from Lev Povalahev's l3ds.cpp,
-    copyright (c) 2001-2002 Lev Povalahev.  Used with permission.
-
-    \author:    <http://www.chai3d.org>
-    \author:    Lev Povalahev
-    \author:    Dan Morris
-    \version    1.0
-    \date       03/2004
+    \author    <http://www.chai3d.org>
+    \author    Lev Povalahev
+    \author    Dan Morris
+    \version   2.0.0 $Rev: 270 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CFileLoader3DS.h"
+#include "files/CFileLoader3DS.h"
+//---------------------------------------------------------------------------
+#include <algorithm>
+#include <cstring>
+#include <map>
+//---------------------------------------------------------------------------
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//---------------------------------------------------------------------------
 
-// We want to get around snprintf in posix environments
-#ifdef _POSIX
-#define _snprintf(x,y,...) sprintf(x,__VA_ARGS__) 
+// define snprintf alternative in non-posix environments
+#if defined(_WIN32)
+#define snprintf _snprintf
 #endif
 
-#include <map>
+/*
+#if defined(_LINUX) || defined(_MACOSX)
+#define _snprintf(x,y,...) sprintf(x,__VA_ARGS__) 
+#endif
+*/
 
+//---------------------------------------------------------------------------
 typedef std::map<unsigned int, unsigned int> uint_uint_map;
-
 bool g_3dsLoaderShouldGenerateExtraVertices = false;
-
+//---------------------------------------------------------------------------
+#endif   // DOXYGEN_SHOULD_SKIP_THIS
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -52,319 +60,328 @@ bool g_3dsLoaderShouldGenerateExtraVertices = false;
 //===========================================================================
 bool cLoadFile3DS(cMesh* a_mesh, const string& a_fileName)
 {
-  int k;
+    int k;
 
-  // Instantiate a loader
-  L3DS loader;
+    // Instantiate a loader
+    L3DS loader;
 
-  const char* fname = a_fileName.c_str();
-  if (loader.LoadFile(fname) == false) return false;
+    const char* fname = a_fileName.c_str();
+    if (loader.LoadFile(fname) == false) return false;
 
-  cWorld* world = a_mesh->getParentWorld();
+    cWorld* world = a_mesh->getParentWorld();
 
-  // clear all vertices and triangles of the current mesh
-  a_mesh->clear();
+    // clear all vertices and triangles of the current mesh
+    a_mesh->clear();
 
-  // Global rendering flags that we'll use to mark the root mesh usefully
-  bool transparency_enabled = false;
-  bool materials_enabled = false;
+    // Global rendering flags that we'll use to mark the root mesh usefully
+    bool transparency_enabled = false;
+    bool materials_enabled = false;
 
-  // get information about file
+    // get information about file
 
-  // The number of meshes loaded from this file
-  int num_file_meshes = loader.GetMeshCount();
+    // The number of meshes loaded from this file
+    int num_file_meshes = loader.GetMeshCount();
 
-  // Create a child mesh for each mesh we found in the file,
-  // and load its information
-  for(int current_file_mesh=0; current_file_mesh<num_file_meshes; current_file_mesh++) {
+    // Create a child mesh for each mesh we found in the file,
+    // and load its information
+    for(int current_file_mesh=0; current_file_mesh<num_file_meshes; current_file_mesh++) 
+    {
+        LMesh& cur_mesh = loader.GetMesh(current_file_mesh);
 
-    LMesh& cur_mesh = loader.GetMesh(current_file_mesh);
-
-    // This CHAI mesh corresponds to the 3ds submesh
-    cMesh* sub_mesh = a_mesh->createMesh();
-
-    // Assign a name to this mesh
-    strncpy(sub_mesh->m_objectName,(const char*)(cur_mesh.GetName().c_str()),CHAI_MAX_OBJECT_NAME_LENGTH);
-
-    // Create a vertex map for each submesh
-    sub_mesh->m_userData = new uint_uint_map;
-
-    a_mesh->addChild(sub_mesh);
-
-    // For each mesh in the file, we're going to create an additional mesh for
-    // each material, since in CHAI each mesh has a specific material
-    int num_materials = cur_mesh.GetMaterialCount();
-
-    // We'll put material-specific submeshes here if we find them...
-    cMesh** newMeshes = 0;
-   
-    // Process materials if there are any...
-    if (num_materials > 0) {
-
-      materials_enabled = true;
-
-      newMeshes = new cMesh*[num_materials];
-
-      // Create the new meshes and add them to the submesh we're working on now
-      for(int i=0; i<num_materials; i++) {
-
-        newMeshes[i] = a_mesh->createMesh();
-        cMesh* newMesh = newMeshes[i];
+        // This CHAI mesh corresponds to the 3ds submesh
+        cMesh* sub_mesh = a_mesh->createMesh();
 
         // Assign a name to this mesh
-        if (num_materials > 1)
-          _snprintf(newMesh->m_objectName,CHAI_MAX_OBJECT_NAME_LENGTH,"%s (mat %d)",
-            (const char*)(cur_mesh.GetName().c_str()),i);
-        else
-          _snprintf(newMesh->m_objectName,CHAI_MAX_OBJECT_NAME_LENGTH,"%s",
-          (const char*)(cur_mesh.GetName().c_str()));
+        strncpy(sub_mesh->m_objectName,(const char*)(cur_mesh.GetName().c_str()),CHAI_SIZE_NAME);
 
-        newMesh->m_userData = new uint_uint_map;
-        sub_mesh->addChild(newMesh);
+        // Create a vertex map for each submesh
+        sub_mesh->m_userData = new uint_uint_map;
 
-        // Set up material properties for each mesh
+        a_mesh->addChild(sub_mesh);
 
-        // Get the global material id for each material used in this mesh
-        int global_material_id = cur_mesh.GetMaterial(i);
+        // For each mesh in the file, we're going to create an additional mesh for
+        // each material, since in CHAI each mesh has a specific material
+        int num_materials = cur_mesh.GetMaterialCount();
 
-        LMaterial& cur_material = loader.GetMaterial(global_material_id);
+        // We'll put material-specific submeshes here if we find them...
+        cMesh** newMeshes = 0;
+       
+        // Process materials if there are any...
+        if (num_materials > 0) 
+        {
+            materials_enabled = true;
 
-        // Does this material have a texture?  Note that we only
-        // support one texture per material right now.
-        LMap& curmap = cur_material.GetTextureMap1();
+            newMeshes = new cMesh*[num_materials];
 
-        if (strlen(curmap.mapName) > 0) {
+            // Create the new meshes and add them to the submesh we're working on now
+            for(int i=0; i<num_materials; i++) 
+            {
+                newMeshes[i] = a_mesh->createMesh();
+                cMesh* newMesh = newMeshes[i];
 
-          cTexture2D *newTexture = world->newTexture();
-          int result = newTexture->loadFromFile(curmap.mapName);
+                // Assign a name to this mesh
+                if (num_materials > 1)
+                snprintf(newMesh->m_objectName,CHAI_SIZE_NAME,"%s (mat %d)",
+                    (const char*)(cur_mesh.GetName().c_str()),i);
+                else
+                snprintf(newMesh->m_objectName,CHAI_SIZE_NAME,"%s",
+                (const char*)(cur_mesh.GetName().c_str()));
 
-          // If this didn't work out, try again in the 3ds file's path
-          if (result == 0) {
+                newMesh->m_userData = new uint_uint_map;
+                sub_mesh->addChild(newMesh);
 
-            char model_dir[1024];
-            find_directory(model_dir,fname);
+                // Set up material properties for each mesh
 
-            char new_texture_path[1024];
-            sprintf(new_texture_path,"%s/%s",model_dir,curmap.mapName);
+                // Get the global material id for each material used in this mesh
+                int global_material_id = cur_mesh.GetMaterial(i);
 
-            result = newTexture->loadFromFile(new_texture_path);
+                LMaterial& cur_material = loader.GetMaterial(global_material_id);
 
-          }
+                // Does this material have a texture?  Note that we only
+                // support one texture per material right now.
+                LMap& curmap = cur_material.GetTextureMap1();
 
-          if (result) {
-            newMeshes[i]->setTexture(newTexture,1);
-          }
+                if (strlen(curmap.mapName) > 0) 
+                {
+                    cTexture2D *newTexture = world->newTexture();
+                    int result = newTexture->loadFromFile(curmap.mapName);
 
-          // We really failed to load a texture...
-          else {
-#ifdef _WIN32
-            // CHAI_DEBUG_PRINT("Could not load texture map %s\n",curmap.mapName);
-#endif
-          }
+                    // If this didn't work out, try again in the 3ds file's path
+                    if (result == 0) 
+                    {
 
+                        char model_dir[1024];
+                        find_directory(model_dir,fname);
+
+                        char new_texture_path[1024];
+                        sprintf(new_texture_path,"%s/%s",model_dir,curmap.mapName);
+
+                        result = newTexture->loadFromFile(new_texture_path);
+                    }
+
+                    if (result) 
+                    {
+                        newMeshes[i]->setTexture(newTexture,1);
+                        newMeshes[i]->setUseTexture(true);
+                    }
+
+                    // We really failed to load a texture...
+                    else 
+                    {
+                        #if defined(_WIN32)
+		                //	CHAI_DEBUG_PRINT("Could not load texture map %s\n",curmap.mapName);
+                        #endif
+                    }
+                }
+
+                // Get transparency
+                double transparency = cur_material.GetTransparency();
+                float alpha = 1.0f - (float)(transparency);
+                if (alpha < 1.0) 
+                {
+                    transparency_enabled = true;
+                    newMesh->setUseTransparency(true, false); 
+                }
+
+                float shininess = cur_material.GetShininess();
+                newMesh->m_material.setShininess(int(shininess * 255.0));
+
+                // get ambient component:
+                LColor3 ambient = cur_material.GetAmbientColor();
+                newMesh->m_material.m_ambient.setR((float)ambient.r);
+                newMesh->m_material.m_ambient.setG((float)ambient.g);
+                newMesh->m_material.m_ambient.setB((float)ambient.b);
+                newMesh->m_material.m_ambient.setA(alpha);
+
+                // get diffuse component:
+                LColor3 diffuse = cur_material.GetDiffuseColor();
+                newMesh->m_material.m_diffuse.setR((float)diffuse.r);
+                newMesh->m_material.m_diffuse.setG((float)diffuse.g);
+                newMesh->m_material.m_diffuse.setB((float)diffuse.b);
+                newMesh->m_material.m_diffuse.setA(alpha);
+
+                // get specular component:
+                LColor3 specular = cur_material.GetSpecularColor();
+                newMesh->m_material.m_specular.setR((float)specular.r);
+                newMesh->m_material.m_specular.setG((float)specular.g);
+                newMesh->m_material.m_specular.setB((float)specular.b);
+                newMesh->m_material.m_specular.setA(alpha);
+
+                // get shininess
+                newMesh->m_material.setShininess((GLuint)(128.0 * cur_material.GetShininess()));
+
+            } // For every material in this mesh
+
+        } // If this submesh has materials
+
+        // Local copy of the material list, for quick lookup
+        vector<uint> materials = cur_mesh.m_materials;
+
+        // Now loop over all the triangles in this mesh and put them in the right
+        // place in our CHAI meshes...
+        unsigned int num_triangles = cur_mesh.GetTriangleCount();
+
+        for(unsigned int cur_tri_index=0; cur_tri_index<num_triangles; cur_tri_index++) 
+        {
+            // Get all the information about this triangle
+            // LTriangle2& cur_tri = cur_mesh.GetTriangle2(cur_tri_index);
+
+            // Get the vertex indices for this triangle...
+            const LTriangle& cur_indexed_tri = cur_mesh.GetTriangle(cur_tri_index);
+
+            // Which CHAI mesh are we going to insert this triangle into?
+            cMesh* cur_chai_mesh;
+
+            // Default to the material-independent submesh
+            cur_chai_mesh = sub_mesh;
+
+            // Look for a material-specific submesh for this triangle if there is one...
+            if (num_materials > 0) 
+            {
+                int curMaterialId = cur_mesh.m_tris[cur_tri_index].materialId;
+
+                // This material id is in terms of the global material id, but we need the
+                // local material id to find the right CHAI mesh...
+                int global_mat_id = curMaterialId;
+
+                int local_mat_id = -1;
+
+                // So we look it up in the list
+                for(unsigned int k=0; k<materials.size(); k++) 
+                {
+                    if ((int)(materials[k]) == global_mat_id) 
+                    {
+                        local_mat_id = k;
+                        break;
+                    }
+                }
+
+                if (local_mat_id == -1) {
+
+                // Error finding the right mesh to put this triangle in
+                // continue;
+
+                // If there's no material, put it in the material-independent sub-mesh
+                cur_chai_mesh = sub_mesh;
+                }
+
+                else cur_chai_mesh = newMeshes[local_mat_id];
+            }
+
+            unsigned int indexTriangle = 0;  
+            if (g_3dsLoaderShouldGenerateExtraVertices == false) 
+            {
+                uint_uint_map* vertex_map = (uint_uint_map*)cur_chai_mesh->m_userData;
+                unsigned short indices[3];
+                unsigned short* pindex = (unsigned short*)(&cur_indexed_tri);
+                uint_uint_map::iterator viter; 
+
+                // For each vertex indexed by this triangle...
+                for(int k=0; k<3; k++) 
+                {
+                    indices[k] = pindex[k];
+                    viter = vertex_map->find(indices[k]);
+
+                    LVector4 v = cur_mesh.GetVertex(indices[k]);
+                    // If we've never seen this vertex before...
+                    if (viter == vertex_map->end()) 
+                    {
+                        // Create a new vertex and put him in this map
+                        int newVertexIndex = cur_chai_mesh->newVertex(v.x,v.y,v.z);
+                        (*vertex_map)[(indices[k])] = newVertexIndex;
+                        indices[k] = newVertexIndex;
+                    }
+                    else 
+                    {
+                        // Otherwise just grab his index...
+                        indices[k] = (*viter).second;
+                    }
+                }        
+
+                // Create the new triangle...
+                indexTriangle = cur_chai_mesh->newTriangle(indices[0],indices[1],indices[2]);
+            }      
+
+            if (g_3dsLoaderShouldGenerateExtraVertices == true) 
+            {  
+                LVector4 v0 = cur_mesh.GetVertex(cur_indexed_tri.a);
+                LVector4 v1 = cur_mesh.GetVertex(cur_indexed_tri.b);
+                LVector4 v2 = cur_mesh.GetVertex(cur_indexed_tri.c);
+
+                cVector3d vert0(v0.x,v0.y,v0.z);
+                cVector3d vert1(v1.x,v1.y,v1.z);
+                cVector3d vert2(v2.x,v2.y,v2.z);
+
+                indexTriangle = cur_chai_mesh->newTriangle(vert0,vert1,vert2);
+            }
+
+            cTriangle* curTriangle = cur_chai_mesh->getTriangle(indexTriangle);
+
+            double transparency = cur_chai_mesh->m_material.m_diffuse.getA();
+
+            // Give properties to each vertex of this triangle
+            unsigned short* pindex = (unsigned short*)(&cur_indexed_tri);
+
+            for(k=0; k<3; k++) 
+            {
+                unsigned short curindex = pindex[k];
+
+                LVector3 norm = cur_mesh.GetNormal(curindex);
+                LVector2 uv = cur_mesh.GetUV(curindex);
+                LColor3 color = cur_mesh.GetColor(curindex);
+
+                cVertex* vertex = curTriangle->getVertex(k);
+                vertex->setNormal(norm.x,norm.y,norm.z);
+                vertex->setTexCoord(uv.x, 1.0 - uv.y);
+                vertex->setColor(color.r,color.g,color.b,(float)transparency);
+            }
+
+        } // For every triangle in this 3ds mesh
+
+        // We're now done with all the vertex maps for this mesh...
+        for(int i=0; i<num_materials; i++) 
+        {
+            cMesh* curMesh = newMeshes[i];
+            uint_uint_map* pmap = (uint_uint_map*)curMesh->m_userData;
+            delete pmap;
         }
 
-        // Get transparency
-        double transparency = cur_material.GetTransparency();
-        float alpha = 1.0f - (float)(transparency);
-        if (alpha < 1.0) {
-          transparency_enabled = true;
-          newMesh->enableTransparency(true, false); 
-        }
+        if (newMeshes) delete [] newMeshes;
 
-        float shininess = cur_material.GetShininess();
-        newMesh->m_material.setShininess(int(shininess * 255.0));
+        uint_uint_map* pmap = (uint_uint_map*)sub_mesh->m_userData;
+        delete pmap;
+        
+    } // For every mesh in the 3ds file
 
-        // get ambient component:
-        LColor3 ambient = cur_material.GetAmbientColor();
-        newMesh->m_material.m_ambient.setR((float)ambient.r);
-        newMesh->m_material.m_ambient.setG((float)ambient.g);
-        newMesh->m_material.m_ambient.setB((float)ambient.b);
-        newMesh->m_material.m_ambient.setA(alpha);
+    // Copy relevant rendering state as generally useful flags in the main mesh.
+    //
+    // Don't over-write the "real" variables in other submeshes
 
-        // get diffuse component:
-        LColor3 diffuse = cur_material.GetDiffuseColor();
-        newMesh->m_material.m_diffuse.setR((float)diffuse.r);
-        newMesh->m_material.m_diffuse.setG((float)diffuse.g);
-        newMesh->m_material.m_diffuse.setB((float)diffuse.b);
-        newMesh->m_material.m_diffuse.setA(alpha);
-
-        // get specular component:
-        LColor3 specular = cur_material.GetSpecularColor();
-        newMesh->m_material.m_specular.setR((float)specular.r);
-        newMesh->m_material.m_specular.setG((float)specular.g);
-        newMesh->m_material.m_specular.setB((float)specular.b);
-        newMesh->m_material.m_specular.setA(alpha);
-
-        // get shininess
-        newMesh->m_material.setShininess((GLuint)(128.0 * cur_material.GetShininess()));
-
-      } // For every material in this mesh
-
-    } // If this submesh has materials
-
-    // Local copy of the material list, for quick lookup
-    vector<uint> materials = cur_mesh.m_materials;
-
-    // Now loop over all the triangles in this mesh and put them in the right
-    // place in our CHAI meshes...
-    unsigned int num_triangles = cur_mesh.GetTriangleCount();
-
-    for(unsigned int cur_tri_index=0; cur_tri_index<num_triangles; cur_tri_index++) {
-
-      // Get all the information about this triangle
-      // LTriangle2& cur_tri = cur_mesh.GetTriangle2(cur_tri_index);
-
-      // Get the vertex indices for this triangle...
-      const LTriangle& cur_indexed_tri = cur_mesh.GetTriangle(cur_tri_index);
-
-      // Which CHAI mesh are we going to insert this triangle into?
-      cMesh* cur_chai_mesh;
-
-      // Default to the material-independent submesh
-      cur_chai_mesh = sub_mesh;
-
-      // Look for a material-specific submesh for this triangle if there is one...
-      if (num_materials > 0) {
-
-        int curMaterialId = cur_mesh.m_tris[cur_tri_index].materialId;
-
-        // This material id is in terms of the global material id, but we need the
-        // local material id to find the right CHAI mesh...
-        int global_mat_id = curMaterialId;
-
-        int local_mat_id = -1;
-
-        // So we look it up in the list
-        for(unsigned int k=0; k<materials.size(); k++) {
-          if (materials[k] == global_mat_id) {
-            local_mat_id = k;
-            break;
-          }
-        }
-
-
-        if (local_mat_id == -1) {
-
-          // Error finding the right mesh to put this triangle in
-          // continue;
-
-          // If there's no material, put it in the material-independent sub-mesh
-          cur_chai_mesh = sub_mesh;
-        }
-
-        else cur_chai_mesh = newMeshes[local_mat_id];
-
-      }
-
-      unsigned int indexTriangle = 0;
-      bool foundTriangle = false;
-
-      if (g_3dsLoaderShouldGenerateExtraVertices == false) {
-
-        uint_uint_map* vertex_map = (uint_uint_map*)cur_chai_mesh->m_userData;
-        unsigned short indices[3];
-        unsigned short* pindex = (unsigned short*)(&cur_indexed_tri);
-        uint_uint_map::iterator viter; 
-
-        // For each vertex indexed by this triangle...
-        for(int k=0; k<3; k++) {
-
-          indices[k] = pindex[k];
-          viter = vertex_map->find(indices[k]);
-
-          LVector4 v = cur_mesh.GetVertex(indices[k]);
-          // If we've never seen this vertex before...
-          if (viter == vertex_map->end()) {
-            // Create a new vertex and put him in this map
-            int newVertexIndex = cur_chai_mesh->newVertex(v.x,v.y,v.z);
-            (*vertex_map)[(indices[k])] = newVertexIndex;
-            indices[k] = newVertexIndex;
-          }
-          else {
-            // Otherwise just grab his index...
-            indices[k] = (*viter).second;
-          }
-        }        
-
-        // Create the new triangle...
-        indexTriangle = cur_chai_mesh->newTriangle(indices[0],indices[1],indices[2]);
-      }      
-
-      if (g_3dsLoaderShouldGenerateExtraVertices == true) {
+    a_mesh->setUseTransparency(transparency_enabled,false);  
+    a_mesh->setUseMaterial(materials_enabled,false);
+    a_mesh->setUseVertexColors(!materials_enabled,false);
       
-        LVector4 v0 = cur_mesh.GetVertex(cur_indexed_tri.a);
-        LVector4 v1 = cur_mesh.GetVertex(cur_indexed_tri.b);
-        LVector4 v2 = cur_mesh.GetVertex(cur_indexed_tri.c);
+    // compute boundary boxes
+    a_mesh->computeBoundaryBox(true);
 
-        cVector3d vert0(v0.x,v0.y,v0.z);
-        cVector3d vert1(v1.x,v1.y,v1.z);
-        cVector3d vert2(v2.x,v2.y,v2.z);
+    // update global position in world
+    if (world != 0) world->computeGlobalPositions(true);
 
-        indexTriangle = cur_chai_mesh->newTriangle(vert0,vert1,vert2);
-      }
-
-      cTriangle* curTriangle = cur_chai_mesh->getTriangle(indexTriangle);
-
-      double transparency = cur_chai_mesh->m_material.m_diffuse.getA();
-
-      // Give properties to each vertex of this triangle
-      unsigned short* pindex = (unsigned short*)(&cur_indexed_tri);
-
-      for(k=0; k<3; k++) {
-
-        unsigned short curindex = pindex[k];
-
-        LVector3 norm = cur_mesh.GetNormal(curindex);
-        LVector2 uv = cur_mesh.GetUV(curindex);
-        LColor3 color = cur_mesh.GetColor(curindex);
-
-        cVertex* vertex = curTriangle->getVertex(k);
-        vertex->setNormal(norm.x,norm.y,norm.z);
-        vertex->setTexCoord(uv.x, 1.0 - uv.y);
-        vertex->setColor(color.r,color.g,color.b,(float)transparency);
-      }
-
-    } // For every triangle in this 3ds mesh
-
-    // We're now done with all the vertex maps for this mesh...
-    for(int i=0; i<num_materials; i++) {
-      cMesh* curMesh = newMeshes[i];
-      uint_uint_map* pmap = (uint_uint_map*)curMesh->m_userData;
-      delete pmap;
-    }
-
-    if (newMeshes) delete [] newMeshes;
-
-    uint_uint_map* pmap = (uint_uint_map*)sub_mesh->m_userData;
-    delete pmap;
-    
-  } // For every mesh in the 3ds file
-
-  // Copy relevant rendering state as generally useful flags in the main mesh.
-  //
-  // Don't over-write the "real" variables in other submeshes
-
-  a_mesh->enableTransparency(transparency_enabled,false);  
-  a_mesh->useMaterial(materials_enabled,false);
-  a_mesh->useColors(!materials_enabled,false);
-  
-  // compute boundary boxes
-  a_mesh->computeBoundaryBox(true);
-
-  // update global position in world
-  if (world != 0) world->computeGlobalPositions(true);
-
-  return true;
-
+    // return result
+    return (true);
 }
 
-/******
 
+//---------------------------------------------------------------------------
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//---------------------------------------------------------------------------
+
+//===========================================================================
+/*
   The remainder of this file comes from Lev Povalahev's l3ds.cpp
   copyright (c) 2001-2002 Lev Povalahev
-
-******/
+*/
+//===========================================================================
 
 typedef unsigned long ulong;
 
@@ -477,6 +494,8 @@ LVector4 zero4 = {0, 0, 0, 0};
 
 LMap emptyMap = {0, "", 1, 1, 0, 0, 0};
 
+//---------------------------------------------------------------------------
+
 LVector3 _4to3(const LVector4 &vec)
 {
     LVector3 t;
@@ -485,6 +504,8 @@ LVector3 _4to3(const LVector4 &vec)
     t.z = vec.z;
     return t;
 }
+
+//---------------------------------------------------------------------------
 
 LVector3 AddVectors(const LVector3 &a, const LVector3 &b)
 {
@@ -495,6 +516,8 @@ LVector3 AddVectors(const LVector3 &a, const LVector3 &b)
     return t;
 }
 
+//---------------------------------------------------------------------------
+
 LVector3 SubtractVectors(const LVector3 &a, const LVector3 &b)
 {
     LVector3 t;
@@ -503,6 +526,8 @@ LVector3 SubtractVectors(const LVector3 &a, const LVector3 &b)
     t.z = a.z-b.z;
     return t;
 }
+
+//---------------------------------------------------------------------------
 
 float VectorLength(const LVector3 &vec)
 {
@@ -522,6 +547,8 @@ LVector3 NormalizeVector(const LVector3 &vec)
     return v;
 }
 
+//---------------------------------------------------------------------------
+
 LVector3 CrossProduct(const LVector3 &a, const LVector3 &b)
 {
     LVector3 v;
@@ -530,6 +557,8 @@ LVector3 CrossProduct(const LVector3 &a, const LVector3 &b)
     v.z = a.x*b.y - a.y*b.x;
     return v;
 }
+
+//---------------------------------------------------------------------------
 
 void LoadIdentityMatrix(LMatrix4 &m)
 {
@@ -554,6 +583,8 @@ void LoadIdentityMatrix(LMatrix4 &m)
     m._44 = 0.0f;
 }
 
+//---------------------------------------------------------------------------
+
 LVector4 VectorByMatrix(const LMatrix4 &m, const LVector4 &vec)
 {
     LVector4 res;
@@ -575,13 +606,16 @@ LVector4 VectorByMatrix(const LMatrix4 &m, const LVector4 &vec)
     return res;
 }
 
+//---------------------------------------------------------------------------
+
 void QuatToMatrix(const LVector4 &quat, LMatrix4 &m)
 {
 
 }
 
+
 //---------------------------------------------------------------------------
-// LObject implementation
+// Lobject CLASS IMPLEMENTATION
 //---------------------------------------------------------------------------
 
 LObject::LObject()
@@ -589,20 +623,28 @@ LObject::LObject()
     m_name = "";//.clear();
 }
 
+//---------------------------------------------------------------------------
+
 LObject::~LObject()
 {
     // nothing here
 }
+
+//---------------------------------------------------------------------------
 
 void LObject::SetName(const string& value)
 {
     m_name = value;
 }
 
+//---------------------------------------------------------------------------
+
 const string& LObject::GetName()
 {
     return m_name;
 }
+
+//---------------------------------------------------------------------------
 
 bool LObject::IsObject(const string &name)
 {
@@ -611,7 +653,7 @@ bool LObject::IsObject(const string &name)
 
 
 //---------------------------------------------------------------------------
-// LMaterial implementation
+// LMaterial CLASS IMPLEMENTATION
 //---------------------------------------------------------------------------
 
 LMaterial::LMaterial()
@@ -632,95 +674,133 @@ LMaterial::LMaterial()
     m_transparency = 0;
 }
 
+//---------------------------------------------------------------------------
+
 LMaterial::~LMaterial()
 {
 
 }
+
+//---------------------------------------------------------------------------
 
 uint LMaterial::GetID()
 {
     return m_id;
 }
 
+//---------------------------------------------------------------------------
+
 LMap& LMaterial::GetTextureMap1()
 {
     return m_texMap1;
 }
+
+//---------------------------------------------------------------------------
 
 LMap& LMaterial::GetTextureMap2()
 {
     return m_texMap2;
 }
 
+//---------------------------------------------------------------------------
+
 LMap& LMaterial::GetOpacityMap()
 {
     return m_opacMap;
 }
+
+//---------------------------------------------------------------------------
 
 LMap& LMaterial::GetSpecularMap()
 {
     return m_specMap;
 }
 
+//---------------------------------------------------------------------------
+
 LMap& LMaterial::GetBumpMap()
 {
     return m_bumpMap;
 }
+
+//---------------------------------------------------------------------------
 
 LMap& LMaterial::GetReflectionMap()
 {
     return m_reflMap;
 }
 
+//---------------------------------------------------------------------------
+
 LColor3 LMaterial::GetAmbientColor()
 {
     return m_ambient;
 }
+
+//---------------------------------------------------------------------------
 
 LColor3 LMaterial::GetDiffuseColor()
 {
     return m_diffuse;
 }
 
+//---------------------------------------------------------------------------
+
 LColor3 LMaterial::GetSpecularColor()
 {
     return m_specular;
 }
+
+//---------------------------------------------------------------------------
 
 float LMaterial::GetShininess()
 {
     return m_shininess;
 }
 
+//---------------------------------------------------------------------------
+
 float LMaterial::GetTransparency()
 {
     return m_transparency;
 }
+
+//---------------------------------------------------------------------------
 
 LShading LMaterial::GetShadingType()
 {
     return m_shading;
 }
 
+//---------------------------------------------------------------------------
+
 void LMaterial::SetID(uint value)
 {
     m_id = value;
 }
+
+//---------------------------------------------------------------------------
 
 void LMaterial::SetAmbientColor(const LColor3 &color)
 {
     m_ambient = color;
 }
 
+//---------------------------------------------------------------------------
+
 void LMaterial::SetDiffuseColor(const LColor3 &color)
 {
     m_diffuse = color;
 }
 
+//---------------------------------------------------------------------------
+
 void LMaterial::SetSpecularColor(const LColor3 &color)
 {
     m_specular = color;
 }
+
+//---------------------------------------------------------------------------
 
 void LMaterial::SetShininess(float value)
 {
@@ -731,6 +811,8 @@ void LMaterial::SetShininess(float value)
         m_shininess = 1;
 }
 
+//---------------------------------------------------------------------------
+
 void LMaterial::SetTransparency(float value)
 {
     m_transparency = value;
@@ -740,13 +822,16 @@ void LMaterial::SetTransparency(float value)
         m_transparency = 1;
 }
 
+//---------------------------------------------------------------------------
+
 void LMaterial::SetShadingType(LShading shading)
 {
     m_shading = shading;
 }
 
+
 //---------------------------------------------------------------------------
-// LMesh implementation
+// LMesh CLASS IMPLEMENTATION
 //---------------------------------------------------------------------------
 
 LMesh::LMesh()
@@ -755,10 +840,14 @@ LMesh::LMesh()
     Clear();
 }
 
+//---------------------------------------------------------------------------
+
 LMesh::~LMesh()
 {
     Clear();
 }
+
+//---------------------------------------------------------------------------
 
 void LMesh::Clear()
 {
@@ -774,10 +863,14 @@ void LMesh::Clear()
     LoadIdentityMatrix(m_matrix);
 }
 
+//---------------------------------------------------------------------------
+
 uint LMesh::GetVertexCount()
 {
     return m_vertices.size();
 }
+
+//---------------------------------------------------------------------------
 
 void LMesh::SetVertexArraySize(uint value)
 {
@@ -789,10 +882,14 @@ void LMesh::SetVertexArraySize(uint value)
     m_binormals.resize(value);
 }
 
+//---------------------------------------------------------------------------
+
 uint LMesh::GetTriangleCount()
 {
     return m_triangles.size();
 }
+
+//---------------------------------------------------------------------------
 
 void LMesh::SetTriangleArraySize(uint value)
 {
@@ -802,35 +899,49 @@ void LMesh::SetTriangleArraySize(uint value)
     m_triangles.resize(value);    
 }
 
+//---------------------------------------------------------------------------
+
 const LVector4& LMesh::GetVertex(uint index)
 {
     return m_vertices[index];    
 }
+
+//---------------------------------------------------------------------------
 
 const LVector3& LMesh::GetNormal(uint index)
 {
     return m_normals[index];
 }
 
-LColor3& LMesh::GetColor(uint index) {
+//---------------------------------------------------------------------------
+
+LColor3& LMesh::GetColor(uint index) 
+{
     return m_colors[index];
 }
 
+//---------------------------------------------------------------------------
 
 const LVector2& LMesh::GetUV(uint index)
 {
     return m_uv[index];
 }
 
+//---------------------------------------------------------------------------
+
 const LVector3& LMesh::GetTangent(uint index)
 {
     return m_tangents[index];
 }
 
+//---------------------------------------------------------------------------
+
 const LVector3& LMesh::GetBinormal(uint index)
 {
     return m_binormals[index];
 }
+
+//---------------------------------------------------------------------------
 
 void LMesh::SetVertex(const LVector4 &vec, uint index)
 {
@@ -839,12 +950,16 @@ void LMesh::SetVertex(const LVector4 &vec, uint index)
     m_vertices[index] = vec;
 }
 
+//---------------------------------------------------------------------------
+
 void LMesh::SetNormal(const LVector3 &vec, uint index)
 {
     if (index >= m_vertices.size())
         return;
     m_normals[index] = vec;
 }
+
+//---------------------------------------------------------------------------
 
 void LMesh::SetUV(const LVector2 &vec, uint index)
 {
@@ -853,6 +968,7 @@ void LMesh::SetUV(const LVector2 &vec, uint index)
     m_uv[index] = vec;
 }
 
+//---------------------------------------------------------------------------
 
 void LMesh::SetColor(const LColor3 &vec, uint index)
 {
@@ -861,6 +977,7 @@ void LMesh::SetColor(const LColor3 &vec, uint index)
     m_colors[index] = vec;
 }
 
+//---------------------------------------------------------------------------
 
 void LMesh::SetTangent(const LVector3 &vec, uint index)
 {
@@ -869,6 +986,8 @@ void LMesh::SetTangent(const LVector3 &vec, uint index)
     m_tangents[index] = vec;    
 }
 
+//---------------------------------------------------------------------------
+
 void LMesh::SetBinormal(const LVector3 &vec, uint index)
 {
     if (index >= m_vertices.size())
@@ -876,10 +995,14 @@ void LMesh::SetBinormal(const LVector3 &vec, uint index)
     m_binormals[index] = vec;
 }
 
+//---------------------------------------------------------------------------
+
 const LTriangle& LMesh::GetTriangle(uint index)
 {
     return m_triangles[index];
 }
+
+//---------------------------------------------------------------------------
 
 LTriangle2 LMesh::GetTriangle2(uint index)
 {
@@ -915,15 +1038,21 @@ LTriangle2 LMesh::GetTriangle2(uint index)
     return f;
 }
 
+//---------------------------------------------------------------------------
+
 LMatrix4 LMesh::GetMatrix()
 {
     return m_matrix;
 }
 
+//---------------------------------------------------------------------------
+
 void LMesh::SetMatrix(LMatrix4 m)
 {
     m_matrix = m;
 }
+
+//---------------------------------------------------------------------------
 
 void LMesh::TransformVertices()
 {
@@ -932,9 +1061,11 @@ void LMesh::TransformVertices()
         m_vertices[i] = VectorByMatrix(m_matrix, m_vertices[i]);
 }
 
+//---------------------------------------------------------------------------
+
 void LMesh::CalcNormals(bool useSmoothingGroups)
 {
-    uint i;
+    unsigned int i;
     // first calculate the face normals
     for (i=0; i<m_triangles.size(); i++)
     {
@@ -1035,11 +1166,11 @@ void LMesh::CalcNormals(bool useSmoothingGroups)
                     uint t = m_vertices.size()-1;
                     for (uint h=0; h<smList[j].size(); h++)
                     {
-                        if (m_tris[smList[j][h]].a == i)
+                        if (m_tris[smList[j][h]].a == (int)i)
                             m_tris[smList[j][h]].a = t;
-                        if (m_tris[smList[j][h]].b == i)
+                        if (m_tris[smList[j][h]].b == (int)i)
                             m_tris[smList[j][h]].b = t;
-                        if (m_tris[smList[j][h]].c == i)
+                        if (m_tris[smList[j][h]].c == (int)i)
                             m_tris[smList[j][h]].c = t;
                     }
                 }
@@ -1087,6 +1218,8 @@ void LMesh::CalcNormals(bool useSmoothingGroups)
         m_triangles[i].c = m_tris[i].c;
     }
 }
+
+//---------------------------------------------------------------------------
 
 void LMesh::CalcTextureSpace()
 {
@@ -1181,6 +1314,8 @@ void LMesh::CalcTextureSpace()
     }
 }
 
+//---------------------------------------------------------------------------
+
 void LMesh::Optimize(LOptimizationLevel value)
 {
     switch (value)
@@ -1200,6 +1335,8 @@ void LMesh::Optimize(LOptimizationLevel value)
     }
 }
 
+//---------------------------------------------------------------------------
+
 void LMesh::SetTri(const LTri &tri, uint index)
 {
     if (index >= m_triangles.size())
@@ -1207,29 +1344,36 @@ void LMesh::SetTri(const LTri &tri, uint index)
     m_tris[index] = tri;
 }
 
+//---------------------------------------------------------------------------
+
 LTri& LMesh::GetTri(uint index)
 {
     return m_tris[index];
 }
+
+//---------------------------------------------------------------------------
 
 uint LMesh::GetMaterial(uint index)
 {
     return m_materials[index];
 }
 
+//---------------------------------------------------------------------------
 uint LMesh::AddMaterial(uint id)
 {
     m_materials.push_back(id);
     return m_materials.size()-1;
 }
 
+//---------------------------------------------------------------------------
 uint LMesh::GetMaterialCount()
 {
     return m_materials.size();
 }
 
+
 //---------------------------------------------------------------------------
-// LCamera implementation
+// LCamera CLASS IMPLENTATION
 //---------------------------------------------------------------------------
 
 LCamera::LCamera()
@@ -1238,10 +1382,14 @@ LCamera::LCamera()
     Clear();
 }
 
+//---------------------------------------------------------------------------
+
 LCamera::~LCamera()
 {
 
 }
+
+//---------------------------------------------------------------------------
 
 void LCamera::Clear()
 {
@@ -1253,10 +1401,14 @@ void LCamera::Clear()
 	m_far = 10000;
 }
 
+//---------------------------------------------------------------------------
+
 void LCamera::SetPosition(LVector3 vec)
 {
     m_pos = vec;
 }
+
+//---------------------------------------------------------------------------
 
 LVector3 LCamera::GetPosition()
 {
@@ -1268,53 +1420,72 @@ void LCamera::SetTarget(LVector3 target)
     m_target = target;
 }
 
+//---------------------------------------------------------------------------
+
 LVector3 LCamera::GetTarget()
 {
     return m_target;
 }
+
+//---------------------------------------------------------------------------
 
 void LCamera::SetFOV(float value)
 {
     m_fov = value;
 }
 
+//---------------------------------------------------------------------------
+
 float LCamera::GetFOV()
 {
     return m_fov;
 }
+
+//---------------------------------------------------------------------------
 
 void LCamera::SetBank(float value)
 {
     m_bank = value;
 }
 
+//---------------------------------------------------------------------------
+
 float LCamera::GetBank()
 {
     return m_bank;
 }
+
+//---------------------------------------------------------------------------
 
 void LCamera::SetNearplane(float value)
 {
     m_near = value;
 }
 
+//---------------------------------------------------------------------------
+
 float LCamera::GetNearplane()
 {
     return m_near;
 }
+
+//---------------------------------------------------------------------------
 
 void LCamera::SetFarplane(float value)
 {
     m_far = value;
 }
 
+//---------------------------------------------------------------------------
+
 float LCamera::GetFarplane()
 {
     return m_far;
 }
 
+
 //---------------------------------------------------------------------------
-// LLight implementation
+// LLight CLASS IMPLEMENTATION
 //---------------------------------------------------------------------------
 
 LLight::LLight()
@@ -1323,10 +1494,14 @@ LLight::LLight()
     Clear();
 }
 
+//---------------------------------------------------------------------------
+
 LLight::~LLight()
 {
 
 }
+
+//---------------------------------------------------------------------------
 
 void LLight::Clear()
 {
@@ -1337,88 +1512,121 @@ void LLight::Clear()
 	m_attenuationstart = 1000;
 }
 
+//---------------------------------------------------------------------------
+
 void LLight::SetPosition(LVector3 vec)
 {
     m_pos = vec;
 }
+
+//---------------------------------------------------------------------------
 
 LVector3 LLight::GetPosition()
 {
     return m_pos;
 }
 
+//---------------------------------------------------------------------------
+
 void LLight::SetColor(LColor3 color)
 {
     m_color = color;
 }
+
+//---------------------------------------------------------------------------
 
 LColor3 LLight::GetColor()
 {
     return m_color;
 }
 
+//---------------------------------------------------------------------------
+
 void LLight::SetSpotlight(bool value)
 {
     m_spotlight = value;
 }
+
+//---------------------------------------------------------------------------
 
 bool LLight::GetSpotlight()
 {
     return m_spotlight;
 }
 
+//---------------------------------------------------------------------------
+
 void LLight::SetTarget(LVector3 target)
 {
     m_target = target;
 }
+
+//---------------------------------------------------------------------------
 
 LVector3 LLight::GetTarget()
 {
     return m_target;
 }
 
+//---------------------------------------------------------------------------
+
 void LLight::SetHotspot(float value)
 {
     m_hotspot = value;
 }
+
+//---------------------------------------------------------------------------
 
 float LLight::GetHotspot()
 {
     return m_hotspot;
 }
 
+//---------------------------------------------------------------------------
+
 void LLight::SetFalloff(float value)
 {
     m_falloff = value;
 }
-    
+
+//---------------------------------------------------------------------------
+
 float LLight::GetFalloff()
 {
     return m_falloff;
 }
+
+//---------------------------------------------------------------------------
 
 void LLight::SetAttenuationstart(float value)
 {
     m_attenuationend = value;
 }
 
+//---------------------------------------------------------------------------
+
 float LLight::GetAttenuationstart()
 {
     return m_attenuationend;
 }
+
+//---------------------------------------------------------------------------
 
 void LLight::SetAttenuationend(float value)
 {
 	m_attenuationstart = value;
 }
 
+//---------------------------------------------------------------------------
+
 float LLight::GetAttenuationend()
 {
 	return m_attenuationstart;
 }
 
+
 //---------------------------------------------------------------------------
-// LImporter implementation
+// LImporter CLASS IMPLEMENTATION
 //---------------------------------------------------------------------------
 
 LImporter::LImporter()
@@ -1426,50 +1634,69 @@ LImporter::LImporter()
     Clear();
 }       
 
+//---------------------------------------------------------------------------
+
 LImporter::~LImporter()
 {
     Clear();
 }
 
+//---------------------------------------------------------------------------
+
 uint LImporter::GetMeshCount()
 {
     return m_meshes.size();
 }
+//---------------------------------------------------------------------------
 
 uint LImporter::GetLightCount()
 {
     return m_lights.size();
 }
 
+//---------------------------------------------------------------------------
+
 uint LImporter::GetMaterialCount()
 {
     return m_materials.size();
 }
+
+//---------------------------------------------------------------------------
 
 uint LImporter::GetCameraCount()
 {
     return m_cameras.size();
 }
 
+//---------------------------------------------------------------------------
+
 LMesh& LImporter::GetMesh(uint index)
 {
     return m_meshes[index];
 }
+
+//---------------------------------------------------------------------------
 
 LLight& LImporter::GetLight(uint index)
 {
     return m_lights[index];
 }
 
+//---------------------------------------------------------------------------
+
 LMaterial& LImporter::GetMaterial(uint index)
 {
     return m_materials[index];
 }
 
+//---------------------------------------------------------------------------
+
 LCamera& LImporter::GetCamera(uint index)
 {
     return m_cameras[index];
 }
+
+//---------------------------------------------------------------------------
 
 LMaterial* LImporter::FindMaterial(const string& name)
 {
@@ -1479,6 +1706,8 @@ LMaterial* LImporter::FindMaterial(const string& name)
     return 0;
 }
 
+//---------------------------------------------------------------------------
+
 LMesh* LImporter::FindMesh(const string& name)
 {
     for (uint i=0; i<m_meshes.size(); i++)
@@ -1486,6 +1715,8 @@ LMesh* LImporter::FindMesh(const string& name)
             return &m_meshes[i];
     return 0;
 }
+
+//---------------------------------------------------------------------------
 
 LLight* LImporter::FindLight(const string& name)
 {
@@ -1495,6 +1726,8 @@ LLight* LImporter::FindLight(const string& name)
     return 0;
 }
 
+//---------------------------------------------------------------------------
+
 void LImporter::Clear()
 {
     m_meshes.clear();
@@ -1503,18 +1736,23 @@ void LImporter::Clear()
     m_optLevel = oSimple;
 }
 
+//---------------------------------------------------------------------------
+
 void LImporter::SetOptimizationLevel(LOptimizationLevel value)
 {
     m_optLevel = value;        
 }
+
+//---------------------------------------------------------------------------
 
 LOptimizationLevel LImporter::GetOptimizationLevel()
 {
     return m_optLevel;
 }
 
+
 //---------------------------------------------------------------------------
-// L3DS implementation
+// L3DS CLASS IMPLEMENTATION
 //---------------------------------------------------------------------------
 
 L3DS::L3DS()
@@ -1526,6 +1764,8 @@ L3DS::L3DS()
     m_eof = false;
 } 
 
+//---------------------------------------------------------------------------
+
 L3DS::L3DS(const char *filename)
 : LImporter()
 {
@@ -1536,13 +1776,18 @@ L3DS::L3DS(const char *filename)
     LoadFile(filename);
 }
 
+//---------------------------------------------------------------------------
+
 L3DS::~L3DS()
 {
     if (m_bufferSize > 0)
         free(m_buffer);
 }
 
-bool L3DS::LoadFile(const char *filename) {
+//---------------------------------------------------------------------------
+
+bool L3DS::LoadFile(const char *filename) 
+{
     FILE *f;
     f = fopen(filename, "rb");
     if (f == 0)
@@ -1574,7 +1819,6 @@ bool L3DS::LoadFile(const char *filename) {
     m_buffer = 0;
     m_bufferSize = 0;
 
-
     /***
 
      Added by Dan Morris.
@@ -1583,36 +1827,35 @@ bool L3DS::LoadFile(const char *filename) {
      diffuse colors, to approximate the correct colors.
 
      ***/
-    if (this->GetMaterialCount() > 0) {
+    if (this->GetMaterialCount() > 0) 
+    {
+        uint last_mat = 0;
 
-      uint last_mat = 0;
-
-      // Now build colors for each triangle...
-      for (uint i= 0; i<this->GetMeshCount(); i++) {
+        // Now build colors for each triangle...
+        for (uint i= 0; i<this->GetMeshCount(); i++) {
 
         LMesh &mesh = this->GetMesh(i);
-   
-        LColor3* color_array = &(mesh.GetColor(0));
 
         // For each triangle
-        for (uint j=0; j<mesh.m_tris.size(); j++) {
+        for (uint j=0; j<mesh.m_tris.size(); j++) 
+        {
+            uint mat_id = mesh.m_tris[j].materialId;
 
-          uint mat_id = mesh.m_tris[j].materialId;
+            if (mat_id >= this->GetMaterialCount()) 
+            {
+                mat_id = last_mat;
+            }
 
-          if (mat_id >= this->GetMaterialCount()) {
-            mat_id = last_mat;
-          }
+            last_mat = mat_id;
 
-          last_mat = mat_id;
+            LMaterial& mat = this->GetMaterial(mat_id);
 
-          LMaterial& mat = this->GetMaterial(mat_id);
+            LColor3 c = mat.GetDiffuseColor();
 
-          LColor3 c = mat.GetDiffuseColor();
-
-          // Set each vertex's color          
-          mesh.SetColor(c, mesh.m_tris[j].a);
-          mesh.SetColor(c, mesh.m_tris[j].b);
-          mesh.SetColor(c, mesh.m_tris[j].c);
+            // Set each vertex's color          
+            mesh.SetColor(c, mesh.m_tris[j].a);
+            mesh.SetColor(c, mesh.m_tris[j].b);
+            mesh.SetColor(c, mesh.m_tris[j].c);
         }
      }
 
@@ -1621,18 +1864,22 @@ bool L3DS::LoadFile(const char *filename) {
    return res;
 }
 
+//---------------------------------------------------------------------------
+
 short L3DS::ReadShort()
 {
     if ((m_buffer!=0) && (m_bufferSize != 0) && ((m_pos+2)<m_bufferSize))
     {
         short *w = (short*)(m_buffer+m_pos);
-        short s = *w;//(short)*(m_buffer+m_pos);
+        short s = *w; //(short)*(m_buffer+m_pos);
         m_pos += 2;
         return s;
     }
     m_eof = true;
     return 0;
 }
+
+//---------------------------------------------------------------------------
 
 int L3DS::ReadInt()
 {
@@ -1647,6 +1894,8 @@ int L3DS::ReadInt()
     return 0;
 }
 
+//---------------------------------------------------------------------------
+
 char L3DS::ReadChar()
 {
     if ((m_buffer!=0) && (m_bufferSize != 0) && ((m_pos+1)<m_bufferSize))
@@ -1658,6 +1907,8 @@ char L3DS::ReadChar()
     m_eof = true;
     return 0;
 }
+
+//---------------------------------------------------------------------------
 
 float L3DS::ReadFloat()
 {
@@ -1672,6 +1923,8 @@ float L3DS::ReadFloat()
     return 0.0;
 }
 
+//---------------------------------------------------------------------------
+
 byte L3DS::ReadByte()
 {
     if ((m_buffer!=0) && (m_bufferSize != 0) && ((m_pos+1)<m_bufferSize))
@@ -1683,6 +1936,8 @@ byte L3DS::ReadByte()
     m_eof = true;
     return 0;
 }
+
+//---------------------------------------------------------------------------
 
 int L3DS::ReadASCIIZ(char *buf, int max_count)
 {
@@ -1705,23 +1960,34 @@ int L3DS::ReadASCIIZ(char *buf, int max_count)
     return count;
 }
 
+//---------------------------------------------------------------------------
+
 void L3DS::Seek(int offset, int origin)
 {
     if (origin == SEEK_START)
-        m_pos = offset;
+	{
+        m_pos = (std::max)(0,offset);
+	}
     if (origin == SEEK_CURSOR)
-        m_pos += offset;
-    if (m_pos < 0)
-        m_pos = 0;
+    {
+      if (offset < 0 && (uint)(abs(offset)) > m_pos) m_pos = 0;
+      else                                           m_pos += offset;
+    }
     if (m_pos >= m_bufferSize)
+	{
         m_pos = m_bufferSize-1;
+	}
     m_eof = false;
 }
+
+//---------------------------------------------------------------------------
 
 uint L3DS::Pos()
 {
     return m_pos;
 }
+
+//---------------------------------------------------------------------------
 
 LChunk L3DS::ReadChunk()
 {
@@ -1732,6 +1998,8 @@ LChunk L3DS::ReadChunk()
     chunk.end = chunk.start+a-6;
     return chunk;
 }
+
+//---------------------------------------------------------------------------
 
 bool L3DS::FindChunk(LChunk &target, const LChunk &parent)
 {
@@ -1755,15 +2023,21 @@ bool L3DS::FindChunk(LChunk &target, const LChunk &parent)
     return false;
 }
 
+//---------------------------------------------------------------------------
+
 void L3DS::SkipChunk(const LChunk &chunk)
 {
     Seek(chunk.end, SEEK_START);
 }
 
+//---------------------------------------------------------------------------
+
 void L3DS::GotoChunk(const LChunk &chunk)
 {
     Seek(chunk.start, SEEK_START);
 }
+
+//---------------------------------------------------------------------------
 
 LColor3 L3DS::ReadColor(const LChunk &chunk)
 {
@@ -1797,6 +2071,8 @@ LColor3 L3DS::ReadColor(const LChunk &chunk)
     return col;
 }
 
+//---------------------------------------------------------------------------
+
 float L3DS::ReadPercentage(const LChunk &chunk)
 {
     GotoChunk(chunk);
@@ -1810,6 +2086,8 @@ float L3DS::ReadPercentage(const LChunk &chunk)
     ErrorMsg("L3DS::ReadPercentage - error, the chunk is not a percentage chunk");
     return 0;
 }
+
+//---------------------------------------------------------------------------
 
 bool L3DS::Read3DS()
 {
@@ -1835,8 +2113,6 @@ bool L3DS::Read3DS()
         SkipChunk(obj);
     }
     GotoChunk(edit);
-
-    int chunkcount = 0;
 
     obj.id = EDIT_OBJECT;
     {
@@ -1885,6 +2161,8 @@ bool L3DS::Read3DS()
     strcpy(m_objName, "");
     return true;
 }
+
+//---------------------------------------------------------------------------
 
 void L3DS::ReadLight(const LChunk &parent)
 {
@@ -1935,6 +2213,8 @@ void L3DS::ReadLight(const LChunk &parent)
     m_lights.push_back(light);
 }
 
+//---------------------------------------------------------------------------
+
 void L3DS::ReadCamera(const LChunk &parent)
 {
     LVector3 v,t;
@@ -1970,6 +2250,8 @@ void L3DS::ReadCamera(const LChunk &parent)
     }
     m_cameras.push_back(camera);
 }
+
+//---------------------------------------------------------------------------
 
 void L3DS::ReadMesh(const LChunk &parent)
 {
@@ -2040,7 +2322,7 @@ void L3DS::ReadMesh(const LChunk &parent)
             m._44 = 1.0f;
 
             mesh.SetMatrix(m);
-            
+
             break;
         default:
             break;
@@ -2052,6 +2334,8 @@ void L3DS::ReadMesh(const LChunk &parent)
     }
     m_meshes.push_back(mesh);
 }
+
+//---------------------------------------------------------------------------
 
 void L3DS::ReadFaceList(const LChunk &chunk, LMesh &mesh)
 {
@@ -2075,7 +2359,7 @@ void L3DS::ReadFaceList(const LChunk &chunk, LMesh &mesh)
     count = ReadShort();
     mesh.SetTriangleArraySize(count);    
     
-    for (i=0; i<count; i++)
+    for (i=0; i<(unsigned int)count; i++)
     {
         tri.a = ReadShort();
         tri.b = ReadShort();
@@ -2086,7 +2370,7 @@ void L3DS::ReadFaceList(const LChunk &chunk, LMesh &mesh)
 
     // now read the optional chunks
     ch = ReadChunk();
-    int mat_id;
+    int mat_id = 0;
     while (ch.end <= chunk.end)
     {
       LMaterial* mat;
@@ -2104,7 +2388,7 @@ void L3DS::ReadFaceList(const LChunk &chunk, LMesh &mesh)
             
             count = ReadShort();
             
-            for (i=0; i<count; i++)  {
+            for (i=0; i<(unsigned int)count; i++)  {
             
               t = ReadShort();
               if (mat) mesh.GetTri(t).materialId = mat_id;
@@ -2121,7 +2405,10 @@ void L3DS::ReadFaceList(const LChunk &chunk, LMesh &mesh)
     }
 }
 
-void L3DS::ReadMaterial(const LChunk &parent) {
+//---------------------------------------------------------------------------
+
+void L3DS::ReadMaterial(const LChunk &parent) 
+{
     // variables
     LChunk chunk;
     LChunk child;
@@ -2222,7 +2509,9 @@ void L3DS::ReadMaterial(const LChunk &parent) {
     m_materials[m_materials.size()-1].SetID(m_materials.size()-1);
 }
 
-void L3DS::ReadMap(const LChunk &chunk, LMap& map)
+//---------------------------------------------------------------------------
+
+void L3DS::ReadMap(const LChunk &chunk, LMap& lmap)
 {
     LChunk child;
     char str[20];
@@ -2233,32 +2522,34 @@ void L3DS::ReadMap(const LChunk &chunk, LMap& map)
         switch (child.id)
         {
         case INT_PERCENTAGE:
-            map.strength = ReadPercentage(child);
+            lmap.strength = ReadPercentage(child);
             break;
         case MAT_MAPNAME:
             ReadASCIIZ(str, 20);
-            strcpy(map.mapName, str);
+            strcpy(lmap.mapName, str);
             break;
         case MAT_MAP_USCALE:
-            map.uScale = ReadFloat();
+            lmap.uScale = ReadFloat();
             break;
         case MAT_MAP_VSCALE:
-            map.vScale = ReadFloat();
+            lmap.vScale = ReadFloat();
             break;
         case MAT_MAP_UOFFSET:
-            map.uOffset = ReadFloat();
+            lmap.uOffset = ReadFloat();
             break;
         case MAT_MAP_VOFFSET:
-            map.vOffset = ReadFloat();
+            lmap.vOffset = ReadFloat();
             break;
         case MAT_MAP_ANG:
-            map.angle = ReadFloat();
+            lmap.angle = ReadFloat();
             break;
         }
         SkipChunk(child);
         child = ReadChunk();
     }
 }
+
+//---------------------------------------------------------------------------
 
 void L3DS::ReadKeyframeData(const LChunk &parent)
 {
@@ -2375,6 +2666,8 @@ void L3DS::ReadKeyframeData(const LChunk &parent)
     GotoChunk(parent);
 }
 
+//---------------------------------------------------------------------------
+
 long L3DS::ReadKeyheader()
 {
     long frame;
@@ -2402,3 +2695,7 @@ long L3DS::ReadKeyheader()
     }
     return frame;
 }
+
+//---------------------------------------------------------------------------
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
+//---------------------------------------------------------------------------

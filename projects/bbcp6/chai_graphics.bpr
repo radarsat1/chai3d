@@ -1,0 +1,186 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="..\..\lib\bbcp6\chai_graphics.lib"/>
+    <OBJFILES value="obj\CColor.obj obj\CDraw3D.obj obj\CMacrosGL.obj obj\CMaterial.obj 
+      obj\CTexture2D.obj obj\CTriangle.obj obj\CVertex.obj obj\CGenericTexture.obj"/>
+    <RESFILES value=""/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value="..\..\lib\bbcp6\glu32.lib ..\..\lib\bbcp6\glut32.lib 
+      ..\..\lib\bbcp6\opengl32.lib"/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..\src\graphics"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="_DEBUG;_WIN32;_BBCP"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
+    <MAINSOURCE value="chai_graphics.bpf"/>
+    <INCLUDEPATH value="$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\forces;..\..\src\math;..\..\src\files;..\..\src\tools;..\..\src\collisions;..\..\src\display;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp"/>
+    <LIBPATH value="..\..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par -w-8027 -w-8026 -w-hch -w-csu"/>
+    <LISTFILE value=""/>
+    <OTHERFILES value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2obj -N0obj -$Y+ -$W -$O- -$A8 -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="/P64"/>
+    <OTHERFILES value=""/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+    <OTHERFILES value=""/>
+  </LINKER>
+  <FILELIST>
+      <FILE FILENAME="chai_graphics.bpf" FORMNAME="" UNITNAME="chai_graphics" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\lib\bbcp6\glu32.lib" FORMNAME="" UNITNAME="glu32.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\lib\bbcp6\glut32.lib" FORMNAME="" UNITNAME="glut32.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\lib\bbcp6\opengl32.lib" FORMNAME="" UNITNAME="opengl32.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\graphics\CColor.cpp" FORMNAME="" UNITNAME="CColor.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\graphics\CDraw3D.cpp" FORMNAME="" UNITNAME="CDraw3D.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\graphics\CMacrosGL.cpp" FORMNAME="" UNITNAME="CMacrosGL.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\graphics\CMaterial.cpp" FORMNAME="" UNITNAME="CMaterial.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\graphics\CTexture2D.cpp" FORMNAME="" UNITNAME="CTexture2D" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\graphics\CTriangle.cpp" FORMNAME="" UNITNAME="CTriangle.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\graphics\CVertex.cpp" FORMNAME="" UNITNAME="CVertex.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\graphics\CGenericTexture.cpp" FORMNAME="" UNITNAME="CGenericTexture" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=20
+Item0=$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\forces;..\..\src\math;..\..\src\files;..\..\src\tools;..\..\src\collisions;..\..\src\display;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp
+Item1=$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\forces;..\..\src\math;..\..\src\files;..\..\src\tools;..\..\src\collisions;..\..\src\display;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp6
+Item2=$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\forces;..\..\src\math;..\..\src\files;..\..\src\tools;..\..\src\collisions;..\..\src\display;..\..\src\scenegraph;..\..\src
+Item3=$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\forces;..\..\src\math;..\..\src\files;..\..\src\tools;..\..\src\collisions;..\..\src\display;..\..\src\scenegraph;..\..\src\
+Item4=$(BCB)\include;$(BCB)\include\vcl;..\..\src\graphics;..\..\src\forces;..\..\src\math;..\..\src\files;..\..\src\tools;..\..\src\collisions;..\..\src\display;..\..\src\scenegraph
+Item5=..\..\src\graphics;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display;..\src\scenegraph
+Item6=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display;..\src\scenegraph
+Item7=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external;..\src\display
+Item8=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions;..\include\external
+Item9=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item10=..\src\graphics;..\src\forces;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item11=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item12=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\files;..\src\tools;..\src\collisions
+Item13=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item14=C:\Program Files\Borland\CBuilder6\Projects;..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item15=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files;..\src\tools
+Item16=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\collisions;..\src\files
+Item17=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl;..\src\math
+Item18=..\src\graphics;$(BCB)\include;$(BCB)\include\vcl
+Item19=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=7
+Item0=..\..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item1=$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..\src\graphics;C:\Program Files\Borland\CBuilder6\Projects;..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item3=C:\Program Files\Borland\CBuilder6\Projects;..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item5=E:\dev\cBuilder\graphics\shadows\bbcp;C:\Program Files\Borland\CBuilder6\Projects;..\src\math;..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\src\graphics;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=10
+Item0=_DEBUG;_WIN32;_BBCP
+Item1=_DEBUG;_WIN32
+Item2=I_WIN32;GLUT_NO_LIB_PRAGMA;_DEBUG
+Item3=I_WIN32;GLUT_NO_LIB_PRAGMA
+Item4=_DEBUG;I_WIN32;GLUT_NO_LIB_PRAGMA
+Item5=_DEBUG;I_WIN32
+Item6=_DEBUG; _CHAI_WIN32
+Item7=_DEBUG;
+Item8=_DEBUG; _WIN32
+Item9=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=obj
+
+[HistoryLists\hlFinalOutputDir]
+Count=4
+Item0=..\..\lib\bbcp6\
+Item1=..\lib\bbcp6\
+Item2=..\lib\bbcp\
+Item3=..\lib\bbcp
+
+[HistoryLists\hIBPIOutputDir]
+Count=1
+Item0=..\lib\bbcp
+
+[HistoryLists\hlTlibPageSize]
+Count=3
+Item0=0x0040
+Item1=0x0020
+Item2=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteLauncher=
+RemoteCWD=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

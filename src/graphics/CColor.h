@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,10 +12,10 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \author    Dan Morris
+    \version   2.0.0 $Rev: 253 $
 */
 //===========================================================================
 
@@ -23,36 +23,43 @@
 #ifndef CColorH
 #define CColorH
 //---------------------------------------------------------------------------
-#include "CMaths.h"
-#ifdef _WIN32
-#include "windows.h"
-#endif
-
-#include <GL/gl.h>
-
-/*!
-    \file CColor.h
-*/
-
+#include "extras/CGlobals.h"
+#include "math/CMaths.h"
+//---------------------------------------------------------------------------
 struct cColorb;
 struct cColorf;
-
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-      \struct   cColorf
-      \brief    cColorf describes a color composed of 4 \e GLfloats.
+    \file       CColor.h
+    
+    \brief  
+    <b> Graphics </b> \n 
+    Color Properties.
+*/
+//===========================================================================
+
+//===========================================================================
+/*!
+    \struct     cColorf
+    \ingroup    graphics
+
+    \brief    
+    cColorf describes a color composed of 4 \e GLfloats.
 */
 //===========================================================================
 struct cColorf
 {
   public:
-
+    
+    //-----------------------------------------------------------------------
     // CONSTRUCTOR & DESTRUCTOR:
     //-----------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------
     /*!
-        Default constructor of cColorf (color defaults to opaque white)
+        Default constructor of cColorf (color defaults to opaque white).
     */
     //-----------------------------------------------------------------------
     cColorf()
@@ -94,15 +101,18 @@ struct cColorf
     ~cColorf() {};
 
 
+	//-----------------------------------------------------------------------
     // METHODS:
+    //-----------------------------------------------------------------------
+
     //-----------------------------------------------------------------------
     /*!
         Set a color by passing its RGBA components as parameters.
 
-        \param    a_red    Red component
-        \param    a_green  Green component
-        \param    a_blue   Blue component
-        \param    a_alpha  Alpha component
+        \param    a_red    Red component.
+        \param    a_green  Green component.
+        \param    a_blue   Blue component.
+        \param    a_alpha  Alpha component.
     */
     //-----------------------------------------------------------------------
     inline void set(const GLfloat a_red, const GLfloat a_green, const GLfloat a_blue,
@@ -118,7 +128,7 @@ struct cColorf
     //-----------------------------------------------------------------------
     /*!
         Set color by copying three \e GLfloats from an external array, each
-        describing one of the RGB components. Alpha is set to \e 1.0
+        describing one of the RGB components. Alpha is set to \e 1.0.
 
         \param    a_colorRGB  Pointer to an array of type \e float.
     */
@@ -148,12 +158,12 @@ struct cColorf
         m_color[3] = a_colorRGBA[3];
     }
 
-    
+
     //-----------------------------------------------------------------------
     /*!
           Access the nth component of this color (we provide both const
           and non-const versions so you can use this operator as an l-value
-          or an r-value)
+          or an r-value).
     */
     //-----------------------------------------------------------------------
     inline GLfloat operator[](const unsigned int n) const
@@ -161,6 +171,15 @@ struct cColorf
         if (n<4) return m_color[n];
         else return 0.0f;
     }
+
+
+    //-----------------------------------------------------------------------
+    /*!
+          Access the nth component of this color (we provide both const
+          and non-const versions so you can use this operator as an l-value
+          or an r-value).
+    */
+    //-----------------------------------------------------------------------
     inline GLfloat& operator[](const unsigned int n)
     {
         if (n<4) return m_color[n];
@@ -170,7 +189,9 @@ struct cColorf
 
     //-----------------------------------------------------------------------
     /*!
-          Set the \e red component.          
+          Set the \e red component.
+
+          \param    a_red  Red component.
     */
     //-----------------------------------------------------------------------
     inline void setR(const GLfloat a_red)
@@ -192,7 +213,9 @@ struct cColorf
 
     //-----------------------------------------------------------------------
     /*!
-          Set the \e green component.          
+          Set the \e green component.
+
+          \param    a_green  Green component.
     */
     //-----------------------------------------------------------------------
     inline void setG(const GLfloat a_green)
@@ -238,7 +261,9 @@ struct cColorf
 
     //-----------------------------------------------------------------------
     /*!
-          Set the \e alpha component.          
+          Set the \e alpha component.
+
+          \param    a_alpha  Alpha component.
     */
     //-----------------------------------------------------------------------
     inline void setA(const GLfloat a_alpha)
@@ -260,9 +285,9 @@ struct cColorf
 
     //-----------------------------------------------------------------------
     /*!
-          Render this color in OpenGL (sets it to be the currnent color)
+          Render this color in OpenGL (sets it to be the current color).
 
-          Does not confirm that GL color-tracking is enabled
+          Does not confirm that GL color-tracking is enabled.
     */
     //-----------------------------------------------------------------------
     inline void render() const
@@ -273,7 +298,7 @@ struct cColorf
 
     //-----------------------------------------------------------------------
     /*!
-          Returns a pointer to the raw color array
+          Returns a pointer to the raw color array.
     */
     //-----------------------------------------------------------------------
     inline const GLfloat* pColor() const
@@ -285,16 +310,16 @@ struct cColorf
     //-----------------------------------------------------------------------
     /*!
           Returns this color, converted to \e cColorb format.
-
-          This method is the only method defined outside the class
-          definition, to avoid a recursive referencing problem with the
-          cColorb class.
     */
     //-----------------------------------------------------------------------
-    inline cColorb getColorb() const;   
+    cColorb getColorb() const;
 
   public:
+
+    //-----------------------------------------------------------------------
     // MEMBERS:
+    //-----------------------------------------------------------------------
+
     //! Color in \e GLfloat format [R,G,B,A].
     GLfloat m_color[4];
 };
@@ -302,15 +327,21 @@ struct cColorf
 
 //===========================================================================
 /*!
-      \struct   cColorb
-      \brief    cColorb describes a color composed of 4 \e bytes.
+    \struct     cColorb
+    \ingroup    graphics
+    
+    \brief    
+    cColorb describes a color composed of 4 \e bytes.
 */
 //===========================================================================
 struct cColorb
 {
   public:
 
+    //-----------------------------------------------------------------------
     // CONSTRUCTOR & DESTRUCTOR:
+    //-----------------------------------------------------------------------
+
     //-----------------------------------------------------------------------
     /*!
         Constructor of cColorb.
@@ -355,7 +386,10 @@ struct cColorb
     ~cColorb() {};
 
 
+	//-----------------------------------------------------------------------
     // METHODS:
+    //-----------------------------------------------------------------------
+
     //-----------------------------------------------------------------------
     /*!
         Set a color by passing its RGBA components as parameters.
@@ -396,9 +430,9 @@ struct cColorb
     //-----------------------------------------------------------------------
     /*!
         Set color by copying four floats from an external array, each
-        describing an RGBA component
+        describing an RGBA component.
 
-        \param    a_colorRGBA  Pointer to an array of type \e GLubyte
+        \param    a_colorRGBA  Pointer to an array of type \e GLubyte.
     */
     //-----------------------------------------------------------------------
     inline void setMem4(const GLubyte* a_colorRGBA)
@@ -414,7 +448,7 @@ struct cColorb
     /*!
           Set the \e red component.
 
-          \param    a_red  Red component
+          \param    a_red  Red component.
     */
     //-----------------------------------------------------------------------
     inline void setR(const GLubyte a_red)
@@ -425,7 +459,7 @@ struct cColorb
 
     //-----------------------------------------------------------------------
     /*!
-          Read the \e red component
+          Read the \e red component.
     */
     //-----------------------------------------------------------------------
     inline GLfloat getR() const
@@ -436,9 +470,9 @@ struct cColorb
 
     //-----------------------------------------------------------------------
     /*!
-          Set the \e green component
+          Set the \e green component.
 
-          \param    a_green  Green component
+          \param    a_green  Green component.
     */
     //-----------------------------------------------------------------------
     inline void setG(const GLubyte a_green)
@@ -449,7 +483,7 @@ struct cColorb
 
     //-----------------------------------------------------------------------
     /*!
-          Read the \e green component
+          Read the \e green component.
     */
     //-----------------------------------------------------------------------
     inline GLfloat getG() const
@@ -460,9 +494,9 @@ struct cColorb
 
     //-----------------------------------------------------------------------
     /*!
-          Set the \e blue component
+          Set the \e blue component.
 
-          \param    a_blue  Blue component
+          \param    a_blue  Blue component.
     */
     //-----------------------------------------------------------------------
     inline void setB(const GLubyte a_blue)
@@ -473,7 +507,7 @@ struct cColorb
 
     //-----------------------------------------------------------------------
     /*!
-          Read the \e blue component
+          Read the \e blue component.
     */
     //-----------------------------------------------------------------------
     inline GLfloat getB() const
@@ -484,9 +518,9 @@ struct cColorb
 
     //-----------------------------------------------------------------------
     /*!
-          Set the \e alpha component
+          Set the \e alpha component.
 
-          \param    a_alpha Alpha component
+          \param    a_alpha Alpha component.
     */
     //-----------------------------------------------------------------------
     inline void setA(const GLubyte a_alpha)
@@ -508,9 +542,8 @@ struct cColorb
 
     //-----------------------------------------------------------------------
     /*!
-          Render this color in OpenGL (sets it to be the currnent color)
-
-          Does not confirm that GL color-tracking is enabled
+          Render this color in OpenGL (sets it to be the current color).
+          Does not confirm that GL color-tracking is enabled.
     */
     //-----------------------------------------------------------------------
     inline void render() const
@@ -521,9 +554,9 @@ struct cColorb
 
     //-----------------------------------------------------------------------
     /*!
-          Return a pointer to the raw color array
+          Return a pointer to the raw color array.
 
-          \return   Return memory location of color array
+          \return   Return memory location of color array.
     */
     //-----------------------------------------------------------------------
     inline const GLubyte* pColor() const
@@ -532,67 +565,53 @@ struct cColorb
     }
 
 
-
     //-----------------------------------------------------------------------
     /*!
           Return this color converted to \e cColorf format.
-
-          This method is the only method defined outside the class
-          definition, to avoid a recursive referencing problem with the
-          cColorf class.
     */
     //-----------------------------------------------------------------------
-    inline cColorf getColorf() const;
+    cColorf getColorf() const;
+
 
   public:
+
+    //-----------------------------------------------------------------------
     // MEMBERS:
+    //-----------------------------------------------------------------------
+
     //! Color in \e GLubyte format [R,G,B,A].
     GLubyte m_color[4];
 };
 
 
-// One function in each type was declared but not defined, to avoid
-// recursive referencing problems...
-cColorb cColorf::getColorb(void) const
-{
-    cColorb color(   (GLubyte)(m_color[0] * (GLfloat)0xff),
-                     (GLubyte)(m_color[1] * (GLfloat)0xff),
-                     (GLubyte)(m_color[2] * (GLfloat)0xff),
-                     (GLubyte)(m_color[3] * (GLfloat)0xff) );
-    return (color);
-}
+//---------------------------------------------------------------------------
+// GENERAL CONSTANTS
+//---------------------------------------------------------------------------
 
-cColorf cColorb::getColorf(void) const
-{
-    cColorf color (   (GLfloat)m_color[0] / (GLfloat)0xff,
-                      (GLfloat)m_color[1] / (GLfloat)0xff,
-                      (GLfloat)m_color[2] / (GLfloat)0xff,
-                      (GLfloat)m_color[3] / (GLfloat)0xff );
-    return color;
-}
-
+//! Color Red.
 extern cColorf CHAI_COLOR_RED;
+
+//! Color Green.
 extern cColorf CHAI_COLOR_GREEN;
+
+//! Color Blue.
 extern cColorf CHAI_COLOR_BLUE;
-extern cColorf CHAI_COLOR_WHITE;
-extern cColorf CHAI_COLOR_BLACK;
+
+//! Color Yellow.
 extern cColorf CHAI_COLOR_YELLOW;
-extern cColorf CHAI_COLOR_AQUA;
-extern cColorf CHAI_COLOR_PURPLE;
 
-extern cColorf CHAI_COLOR_PASTEL_RED;
-extern cColorf CHAI_COLOR_PASTEL_GREEN;
-extern cColorf CHAI_COLOR_PASTEL_BLUE;
-extern cColorf CHAI_COLOR_PASTEL_AQUA;
-extern cColorf CHAI_COLOR_PASTEL_VIOLET;
-extern cColorf CHAI_COLOR_PASTEL_YELLOW;
-extern cColorf CHAI_COLOR_PASTEL_GRAY;
+//! Color Cyan.
+extern cColorf CHAI_COLOR_CYAN;
 
-#define N_CHAI_BASIC_COLORS 8
-extern cColorf CHAI_BASIC_COLORS[N_CHAI_BASIC_COLORS];
+//! Color Magenta.
+extern cColorf CHAI_COLOR_MAGENTA;
 
-#define N_CHAI_PASTEL_COLORS 7
-extern cColorf CHAI_PASTEL_COLORS[N_CHAI_PASTEL_COLORS];
+//! Color Black.
+extern cColorf CHAI_COLOR_BLACK;
+
+//! Color White.
+extern cColorf CHAI_COLOR_WHITE;
+
 
 //---------------------------------------------------------------------------
 #endif

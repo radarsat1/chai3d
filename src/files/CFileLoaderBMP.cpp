@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,15 +12,14 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 243 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CFileLoaderBMP.h"
+#include "files/CFileLoaderBMP.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
@@ -57,9 +56,9 @@ cFileLoaderBMP::cFileLoaderBMP(char* a_fileName)
 
 //===========================================================================
 /*!
-      Destructor of cFileLoaderBMP
+    Destructor of cFileLoaderBMP
 
-      \fn         cFileLoaderBMP::~cFileLoaderBMP()
+    \fn         cFileLoaderBMP::~cFileLoaderBMP()
 */
 //===========================================================================
 cFileLoaderBMP::~cFileLoaderBMP()
@@ -79,10 +78,10 @@ cFileLoaderBMP::~cFileLoaderBMP()
 
 //===========================================================================
 /*!
-      Load a bitmap from a file and represent it correctly in memory.
+    Load a bitmap from a file and represent it correctly in memory.
 
-      \fn         bool cFileLoaderBMP::loadBMP(char* a_fileName)
-      \param      a_fileName  Filename of image bitmap.
+    \fn         bool cFileLoaderBMP::loadBMP(char* a_fileName)
+    \param      a_fileName  Filename of image bitmap.
 */
 //===========================================================================
 bool cFileLoaderBMP::loadBMP(char* a_fileName)
@@ -116,8 +115,12 @@ bool cFileLoaderBMP::loadBMP(char* a_fileName)
         return false;
     }
 
+    // rewind file
+    rewind (in);
+
     // read in the entire BITMAPFILEHEADER
-    fread(&m_bmfh, sizeof(BITMAPFILEHEADER), 1, in);
+    int s1 = sizeof(BITMAPFILEHEADER);
+    int ss1 = (int)fread(&m_bmfh, s1, 1, in);
 
     // check for the magic number that says this is a bitmap
     if (m_bmfh.bfType != BITMAP_MAGIC_NUMBER)
@@ -127,8 +130,9 @@ bool cFileLoaderBMP::loadBMP(char* a_fileName)
     }
 
     // read in the entire BITMAPINFOHEADER
-    fread(&m_bmih, sizeof(BITMAPINFOHEADER), 1, in);
-
+    int s2 = sizeof(BITMAPINFOHEADER);
+    int ss2 = (int)fread(&m_bmih, s2, 1, in);
+  
     // save the width, height and bits per pixel for external use
     m_width = m_bmih.biWidth;
     m_height = m_bmih.biHeight;
@@ -206,9 +210,9 @@ bool cFileLoaderBMP::loadBMP(char* a_fileName)
 
 //===========================================================================
 /*!
-      This function initializes all variables in class.
+    This function initializes all variables in class.
 
-      \fn        void cFileLoaderBMP::reset()
+    \fn        void cFileLoaderBMP::reset()
 */
 //===========================================================================
 void cFileLoaderBMP::reset()
@@ -222,9 +226,9 @@ void cFileLoaderBMP::reset()
 
 //===========================================================================
 /*!
-      Convert format from GBR to RGB - 24bits images
+    Convert format from GBR to RGB - 24bits images
 
-      \fn        bool cFileLoaderBMP::convert24(char* tempData)
+    \fn        bool cFileLoaderBMP::convert24(char* tempData)
 */
 //===========================================================================
 bool cFileLoaderBMP::convert24(char* tempData)
@@ -298,9 +302,9 @@ bool cFileLoaderBMP::convert24(char* tempData)
 
 //===========================================================================
 /*!
-      Convert format from GBR to RGB - 8bits images
+    Convert format from GBR to RGB - 8bits images
 
-      \fn        bool cFileLoaderBMP::convert8(char* tempData)
+    \fn        bool cFileLoaderBMP::convert8(char* tempData)
 */
 //===========================================================================
 bool cFileLoaderBMP::convert8(char* tempData)

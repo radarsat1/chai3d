@@ -1,0 +1,597 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="generator" content="Adobe GoLive 6">
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="description"  content="CHAI3D: The Open Source Haptics Project">
+		<title>CHAI 3D</title>
+		<link href="resources/style/chai3d.css" rel="stylesheet" media="screen">
+		<csscriptdict>
+			<script type="text/javascript"><!--
+function newImage(arg) {
+	if (document.images) {
+		rslt = new Image();
+		rslt.src = arg;
+		return rslt;
+	}
+}
+userAgent = window.navigator.userAgent;
+browserVers = parseInt(userAgent.charAt(userAgent.indexOf("/")+1),10);
+mustInitImg = true;
+function initImgID() {di = document.images; if (mustInitImg && di) { for (var i=0; i<di.length; i++) { if (!di[i].id) di[i].id=di[i].name; } mustInitImg = false;}}
+function findElement(n,ly) {
+	d = document;
+	if (browserVers < 4)		return d[n];
+	if ((browserVers >= 6) && (d.getElementById)) {initImgID; return(d.getElementById(n))}; 
+	var cd = ly ? ly.document : d;
+	var elem = cd[n];
+	if (!elem) {
+		for (var i=0;i<cd.layers.length;i++) {
+			elem = findElement(n,cd.layers[i]);
+			if (elem) return elem;
+		}
+	}
+	return elem;
+}
+function changeImages() {
+	d = document;
+	if (d.images) {
+		var img;
+		for (var i=0; i<changeImages.arguments.length; i+=2) {
+			img = null;
+			if (d.layers) {img = findElement(changeImages.arguments[i],0);}
+			else {img = d.images[changeImages.arguments[i]];}
+			if (img) {img.src = changeImages.arguments[i+1];}
+		}
+	}
+}
+
+// --></script>
+		</csscriptdict>
+		<csactiondict>
+			<script type="text/javascript"><!--
+var preloadFlag = false;
+function preloadImages() {
+	if (document.images) {
+		over_menuM1a = newImage(/*URL*/'resources/images/menuM1b.png');
+		over_menuM2a = newImage(/*URL*/'resources/images/menuM2b.png');
+		over_menuM3a = newImage(/*URL*/'resources/images/menuM3b.png');
+		over_menuM4a = newImage(/*URL*/'resources/images/menuM4b.png');
+		over_menuM4a2 = newImage(/*URL*/'resources/images/menuM5b.png');
+		preloadFlag = true;
+	}
+}
+
+// --></script>
+		</csactiondict>
+	</head>
+
+	<body onload="preloadImages();" bgcolor="#ffffff">
+		<div align="center">
+			<table width="740" border="0" cellspacing="0" cellpadding="0" cool gridx="2" gridy="2" height="6634" showgridx showgridy usegridx usegridy>
+				<tr height="36">
+					<td width="1" height="365" rowspan="4"></td>
+					<td width="739" height="36" colspan="9"></td>
+					<td width="1" height="36"><spacer type="block" width="1" height="36"></td>
+				</tr>
+				<tr height="40">
+					<td width="74" height="40" colspan="2" valign="top" align="left" xpos="1"><a onmouseover="changeImages( /*CMP*/'menuM1a',/*URL*/'resources/images/menuM1b.png');return true" onmouseout="changeImages( /*CMP*/'menuM1a',/*URL*/'resources/images/menuM1a.png');return true" href="http://www.chai3d.org/concept.html"><img src="resources/images/menuM1a.png" alt="" name="menuM1a" height="36" width="74" border="0"></a></td>
+					<td width="102" height="40" valign="top" align="left" xpos="75"><a onmouseover="changeImages( /*CMP*/'menuM2a',/*URL*/'resources/images/menuM2b.png');return true" onmouseout="changeImages( /*CMP*/'menuM2a',/*URL*/'resources/images/menuM2a.png');return true" href="http://www.chai3d.org/download.html"><img src="resources/images/menuM2a.png" alt="" name="menuM2a" height="36" width="102" border="0"></a></td>
+					<td width="74" height="40" valign="top" align="left" xpos="177"><a onmouseover="changeImages( /*CMP*/'menuM3a',/*URL*/'resources/images/menuM3b.png');return true" onmouseout="changeImages( /*CMP*/'menuM3a',/*URL*/'resources/images/menuM3a.png');return true" href="http://www.chai3d.org/people.html"><img src="resources/images/menuM3a.png" alt="" name="menuM3a" height="36" width="74" border="0"></a></td>
+					<td width="84" height="40" valign="top" align="left" xpos="251"><a onmouseover="changeImages( /*CMP*/'menuM4a',/*URL*/'resources/images/menuM4b.png');return true" onmouseout="changeImages( /*CMP*/'menuM4a',/*URL*/'resources/images/menuM4a.png');return true" href="http://www.chai3d.org/project.html"><img src="resources/images/menuM4a.png" alt="" name="menuM4a" height="36" width="84" border="0"></a></td>
+					<td width="86" height="40" valign="top" align="left" xpos="335"><a onmouseover="changeImages( /*CMP*/'menuM4a2',/*URL*/'resources/images/menuM5b.png');return true" onmouseout="changeImages( /*CMP*/'menuM4a2',/*URL*/'resources/images/menuM5a.png');return true" href="http://www.chai3d.org/support.html"><img src="resources/images/menuM5a.png" alt="" name="menuM4a2" height="36" width="86" border="0"></a></td>
+					<td width="320" height="40" colspan="4" valign="top" align="left" xpos="421"><a href="index.html"><img src="resources/images/menuMLogo.png" alt="" height="36" width="320" border="0"></a></td>
+				</tr>
+				<tr height="54">
+					<td width="740" height="54" colspan="10" valign="top" align="left" xpos="1"><img src="resources/images/barExamples.png" alt="" height="54" width="740" border="0"></td>
+				</tr>
+				<tr height="235">
+					<td width="1" height="235"></td>
+					<td width="739" height="235" colspan="9" valign="top" align="left" xpos="2">
+						<table width="741" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="235" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="740" height="32" colspan="4"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="176">
+								<td content csheight="113" width="352" height="176" valign="top" xpos="0">
+									<p><span class="mainbody">The best way to learn about using CHAI 3D is to explore the various examples provided with the framework. Each example is labeled by a unique name and a two digit number that indicates its relative level of complexity. For instance, the foundations of CHAI 3D are mostly covered in examples 01-30, while the more advanced topics including rigid and deformable dynamic  </span></p>
+								</td>
+								<td width="32" height="176"></td>
+								<td content csheight="85" width="352" height="176" valign="top" xpos="384">
+									<p><span class="mainbody">simulations are presented in examples 40&#x2018;s and higher.  Screenshots are illustrated here bellow for each example with a short description of the functionalities they introduce. More detailed information about the technical aspects can be directly found in the source code.</span></p>
+								</td>
+								<td width="4" height="176"></td>
+								<td width="1" height="176"><spacer type="block" width="1" height="176"></td>
+							</tr>
+							<tr height="26">
+								<td width="740" height="26" colspan="4" valign="top" align="left" xpos="0"><img src="resources/images/line.png" alt="" height="1" width="740" border="0"></td>
+								<td width="1" height="26"><spacer type="block" width="1" height="26"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="352" height="1"><spacer type="block" width="352" height="1"></td>
+								<td width="32" height="1"><spacer type="block" width="32" height="1"></td>
+								<td width="352" height="1"><spacer type="block" width="352" height="1"></td>
+								<td width="4" height="1"><spacer type="block" width="4" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="741" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-devices.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="128" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>01 - devices </span></td>
+								<td width="228" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="225" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">The best way to learn about using CHAI 3D is to explore the various examples provided with the framework. Each example is labeled by a unique name and a two digit number that indicates its relative level of complexity. For instance, the foundations of CHAI 3D are mostly covered in examples 01-30, while the more advanced topics including rigid and deformable dynamic simulations are presented in examples 40&#x2018;s and higher.  Screenshots are illustrated here bellow for each example with a short description of the functionalities they introduce. More detailed information about the technical aspects can be directly found in the source code.</span></p>
+								</td>
+								<td width="4" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="128" height="1"><spacer type="block" width="128" height="1"></td>
+								<td width="224" height="1"><spacer type="block" width="224" height="1"></td>
+								<td width="4" height="1"><spacer type="block" width="4" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-torus.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="128" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>10 - oring </span></td>
+								<td width="229" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="183" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">Extending our first example, 10-oring introduces generic object by rendering a virtual torus. (cShapeTorus). The haptic device is interfaced to the simulation via a virtual tool (cGeneric3ofPointer) which computes the interactions between the haptic device and the objects located in the environment. A surface effect is added to the torus to generate a force response when the operator encounters the object with the device. A simple physical behavior is programmed in the Haptics Thread to rotate the torus when external forces are applied onto it. A spherical texture map is used to produce a metallic reflection on the environment. </span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="128" height="1"><spacer type="block" width="128" height="1"></td>
+								<td width="224" height="1"><spacer type="block" width="224" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-effects.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="128" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>11 - effects </span></td>
+								<td width="229" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="169" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">This example explores in more depth the possibilities offered by combining various haptic effects together. Surface, viscosity, friction, stick&#x2019;n slip, and magnetic properties are programmed onto 4 spheres for comparison. This example is a great starting point for understanding how potential fields can be effectively combined together to haptically render different material properties or tactile conditions. </span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="128" height="1"><spacer type="block" width="128" height="1"></td>
+								<td width="224" height="1"><spacer type="block" width="224" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="741" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-polygons.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="29" width="176" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>12 - polygons </span></td>
+								<td width="180" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="183" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">Introducing some the of the more advanced techniques in computer haptics, this example demonstrates the finger-proxy force rendering algorithm that is used to compute force interactions between a sphere (proxy) and a virtual mesh object composed of  triangles (cMesh). In this program, a simple routine creates a circular fan of individual triangles and defines a color for each of them. This example can easily be extended to build more sophisticated objects. The collision detection between the tool and the object is managed by the collision detector, or more specifically in this example, by an aligned bounding box tree structure (AABB). </span></p>
+								</td>
+								<td width="4" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="176" height="1"><spacer type="block" width="176" height="1"></td>
+								<td width="176" height="1"><spacer type="block" width="176" height="1"></td>
+								<td width="4" height="1"><spacer type="block" width="4" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-map.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="240" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>20 - map </span></td>
+								<td width="117" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="183" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">From a 2D bitmap image, this example generates a height map by converting each colored pixel into a height value. The height map is then converted into an array of triangles to produce a virtual mesh. The original bitmap image is then clamped onto the surface as a 2D texture. By operating the haptic device and by engaging the user switch, the operator can freely rotate the camera and navigate around the object. By touching the surface of the map and by simultaneously engaging the user switch, the operator can locally modify the topology of the map. A virtual magnetic line is also used to guide the operator along a vertical segment during the modeling process. </span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="240" height="1"><spacer type="block" width="240" height="1"></td>
+								<td width="112" height="1"><spacer type="block" width="112" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="741" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-object.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="208" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>21 - object </span></td>
+								<td width="148" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="183" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">To display more complex mesh models, this example demonstrates the use of the mesh file loader which currently supports file formats of types .3ds (3D Studio MAX) and .obj (Alias Wavefront).  As a scene may become more complicated with larger objects (populated with more triangles), further computation is required during the collision detection phase which can lead to degraded haptic rendering performance issues. Designing effective collision detectors to handle complex mesh models is a fundamental and challenging task for programming high-quality haptic simulated scenes. CHAI 3D currently supports spherical and aligned bounding box collision detection trees. </span></p>
+								</td>
+								<td width="4" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="208" height="1"><spacer type="block" width="208" height="1"></td>
+								<td width="144" height="1"><spacer type="block" width="144" height="1"></td>
+								<td width="4" height="1"><spacer type="block" width="4" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="34">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-chrome.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="224" height="34" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>22 - chrome </span></td>
+								<td width="133" height="34" colspan="2"></td>
+								<td width="1" height="34"><spacer type="block" width="1" height="34"></td>
+							</tr>
+							<tr height="359">
+								<td content csheight="169" width="352" height="359" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">Very similar to example 21, this application illustrate the use of spherical mapping to create more sophisticated graphical effects. In the Haptics Thread a simple force model is used to slowly re-orientate the virtual face back to its original configuration. Notice the larger diameter of the cursor which can be adjusted to typically model tools of different sizes (radius). The current force rendering model uses Ruspini&#x2019;s finger-proxy approach (Stanford University).</span></p>
+								</td>
+								<td width="5" height="359"></td>
+								<td width="1" height="359"><spacer type="block" width="1" height="359"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="224" height="1"><spacer type="block" width="224" height="1"></td>
+								<td width="128" height="1"><spacer type="block" width="128" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-tooth.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="208" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>23 - tooth </span></td>
+								<td width="149" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="169" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">In this example we demonstrate how to command a 3D mesh model of a drill with a haptic device. By enabling the user switch, the operator can translate or rotate the tooth according to the movement of his/her hand. If the haptic device only holds 3 degrees-of-freedom (translation only) then the tool is automatically oriented to remain near perpendicular to the tooth&#x2019;s surface. This example also demonstrates some of the transparency rendering functionalities offered by the graphics engines.</span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="208" height="1"><spacer type="block" width="208" height="1"></td>
+								<td width="144" height="1"><spacer type="block" width="144" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-turntable.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="224" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>24 - turntable </span></td>
+								<td width="133" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="169" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">This example explores the combination of sounds and haptics via the audio BASS library. Two meshes are used to model a turntable and a vinyl record which can freely spin around its vertical axis. Stiffness, friction (static and dynamic) and inertia properties can be adjusted to finely tune the haptic feeling when spinning the plate. An mp3 audio soundtrack is loaded and synchronized with the motion of the record player. </span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="224" height="1"><spacer type="block" width="224" height="1"></td>
+								<td width="128" height="1"><spacer type="block" width="128" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-cubic.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="208" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>25 - cubic </span></td>
+								<td width="149" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="169" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">Similar to the 12-polygon demo, this example projects onto a cube an image texture generated directly from the virtual camera viewport. Friction properties are also enabled to allow the operator to grasp the object to rotate it. This demo can easily be extended to further explore video texturing techniques or other applications that require bitmap editing.</span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="208" height="1"><spacer type="block" width="208" height="1"></td>
+								<td width="144" height="1"><spacer type="block" width="144" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-ode-cubic.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="288" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>40 - ODE - cubes </span></td>
+								<td width="69" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="169" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">This example illustrates the use of the Open Dynamics Engine (ODE) module included with CHAI 3D. Three cubes are created and physical properties are defined for each of them. All physical interactions are computed by the ODE system within the Haptics Thread. CHAI 3D force rendering models are used to compute the interaction forces between the cursor tool and the objects; the resulting forces are then transferred to the ODE engine to update the dynamic configuration of each object in real time. Gravity can be either enabled or disabled by pressing the respective keyboard commands (see keyboard options in the console).</span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="288" height="1"><spacer type="block" width="288" height="1"></td>
+								<td width="64" height="1"><spacer type="block" width="64" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="741" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-ode-pool.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="240" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>41 - ODE - pool </span></td>
+								<td width="116" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="178" width="353" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">Similar to the previous example, the 41-ODE-pool application models three solid spheres by also binding some texture properties onto each of them. The operator can manipulate and pick each ball individually by simultaneously touching it and enabling the user switch. On each presented ODE demo, four transparent vertical walls are used to contain the objects within the physical workspace of the haptic device. Gravity can be either enabled or disabled by pressing the respective keyboard commands (see keyboard options in the console).</span></p>
+									<p></p>
+								</td>
+								<td width="3" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="240" height="1"><spacer type="block" width="240" height="1"></td>
+								<td width="113" height="1"><spacer type="block" width="113" height="1"></td>
+								<td width="3" height="1"><spacer type="block" width="3" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-ode-mesh.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="208" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>42 - ODE - mesh </span></td>
+								<td width="149" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="169" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">This example introduces some of the more sophisticated features of ODE such as the tri-mesh collision detection where impacts are computed between individual triangles composing the object meshes. Each ODE object can be grasped by simultaneously touching its surface and enabling the user switch of the haptic device. Notice in this example that the two vertical shafts are defined as two ODE objects with their static property enabled. Gravity can be either enabled or disabled by pressing the respective keyboard commands (see keyboard options in the console).</span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="208" height="1"><spacer type="block" width="208" height="1"></td>
+								<td width="144" height="1"><spacer type="block" width="144" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="741" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-gem-membrane.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="18" width="224" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>50 - GEL - membrane </span></td>
+								<td width="132" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="183" width="353" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">Using the GEL dynamics engine (Stanford University), this example introduces an new approach to simulate the dynamic behavior of complex deformable objects. The GEL model uses a skeleton technique where filling spheres are inserted inside the mesh object and connected together using elastic links to model properties such as mass, inertia, elongation, flexion and torsion.  Each vertex (triangles point) composing the mesh is then attached to the nearest sphere or link. As the skeleton deforms, the shape of the mesh is updated at every simulation cycle. </span></p>
+								</td>
+								<td width="3" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="224" height="1"><spacer type="block" width="224" height="1"></td>
+								<td width="129" height="1"><spacer type="block" width="129" height="1"></td>
+								<td width="3" height="1"><spacer type="block" width="3" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="394">
+					<td width="741" height="394" colspan="11" valign="top" align="left" xpos="0">
+						<table width="742" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="394" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="393" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-gem-cell.png" alt="" height="352" width="352" border="0"></td>
+								<td content csheight="29" width="240" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>51 - GEL - cell </span></td>
+								<td width="117" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="361">
+								<td content csheight="169" width="352" height="361" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">An artistic view of a cell. This example further illustrates the concept of real time deformation or a complex structure. By further refining the underlying skeleton models it is possible to create multi-body scenes. Collision detection between different objects can be effectively estimated by computing the collision between their skeletons. </span></p>
+								</td>
+								<td width="5" height="361"></td>
+								<td width="1" height="361"><spacer type="block" width="1" height="361"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="240" height="1"><spacer type="block" width="240" height="1"></td>
+								<td width="112" height="1"><spacer type="block" width="112" height="1"></td>
+								<td width="5" height="1"><spacer type="block" width="5" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="325">
+					<td width="741" height="325" colspan="11" valign="top" align="left" xpos="0">
+						<table width="741" border="0" cellspacing="0" cellpadding="0" cool gridx="16" gridy="16" height="325" showgridx showgridy usegridx usegridy>
+							<tr height="32">
+								<td width="384" height="324" rowspan="2" valign="top" align="left" xpos="0"><img src="resources/images/ex-gem-duck2.png" alt="" height="283" width="352" border="0"></td>
+								<td content csheight="18" width="224" height="32" valign="top" xpos="384"><span class="mainbody2"><b>name: </b>52 - GEL - ducky </span></td>
+								<td width="132" height="32" colspan="2"></td>
+								<td width="1" height="32"><spacer type="block" width="1" height="32"></td>
+							</tr>
+							<tr height="292">
+								<td content csheight="169" width="352" height="292" colspan="2" valign="top" xpos="384">
+									<p><span class="mainbody">Another example illustrating the use of the GEL framework where a skeleton model of a virtual duck is generated. The water is modeled by using an array of GEL springs and mass nodes with a double layer of semi-transparent texture mapping to create the illusion of translucent waves. Notice the reflection in the water which is created by rendering a mirrored copy the scene; this technique is also used with the ODE demos.</span></p>
+								</td>
+								<td width="4" height="292"></td>
+								<td width="1" height="292"><spacer type="block" width="1" height="292"></td>
+							</tr>
+							<tr height="1" cntrlrow>
+								<td width="384" height="1"><spacer type="block" width="384" height="1"></td>
+								<td width="224" height="1"><spacer type="block" width="224" height="1"></td>
+								<td width="128" height="1"><spacer type="block" width="128" height="1"></td>
+								<td width="4" height="1"><spacer type="block" width="4" height="1"></td>
+								<td width="1" height="1"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr height="1">
+					<td width="1" height="33" rowspan="2"></td>
+					<td width="740" height="1" colspan="10" valign="top" align="left" xpos="1"><img src="resources/images/line.png" alt="" height="1" width="740" border="0"></td>
+				</tr>
+				<tr height="32">
+					<td width="637" height="32" colspan="7"></td>
+					<td content csheight="32" width="103" height="32" colspan="3" valign="top" xpos="638">
+						<div align="right">
+							<span class="copyright">copyright 2009</span></div>
+					</td>
+				</tr>
+				<tr height="1" cntrlrow>
+					<td width="1" height="1"><spacer type="block" width="1" height="1"></td>
+					<td width="1" height="1"><spacer type="block" width="1" height="1"></td>
+					<td width="73" height="1"><spacer type="block" width="73" height="1"></td>
+					<td width="102" height="1"><spacer type="block" width="102" height="1"></td>
+					<td width="74" height="1"><spacer type="block" width="74" height="1"></td>
+					<td width="84" height="1"><spacer type="block" width="84" height="1"></td>
+					<td width="86" height="1"><spacer type="block" width="86" height="1"></td>
+					<td width="217" height="1"><spacer type="block" width="217" height="1"></td>
+					<td width="101" height="1"><spacer type="block" width="101" height="1"></td>
+					<td width="1" height="1"><spacer type="block" width="1" height="1"></td>
+					<td width="1" height="1"></td>
+				</tr>
+			</table>
+			<p></p>
+		</div>
+	</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

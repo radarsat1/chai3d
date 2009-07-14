@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,35 +12,24 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Francois Conti
-    \version    1.1
-    \date       06/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 264 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CShapeTorus.h"
-#include "CDraw3D.h"
-
-// Different compilers like slightly different GLUT's 
-#ifdef _MSVC
-#include "../../external/OpenGL/msvc6/glut.h"
-#else
-  #ifdef _POSIX
-    #include <GL/glut.h>
-  #else
-    #include "../../external/OpenGL/bbcp6/glut.h"
-  #endif
-#endif
-
+#include "scenegraph/CShapeTorus.h"
+//---------------------------------------------------------------------------
+#include "extras/CGlobals.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
     Constructor of cShapeTorus.
 
-    \fn     cShapeTorus::cShapeTorus(const double& a_insideRadius, const double& a_outsideRadius)
+    \fn     cShapeTorus::cShapeTorus(const double& a_insideRadius, 
+                                     const double& a_outsideRadius)
     \param  a_insideRadius    Inside radius of torus
     \param  a_outsideRadius   Outside radius of torus
 */
@@ -50,10 +39,13 @@ cShapeTorus::cShapeTorus(const double& a_insideRadius, const double& a_outsideRa
     // initialize radius of sphere
     setSize(a_insideRadius, a_outsideRadius);
 
+    // resolution of the graphical model
+    m_resolution = 64;
+
     // set material properties
     m_material.setShininess(100);
     m_material.m_ambient.set((float)0.3, (float)0.3, (float)0.3);
-    m_material.m_diffuse.set((float)0.1, (float)0.7, (float)0.8);
+    m_material.m_diffuse.set((float)0.7, (float)0.7, (float)0.7);
     m_material.m_specular.set((float)1.0, (float)1.0, (float)1.0);
     m_material.setStiffness(100.0);
 };
@@ -69,17 +61,38 @@ cShapeTorus::cShapeTorus(const double& a_insideRadius, const double& a_outsideRa
 //===========================================================================
 void cShapeTorus::render(const int a_renderMode)
 {
+    //-----------------------------------------------------------------------
+    // Conditions for object to be rendered
+    //-----------------------------------------------------------------------
+
+    if(((a_renderMode == CHAI_RENDER_MODE_NON_TRANSPARENT_ONLY) &&
+        (m_useTransparency == true)) ||
+       ((a_renderMode == CHAI_RENDER_MODE_TRANSPARENT_FRONT_ONLY) &&
+        (m_useTransparency == false)) ||
+       ((a_renderMode == CHAI_RENDER_MODE_TRANSPARENT_BACK_ONLY) &&
+        (m_useTransparency == false)))
+        {
+            return;
+        }
+
+    //-----------------------------------------------------------------------
+    // Rendering code here
+    //-----------------------------------------------------------------------
+
     // render material properties
-    m_material.render();
+    if (m_useMaterialProperty)
+    {
+        m_material.render();
+    }
 
     // render texture property if defined
-    if (m_texture != NULL)
+    if ((m_texture != NULL) && (m_useTextureMapping))
     {
         m_texture->render();
     }
 
     // draw sphere
-    glutSolidTorus(m_innerRadius, m_outerRadius, 32, 32);
+    glutSolidTorus(m_innerRadius, m_outerRadius, m_resolution, m_resolution);
 
     // turn off texture rendering if it has been used
     glDisable(GL_TEXTURE_2D);
@@ -88,52 +101,61 @@ void cShapeTorus::render(const int a_renderMode)
 
 //===========================================================================
 /*!
-    Compute forces between tool and sphere shape
+    From the position of the tool, search for the nearest point located
+    at the surface of the current object. Decide if the point is located inside
+    or outside of the object
 
-    \fn       cVector3d cShapeTorus::computeLocalForce(const cVector3d& a_localPosition)
-    \param    a_localPosition    position of tool in world coordinates
-    \return   return reaction force if tool is located inside sphere
+    \fn     void cShapeTorus::computeLocalInteraction(const cVector3d& a_toolPos,
+                                                      const cVector3d& a_toolVel,
+                                                      const unsigned int a_IDN)
+    \param  a_toolPos  Position of the tool.
+    \param  a_toolVel  Velocity of the tool.
+    \param  a_IDN  Identification number of the force algorithm.
 */
 //===========================================================================
-cVector3d cShapeTorus::computeLocalForce(const cVector3d& a_localPosition)
+void cShapeTorus::computeLocalInteraction(const cVector3d& a_toolPos,
+                                          const cVector3d& a_toolVel,
+                                          const unsigned int a_IDN)
 {
-	
-    // In the following we compute the reaction forces between the tool and the
-    // sphere.
-    cVector3d localForce;
+    cVector3d toolProjection = a_toolPos;
+    toolProjection.z = 0;
 
-    // project pointer on torus plane (z=0)
-    cVector3d fingerProjection = a_localPosition;
-    fingerProjection.z = 0;
-    
     // search for the nearest point on the torus medial axis
-    if (a_localPosition.lengthsq() > CHAI_SMALL)
+    if (a_toolPos.lengthsq() > CHAI_SMALL)
     {
-        cVector3d pointAxisTorus = cMul(m_outerRadius, cNormalize(fingerProjection));
+        cVector3d pointAxisTorus = cMul(m_outerRadius, cNormalize(toolProjection));
 
-        // compute eventual penetration of finger inside the torus
-        cVector3d vectTorusFinger = cSub(a_localPosition, pointAxisTorus);
+        // compute eventual penetration of tool inside the torus
+        cVector3d vectTorusTool = cSub(a_toolPos, pointAxisTorus);
 
-        double distance = vectTorusFinger.length();
+        double distance = vectTorusTool.length();
 
-        // finger inside torus, compute forces
+        // tool is located inside the torus
         if ((distance < m_innerRadius) && (distance > 0.001))
         {
-            localForce = cMul((m_innerRadius - distance) * (m_material.getStiffness()), cNormalize(vectTorusFinger));
+            m_interactionInside = true;
         }
 
-        // finger is outside torus
+        // tool is located outside the torus
         else
         {
-            localForce.zero();
+            m_interactionInside = false;
         }
+
+        // compute surface point
+        double dist = vectTorusTool.length();
+        if (dist > 0)
+        {
+            vectTorusTool.mul(1/dist);
+        }
+        vectTorusTool.mul(m_innerRadius);
+        pointAxisTorus.addr(vectTorusTool, m_interactionProjectedPoint);
     }
     else
     {
-        localForce.zero();
+        m_interactionInside = false;
+        m_interactionProjectedPoint = a_toolPos;
     }
-
-    return (localForce);
 }
 
 

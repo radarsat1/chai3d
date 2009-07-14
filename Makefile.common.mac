@@ -1,0 +1,15 @@
+#  (C) 2002-2009 - CHAI 3D
+#  All Rights Reserved.
+#
+#  $Author: seb $
+#  $Date: 2009-05-21 12:34:35 +1200 (Thu, 21 May 2009) $
+#  $Rev: 198 $
+
+
+# common compiler flags
+CXXFLAGS += -D_MACOSX
+CXXFLAGS += -W -Wno-deprecated -Wno-unused-parameter
+
+# common linker flags
+LDFLAGS  += -L/usr/lib -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+LDLIBS   += -lpthread -framework IOKit -framework CoreFoundation -framework OpenGL -framework GLUT

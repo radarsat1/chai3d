@@ -1,7 +1,7 @@
 //===========================================================================
 /*
     This file is part of the CHAI 3D visualization and haptics libraries.
-    Copyright (C) 2003-2004 by CHAI 3D. All rights reserved.
+    Copyright (C) 2003-2009 by CHAI 3D. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License("GPL") version 2
@@ -12,80 +12,193 @@
     of our support services, please contact CHAI 3D about acquiring a
     Professional Edition License.
 
-    \author:    <http://www.chai3d.org>
-    \author:    Force Dimension - www.forcedimension.com
-    \version    1.1
-    \date       01/2004
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   2.0.0 $Rev: 266 $
 */
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "CFalconDevice.h"
+#include "extras/CGlobals.h"
+#include "devices/CFalconDevice.h"
 //---------------------------------------------------------------------------
-#ifndef _DISABLE_FALCON_DEVICE_SUPPORT
+#if defined(_ENABLE_FALCON_DEVICE_SUPPORT)
 //---------------------------------------------------------------------------
-#include <windows.h>
-#include "CMaths.h"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //---------------------------------------------------------------------------
 
-HINSTANCE dhdlcDLL = NULL;
+#ifndef DLLVERSIONINFO
+typedef struct _DllVersionInfo
+{
+    DWORD cbSize;
+    DWORD dwMajorVersion;
+    DWORD dwMinorVersion;
+    DWORD dwBuildNumber;
+    DWORD dwPlatformID;
+}DLLVERSIONINFO;
+#endif
 
-int (__stdcall *dhdlcOpen)                       ();
-int (__stdcall *dhdlcClose)                      ();
-int (__stdcall *dhdlcGetButton)                  ();
-int (__stdcall *dhdlcReset)                      ();
-int (__stdcall *dhdlcGetPosition)                (double *px, double *py, double *pz);
-int (__stdcall *dhdlcSetForce)                   (double  fx, double  fy, double  fz);
-int (__stdcall *dhdlcUpdate)                     ();
+#ifndef DLLGETVERSIONPROC
+typedef int (FAR WINAPI *DLLGETVERSIONPROC) (DLLVERSIONINFO *);
+#endif
+//---------------------------------------------------------------------------
+
+HINSTANCE hdFalconDLL = NULL;
+HINSTANCE hdFalconDriverDLL = NULL;
+
+int (__stdcall *hdFalconGetNumDevices)  ();
+int (__stdcall *hdFalconOpen)           (int a_deviceID);
+int (__stdcall *hdFalconClose)          (int a_deviceID);
+int (__stdcall *hdFalconGetPosition)    (int a_deviceID,
+					 double *a_posX,
+                     double *a_posY,
+					 double *a_posZ);
+int (__stdcall *hdFalconGetRotation)   (int a_deviceID,
+                                        double *a_rot00,
+                                        double *a_rot01,
+                                        double *a_rot02,
+                                        double *a_rot10,
+                                        double *a_rot11,
+                                        double *a_rot12,
+                                        double *a_rot20,
+                                        double *a_rot21,
+                                        double *a_rot22);
+
+int (__stdcall *hdFalconGetButtons)    (int a_deviceID);
+
+int (__stdcall *hdFalconSetForce)      (int a_deviceID,
+                                        double *a_forceX,
+                                        double *a_forceY,
+                                        double *a_forceZ);
 
 
+// Initialize dhd dll reference count
+int cFalconDevice::m_dllcount = 0;
+
+//---------------------------------------------------------------------------
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
+//---------------------------------------------------------------------------
 
 //===========================================================================
 /*!
-    Constructor of cDeltaDevice.
+    Constructor of cFalconDevice.
 
     \fn     cFalconDevice::cFalconDevice(unsigned int a_deviceNumber)
 */
 //===========================================================================
 cFalconDevice::cFalconDevice(unsigned int a_deviceNumber)
 {
-    // init variable
-    m_halfSizeWorkspace     = 0.075;
-    m_maximumForces         = 5.0;
+    // set specifications
+    m_specifications.m_manufacturerName              = "Novint Technologies";
+    m_specifications.m_modelName                     = "Falcon";
+    m_specifications.m_maxForce                      = 8.0;     // [N]
+    m_specifications.m_maxForceStiffness             = 3000.0;  // [N/m]
+    m_specifications.m_maxTorque                     = 0.0;     // [N*m]
+    m_specifications.m_maxTorqueStiffness            = 0.0;     // [N*m/Rad]
+    m_specifications.m_maxGripperTorque              = 0.0;     // [N]
+    m_specifications.m_maxLinearDamping              = 20.0;    // [N/(m/s)]
+    m_specifications.m_maxGripperTorqueStiffness     = 0.0;     // [N*m/m]
+    m_specifications.m_workspaceRadius               = 0.04;    // [m]
+    m_specifications.m_sensedPosition                = true;
+    m_specifications.m_sensedRotation                = false;
+    m_specifications.m_sensedGripper                 = false;
+    m_specifications.m_actuatedPosition              = true;
+    m_specifications.m_actuatedRotation              = false;
+    m_specifications.m_actuatedGripper               = false;
+    m_specifications.m_leftHand                      = true;
+    m_specifications.m_rightHand                     = true;
 
     // device is not yet available or ready
+    m_driverInstalled = false;
     m_systemAvailable = false;
     m_systemReady = false;
 
-    // load dhdlc.dll library
-    dhdlcDLL = LoadLibrary("C:\\Program Files\\Novint\\Falcon\\HDAL\\bin\\dhdlc.dll");
+    // check if Falcon drivers installed
+    if (m_dllcount == 0)
+    {
+        // load Falcon dll
+        hdFalconDriverDLL = LoadLibrary("hdl.dll");
+
+        // check if file exists
+        if (hdFalconDriverDLL == NULL) { return; }
+
+        // check if multi device is supported
+        FARPROC testFunction = NULL;
+        testFunction = GetProcAddress(hdFalconDriverDLL, "_hdlCountDevices@0");
+        if (testFunction == NULL)
+        {
+            // failed, old version is installed.
+            printf("Error - Please update the drivers of your Novint Falcon haptic device.\n");
+            return;
+        }
+    }
+
+    // the Falcon drivers are installed
+    m_driverInstalled = true;
+
+    // load dll library
+    if (m_dllcount == 0)
+    {
+        hdFalconDLL = LoadLibrary("hdFalcon.dll");
+    }
 
     // check if DLL loaded correctly
-    if (dhdlcDLL == NULL)
+    if (hdFalconDLL == NULL)
     {
         return;
     }
 
+
     // load different callbacks
-    dhdlcOpen        = (int (__stdcall*)())GetProcAddress(dhdlcDLL, "dhdOpen");
-    dhdlcClose       = (int (__stdcall*)())GetProcAddress(dhdlcDLL, "dhdClose");
-    dhdlcGetButton   = (int (__stdcall*)())GetProcAddress(dhdlcDLL, "dhdGetButton");
-    dhdlcReset       = (int (__stdcall*)())GetProcAddress(dhdlcDLL, "dhdReset");
-    dhdlcGetPosition = (int (__stdcall*)(double*, double*, double*))GetProcAddress(dhdlcDLL, "dhdGetPosition");
-    dhdlcSetForce    = (int (__stdcall*)(double, double, double))GetProcAddress(dhdlcDLL, "dhdSetForce");
-    dhdlcUpdate      = (int (__stdcall*)())GetProcAddress(dhdlcDLL, "dhdUpdate");
+    hdFalconGetNumDevices = (int (__stdcall*)(void))
+                            GetProcAddress(hdFalconDLL, "hdFalconGetNumDevices");
+
+    hdFalconOpen         = (int (__stdcall*)(int))
+                            GetProcAddress(hdFalconDLL, "hdFalconOpen");
+
+    hdFalconClose        = (int (__stdcall*)(int))
+                            GetProcAddress(hdFalconDLL, "hdFalconClose");
+
+    hdFalconGetPosition  = (int (__stdcall*)(int,
+                                             double*, double*, double*))
+                            GetProcAddress(hdFalconDLL, "hdFalconGetPosition");
+
+    hdFalconGetRotation  = (int (__stdcall*)(int,
+                                             double*, double*, double*,
+                                             double*, double*, double*,
+                                             double*, double*, double*))
+                            GetProcAddress(hdFalconDLL, "hdFalconGetRotation");
+
+    hdFalconGetButtons        = (int (__stdcall*)(int))
+                            GetProcAddress(hdFalconDLL, "hdFalconGetButtons");
+
+    hdFalconSetForce     = (int (__stdcall*)(int,
+                                             double*,
+                                             double*,
+                                             double*))
+                            GetProcAddress(hdFalconDLL, "hdFalconSetForce");
+
+
+    // get the number ID of the device we wish to communicate with
+    m_deviceID = a_deviceNumber;
+
+    // get the number of Force Dimension devices connected to this computer
+    int numDevices = hdFalconGetNumDevices();
 
     // check if such device is available
-    if (dhdlcOpen() >= 0)
+    if ((a_deviceNumber + 1) > (unsigned int)numDevices)
     {
-        m_systemAvailable = true;
+        // no, such ID does not lead to an existing device
+        m_systemAvailable = false;
     }
     else
     {
-        m_systemAvailable = false;
+        // yes, this ID leads to an existing device
+        m_systemAvailable = true;
     }
 
-    dhdlcClose();
+    // increment counter
+    m_dllcount++;
 }
 
 
@@ -104,24 +217,28 @@ cFalconDevice::~cFalconDevice()
         close();
     }
 
+    m_dllcount--;
 
-    if (dhdlcDLL != NULL)
+    if ((m_dllcount == 0) && (hdFalconDLL != NULL))
     {
-        FreeLibrary(dhdlcDLL);
-        dhdlcDLL = 0;
+        FreeLibrary(hdFalconDLL);
+        hdFalconDLL = NULL;
     }
 }
 
 
 //===========================================================================
 /*!
-    Open connection to delta device.
+    Open connection to Falcon haptic device.
 
     \fn     int cFalconDevice::open()
 */
 //===========================================================================
 int cFalconDevice::open()
 {
+    // check if drivers are installed
+    if (!m_driverInstalled) return (-1);
+
     // check if the system is available
     if (!m_systemAvailable) return (-1);
 
@@ -129,36 +246,33 @@ int cFalconDevice::open()
     if (m_systemReady) return (0);
 
     // try to open the device
-    int result = dhdlcOpen();
+    hdFalconOpen(m_deviceID);
 
     // update device status
-    if (result == 0)
-    {
-        m_systemReady = true;
-        return(0);
-    }
-    else
-    {
-        m_systemReady = false;
-        return (-1);
-    }
+    m_systemReady = true;
+
+    // success
+    return (0);
 }
 
 
 //===========================================================================
 /*!
-    Close connection to delta device.
+    Close connection to Falcon haptic device.
 
     \fn     int cFalconDevice::close()
 */
 //===========================================================================
 int cFalconDevice::close()
 {
+    // check if drivers are installed
+    if (!m_driverInstalled) return (-1);
+
     // check if the system has been opened previously
     if (!m_systemReady) return (-1);
 
     // yes, the device is open so let's close it
-    int result = dhdlcClose();
+    int result = hdFalconClose(m_deviceID);
 
     // update status
     m_systemReady = false;
@@ -170,8 +284,8 @@ int cFalconDevice::close()
 
 //===========================================================================
 /*!
-    Calibrate delta device. 
-    
+    Calibrate Falcon haptic device.
+
     This function does nothing right now; the a_resetEncoders parameter is ignored.
 
     \fn     int cFalconDevice::initialize(const bool a_resetEncoders = false)
@@ -181,124 +295,120 @@ int cFalconDevice::close()
 //===========================================================================
 int cFalconDevice::initialize(const bool a_resetEncoders)
 {
+    // check if drivers are installed
+    if (!m_driverInstalled) return (-1);
+
     // reset encoders
     return (0);
-    //return (dhdlcReset());
 }
 
 
 //===========================================================================
 /*!
-    Send a command to the delta device
+    Returns the number of devices available from this class of device.
 
-    \fn         int cFalconDevice::command(int a_command, void* a_data)
-    \param      a_command  Selected command.
-    \param      a_data  Pointer to the corresponding data structure.
-    \return     Return status of command.  CHAI_MSG_OK is good, anything
-                else is probably not good.
+    \fn     unsigned int cFalconDevice::getNumDevices();
+    \return  Returns the result
 */
 //===========================================================================
-int cFalconDevice::command(int a_command, void* a_data)
+unsigned int cFalconDevice::getNumDevices()
 {
-    // temp variables
-    int result = CHAI_MSG_OK;
-    double x=0.0,y=0.0,z=0.0;
+    // check if drivers are installed
+    if (!m_driverInstalled) return (0);
 
-    // check if device is open
-    if (m_systemReady)
-    {
-        switch (a_command)
-        {
-            // read position of falcon device
-            case CHAI_CMD_GET_POS_3D:
-            {
-                // read position from device
-                cVector3d* position = (cVector3d *) a_data;
-                dhdlcUpdate();
-                dhdlcGetPosition(&x, &y, &z);
-                position->set(x, y, z);
-            }
-            break;
-
-            // read normalized position of the delta device
-            case CHAI_CMD_GET_POS_NORM_3D:
-            {
-                // read position from device
-                cVector3d* position = (cVector3d *) a_data;
-                dhdlcUpdate();
-                dhdlcGetPosition(&x, &y, &z);
-                position->set(x, y, z);
-                position->div(m_halfSizeWorkspace);
-            }
-            break;
-
-            // read orientation angles of delta wrist
-            case CHAI_CMD_GET_ROT_ANGLES:
-            {
-                cVector3d* angles = (cVector3d *) a_data;
-                angles->set(0, 0, 0);
-            }
-            break;
-
-            // read orientation matrix of wrist
-            case CHAI_CMD_GET_ROT_MATRIX:
-            {
-                cMatrix3d frame;
-                frame.identity();
-                cMatrix3d* matrix = (cMatrix3d *) a_data;
-                *matrix = frame;
-            }
-            break;
-
-            // set force to device
-            case CHAI_CMD_SET_FORCE_3D:
-            {
-                cVector3d* force = (cVector3d *) a_data;
-                dhdlcSetForce(force->x, force->y, force->z);
-            }
-            break;
-
-
-            // read user switch from wrist
-            case CHAI_CMD_GET_SWITCH_0:
-            {
-                int* result = (int *) a_data;
-                *result = dhdlcGetButton();
-            }
-            break;
-
-            // read user switch from wrist
-            case CHAI_CMD_GET_SWITCH_MASK:
-            {
-                int* result = (int *) a_data;
-
-                // Force the result to be 0 or 1, since bit 0 should carry button 0's value
-                *result = dhdlcGetButton() ? 1 : 0;
-            }
-            break;
-
-            // read scale factor from normalized coords to mm
-            case CHAI_CMD_GET_NORMALIZED_SCALE_FACTOR:
-            {
-                double* scale = (double*)a_data;
-
-                // Multiply by m_halfSizeWorkspace to get meters back
-                *scale = m_halfSizeWorkspace;
-
-                result = CHAI_MSG_OK;
-            }
-            break;
-
-            // function is not implemented for delta devices
-            default:
-                result = CHAI_MSG_NOT_IMPLEMENTED;
-        }
-    }
-    else
-    {
-        result = CHAI_MSG_SYSTEM_NOT_READY;
-    }
-    return (result);
+    int numDevices = hdFalconGetNumDevices();
+    return (numDevices);
 }
 
-#endif
+
+//===========================================================================
+/*!
+    Read the position of the device. Units are meters [m].
+
+    \fn     int cFalconDevice::getPosition(cVector3d& a_position)
+    \param  a_position  Return value.
+    \return Return 0 if no error occurred.
+*/
+//===========================================================================
+int cFalconDevice::getPosition(cVector3d& a_position)
+{
+    // check if drivers are installed
+    if (!m_driverInstalled) return (-1);
+
+    double x,y,z;
+    int error = hdFalconGetPosition(m_deviceID, &x, &y, &z);
+
+    // add a small offset for zero centering
+    x = x + 0.01;
+    a_position.set(x, y, z);
+    estimateLinearVelocity(a_position);
+    return (error);
+}
+
+
+//===========================================================================
+/*!
+    Send a force [N] to the Falcon haptic device.
+
+    \fn     int cFalconDevice::setForce(cVector3d& a_force)
+    \param  a_force  Force command to be applied to device.
+    \return Return 0 if no error occurred.
+*/
+//===========================================================================
+int cFalconDevice::setForce(cVector3d& a_force)
+{
+    // check if drivers are installed
+    if (!m_driverInstalled) return (-1);
+
+    int error = hdFalconSetForce(m_deviceID, &a_force.x, &a_force.y, &a_force.z);
+    m_prevForce = a_force;
+    return (error);
+}
+
+
+//===========================================================================
+/*!
+    Read the status of the user switch [1 = \e ON / 0 = \e OFF].
+
+    \fn     int cFalconDevice::getUserSwitch(int a_switchIndex, bool& a_status)
+    \param  a_switchIndex  index number of the switch.
+    \param  a_status result value from reading the selected input switch.
+    \return Return 0 if no error occurred.
+*/
+//===========================================================================
+int cFalconDevice::getUserSwitch(int a_switchIndex, bool& a_status)
+{
+    // check if drivers are installed
+    if (!m_driverInstalled) return (-1);
+    
+    bool result = false;
+    int button = hdFalconGetButtons(m_deviceID);
+
+    switch (a_switchIndex)
+    {
+        case 0:
+			if (button & 1) { result = true; }
+            break;
+
+        case 1:
+            if (button & 2) { result = true; }
+            break;
+
+        case 2:
+            if (button & 3) { result = true; }
+            break;
+
+        case 3:
+            if (button & 4) { result = true; }
+            break;
+    }
+
+	// return result
+	a_status = result;
+
+    return (0);
+}
+
+//---------------------------------------------------------------------------
+#endif //_ENABLE_FALCON_DEVICE_SUPPORT
+//---------------------------------------------------------------------------

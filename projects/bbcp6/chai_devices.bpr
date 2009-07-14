@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="..\..\lib\bbcp6\chai_devices.lib"/>
+    <OBJFILES value="obj\CVirtualDevice.obj obj\CPhantomDevices.obj obj\CGenericDevice.obj 
+      obj\CDriverSensoray626.obj obj\CDriverServotogo.obj obj\CFalconDevice.obj 
+      obj\CFreedom6SDevice.obj obj\CGenericHapticDevice.obj 
+      obj\CHapticDeviceHandler.obj obj\CMyCustomDevice.obj obj\CDeltaDevices.obj 
+      obj\CCallback.obj"/>
+    <RESFILES value=""/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value="..\..\lib\bbcp6\DLPortIO.lib"/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..\src\devices"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="_DEBUG;_WIN32;_BBCP"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
+    <MAINSOURCE value="chai_devices.bpf"/>
+    <INCLUDEPATH value="&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\devices;..\..\src\timers;..\..\src;..\..\external\opengl\bbcp"/>
+    <LIBPATH value="&quot;C:\Program Files\Borland\CBuilder6\Projects&quot;;..\..\src\devices;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-rch -w-8065 -w-pia -w-par -w-8027 -w-csu"/>
+    <LISTFILE value=""/>
+    <OTHERFILES value=""/>
+  </MACROS>
+  <OPTIONS>
+    <IDLCFLAGS value="-I..\src\devices -I$(BCB)\include -I$(BCB)\include\vcl -I..\src\math 
+      -src_suffix cpp -DWIN32 -boa"/>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2obj -N0obj -$Y+ -$W -$O- -$A8 -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value=""/>
+    <OTHERFILES value=""/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+    <OTHERFILES value=""/>
+  </LINKER>
+  <FILELIST>
+      <FILE FILENAME="chai_devices.bpf" FORMNAME="" UNITNAME="chai_devices" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CVirtualDevice.cpp" FORMNAME="" UNITNAME="CVirtualDevice" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CPhantomDevices.cpp" FORMNAME="" UNITNAME="CPhantomDevices.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CGenericDevice.cpp" FORMNAME="" UNITNAME="CGenericDevice.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CDriverSensoray626.cpp" FORMNAME="" UNITNAME="CDriverSensoray626" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CDriverServotogo.cpp" FORMNAME="" UNITNAME="CDriverServotogo.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\lib\bbcp6\DLPortIO.lib" FORMNAME="" UNITNAME="DLPortIO.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CFalconDevice.cpp" FORMNAME="" UNITNAME="CFalconDevice" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CFreedom6SDevice.cpp" FORMNAME="" UNITNAME="CFreedom6SDevice" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CGenericHapticDevice.cpp" FORMNAME="" UNITNAME="CGenericHapticDevice" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CHapticDeviceHandler.cpp" FORMNAME="" UNITNAME="CHapticDeviceHandler" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CMyCustomDevice.cpp" FORMNAME="" UNITNAME="CMyCustomDevice" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CDeltaDevices.cpp" FORMNAME="" UNITNAME="CDeltaDevices" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\devices\CCallback.cpp" FORMNAME="" UNITNAME="CCallback" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=10
+Item0=C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\devices;..\..\src\timers;..\..\src;..\..\external\opengl\bbcp
+Item1=C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\devices;..\..\src\timers;..\..\src;..\..\external\opengl\bbcp6
+Item2=C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\devices;..\..\src\timers;..\..\src
+Item3=$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\devices;..\..\src\timers;..\..\src\
+Item4=$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\devices;..\..\src\timers
+Item5=..\..\src\devices;..\src\devices;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\timers
+Item6=..\src\devices;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\timers
+Item7=..\src\devices;$(BCB)\include;$(BCB)\include\vcl;..\src\math
+Item8=..\src\devices;$(BCB)\include;$(BCB)\include\vcl
+Item9=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=5
+Item0=C:\Program Files\Borland\CBuilder6\Projects;..\..\src\devices;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\src\devices;$(BCB)\lib\obj;$(BCB)\lib
+Item2=$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\..\src\devices;..\src\devices;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\src\devices;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=5
+Item0=_DEBUG;_WIN32;_BBCP
+Item1=_DEBUG;_WIN32
+Item2=WIN32;_DEBUG
+Item3=WIN32
+Item4=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=obj
+
+[HistoryLists\hlFinalOutputDir]
+Count=5
+Item0=..\..\lib\bbcp6\
+Item1=..\lib\bbcp6\
+Item2=..\bin\
+Item3=..\lib\bbcp\
+Item4=..\lib\bbcp
+
+[HistoryLists\hIBPIOutputDir]
+Count=1
+Item0=..\lib\bbcp
+
+[HistoryLists\hlTlibPageSize]
+Count=1
+Item0=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteLauncher=
+RemoteCWD=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

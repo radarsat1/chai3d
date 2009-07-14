@@ -1,0 +1,133 @@
+#------------------------------------------------------------------------------
+VERSION = BWS.01
+#------------------------------------------------------------------------------
+!ifndef ROOT
+ROOT = $(MAKEDIR)\..
+!endif
+#------------------------------------------------------------------------------
+MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
+DCC = $(ROOT)\bin\dcc32.exe $**
+BRCC = $(ROOT)\bin\brcc32.exe $**
+#------------------------------------------------------------------------------
+PROJECTS = chai_collisions.lib chai_devices.lib chai_displays.lib \
+  chai_effects.lib chai_extras.lib chai_files.lib chai_forces.lib \
+  chai_graphics.lib chai_math.lib chai_scenegraph.lib chai_timers.lib \
+  chai_tools.lib chai_widgets.lib devices_bbcp6.exe boards_bbcp6.exe \
+  oring_bbcp6.exe effects_bbcp6.exe polygons_bbcp6.exe map_bbcp6.exe \
+  object_bbcp6.exe chrome_bbcp6.exe tooth_bbcp6.exe turntable_bbcp6.exe \
+  cubic_bbcp6.exe GEL_membrane_bbcp6.exe GEL_cell_bbcp6.exe GEL_duck_bbcp6.exe
+#------------------------------------------------------------------------------
+default: $(PROJECTS)
+#------------------------------------------------------------------------------
+
+
+
+chai_collisions.lib: ..\..\projects\bbcp6\chai_collisions.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_devices.lib: ..\..\projects\bbcp6\chai_devices.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_displays.lib: ..\..\projects\bbcp6\chai_displays.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_extras.lib: ..\..\projects\bbcp6\chai_extras.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_forces.lib: ..\..\projects\bbcp6\chai_forces.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_graphics.lib: ..\..\projects\bbcp6\chai_graphics.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_math.lib: ..\..\projects\bbcp6\chai_math.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_scenegraph.lib: ..\..\projects\bbcp6\chai_scenegraph.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_timers.lib: ..\..\projects\bbcp6\chai_timers.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_tools.lib: ..\..\projects\bbcp6\chai_tools.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_widgets.lib: ..\..\projects\bbcp6\chai_widgets.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_files.lib: ..\..\projects\bbcp6\chai_files.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chai_effects.lib: ..\..\projects\bbcp6\chai_effects.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+devices_bbcp6.exe: 01-devices\devices_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+boards_bbcp6.exe: 02-boards\boards_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+oring_bbcp6.exe: 10-oring\oring_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+effects_bbcp6.exe: 11-effects\effects_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+polygons_bbcp6.exe: 12-polygons\polygons_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+map_bbcp6.exe: 20-map\map_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+object_bbcp6.exe: 21-object\object_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+chrome_bbcp6.exe: 22-chrome\chrome_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+tooth_bbcp6.exe: 23-tooth\tooth_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+turntable_bbcp6.exe: 24-turntable\turntable_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+cubic_bbcp6.exe: 25-cubic\cubic_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+GEL_membrane_bbcp6.exe: 50-GEL-membrane\GEL_membrane_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+GEL_cell_bbcp6.exe: 51-GEL-cell\GEL_cell_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+GEL_duck_bbcp6.exe: 52-GEL-duck\GEL_duck_bbcp6.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+

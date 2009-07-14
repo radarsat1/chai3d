@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="..\..\lib\bbcp6\chai_extras.lib"/>
+    <OBJFILES value="obj\CExtras.obj"/>
+    <RESFILES value=""/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..\src\extras"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="_DEBUG;_WIN32;_BBCP"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
+    <MAINSOURCE value="chai_extras.bpf"/>
+    <INCLUDEPATH value="..\..\src\extras;..\..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\graphics;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp"/>
+    <LIBPATH value="..\..\src\extras;..\..\src\files;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-rch -w-par -w-lin -w-8027 -w-8026 -w-csu -w-ccc -w-aus"/>
+    <LISTFILE value=""/>
+    <OTHERFILES value=""/>
+  </MACROS>
+  <OPTIONS>
+    <IDLCFLAGS value="-I..\examples\bcpp6 -I..\src\files -I$(BCB)\include -I$(BCB)\include\vcl 
+      -I..\src\math -I..\src\graphics -src_suffix cpp -boa"/>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <PFLAGS value="-N2obj -N0obj -$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="/P32"/>
+    <OTHERFILES value=""/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+    <OTHERFILES value=""/>
+  </LINKER>
+  <FILELIST>
+      <FILE FILENAME="chai_extras.bpf" FORMNAME="" UNITNAME="chai_extras" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\src\extras\CExtras.cpp" FORMNAME="" UNITNAME="CExtras" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=13
+Item0=..\..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\graphics;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp
+Item1=..\..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\graphics;..\..\src\scenegraph;..\..\src;..\..\external\opengl\bbcp6
+Item2=..\..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\graphics;..\..\src\scenegraph;..\..\src
+Item3=..\..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\graphics;..\..\src\scenegraph;..\..\src\
+Item4=..\..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\..\src\math;..\..\src\graphics;..\..\src\scenegraph
+Item5=..\..\src\files;..\examples\bcpp6;..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\scenegraph
+Item6=..\examples\bcpp6;..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics;..\src\scenegraph
+Item7=..\examples\bcpp6;..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
+Item8=..\src\files;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
+Item9=..\src\files\obj;..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl;..\src\math;..\src\graphics
+Item10=..\src\files\obj;..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl
+Item11=..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\include;$(BCB)\include\vcl
+Item12=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=7
+Item0=..\..\src\files;$(BCB)\lib\obj;$(BCB)\lib
+Item1=$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..\src\files;..\examples\bcpp6;..\src\files;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\examples\bcpp6;..\src\files;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\src\files;$(BCB)\lib\obj;$(BCB)\lib
+Item5=..\src\files\obj;..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\src\files;C:\Program Files\Borland\CBuilder6\Projects;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=3
+Item0=_DEBUG;_WIN32;_BBCP
+Item1=_WIN32
+Item2=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=obj
+
+[HistoryLists\hlFinalOutputDir]
+Count=3
+Item0=..\..\lib\bbcp6\
+Item1=..\lib\bbcp6\
+Item2=..\lib\bbcp6
+
+[HistoryLists\hlTlibPageSize]
+Count=2
+Item0=0x0020
+Item1=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteLauncher=
+RemoteCWD=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>
