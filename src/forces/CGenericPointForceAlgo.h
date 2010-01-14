@@ -22,8 +22,8 @@
 #ifndef CGenericPointForceAlgoH
 #define CGenericPointForceAlgoH
 //---------------------------------------------------------------------------
-#include "math/CVector3d.h"
-#include "scenegraph/CGenericObject.h"
+#include "../math/CVector3d.h"
+#include "../scenegraph/CGenericObject.h"
 #include <vector>
 //---------------------------------------------------------------------------
 class cWorld;

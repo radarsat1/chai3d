@@ -22,8 +22,8 @@
 #ifndef CEffectVibrationH
 #define CEffectVibrationH
 //---------------------------------------------------------------------------
-#include "effects/CGenericEffect.h"
-#include "timers/CPrecisionClock.h"
+#include "../effects/CGenericEffect.h"
+#include "../timers/CPrecisionClock.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

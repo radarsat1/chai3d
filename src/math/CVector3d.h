@@ -23,9 +23,9 @@
 #ifndef CVector3dH
 #define CVector3dH
 //---------------------------------------------------------------------------
-#include "math/CString.h"
-#include "math/CConstants.h"
-#include "extras/CGlobals.h"
+#include "../math/CString.h"
+#include "../math/CConstants.h"
+#include "../extras/CGlobals.h"
 #include <math.h>
 #include <ostream>
 //---------------------------------------------------------------------------

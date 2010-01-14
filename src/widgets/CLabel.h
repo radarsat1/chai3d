@@ -22,11 +22,11 @@
 #ifndef CLabelH
 #define CLabelH
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
-#include "scenegraph/CGenericObject.h"
-#include "widgets/CFont.h"
-#include "graphics/CColor.h"
-#include "math/CString.h"
+#include "../extras/CGlobals.h"
+#include "../scenegraph/CGenericObject.h"
+#include "../widgets/CFont.h"
+#include "../graphics/CColor.h"
+#include "../math/CString.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

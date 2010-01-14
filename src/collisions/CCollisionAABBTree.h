@@ -23,8 +23,8 @@
 #ifndef CCollisionAABBTreeH
 #define CCollisionAABBTreeH
 //---------------------------------------------------------------------------
-#include "collisions/CCollisionBasics.h"
-#include "collisions/CCollisionAABBBox.h"
+#include "../collisions/CCollisionBasics.h"
+#include "../collisions/CCollisionAABBBox.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

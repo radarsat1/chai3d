@@ -22,9 +22,9 @@
 #ifndef CVertexH
 #define CVertexH
 //---------------------------------------------------------------------------
-#include "math/CVector3d.h"
-#include "math/CMatrix3d.h"
-#include "graphics/CColor.h"
+#include "../math/CVector3d.h"
+#include "../math/CMatrix3d.h"
+#include "../graphics/CColor.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

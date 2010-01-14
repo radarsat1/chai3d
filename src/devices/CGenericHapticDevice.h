@@ -22,10 +22,10 @@
 #ifndef CGenericHapticDeviceH
 #define CGenericHapticDeviceH
 //---------------------------------------------------------------------------
-#include "devices/CGenericDevice.h"
-#include "math/CVector3d.h"
-#include "math/CMatrix3d.h"
-#include "timers/CPrecisionClock.h"
+#include "../devices/CGenericDevice.h"
+#include "../math/CVector3d.h"
+#include "../math/CMatrix3d.h"
+#include "../timers/CPrecisionClock.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

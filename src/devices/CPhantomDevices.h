@@ -25,10 +25,10 @@
 //---------------------------------------------------------------------------
 #if defined(_ENABLE_PHANTOM_DEVICE_SUPPORT)
 //---------------------------------------------------------------------------
-#include "devices/CGenericHapticDevice.h"
+#include "../devices/CGenericHapticDevice.h"
 //---------------------------------------------------------------------------
 #ifdef _LINUX
-#include "devices/hdPhantom.h"
+#include "../devices/hdPhantom.h"
 #endif
 //---------------------------------------------------------------------------
 

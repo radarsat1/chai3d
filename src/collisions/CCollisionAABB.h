@@ -23,12 +23,12 @@
 #ifndef CCollisionAABBH
 #define CCollisionAABBH
 //---------------------------------------------------------------------------
-#include "graphics/CTriangle.h"
-#include "graphics/CVertex.h"
-#include "math/CMaths.h"
-#include "collisions/CGenericCollision.h"
-#include "collisions/CCollisionAABBBox.h"
-#include "collisions/CCollisionAABBTree.h"
+#include "../graphics/CTriangle.h"
+#include "../graphics/CVertex.h"
+#include "../math/CMaths.h"
+#include "../collisions/CGenericCollision.h"
+#include "../collisions/CCollisionAABBBox.h"
+#include "../collisions/CCollisionAABBTree.h"
 #include <vector>
 //---------------------------------------------------------------------------
 

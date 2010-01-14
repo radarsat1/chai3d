@@ -23,10 +23,10 @@
 #ifndef CGenericToolH
 #define CGenericToolH
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
+#include "../extras/CGlobals.h"
 //---------------------------------------------------------------------------
-#include "scenegraph/CGenericObject.h"
-#include "devices/CGenericHapticDevice.h"
+#include "../scenegraph/CGenericObject.h"
+#include "../devices/CGenericHapticDevice.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

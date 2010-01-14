@@ -33,30 +33,30 @@
 */
 //===========================================================================
 
-#include "devices/CGenericHapticDevice.h"
+#include "../devices/CGenericHapticDevice.h"
 
 #if defined(_ENABLE_VIRTUAL_DEVICE_SUPPORT)
-#include "devices/CVirtualDevice.h"
+#include "../devices/CVirtualDevice.h"
 #endif
 
 #if defined(_ENABLE_DELTA_DEVICE_SUPPORT)
-#include "devices/CDeltaDevices.h"
+#include "../devices/CDeltaDevices.h"
 #endif
 
 #if defined(_ENABLE_FALCON_DEVICE_SUPPORT)
-#include "devices/CFalconDevice.h"
+#include "../devices/CFalconDevice.h"
 #endif
 
 #if defined(_ENABLE_MPB_DEVICE_SUPPORT)
-#include "devices/CFreedom6SDevice.h"
+#include "../devices/CFreedom6SDevice.h"
 #endif
 
 #if defined(_ENABLE_PHANTOM_DEVICE_SUPPORT)
-#include "devices/CPhantomDevices.h"
+#include "../devices/CPhantomDevices.h"
 #endif
 
 #if defined(_ENABLE_CUSTOM_DEVICE_SUPPORT)
-#include "devices/CMyCustomDevice.h"
+#include "../devices/CMyCustomDevice.h"
 #endif
 //---------------------------------------------------------------------------
 //! Maximum number of devices that can be connected at the same time.

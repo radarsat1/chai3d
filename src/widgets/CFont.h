@@ -22,7 +22,7 @@
 #ifndef CFontH
 #define CFontH
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
+#include "../extras/CGlobals.h"
 #include <stdlib.h>
 #include <string.h>
 //---------------------------------------------------------------------------

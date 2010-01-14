@@ -22,8 +22,8 @@
 #ifndef CPotentialFieldForceAlgoH
 #define CPotentialFieldForceAlgoH
 //---------------------------------------------------------------------------
-#include "forces/CGenericPointForceAlgo.h"
-#include "forces/CInteractionBasics.h"
+#include "../forces/CGenericPointForceAlgo.h"
+#include "../forces/CInteractionBasics.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

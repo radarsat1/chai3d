@@ -22,10 +22,10 @@
 #ifndef CTriangleH
 #define CTriangleH
 //---------------------------------------------------------------------------
-#include "math/CMaths.h"
-#include "graphics/CVertex.h"
-#include "scenegraph/CMesh.h"
-#include "collisions/CCollisionBasics.h"
+#include "../math/CMaths.h"
+#include "../graphics/CVertex.h"
+#include "../scenegraph/CMesh.h"
+#include "../collisions/CCollisionBasics.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

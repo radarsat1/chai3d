@@ -23,16 +23,16 @@
 #ifndef CGenericObjectH
 #define CGenericObjectH
 //---------------------------------------------------------------------------
-#include "math/CMaths.h"
-#include "graphics/CDraw3D.h"
-#include "graphics/CColor.h"
-#include "graphics/CMacrosGL.h"
-#include "graphics/CMaterial.h"
-#include "graphics/CTexture2D.h"
-#include "collisions/CCollisionBasics.h"
-#include "forces/CInteractionBasics.h"
-#include "effects/CGenericEffect.h"
-#include "extras/CGenericType.h"
+#include "../math/CMaths.h"
+#include "../graphics/CDraw3D.h"
+#include "../graphics/CColor.h"
+#include "../graphics/CMacrosGL.h"
+#include "../graphics/CMaterial.h"
+#include "../graphics/CTexture2D.h"
+#include "../collisions/CCollisionBasics.h"
+#include "../forces/CInteractionBasics.h"
+#include "../effects/CGenericEffect.h"
+#include "../extras/CGenericType.h"
 //---------------------------------------------------------------------------
 #include <typeinfo>
 #include <vector>

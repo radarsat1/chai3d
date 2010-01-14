@@ -22,8 +22,8 @@
 #ifndef CBitmapH
 #define CBitmapH
 //---------------------------------------------------------------------------
-#include "scenegraph/CGenericObject.h"
-#include "files/CImageLoader.h"
+#include "../scenegraph/CGenericObject.h"
+#include "../files/CImageLoader.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

@@ -23,9 +23,9 @@
 #ifndef CTexture2DH
 #define CTexture2DH
 //---------------------------------------------------------------------------
-#include "files/CImageLoader.h"
-#include "graphics/CColor.h"
-#include "graphics/CGenericTexture.h"
+#include "../files/CImageLoader.h"
+#include "../graphics/CColor.h"
+#include "../graphics/CGenericTexture.h"
 #include <string>
 #include <stdio.h>
 //---------------------------------------------------------------------------

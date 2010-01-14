@@ -22,10 +22,10 @@
 #ifndef CProxyPointForceAlgoH
 #define CProxyPointForceAlgoH
 //---------------------------------------------------------------------------
-#include "math/CVector3d.h"
-#include "math/CMatrix3d.h"
-#include "collisions/CGenericCollision.h"
-#include "forces/CGenericPointForceAlgo.h"
+#include "../math/CVector3d.h"
+#include "../math/CMatrix3d.h"
+#include "../collisions/CGenericCollision.h"
+#include "../forces/CGenericPointForceAlgo.h"
 #include <map>
 //---------------------------------------------------------------------------
 class cWorld;

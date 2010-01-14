@@ -23,9 +23,9 @@
 #ifndef CCollisionAABBBoxH
 #define CCollisionAABBBoxH
 //---------------------------------------------------------------------------
-#include "math/CMaths.h"
-#include "graphics/CTriangle.h"
-#include "graphics/CVertex.h"
+#include "../math/CMaths.h"
+#include "../graphics/CTriangle.h"
+#include "../graphics/CVertex.h"
 #include <vector>
 //---------------------------------------------------------------------------
 

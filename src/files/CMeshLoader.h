@@ -22,17 +22,17 @@
 #ifndef CMeshLoaderH
 #define CMeshLoaderH
 //---------------------------------------------------------------------------
-#include "math/CMatrix3d.h"
-#include "math/CVector3d.h"
-#include "graphics/CVertex.h"
-#include "graphics/CTriangle.h"
-#include "graphics/CMaterial.h"
-#include "graphics/CTexture2D.h"
-#include "scenegraph/CWorld.h"
-#include "scenegraph/CLight.h"
-#include "scenegraph/CMesh.h"
-#include "files/CFileLoaderOBJ.h"
-#include "files/CFileLoader3DS.h"
+#include "../math/CMatrix3d.h"
+#include "../math/CVector3d.h"
+#include "../graphics/CVertex.h"
+#include "../graphics/CTriangle.h"
+#include "../graphics/CMaterial.h"
+#include "../graphics/CTexture2D.h"
+#include "../scenegraph/CWorld.h"
+#include "../scenegraph/CLight.h"
+#include "../scenegraph/CMesh.h"
+#include "../files/CFileLoaderOBJ.h"
+#include "../files/CFileLoader3DS.h"
 #include <string>
 //---------------------------------------------------------------------------
 

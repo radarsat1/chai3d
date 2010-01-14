@@ -23,12 +23,12 @@
 #ifndef CGeneric3dofPointerH
 #define CGeneric3dofPointerH
 //---------------------------------------------------------------------------
-#include "tools/CGenericTool.h"
-#include "graphics/CColor.h"
-#include "scenegraph/CShapeSphere.h"
-#include "scenegraph/CMesh.h"
-#include "forces/CProxyPointForceAlgo.h"
-#include "forces/CPotentialFieldForceAlgo.h"
+#include "../tools/CGenericTool.h"
+#include "../graphics/CColor.h"
+#include "../scenegraph/CShapeSphere.h"
+#include "../scenegraph/CMesh.h"
+#include "../forces/CProxyPointForceAlgo.h"
+#include "../forces/CPotentialFieldForceAlgo.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

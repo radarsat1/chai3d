@@ -22,7 +22,7 @@
 #ifndef CGenericCollisionH
 #define CGenericCollisionH
 //---------------------------------------------------------------------------
-#include "collisions/CCollisionBasics.h"
+#include "../collisions/CCollisionBasics.h"
 //---------------------------------------------------------------------------
 using std::vector;
 //---------------------------------------------------------------------------

@@ -22,8 +22,8 @@
 #ifndef CGenericDeviceH
 #define CGenericDeviceH
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
-#include "devices/CCallback.h"
+#include "../extras/CGlobals.h"
+#include "../devices/CCallback.h"
 #include <string>
 #include <stdio.h>
 //---------------------------------------------------------------------------

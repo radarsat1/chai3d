@@ -22,8 +22,8 @@
 #ifndef CGenericEffectH
 #define CGenericEffectH
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
-#include "math/CVector3d.h"
+#include "../extras/CGlobals.h"
+#include "../math/CVector3d.h"
 //---------------------------------------------------------------------------
 class cGenericObject;
 

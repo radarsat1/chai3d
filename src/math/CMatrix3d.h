@@ -22,9 +22,9 @@
 #ifndef CMatrix3dH
 #define CMatrix3dH
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
-#include "math/CConstants.h"
-#include "math/CVector3d.h"
+#include "../extras/CGlobals.h"
+#include "../math/CConstants.h"
+#include "../math/CVector3d.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

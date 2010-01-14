@@ -23,10 +23,10 @@
 #ifndef CCollisionBruteH
 #define CCollisionBruteH
 //---------------------------------------------------------------------------
-#include "math/CMaths.h"
-#include "graphics/CTriangle.h"
-#include "graphics/CVertex.h"
-#include "collisions/CGenericCollision.h"
+#include "../math/CMaths.h"
+#include "../graphics/CTriangle.h"
+#include "../graphics/CVertex.h"
+#include "../collisions/CGenericCollision.h"
 #include <vector>
 //---------------------------------------------------------------------------
 using std::vector;

@@ -22,10 +22,10 @@
 #ifndef CInteractionBasicsH
 #define CInteractionBasicsH
 //---------------------------------------------------------------------------
-#include "math/CVector3d.h"
-#include "math/CMatrix3d.h"
-#include "graphics/CVertex.h"
-#include "graphics/CMaterial.h"
+#include "../math/CVector3d.h"
+#include "../math/CMatrix3d.h"
+#include "../graphics/CVertex.h"
+#include "../graphics/CMaterial.h"
 #include <vector>
 //---------------------------------------------------------------------------
 using std::vector;

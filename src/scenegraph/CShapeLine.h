@@ -22,8 +22,8 @@
 #ifndef CShapeLineH
 #define CShapeLineH
 //---------------------------------------------------------------------------
-#include "scenegraph/CGenericObject.h"
-#include "graphics/CMaterial.h"
+#include "../scenegraph/CGenericObject.h"
+#include "../graphics/CMaterial.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

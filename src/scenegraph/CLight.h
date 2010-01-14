@@ -22,10 +22,10 @@
 #ifndef CLightH
 #define CLightH
 //---------------------------------------------------------------------------
-#include "math/CMaths.h"
-#include "graphics/CColor.h"
-#include "graphics/CMacrosGL.h"
-#include "scenegraph/CGenericObject.h"
+#include "../math/CMaths.h"
+#include "../graphics/CColor.h"
+#include "../graphics/CMacrosGL.h"
+#include "../scenegraph/CGenericObject.h"
 //---------------------------------------------------------------------------
 class cWorld;
 //---------------------------------------------------------------------------

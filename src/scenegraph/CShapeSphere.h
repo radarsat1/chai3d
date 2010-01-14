@@ -22,9 +22,9 @@
 #ifndef CShapeSphereH
 #define CShapeSphereH
 //---------------------------------------------------------------------------
-#include "scenegraph/CGenericObject.h"
-#include "graphics/CMaterial.h"
-#include "graphics/CTexture2D.h"
+#include "../scenegraph/CGenericObject.h"
+#include "../graphics/CMaterial.h"
+#include "../graphics/CTexture2D.h"
 //---------------------------------------------------------------------------
 
 //===========================================================================

@@ -23,8 +23,8 @@
 #ifndef CColorH
 #define CColorH
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
-#include "math/CMaths.h"
+#include "../extras/CGlobals.h"
+#include "../math/CMaths.h"
 //---------------------------------------------------------------------------
 struct cColorb;
 struct cColorf;

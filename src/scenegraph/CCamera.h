@@ -23,9 +23,9 @@
 #ifndef CCameraH
 #define CCameraH
 //---------------------------------------------------------------------------
-#include "scenegraph/CGenericObject.h"
-#include "math/CMaths.h"
-#include "files/CImageLoader.h"
+#include "../scenegraph/CGenericObject.h"
+#include "../math/CMaths.h"
+#include "../files/CImageLoader.h"
 //---------------------------------------------------------------------------
 class cWorld;
 //---------------------------------------------------------------------------

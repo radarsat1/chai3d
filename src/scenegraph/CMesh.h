@@ -28,10 +28,10 @@
 #ifndef CMeshH
 #define CMeshH
 //---------------------------------------------------------------------------
-#include "scenegraph/CGenericObject.h"
-#include "graphics/CMaterial.h"
-#include "graphics/CTexture2D.h"
-#include "graphics/CColor.h"
+#include "../scenegraph/CGenericObject.h"
+#include "../graphics/CMaterial.h"
+#include "../graphics/CTexture2D.h"
+#include "../graphics/CColor.h"
 #include <vector>
 #include <list>
 //---------------------------------------------------------------------------

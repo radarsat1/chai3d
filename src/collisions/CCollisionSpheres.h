@@ -23,14 +23,14 @@
 #ifndef CCollisionSpheresH
 #define CCollisionSpheresH
 //---------------------------------------------------------------------------
-#include "math/CMaths.h"
-#include "collisions/CGenericCollision.h"
-#include "collisions/CCollisionSpheresGeometry.h"
-#include "graphics/CVertex.h"
-#include "graphics/CTriangle.h"
-#include "graphics/CDraw3D.h"
-#include "graphics/CColor.h"
-#include "scenegraph/CMesh.h"
+#include "../math/CMaths.h"
+#include "../collisions/CGenericCollision.h"
+#include "../collisions/CCollisionSpheresGeometry.h"
+#include "../graphics/CVertex.h"
+#include "../graphics/CTriangle.h"
+#include "../graphics/CDraw3D.h"
+#include "../graphics/CColor.h"
+#include "../scenegraph/CMesh.h"
 #include <assert.h>
 #include <list>
 #include <queue>

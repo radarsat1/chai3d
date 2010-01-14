@@ -23,8 +23,8 @@
 #ifndef CCollisionSpheresGeometryH
 #define CCollisionSpheresGeometryH
 //---------------------------------------------------------------------------
-#include "math/CMaths.h"
-#include "graphics/CTriangle.h"
+#include "../math/CMaths.h"
+#include "../graphics/CTriangle.h"
 #include <assert.h>
 #include <list>
 #include <map>

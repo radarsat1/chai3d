@@ -23,15 +23,15 @@
 #ifndef CFileLoader3DSH
 #define CFileLoader3DSH
 //---------------------------------------------------------------------------
-#include "math/CMatrix3d.h"
-#include "math/CVector3d.h"
-#include "graphics/CVertex.h"
-#include "graphics/CTriangle.h"
-#include "scenegraph/CMesh.h"
-#include "graphics/CMaterial.h"
-#include "graphics/CTexture2D.h"
-#include "scenegraph/CWorld.h"
-#include "scenegraph/CLight.h"
+#include "../math/CMatrix3d.h"
+#include "../math/CVector3d.h"
+#include "../graphics/CVertex.h"
+#include "../graphics/CTriangle.h"
+#include "../scenegraph/CMesh.h"
+#include "../graphics/CMaterial.h"
+#include "../graphics/CTexture2D.h"
+#include "../scenegraph/CWorld.h"
+#include "../scenegraph/CLight.h"
 #include <string>
 #include <vector>
 #include <stdio.h>

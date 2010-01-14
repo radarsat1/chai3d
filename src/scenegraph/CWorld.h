@@ -22,12 +22,12 @@
 #ifndef CWorldH
 #define CWorldH
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
-#include "scenegraph/CCamera.h"
-#include "scenegraph/CGenericObject.h"
-#include "graphics/CTriangle.h"
-#include "graphics/CTexture2D.h"
-#include "graphics/CColor.h"
+#include "../extras/CGlobals.h"
+#include "../scenegraph/CCamera.h"
+#include "../scenegraph/CGenericObject.h"
+#include "../graphics/CTriangle.h"
+#include "../graphics/CTexture2D.h"
+#include "../graphics/CColor.h"
 #include <vector>
 //---------------------------------------------------------------------------
 class cLight;
