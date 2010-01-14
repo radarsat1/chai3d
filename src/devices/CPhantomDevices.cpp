@@ -78,9 +78,10 @@ int (__stdcall *hdPhantomGetType)(int a_deviceID,
                                   char* a_typeName);
 
 
-// Initialize dhd dll reference count
-int cPhantomDevice::m_dllcount = 0;
 #endif
+
+// Initialize dll reference count
+int cPhantomDevice::m_dllcount = 0;
 
 //---------------------------------------------------------------------------
 // LINUX
@@ -174,7 +175,7 @@ int hdPhantomSetTorque(int a_deviceID,
 int hdPhantomGetWorkspaceRadius(int a_deviceID, double *a_workspaceRadius);
 
 int hdPhantomGetType(int a_deviceID, 
-										 char* a_typeName)
+                     char* a_typeName);
 
 HDCallbackCode HDCALLBACK servophantomDevices(void* pUserData);
 
@@ -290,7 +291,7 @@ cPhantomDevice::cPhantomDevice(unsigned int a_deviceNumber)
 
 #if defined(_LINUX)
     // initialize open haptics
-    void init()
+    init();
 
     // the Phantom drivers are installed
     m_driverInstalled = true;
@@ -700,7 +701,7 @@ void init()
 		// check if device is available
 		if (HD_DEVICE_ERROR(error = hdGetError())) 
 		{
-			return(true);
+			return;
 		}
 
 		// enable forces
@@ -718,7 +719,7 @@ void init()
 		// check if device is available
 		if (HD_DEVICE_ERROR(error = hdGetError())) 
 		{
-			return(true);
+			return;
 		}
 
 		// enable forces
@@ -730,7 +731,7 @@ void init()
 		phantomDevices[1].enabled = true;
 		numPhantomDevices++;
 	}
-	return (true);
+	return;
 }
 
 

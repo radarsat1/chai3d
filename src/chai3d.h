@@ -53,6 +53,7 @@
 
 #if defined(_LINUX)
 #include "devices/CDeltaDevices.h"     
+#include "devices/CPhantomDevices.h"
 #endif
 
 #if defined(_MACOSX)
