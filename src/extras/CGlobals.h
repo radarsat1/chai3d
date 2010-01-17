@@ -98,6 +98,16 @@
 
     #endif
 
+    //--------------------------------------------------------------------
+    // MINGW - Windows port of GCC
+    //--------------------------------------------------------------------
+    #if defined(_MINGW)
+
+        #define CHAI_DEBUG_PRINT printf
+        #include "GL/glut.h"
+
+    #endif
+
 #endif
 
 

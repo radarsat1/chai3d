@@ -23,6 +23,9 @@ endif
 ifeq ($(SYSTEM), QNX)
 OS = qnx
 endif
+ifeq ($(SYSTEM), MINGW32_NT-5.1)
+OS = mingw
+endif
 
 # architecture
 ARCH = $(shell echo `uname -m`)
