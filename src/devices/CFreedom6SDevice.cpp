@@ -20,8 +20,9 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-#include "extras/CGlobals.h"
-#include "devices/CFreedom6SDevice.h"
+#include "../extras/CGlobals.h"
+#include "../devices/CFreedom6SDevice.h"
+#include "../math/CVector3d.h"
 //---------------------------------------------------------------------------
 #if defined(_ENABLE_MPB_DEVICE_SUPPORT)
 //---------------------------------------------------------------------------
@@ -29,14 +30,12 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
-#include "CVector3d.h"
 //---------------------------------------------------------------------------
-#ifdef _POSIX
+#ifdef _LINUX
 #define HINSTANCE void*
 #define GetProcAddress dlsym
 #define FreeLibrary dlclose
 #include <dlfcn.h>
-#endif
 #endif
 //---------------------------------------------------------------------------
 HINSTANCE hf6sDLL = NULL;
@@ -103,7 +102,7 @@ cFreedom6SDevice::cFreedom6SDevice() : cGenericHapticDevice()
 
     if (hf6sDLL==NULL)
     {
-#ifdef _POSIX
+#ifdef _LINUX
         hf6sDLL = dlopen("libfreedom6s.so", RTLD_LAZY);
 #else
         hf6sDLL = LoadLibrary("freedom6s.dll");
