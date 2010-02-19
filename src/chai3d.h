@@ -52,8 +52,9 @@
 #endif
 
 #if defined(_LINUX)
-#include "devices/CDeltaDevices.h"     
-#include "devices/CPhantomDevices.h"
+//#include "devices/CDeltaDevices.h"     
+//#include "devices/CPhantomDevices.h"
+#include "devices/CFreedom6SDevice.h"
 #endif
 
 #if defined(_MACOSX)

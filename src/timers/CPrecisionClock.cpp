@@ -22,7 +22,7 @@
 #include "timers/CPrecisionClock.h"
 //---------------------------------------------------------------------------
 #if defined(_MACOSX) || defined(_LINUX)
-#include "dhdc.h"
+//#include "dhdc.h"
 #endif
 //---------------------------------------------------------------------------
 
@@ -223,7 +223,8 @@ double cPrecisionClock::getCPUTimeSeconds()
     // POSIX implementation
 #else
 
-    return dhdGetTime();
+    //return dhdGetTime();
+    return clock();
 
 #endif
 

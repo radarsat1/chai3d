@@ -12,4 +12,4 @@ CXXFLAGS += -W -Wno-deprecated -Wno-unused-parameter
 
 # common linker flags
 LDFLAGS  += -L/usr/lib
-LDLIBS   += -lpthread -lrt -lpci -lz -lusb -lGL -lGLU -lglut -lHD
+LDLIBS   += -lpthread -lrt -lz -lGL -lGLU -lglut #-lHD -lpci -lusb

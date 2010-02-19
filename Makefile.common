@@ -70,9 +70,9 @@ ARFLAGS  = rvs
 # common linker flags
 LDFLAGS  = -L$(LIB_DIR) -L$(DHD_EXT)/lib/$(OS)-$(ARCH)
 ifneq ($(CFG),debug)
-LDLIBS  = -lchai3d -ldhd
+LDLIBS  = -lchai3d #-ldhd
 else
-LDLIBS  = -lchai3d-dbg -ldhd
+LDLIBS  = -lchai3d-dbg #-ldhd
 endif 
 
 # module specific linker flags
