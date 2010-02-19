@@ -138,7 +138,7 @@ cFreedom6SDevice::cFreedom6SDevice() : cGenericHapticDevice()
     m_specifications.m_manufacturerName              = "MPB Technologies";
     m_specifications.m_modelName                     = "freedom 6S";
     m_specifications.m_maxForce                      = 2.500;   // [N]
-    m_specifications.m_maxForceStiffness             = 2000.0;  // [N/m]
+    m_specifications.m_maxForceStiffness             = 1200.0;  // [N/m]
     m_specifications.m_maxTorque                     = 0.250;   // [N*m]
     m_specifications.m_maxTorqueStiffness            = 3.000;   // [N*m/Rad]
     m_specifications.m_maxGripperTorque              = 0.000;   // [N*m]
