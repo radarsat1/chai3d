@@ -275,6 +275,7 @@ int main(int argc, char* argv[])
     if (hapticDevice)
     {
         hapticDevice->open();
+        hapticDevice->initialize();
         info = hapticDevice->getSpecifications();
     }
 
@@ -564,6 +565,13 @@ void close(void)
 
 //---------------------------------------------------------------------------
 
+void onTimer(int)
+{
+    glutPostRedisplay();
+}
+
+//---------------------------------------------------------------------------
+
 void updateGraphics(void)
 {
     // update mesh of deformable model
@@ -584,7 +592,7 @@ void updateGraphics(void)
     // inform the GLUT window to call updateGraphics again (next frame)
     if (simulationRunning)
     {
-        glutPostRedisplay();
+        glutTimerFunc(33, onTimer, 0);
     }
 }
 
@@ -640,6 +648,12 @@ void updateHaptics(void)
 
         // send forces to haptic device
         hapticDevice->setForce(force);
+
+#ifdef _WIN32
+        Sleep(1);
+#else
+        usleep(1000);
+#endif
     }
 
     // exit haptics thread

@@ -355,6 +355,8 @@ int main(int argc, char* argv[])
     // define a default stiffness for the object
     tooth->setStiffness(0.8 * stiffnessMax, true);
 
+    tooth->setFriction(0.5, 0.4, true);
+
     // create a new mesh.
     drill = new cMesh(world);
 
@@ -560,6 +562,12 @@ void close(void)
 
 //---------------------------------------------------------------------------
 
+void onTimer(int)
+{
+    glutPostRedisplay();
+}
+//---------------------------------------------------------------------------
+
 void updateGraphics(void)
 {
     // render world
@@ -576,7 +584,7 @@ void updateGraphics(void)
     // inform the GLUT window to call updateGraphics again (next frame)
     if (simulationRunning)
     {
-        glutPostRedisplay();
+        glutTimerFunc(60, onTimer, 0);
     }
 }
 
@@ -664,6 +672,12 @@ void updateHaptics(void)
 
         // compute global reference frames for each object
         world->computeGlobalPositions(true);
+
+#ifdef _WIN32
+        Sleep(1);
+#else
+        usleep(1000);
+#endif
     }
 
     // exit haptics thread
