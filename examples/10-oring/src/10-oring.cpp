@@ -446,6 +446,13 @@ void close(void)
 
 //---------------------------------------------------------------------------
 
+void onTimer(int)
+{
+    glutPostRedisplay();
+}
+
+//---------------------------------------------------------------------------
+
 void updateGraphics(void)
 {
     // render world
@@ -462,7 +469,7 @@ void updateGraphics(void)
     // inform the GLUT window to call updateGraphics again (next frame)
     if (simulationRunning)
     {
-        glutPostRedisplay();
+        glutTimerFunc(33, onTimer, 0);
     }
 }
 
@@ -557,6 +564,8 @@ void updateHaptics(void)
         {
             object->rotate(cNormalize(rotVel), timeInterval * rotVel.length());
         }
+
+        usleep(1000);
     }
     
     // exit haptics thread
