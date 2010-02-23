@@ -331,9 +331,17 @@ int cFreedom6SDevice::getRotation(cMatrix3d& a_rotation)
 {
     // note that this assumes getPosition() has been called
     // immediately previously!
-//     a_rotation.set(m_kinemat[0], m_kinemat[1], m_kinemat[2],
-//                    m_kinemat[4], m_kinemat[5], m_kinemat[6],
-//                    m_kinemat[8], m_kinemat[9], m_kinemat[10]);
+//     a_rotation.set(m_kinemat[0], m_kinemat[4], m_kinemat[8],
+//                    m_kinemat[1], m_kinemat[5], m_kinemat[9],
+//                    m_kinemat[2], m_kinemat[6], m_kinemat[10]);
+
+//     // rotate around z
+//     cMatrix3d rot1;
+//     rot1.set( 0, 1, 0,
+//              -1, 0, 0,
+//               0, 0, 1 );
+
+//     a_rotation = a_rotation;// * rot1 * rot2;
     a_rotation.set(1,0,0,0,1,0,0,0,1);
 
     // success
