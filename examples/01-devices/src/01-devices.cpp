@@ -103,6 +103,9 @@ bool useForceField = true;
 // has exited haptics simulation thread
 bool simulationFinished = false;
 
+// position for graphics cursor
+cVector3d graphics_pos;
+
 //---------------------------------------------------------------------------
 // DECLARED MACROS
 //---------------------------------------------------------------------------
@@ -507,6 +510,13 @@ void close(void)
 
 //---------------------------------------------------------------------------
 
+void onTimer(int)
+{
+    glutPostRedisplay();
+}
+
+//---------------------------------------------------------------------------
+
 void updateGraphics(void)
 {
     // update content of position label
@@ -514,7 +524,7 @@ void updateGraphics(void)
     {
         // read position of device an convert into millimeters
         cVector3d pos;
-        hapticDevices[i]->getPosition(pos);
+        pos = graphics_pos;
         pos.mul(1000);
 
         // create a string that concatenates the device number and its position.
@@ -545,7 +555,7 @@ void updateGraphics(void)
     // inform the GLUT window to call updateGraphics again (next frame)
     if (simulationRunning)
     {
-        glutPostRedisplay();
+        glutTimerFunc(33, onTimer, 0);
     }
 }
 
@@ -563,6 +573,7 @@ void updateHaptics(void)
             // read position of haptic device
             cVector3d newPosition;
             hapticDevices[i]->getPosition(newPosition);
+            graphics_pos = newPosition;
 
             // read orientation of haptic device
             cMatrix3d newRotation;
@@ -621,6 +632,8 @@ void updateHaptics(void)
             // increment counter
             i++;
         }
+
+        usleep(1000);
     }
     
     // exit haptics thread
