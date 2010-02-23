@@ -267,18 +267,15 @@ unsigned int cFreedom6SDevice::getNumDevices()
 //===========================================================================
 int cFreedom6SDevice::getPosition(cVector3d& a_position)
 {
-    // temp variables
-    double kinemat[16];
-
     // read position information from device
     f6s_UpdateKinematics(m_hf6s);
-    f6s_GetPositionMatrixGL(m_hf6s, kinemat);
+    f6s_GetPositionMatrixGL(m_hf6s, m_kinemat);
 
-    // kinemat is a row-major 4x4 rotation/translation matrix
+    // m_kinemat is a row-major 4x4 rotation/translation matrix
     cVector3d result;
-    result.x = kinemat[14];
-    result.y = kinemat[12];
-    result.z = kinemat[13];
+    result.x = m_kinemat[14];
+    result.y = m_kinemat[12];
+    result.z = m_kinemat[13];
 
     // return result
     a_position = result;
@@ -332,6 +329,13 @@ int cFreedom6SDevice::getLinearVelocity(cVector3d& a_linearVelocity)
 //===========================================================================
 int cFreedom6SDevice::getRotation(cMatrix3d& a_rotation)
 {
+    // note that this assumes getPosition() has been called
+    // immediately previously!
+//     a_rotation.set(m_kinemat[0], m_kinemat[1], m_kinemat[2],
+//                    m_kinemat[4], m_kinemat[5], m_kinemat[6],
+//                    m_kinemat[8], m_kinemat[9], m_kinemat[10]);
+    a_rotation.set(1,0,0,0,1,0,0,0,1);
+
     // success
     return (0);
 }

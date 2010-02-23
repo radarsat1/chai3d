@@ -117,6 +117,9 @@ class cFreedom6SDevice : public cGenericHapticDevice
 
     //! Handle to device.
     void* m_hf6s;
+
+    //! Internal storage of matrix
+    double m_kinemat[16];
 };
 
 //---------------------------------------------------------------------------
