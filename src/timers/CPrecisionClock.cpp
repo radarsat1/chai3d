@@ -23,6 +23,7 @@
 //---------------------------------------------------------------------------
 #if defined(_MACOSX) || defined(_LINUX)
 //#include "dhdc.h"
+#include <sys/time.h>
 #endif
 //---------------------------------------------------------------------------
 
@@ -224,7 +225,9 @@ double cPrecisionClock::getCPUTimeSeconds()
 #else
 
     //return dhdGetTime();
-    return clock();
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_usec / 1000000.0 + tv.tv_sec;
 
 #endif
 
