@@ -13,3 +13,14 @@ CXXFLAGS += -W -Wno-deprecated -Wno-unused-parameter
 # common linker flags
 LDFLAGS  += -L/usr/lib
 LDLIBS   += -lpthread -lrt -lz -lGL -lGLU -lglut #-lHD -lpci -lusb
+
+# detect OpenHaptics
+ifneq ($(shell ldconfig -p | grep libHD.so),)
+LDLIBS += -lHD
+CXXFLAGS += -D_ENABLE_PHANTOM_DEVICE_SUPPORT
+endif
+
+# detect Freedom 6S
+ifneq ($(shell ldconfig -p | grep libfreedom6s.so),)
+CXXFLAGS += -D__ENABLE_MPB_DEVICE_SUPPORT
+endif
