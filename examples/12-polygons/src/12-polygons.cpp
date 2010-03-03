@@ -593,9 +593,10 @@ void updateHaptics(void)
         {
             object->rotate(cNormalize(rotVel), timeInterval * rotVel.length());
         }
+
+        usleep(1000);
     }
 
-    
     // exit haptics thread
     simulationFinished = true;
 }

@@ -626,6 +626,8 @@ void updateHaptics(void)
 
         // send forces to device
         tool->applyForces();
+
+        usleep(1000);
     }
     
     // exit haptics thread
