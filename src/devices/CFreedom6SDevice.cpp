@@ -332,6 +332,10 @@ int cFreedom6SDevice::getLinearVelocity(cVector3d& a_linearVelocity)
 //===========================================================================
 int cFreedom6SDevice::getRotation(cMatrix3d& a_rotation)
 {
+    // Getting the rotation is not yet implemented, so return the
+    // identity for now.
+    a_rotation.set(1,0,0,0,1,0,0,0,1);
+
     // success
     return (0);
 }
