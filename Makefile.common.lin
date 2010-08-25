@@ -12,4 +12,9 @@ CXXFLAGS += -W -Wno-deprecated -Wno-unused-parameter
 
 # common linker flags
 LDFLAGS  += -L/usr/lib
-LDLIBS   += -lpthread -lrt -lpci -lz -lusb -lGL -lGLU -lglut -lHD
+LDLIBS   += -lpthread -lrt -lz -lGL -lGLU -lglut
+
+# if SensAble HD library is enabled
+ifneq (0,)
+LDLIBS   += -lHD -lpci -lusb
+endif

@@ -68,12 +68,18 @@ CXXFLAGS += -I$(ODE_DIR) -I$(ODE_EXT)/include -DdDOUBLE
 ARFLAGS  = rvs
 
 # common linker flags
-LDFLAGS  = -L$(LIB_DIR) -L$(DHD_EXT)/lib/$(OS)-$(ARCH)
+LDFLAGS  = -L$(LIB_DIR)
 ifneq ($(CFG),debug)
-LDLIBS  = -lchai3d -ldhd
+LDLIBS  = -lchai3d
 else
-LDLIBS  = -lchai3d-dbg -ldhd
+LDLIBS  = -lchai3d-dbg
 endif 
+
+# if DHD is enabled
+ifneq ($(DHD_EXT),)
+LDFLAGS += -L$(DHD_EXT)/lib/$(OS)-$(ARCH)
+LDLIBS  += -ldhd
+endif
 
 # module specific linker flags
 LDFLAGS += -L$(ODE_EXT)/lib/$(OS)-$(ARCH)

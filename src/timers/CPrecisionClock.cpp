@@ -20,9 +20,8 @@
 
 //---------------------------------------------------------------------------
 #include "timers/CPrecisionClock.h"
-//---------------------------------------------------------------------------
-#if defined(_MACOSX) || defined(_LINUX)
-#include "dhdc.h"
+#if !defined(_WIN32)
+#include <sys/time.h>
 #endif
 //---------------------------------------------------------------------------
 
@@ -223,7 +222,11 @@ double cPrecisionClock::getCPUTimeSeconds()
     // POSIX implementation
 #else
 
-    return dhdGetTime();
+    timeval t;
+    gettimeofday(&t,0);
+
+    // Convert everything to sec
+    return (double)t.tv_sec + ((double)t.tv_usec) / 1000000.0;
 
 #endif
 
