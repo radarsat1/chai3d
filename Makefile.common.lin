@@ -15,6 +15,6 @@ LDFLAGS  += -L/usr/lib
 LDLIBS   += -lpthread -lrt -lz -lGL -lGLU -lglut
 
 # if SensAble HD library is enabled
-ifneq (0,)
+ifneq (,)
 LDLIBS   += -lHD -lpci -lusb
 endif
